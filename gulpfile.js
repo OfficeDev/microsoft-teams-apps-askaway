@@ -7,6 +7,8 @@ const config = require('./gulp.config');
 
 const package = require("./package.json");
 
+const webpack = require('webpack');
+
 // NodeJS
 const fs = require('fs'),
     path = require('path');
@@ -15,22 +17,17 @@ const fs = require('fs'),
 const {
     src,
     dest,
-    watch,
     series,
-    parallel,
-    lastRun,
-    task
+    task,
+    watch
 } = require('gulp');
 
 // gulp plugins
-const inject = require('gulp-inject'),
-    zip = require('gulp-zip'),
+const zip = require('gulp-zip'),
     replace = require('gulp-token-replace'),
     PluginError = require('plugin-error'),
-    gulpLoadPlugins = require('gulp-load-plugins'),
     del = require('del');
 
-const $ = gulpLoadPlugins();
 
 // Web Servers
 const ngrok = require('ngrok');
@@ -39,12 +36,9 @@ const ngrok = require('ngrok');
 const
     nodemon = require('nodemon'),
     argv = require('yargs').argv,
-    autoprefixer = require('autoprefixer'),
     log = require('fancy-log'),
     ZSchema = require('z-schema'),
     axios = require('axios');
-
-const webpack = require('webpack');
 
 const env = argv["env"];
 if (env === undefined) {
@@ -55,75 +49,6 @@ if (env === undefined) {
 }
 process.env.VERSION = package.version;
 
-/**
- * Setting up environments
- */
-const isProd = process.env.NODE_ENV === 'production';
-const isTest = process.env.NODE_ENV === 'test';
-const isDev = !isProd && !isTest;
-
-const styles = () => {
-    return src('src/app/**/*.scss')
-        .pipe($.plumber())
-        .pipe($.if(!isProd, $.sourcemaps.init()))
-        .pipe($.sass.sync({
-            outputStyle: 'expanded',
-            precision: 10,
-            includePaths: ['.']
-        }).on('error', $.sass.logError))
-        .pipe($.postcss([
-            autoprefixer()
-        ]))
-        .pipe($.if(!isProd, $.sourcemaps.write()))
-        .pipe(dest('dist'));
-};
-
-/**
- * Register watches
- */
-const watches = () => {
-
-    // all other watches
-    watch(
-        config.watches,
-        series('webpack:server')
-    );
-
-    watch(
-        config.clientWatches,
-        series('webpack:client')
-    );
-
-    // watch for style changes
-    watch('src/app/**/*.scss', series('styles', 'static:copy', 'static:inject'))
-        .on('unlink', (a, b) => {
-
-            let cssFilename = path.basename(a, '.scss') + '.css',
-                cssDirectory = path.dirname(a).replace('src/app', './dist'),
-                cssPath = path.join(cssDirectory, cssFilename);
-
-            console.log(cssPath, fs.existsSync(cssPath));
-
-            if (fs.existsSync(cssPath)) {
-
-                fs.unlinkSync(cssPath);
-                injectSources();
-
-            }
-
-        });
-
-    // watch on new and deleted files
-    watch(config.injectSources)
-        .on('unlink', injectSources)
-        .on('add', injectSources);
-
-
-    // watch for static files
-    watch(config.staticFiles, series('static:copy', 'static:inject'));
-}
-
-task('watch', watches);
 
 // TASK: nuke
 task('nuke', () => {
@@ -146,7 +71,6 @@ task('nodemon', (callback) => {
         }
     });
 });
-
 
 const _webpack = (idx, callback) => {
     const webpackConfig = require(
@@ -176,75 +100,27 @@ const _webpack = (idx, callback) => {
     });
 }
 
-/**
- * Webpack bundling
- */
-task('webpack:client', (callback) => {
-    _webpack(1, callback);
-});
-
 task('webpack:server', (callback) => {
     _webpack(0, callback);
 });
 
-task('webpack', parallel("webpack:client", "webpack:server"));
-
-
 /**
- * Copies static files
+ * Register watches
  */
-task('static:copy', () => {
-    return src(config.staticFiles, {
-        base: "./src/app"
-    })
-        .pipe(
-            dest('./dist/')
-        );
-});
+const watches = () => {
+    // watches for changes in files
+    watch(
+        config.watches,
+        series('webpack:server')
+    );
+}
 
-const injectSources = () => {
-
-    var injectSrc = src(config.injectSources);
-
-    var injectOptions = {
-        relative: false,
-        ignorePath: 'dist/web',
-        addRootSlash: true
-    };
-    return src(config.htmlFiles)
-        .pipe(replace({
-            tokens: {
-                ...process.env
-            }
-        }))
-        .pipe(
-            inject(injectSrc, injectOptions)
-        )
-        .pipe(
-            dest('./dist')
-        );
-
-};
-
-/**
- * Injects script into pages
- */
-task('static:inject', injectSources);
-
-/**
- * SASS compilation
- */
-task('styles', styles);
-
-/**
- * Build task, that uses webpack and injects scripts into pages
- */
-task('build', series('webpack', 'styles', 'static:copy', 'static:inject'));
+task('watch', watches);
 
 /**
  * Replace parameters in the manifest
  */
-task('generate-manifest', (cb) => {
+task('generate-manifest', () => {
     return src('src/manifest/manifest.json')
         .pipe(replace({
             tokens: {
@@ -353,7 +229,7 @@ task('start-ngrok', (cb) => {
         hostName = hostName.replace('https://', '');
 
         log('[NGROK] HOSTNAME: ' + hostName);
-        process.env.HOSTNAME = hostName
+        // process.env.HOSTNAME = hostName
 
         cb();
 
@@ -373,9 +249,7 @@ task('zip', () => {
         .pipe(dest('package'));
 });
 
-task('styles', styles);
-
-task('serve', series('nuke', 'build', 'nodemon', 'watch'));
+task('serve', series('nuke', 'webpack:server', 'nodemon', 'watch'));
 
 task('manifest', series('validate-manifest', 'zip'));
 

@@ -1,32 +1,14 @@
 const config = {
-    injectSources: [
-        "./dist/web/scripts/**/*.js",
-        "./dist/web/styles/**/*.css"
-    ],
-    staticFiles: [
-        "./src/app/**/*.html",
-        "./src/app/**/*.ejs",
-        "./src/app/web/assets/**/*"
-    ],
-    htmlFiles: [
-        "./src/app/**/*.html", "./src/app/**/*.ejs"
-    ],
-    watches: [
-        "./src/app/**/*.*",
-        "!./src/app/**/*.scss",
-        "!./src/app/web/**/*.*",
-        "!./src/app/scripts/**/*.*",
-    ],
-    clientWatches: [
-        "./src/app/scripts/**/*.*",
-        "!./src/app/**/*.scss"
-    ],
     manifests: [
         "./src/manifest/**/*.*",
         '!**/manifest.json'
     ],
     temp: [
         "./temp"
+    ],
+    watches: [
+        "./src/app/**/*.*",
+        "!./src/app/questionlyBot/dialogs/**"
     ],
     // Supported Schemas
     SCHEMAS: [{
