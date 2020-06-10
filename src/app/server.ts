@@ -1,8 +1,7 @@
 import * as Express from "express";
 import * as http from "http";
-import * as path from "path";
 import * as morgan from "morgan";
-import { MsTeamsApiRouter, MsTeamsPageRouter } from "express-msteams-host";
+import { MsTeamsApiRouter } from "express-msteams-host";
 import * as debug from "debug";
 import * as compression from "compression";
 import * as appInsights from "applicationinsights";
@@ -31,14 +30,12 @@ const port = process.env.port || process.env.PORT || 3007;
 
 // Inject the raw request body onto the request object
 express.use(Express.json({
-    verify: (req, res, buf: Buffer, encoding: string): void => {
+    verify: (req, res, buf: Buffer): void => {
         (req as any).rawBody = buf.toString();
     }
 }));
-express.use(Express.urlencoded({ extended: true }));
 
-// Express configuration
-express.set("views", path.join(__dirname, "/"));
+express.use(Express.urlencoded({ extended: true }));
 
 // Add simple logging
 express.use(morgan("tiny"));
@@ -46,25 +43,9 @@ express.use(morgan("tiny"));
 // Add compression - uncomment to remove compression
 express.use(compression());
 
-// Add /scripts and /assets as static folders
-express.use("/scripts", Express.static(path.join(__dirname, "web/scripts")));
-express.use("/assets", Express.static(path.join(__dirname, "web/assets")));
-
 // routing for bots, connectors and incoming web hooks - based on the decorators
 // For more information see: https://www.npmjs.com/package/express-msteams-host
 express.use(MsTeamsApiRouter(allComponents));
-
-// routing for pages for tabs and connector configuration
-// For more information see: https://www.npmjs.com/package/express-msteams-host
-express.use(MsTeamsPageRouter({
-    root: path.join(__dirname, "web/"),
-    components: allComponents
-}));
-
-// Set default web page
-express.use("/", Express.static(path.join(__dirname, "web/"), {
-    index: "index.html"
-}));
 
 // Set the port
 express.set("port", port);

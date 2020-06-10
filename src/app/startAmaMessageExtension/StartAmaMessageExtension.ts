@@ -6,17 +6,11 @@ import { TaskModuleRequest, TaskModuleContinueResponse } from "botbuilder";
 // Initialize debug logging module
 const log = debug("msteams");
 
-@PreventIframe("/startAmaMessageExtension/config.html")
-@PreventIframe("/startAmaMessageExtension/action.html")
 export default class StartAmaMessageExtension implements IMessagingExtensionMiddlewareProcessor {
-
-
-
-
+    
     // handle action response in here
     // See documentation for `MessagingExtensionResult` for details
     public async onSubmitAction(context: TurnContext, value: TaskModuleRequest): Promise<MessagingExtensionResult> {
-
 
         const card = CardFactory.adaptiveCard(
             {
