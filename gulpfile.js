@@ -229,7 +229,7 @@ task('start-ngrok', (cb) => {
         hostName = hostName.replace('https://', '');
 
         log('[NGROK] HOSTNAME: ' + hostName);
-        process.env.HOSTNAME = hostName
+        // process.env.HOSTNAME = hostName
 
         cb();
 
