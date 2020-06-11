@@ -238,15 +238,18 @@ task('start-ngrok', (cb) => {
         const fileExists = async path => !!(await fs.promises.stat(path).catch(e => false));
         const scriptExists = await fileExists('azure-update-endpoint.sh');
         
-        if (scriptExists){
-            exec(`sh ./azure-update-endpoint.sh "https://${hostName}/api/messages"`, (err, stdout, stderr) => {
+        if (!scriptExists){
+            // script doesn't exists
+            log('[AZ-ENDPOINT] script does not exist');
+            cb();
+            return;
+        }
+            
+        // run script
+        exec(`sh ./azure-update-endpoint.sh "https://${hostName}/api/messages"`, (err, stdout, stderr) => {
                 log(`[AZ-ENDPOINT] ${stdout}`);
                 cb(err);
             });
-        } else {
-            log('[AZ-ENDPOINT] script does not exist');
-            cb();
-        }
 
     }).catch((err) => {
         log.error(`[NGROK] Error: ${JSON.stringify(err)}`);
