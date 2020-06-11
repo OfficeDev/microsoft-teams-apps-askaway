@@ -8,6 +8,7 @@ const config = require('./gulp.config');
 const package = require("./package.json");
 
 const webpack = require('webpack');
+const exec = require('child_process').exec;
 
 // NodeJS
 const fs = require('fs'),
@@ -231,7 +232,11 @@ task('start-ngrok', (cb) => {
         log('[NGROK] HOSTNAME: ' + hostName);
         // process.env.HOSTNAME = hostName
 
-        cb();
+        // updates azure bot registraion endpoint
+        exec(`sh ./azure-update-endpoint.sh "https://${hostName}/api/messages"`, (err, stdout, stderr) => {
+            log(`[AZ-ENDPOINT] ${stdout}`);
+            cb(err);
+        });
 
     }).catch((err) => {
         log.error(`[NGROK] Error: ${JSON.stringify(err)}`);
