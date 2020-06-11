@@ -50,17 +50,17 @@ var config = [{
                 test: /\.tsx?$/,
                 exclude: [/lib/, /dist/],
                 loader: "ts-loader"
-            }]
+            },]
         },
         plugins: []
     },
 ];
 
-if (lint !== false) {
-    config[0].plugins.push(new TSLintPlugin({
-        files: ['./src/app/*.ts']
-    }));
-}
+// if (lint !== false) {
+//     config[0].plugins.push(new TSLintPlugin({
+//         files: ['./src/app/*.ts']
+//     }));
+// }
 
 
 module.exports = config;

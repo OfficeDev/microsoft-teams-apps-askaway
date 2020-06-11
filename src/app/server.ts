@@ -1,44 +1,44 @@
-import * as Express from "express";
-import * as http from "http";
-import * as morgan from "morgan";
-import { MsTeamsApiRouter } from "express-msteams-host";
-import * as debug from "debug";
-import * as compression from "compression";
-import * as appInsights from "applicationinsights";
-
+import * as Express from 'express';
+import * as http from 'http';
+import * as morgan from 'morgan';
+import { MsTeamsApiRouter } from 'express-msteams-host';
+import * as debug from 'debug';
+import * as compression from 'compression';
+import * as appInsights from 'applicationinsights';
+import { config as dotenvConfig } from 'dotenv';
 
 // Initialize debug logging module
-const log = debug("msteams");
+const log = debug('msteams');
 
 log(`Initializing Microsoft Teams Express hosted App...`);
 
 // Initialize dotenv, to use .env file settings if existing
 // tslint:disable-next-line:no-var-requires
-require("dotenv").config();
-
+dotenvConfig();
 
 // Set up app insights
 appInsights.setup(process.env.APPINSIGHTS_INSTRUMENTATIONKEY).start();
 
-
 // The import of components has to be done AFTER the dotenv config
-import * as allComponents from "./TeamsAppsComponents";
+import * as allComponents from './TeamsAppsComponents';
 
 // Create the Express webserver
 const express = Express();
 const port = process.env.port || process.env.PORT || 3007;
 
 // Inject the raw request body onto the request object
-express.use(Express.json({
-    verify: (req, res, buf: Buffer): void => {
-        (req as any).rawBody = buf.toString();
-    }
-}));
+express.use(
+    Express.json({
+        verify: (req, res, buf: Buffer): void => {
+            (req as any).rawBody = buf.toString();
+        },
+    })
+);
 
 express.use(Express.urlencoded({ extended: true }));
 
 // Add simple logging
-express.use(morgan("tiny"));
+express.use(morgan('tiny'));
 
 // Add compression - uncomment to remove compression
 express.use(compression());
@@ -48,7 +48,7 @@ express.use(compression());
 express.use(MsTeamsApiRouter(allComponents));
 
 // Set the port
-express.set("port", port);
+express.set('port', port);
 
 // Start the webserver
 http.createServer(express).listen(port, () => {
