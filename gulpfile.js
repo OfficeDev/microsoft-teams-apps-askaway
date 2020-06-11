@@ -221,7 +221,7 @@ task('start-ngrok', (cb) => {
     };
 
 
-    ngrok.connect(conf).then((url) => {
+    ngrok.connect(conf).then(async (url) => {
         log('[NGROK] Url: ' + url);
         if (!conf.authtoken) {
             log("[NGROK] You have been assigned a random ngrok URL that will only be available for this session. You wil need to re-upload the Teams manifest next time you run this command.");
@@ -232,11 +232,21 @@ task('start-ngrok', (cb) => {
         log('[NGROK] HOSTNAME: ' + hostName);
         // process.env.HOSTNAME = hostName
 
-        // updates azure bot registraion endpoint
-        exec(`sh ./azure-update-endpoint.sh "https://${hostName}/api/messages"`, (err, stdout, stderr) => {
-            log(`[AZ-ENDPOINT] ${stdout}`);
-            cb(err);
-        });
+
+        // updates azure bot registraion endpoint //
+        // check if script exists
+        const fileExists = async path => !!(await fs.promises.stat(path).catch(e => false));
+        const scriptExists = await fileExists('azure-update-endpoint.sh');
+        
+        if (scriptExists){
+            exec(`sh ./azure-update-endpoint.sh "https://${hostName}/api/messages"`, (err, stdout, stderr) => {
+                log(`[AZ-ENDPOINT] ${stdout}`);
+                cb(err);
+            });
+        } else {
+            log('[AZ-ENDPOINT] script does not exist');
+            cb();
+        }
 
     }).catch((err) => {
         log.error(`[NGROK] Error: ${JSON.stringify(err)}`);
