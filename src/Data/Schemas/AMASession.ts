@@ -14,7 +14,7 @@ const AMASessionSchema = new mongoose.Schema({
         minlength: 1,
         trim: true,
     },
-    active: {
+    isActive: {
         type: boolean,
         required: true,
     },
