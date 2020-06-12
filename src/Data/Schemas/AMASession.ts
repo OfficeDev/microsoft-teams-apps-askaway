@@ -18,7 +18,7 @@ const AMASessionSchema = new mongoose.Schema({
         type: boolean,
         required: true,
     },
-    host: {
+    hostId: {
         type: mongoose.SchemaTypes.ObjectId,
         ref: 'User',
         required: true,
