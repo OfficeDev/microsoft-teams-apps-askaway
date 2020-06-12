@@ -14,7 +14,7 @@ import {
     TeamsActivityHandler,
 } from 'botbuilder';
 import HelpDialog from './dialogs/HelpDialog';
-import StartAmaMessageExtension from '../startAmaMessageExtension/StartAmaMessageExtension';
+import StartAmaMessageExtension from '../MessageExtension/StartAmaMessageExtension';
 import WelcomeCard from './dialogs/WelcomeCard';
 
 // Initialize debug logging module
