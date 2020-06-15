@@ -17,6 +17,8 @@ import HelpDialog from './dialogs/HelpDialog';
 import StartAmaMessageExtension from '../MessageExtension/StartAmaMessageExtension';
 import WelcomeCard from './dialogs/WelcomeCard';
 
+import * as controller from './../../Controller';
+
 // Initialize debug logging module
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const log = debug('msteams');
@@ -59,8 +61,7 @@ export class Questionly extends TeamsActivityHandler {
                 // TODO: add your own bot logic in here
 
                 switch (context.activity.type) {
-                    case ActivityTypes.Message:
-                        // eslint-disable-next-line no-case-declarations
+                    case ActivityTypes.Message: {
                         let text = TurnContext.removeRecipientMention(
                             context.activity
                         );
@@ -81,6 +82,7 @@ export class Questionly extends TeamsActivityHandler {
                             );
                         }
                         break;
+                    }
                     default:
                         break;
                 }
