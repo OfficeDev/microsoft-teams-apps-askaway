@@ -1,5 +1,4 @@
 import * as mongoose from 'mongoose';
-import { boolean, string } from 'yargs';
 
 const AMASessionSchema = new mongoose.Schema({
     title: {
@@ -15,7 +14,7 @@ const AMASessionSchema = new mongoose.Schema({
         trim: true,
     },
     isActive: {
-        type: boolean,
+        type: Boolean,
         required: true,
     },
     hostId: {
@@ -24,24 +23,23 @@ const AMASessionSchema = new mongoose.Schema({
         required: true,
     },
     conversationId: {
-        type: string,
+        type: String,
         required: true,
     },
     tenantId: {
-        type: string,
+        type: String,
         required: true,
     },
     // The following id is the group chat or channel id based on the context of this session.
     scope: {
         scopeId: {
-            type: string,
+            type: String,
             required: true,
         },
         isChannel: {
-            type: boolean,
+            type: Boolean,
             required: true,
         },
-        required: true,
     },
     datetimeCreated: {
         type: Date,
