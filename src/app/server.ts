@@ -17,7 +17,18 @@ log(`Initializing Microsoft Teams Express hosted App...`);
 dotenvConfig();
 
 // Set up app insights
-appInsights.setup(process.env.APPINSIGHTS_INSTRUMENTATIONKEY).start();
+appInsights
+    .setup(process.env.APPINSIGHTS_INSTRUMENTATIONKEY)
+    .setAutoDependencyCorrelation(true) // track a request across external dependencies and later callbacks
+    .setAutoCollectRequests(true)
+    .setAutoCollectPerformance(true, true)
+    .setAutoCollectExceptions(true)
+    .setAutoCollectDependencies(true) // enables tracking for mongoDB
+    .setAutoCollectConsole(true, true) //includes console.log errors
+    .setUseDiskRetryCaching(true)
+    .setSendLiveMetrics(false)
+    .setDistributedTracingMode(appInsights.DistributedTracingModes.AI);
+appInsights.start();
 
 // The import of components has to be done AFTER the dotenv config
 import * as allComponents from './TeamsAppsComponents';

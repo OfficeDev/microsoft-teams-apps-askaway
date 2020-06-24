@@ -18,11 +18,11 @@ const AMASessionSchema = new mongoose.Schema({
         required: true,
     },
     hostId: {
-        type: mongoose.SchemaTypes.ObjectId,
+        type: String,
         ref: 'User',
         required: true,
     },
-    conversationId: {
+    activityId: {
         type: String,
         required: true,
     },
@@ -51,4 +51,7 @@ const AMASessionSchema = new mongoose.Schema({
     },
 });
 
+/**
+ * Exports the AMASession schema model for external use.
+ */
 export const AMASession = mongoose.model('AMASession', AMASessionSchema);
