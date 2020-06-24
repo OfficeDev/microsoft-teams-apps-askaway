@@ -7,7 +7,7 @@ const QuestionSchema = new mongoose.Schema({
         required: true,
     },
     userId: {
-        type: mongoose.SchemaTypes.ObjectId,
+        type: String,
         ref: 'User',
         required: true,
     },
@@ -17,11 +17,14 @@ const QuestionSchema = new mongoose.Schema({
         minlength: 1,
         trim: true,
     },
-    voters: [{ type: mongoose.SchemaTypes.ObjectId, ref: 'User' }],
+    voters: [{ type: String, ref: 'User' }],
     datetimeCreated: {
         type: Date,
         default: Date.now,
     },
 });
 
+/**
+ * Exports the Question schema model for external use.
+ */
 export const Question = mongoose.model('Question', QuestionSchema);
