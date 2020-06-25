@@ -1,9 +1,37 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // Middleman file to allow for communication between the bot, database, and adaptive card builder.
 import * as db from './Data/Database'; // For database calls
-import * as adaptiveCardBuilder from './AdaptiveCards/AdaptiveCardBuilder';
+import * as adaptiveCardBuilder from './AdaptiveCards/AdaptiveCardBuilder'; // To populate adaptive cards
+import { ok, err, Result } from './util';
 import { AdaptiveCard } from 'adaptivecards';
-import { Result, ok } from './util';
+
+db.initiateConnection(process.env.MONGO_URI as string);
+
+/**
+ * Returns the populated leaderboard adaptive card for the AMA session attached to the id provided.
+ * @param amaSessionId - ID of the AMA session for which the leaderboard shouold be retrieived.
+ * @param aadObjectId - aadObjectId of the user who is trying view the leaderboard. This is to used to control certain factors such as not letting the user upvote their own questions.
+ * @returns - A promise containing a result object which, on success, contains the populated leaderboard adaptive card, and on failure, contains an error card.
+ */
+export const generateLeaderboard = async (
+    amaSessionId: string,
+    aadObjectId: string
+): Promise<Result<AdaptiveCard, AdaptiveCard>> => {
+    try {
+        const questionData = await db.getQuestionData(amaSessionId);
+        return ok(
+            adaptiveCardBuilder.generateLeaderboard(questionData, aadObjectId)
+        );
+    } catch (error) {
+        console.error(error);
+        return err(adaptiveCardBuilder.generateLeaderboardFailed());
+    }
+};
+
+/**
+ * Returns an adaptive card with a message that the task/fetch failed.
+ */
+export const getInvalidTaskFetch = adaptiveCardBuilder.getInvalidTaskFetch;
 
 db.initiateConnection(process.env.MONGO_DB_CONNECTION_STRING as string);
 

@@ -5,13 +5,14 @@ import {
 } from 'express-msteams-host';
 import * as debug from 'debug';
 import {
+    StatePropertyAccessor,
     CardFactory,
     TurnContext,
     MemoryStorage,
     ConversationState,
     TeamsActivityHandler,
-    TaskModuleRequest,
     TaskModuleResponse,
+    TaskModuleRequest,
 } from 'botbuilder';
 import StartAmaMessageExtension from '../MessageExtension/StartAmaMessageExtension';
 
@@ -52,7 +53,38 @@ export class Questionly extends TeamsActivityHandler {
         context: TurnContext,
         taskModuleRequest: TaskModuleRequest
     ): Promise<TaskModuleResponse> {
-        if (taskModuleRequest.data.id == 'askQuestion') {
+        if (taskModuleRequest.data.id === 'viewLeaderboard') {
+            /*================================================================================================================================
+            A payload of the following format should be in the 'data' field of the 'View Leaderboard' Action.Submit button in the master card.
+            {
+                msteams: {
+                    type: 'task/fetch',
+                },
+                id: 'viewLeaderboard',
+                amaSessionId:
+                    <put the amaSessionId here>
+            }
+            ================================================================================================================================*/
+            const leaderboard = await controller.generateLeaderboard(
+                taskModuleRequest.data.amaSessionId,
+                context.activity.from.aadObjectId as string
+            );
+
+            const response: TaskModuleResponse = <TaskModuleResponse>{
+                task: {
+                    type: 'continue',
+                    value: {
+                        card: {
+                            contentType:
+                                'application/vnd.microsoft.card.adaptive',
+                            content: leaderboard.value,
+                        },
+                    },
+                },
+            };
+
+            return response;
+        } else if (taskModuleRequest.data.id == 'askQuestion') {
             /*================================================================================================================================
             A payload of the following format should be in the 'data' field of the 'Ask a Question' Action.Submit button in the master card.
             {
@@ -61,9 +93,7 @@ export class Questionly extends TeamsActivityHandler {
                 },
                 id: 'askQuestion',
                 amaSessionId:
-                    <put the amaSessionId here>,
-                aadObjectId:
-                    <put the aadObjectId of the user asking the question here>,
+                    <put the amaSessionId here>
             }
             ================================================================================================================================*/
             const response: TaskModuleResponse = <TaskModuleResponse>{
@@ -83,14 +113,15 @@ export class Questionly extends TeamsActivityHandler {
 
             return response;
         } else {
-            // included to prevent merge conflicts
             const response: TaskModuleResponse = <TaskModuleResponse>{
                 task: {
                     type: 'continue',
                     value: {
-                        card: CardFactory.adaptiveCard(
-                            controller.getQuestionErrorCard()
-                        ),
+                        card: {
+                            contentType:
+                                'application/vnd.microsoft.card.adaptive',
+                            content: controller.getInvalidTaskFetch(),
+                        },
                     },
                 },
             };
