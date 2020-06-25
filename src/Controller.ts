@@ -61,7 +61,7 @@ export const startAMASession = async (
         console.error(error);
         return err(Error('Failed to start AMA'));
     }
-}
+};
 
 /**
  * Returns the populated leaderboard adaptive card for the AMA session attached to the id provided.
@@ -99,7 +99,7 @@ export const setActivityId = async (
         console.error(error);
         return err(error);
     }
-}
+};
 
 /**
  * Returns an adaptive card with a message that the task/fetch failed.
