@@ -4,8 +4,8 @@ import { Question } from './Schemas/Question';
 import { User } from './Schemas/User';
 
 /**
- * Initiates the connection with mongoose mongoDB
- * @param mongoURI - connection string
+ * Initiates the connection to the CosmosDB database.
+ * @param mongoURI - The mongoDB connection string for the CosmosDB database.
  */
 export const initiateConnection = async (
     mongoURI: string
@@ -15,6 +15,34 @@ export const initiateConnection = async (
         .then(() => console.log('Connection to CosmosDB successful'))
         .catch((error) => console.error(error));
     return true;
+};
+
+/**
+ * Disconnects the connection to the CosmosDB database.
+ */
+export const disconnect = async (): Promise<void> => {
+    await mongoose.disconnect();
+};
+
+/**
+ * Returns all the questions under an AMA with the details of the users filled.
+ * @param amaSessionId - the DBID of the AMA session from which to retrieve the questions.
+ * @returns - Array of Question documents under the AMA.
+ * @throws - Error thrown when finding questions or populating userId field of question documents fails.
+ */
+export const getQuestionData = async (amaSessionId: string) => {
+    const questionData = await Question.find({
+        amaSessionId: amaSessionId,
+    })
+        .populate({ path: 'userId', modle: User })
+        .exec()
+        .catch((error) => {
+            console.error(error);
+            throw new Error(
+                'Retrieving questions or populating user details failed'
+            );
+        });
+    return questionData;
 };
 
 /**
