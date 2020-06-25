@@ -100,7 +100,7 @@ export const getQuestionData = async (amaSessionId: string) => {
     const questionData = await Question.find({
         amaSessionId: amaSessionId,
     })
-        .populate({ path: 'userId', modle: User })
+        .populate({ path: 'userId', model: User })
         .exec()
         .catch((error) => {
             console.error(error);
