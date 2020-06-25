@@ -4,7 +4,6 @@
 
 var webpack = require('webpack');
 const Dotenv = require('dotenv-webpack');
-var TSLintPlugin = require('tslint-webpack-plugin');
 
 var path = require('path');
 var fs = require('fs');
@@ -55,12 +54,6 @@ var config = [{
         plugins: []
     },
 ];
-
-// if (lint !== false) {
-//     config[0].plugins.push(new TSLintPlugin({
-//         files: ['./src/app/*.ts']
-//     }));
-// }
 
 
 module.exports = config;

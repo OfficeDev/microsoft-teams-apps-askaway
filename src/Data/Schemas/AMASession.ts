@@ -24,7 +24,7 @@ const AMASessionSchema = new mongoose.Schema({
     },
     activityId: {
         type: String,
-        required: true,
+        required: false,
     },
     tenantId: {
         type: String,

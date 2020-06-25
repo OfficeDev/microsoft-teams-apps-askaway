@@ -1,7 +1,9 @@
 /* eslint-disable no-console */
 import * as mongoose from 'mongoose';
-import { Question } from './Schemas/Question';
+
+import { AMASession } from './Schemas/AMASession';
 import { User } from './Schemas/User';
+import { Question } from './Schemas/Question';
 
 /**
  * Initiates the connection to the CosmosDB database.
@@ -15,6 +17,70 @@ export const initiateConnection = async (
         .then(() => console.log('Connection to CosmosDB successful'))
         .catch((error) => console.error(error));
     return true;
+};
+
+/**
+ * Creates initial AMA session document and stores it in the database
+ * @param title - title of AMA
+ * @param description - description of AMA
+ * @param userName - name of the user who created the AMA
+ * @param userAadObjId - AAD Object Id of the suer who created the AMA
+ * @param activityId - id of the master card message used for proactive updating
+ * @param tenantId - id of tenant the bot is running on.
+ * @param scopeId - channel id or group chat id
+ * @param isChannel - whether the AMA session was started in a channel or group chat
+ */
+export const createAMASession = async (
+    title: string,
+    description: string,
+    userName: string,
+    userAadObjId: string,
+    activityId: string,
+    tenantId: string,
+    scopeId: string,
+    isChannel: boolean
+): Promise<{ amaSessionId: string; hostId: string }> => {
+    const hostId = await getUserOrCreate(userAadObjId, userName);
+
+    const amaSession = new AMASession({
+        title: title,
+        description: description,
+        hostId: userAadObjId,
+        activityId: activityId,
+        tenantId: tenantId,
+        isActive: true,
+        scope: {
+            scopeId: scopeId,
+            isChannel: isChannel,
+        },
+    });
+
+    const savedSession: mongoose.MongooseDocument = await amaSession
+        .save()
+        .catch((err) => {
+            throw new Error('Error saving AMA session: ' + err);
+        });
+
+    return { amaSessionId: savedSession._id, hostId: userAadObjId };
+};
+
+/**
+ * Updates the activity id of an existing AMA session
+ * @param amaSessionId - document database id of the AMA session
+ * @param activityId - id of the master card message used for proactive updating of the card
+ */
+export const updateActivityId = async (
+    amaSessionId: string,
+    activityId: string
+) => {
+    await AMASession.findByIdAndUpdate(
+        { _id: amaSessionId },
+        { activityId }
+    ).catch((error) => {
+        new Error(
+            `Failed to update activityId of AMA session: ${amaSessionId}. ${error}`
+        );
+    });
 };
 
 /**

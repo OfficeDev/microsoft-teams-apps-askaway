@@ -7,7 +7,7 @@ const config = {
         "./temp"
     ],
     watches: [
-        "./src/app/**/*.*",
+        "./src/**/*.*",
         "!./src/app/questionlyBot/dialogs/**"
     ],
     // Supported Schemas

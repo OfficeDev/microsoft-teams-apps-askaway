@@ -7,6 +7,62 @@ import { AdaptiveCard } from 'adaptivecards';
 
 db.initiateConnection(process.env.MONGO_URI as string);
 
+export const getMasterCard = adaptiveCardBuilder.getMasterCard;
+export const getStartAMACard = adaptiveCardBuilder.getStartAMACard;
+export const getErrorCard = adaptiveCardBuilder.getErrorCard;
+
+/**
+ * Starts the AMA session
+ * @param title - title of AMA
+ * @param description - description of AMA
+ * @param userName - name of the user who created the AMA
+ * @param userAadObjId - AAD Object Id of the suer who created the AMA
+ * @param activityId - id of the master card message used for proactive updating
+ * @param tenantId - id of tenant the bot is running on.
+ * @param scopeId - channel id or group chat id
+ * @param isChannel - whether the AMA session was started in a channel or group chat
+ * @returns the master adaptive card
+ */
+export const startAMASession = async (
+    title: string,
+    description: string,
+    userName: string,
+    userAadObjId: string,
+    activityId: string,
+    tenantId: string,
+    scopeId: string,
+    isChannel: boolean
+): Promise<Result<{ card: AdaptiveCard; amaSessionId: string }, Error>> => {
+    try {
+        // save data to db
+        const response = await db.createAMASession(
+            title,
+            description,
+            userName,
+            userAadObjId,
+            activityId,
+            tenantId,
+            scopeId,
+            isChannel
+        );
+
+        // generate and return mastercard
+        return ok({
+            card: await getMasterCard(
+                title,
+                description,
+                userName,
+                response.amaSessionId,
+                response.hostId
+            ),
+            amaSessionId: response.amaSessionId,
+        });
+    } catch (error) {
+        console.error(error);
+        return err(Error('Failed to start AMA'));
+    }
+}
+
 /**
  * Returns the populated leaderboard adaptive card for the AMA session attached to the id provided.
  * @param amaSessionId - ID of the AMA session for which the leaderboard shouold be retrieived.
@@ -27,6 +83,23 @@ export const generateLeaderboard = async (
         return err(adaptiveCardBuilder.generateLeaderboardFailed());
     }
 };
+
+/**
+ * Sets the activity id of an existing AMA session
+ * @param amaSessionId - document database id of the AMA session
+ * @param activityId - id of the master card message used for proactive updating of the card
+ */
+export const setActivityId = async (
+    amaSessionId: string,
+    activityId: string
+) => {
+    try {
+        return ok(await db.updateActivityId(amaSessionId, activityId));
+    } catch (error) {
+        console.error(error);
+        return err(error);
+    }
+}
 
 /**
  * Returns an adaptive card with a message that the task/fetch failed.

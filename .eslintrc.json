@@ -1,32 +1,35 @@
 {
     "root": true,
     "parser": "@typescript-eslint/parser",
-    "plugins": [
-      "prettier"
-    ],
+    "plugins": ["prettier", "eslint-plugin-tsdoc"],
     "extends": [
-      "eslint:recommended",
-      "plugin:json/recommended",
-      "plugin:prettier/recommended"
+        "eslint:recommended",
+        "plugin:json/recommended",
+        "plugin:prettier/recommended"
     ],
-    "rules": { 
-        "prettier/prettier": [2, {
-          "endOfLine": "auto"
-        }]
+    "rules": {
+        "prettier/prettier": [
+            2,
+            {
+                "endOfLine": "auto"
+            }
+        ]
     },
     "overrides": [
-      {
-        "files": ["**/*.ts", "**/*.tsx"],
-        "parser": "@typescript-eslint/parser",
-        "extends": [
-          "plugin:@typescript-eslint/eslint-recommended",
-          "plugin:@typescript-eslint/recommended"
-        ],
-        "rules": {
-          "no-console": 1, // warning
-          "@typescript-eslint/no-explicit-any": "off",
-          "semi": [1, "always"]
+        {
+            "files": ["**/*.ts", "**/*.tsx"],
+            "parser": "@typescript-eslint/parser",
+            "extends": [
+                "plugin:@typescript-eslint/eslint-recommended",
+                "plugin:@typescript-eslint/recommended"
+            ],
+            "rules": {
+                "no-console": 1, // warning
+                "@typescript-eslint/no-explicit-any": "off",
+                "@typescript-eslint/explicit-module-boundary-types": "off",
+                "semi": [1, "always"],
+                "tsdoc/syntax": 1
+            }
         }
-      }
     ]
-  }
+}

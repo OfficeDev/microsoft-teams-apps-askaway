@@ -23,7 +23,7 @@ import * as controller from './../../Controller';
 const log = debug('msteams');
 
 /**
- * Implementation for Questionly
+ * Main bot activity handler class
  */
 @BotDeclaration(
     '/api/messages',
@@ -32,21 +32,17 @@ const log = debug('msteams');
     process.env.MICROSOFT_APP_PASSWORD
 )
 export class Questionly extends TeamsActivityHandler {
-    private readonly conversationState: ConversationState;
     /** Local property for StartAmaMessageExtension */
-    @MessageExtensionDeclaration('startAmaMessageExtension')
+    @MessageExtensionDeclaration('startAMA')
     private _startAmaMessageExtension: StartAmaMessageExtension;
 
     /**
      * The constructor
-     * @param conversationState
      */
-    public constructor(conversationState: ConversationState) {
+    public constructor() {
         super();
         // Message extension StartAmaMessageExtension
         this._startAmaMessageExtension = new StartAmaMessageExtension();
-
-        this.conversationState = conversationState;
     }
 
     async handleTeamsTaskModuleFetch(

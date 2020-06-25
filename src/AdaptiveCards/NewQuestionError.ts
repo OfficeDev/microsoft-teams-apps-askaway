@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Defines the template for the adaptive card used when errors occur when creating a new question.
  */
