@@ -1,89 +1,56 @@
 {
-  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.6/MicrosoftTeams.schema.json",
-  "manifestVersion": "1.6",
-  "id": "{{APPLICATION_ID}}",
-  "version": "{{VERSION}}",
-  "packageName": "{{PACKAGE_NAME}}",
-  "developer": {
-    "name": "microsoft",
-    "websiteUrl": "https://{{HOSTNAME}}",
-    "privacyUrl": "https://{{HOSTNAME}}/privacy.html",
-    "termsOfUseUrl": "https://{{HOSTNAME}}/tou.html"
-  },
-  "name": {
-    "short": "questionly",
-    "full": "questionly"
-  },
-  "description": {
-    "short": "TODO: add short description here",
-    "full": "TODO: add full description here"
-  },
-  "icons": {
-    "outline": "icon-outline.png",
-    "color": "icon-color.png"
-  },
-  "accentColor": "#D85028",
-  "configurableTabs": [],
-  "staticTabs": [],
-  "bots": [
-    {
-      "botId": "{{MICROSOFT_APP_ID}}",
-      "needsChannelSelector": true,
-      "isNotificationOnly": false,
-      "scopes": [
-        "team",
-        "personal"
-      ],
-      "commandLists": [
+    "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.6/MicrosoftTeams.schema.json",
+    "manifestVersion": "1.6",
+    "id": "{{APPLICATION_ID}}",
+    "version": "{{VERSION}}",
+    "packageName": "{{PACKAGE_NAME}}",
+    "developer": {
+        "name": "microsoft",
+        "websiteUrl": "https://{{HOSTNAME}}",
+        "privacyUrl": "https://{{HOSTNAME}}/privacy.html",
+        "termsOfUseUrl": "https://{{HOSTNAME}}/tou.html"
+    },
+    "name": {
+        "short": "questionly",
+        "full": "questionly"
+    },
+    "description": {
+        "short": "TODO: add short description here",
+        "full": "TODO: add full description here"
+    },
+    "icons": {
+        "outline": "icon-outline.png",
+        "color": "icon-color.png"
+    },
+    "accentColor": "#F9F9FA",
+    "configurableTabs": [],
+    "staticTabs": [],
+    "bots": [
         {
-          "scopes": [
-            "team",
-            "personal"
-          ],
-          "commands": [
-            {
-              "title": "Help",
-              "description": "Shows help information"
-            }
-          ]
+            "botId": "{{MICROSOFT_APP_ID}}",
+            "needsChannelSelector": true,
+            "isNotificationOnly": false,
+            "scopes": ["team", "groupchat"]
         }
-      ]
-    }
-  ],
-  "connectors": [],
-  "composeExtensions": [
-    {
-      "botId": "{{MICROSOFT_APP_ID}}",
-      "canUpdateConfiguration": true,
-      "commands": [
+    ],
+    "connectors": [],
+    "composeExtensions": [
         {
-          "id": "startAmaMessageExtension",
-          "title": "Start AMA",
-          "description": "Add a clever description here",
-          "initialRun": true,
-          "parameters": [
-            {
-              "name": "email",
-              "description": "Enter an e-mail address",
-              "title": "E-mail"
-            }
-          ],
-          "type": "action",
-          "context": [
-            "compose",
-            "message"
-          ],
-          "fetchTask": false
+            "botId": "{{MICROSOFT_APP_ID}}",
+            "canUpdateConfiguration": true,
+            "commands": [
+                {
+                    "id": "startAMA",
+                    "type": "action",
+                    "title": "Start AMA",
+                    "description": "Run an \"Ask Me Anything\" Poll",
+                    "fetchTask": true,
+                    "context": ["compose", "message"]
+                }
+            ]
         }
-      ]
-    }
-  ],
-  "permissions": [
-    "identity",
-    "messageTeamMembers"
-  ],
-  "validDomains": [
-    "{{HOSTNAME}}"
-  ],
-  "showLoadingIndicator": false
+    ],
+    "permissions": ["identity", "messageTeamMembers"],
+    "validDomains": ["{{HOSTNAME}}"],
+    "showLoadingIndicator": false
 }

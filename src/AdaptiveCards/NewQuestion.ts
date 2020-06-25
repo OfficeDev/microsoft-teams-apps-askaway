@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Defines the template for the adaptive card used when creating a new question.
  */
@@ -23,7 +21,7 @@ export default {
             type: 'Action.Submit',
             title: 'Submit',
             data: {
-                amaSessionId: '${AMA_ID}',
+                amaSessionId: '${amaId}',
             },
         },
     ],

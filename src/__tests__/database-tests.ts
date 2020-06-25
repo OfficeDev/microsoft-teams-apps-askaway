@@ -1,12 +1,13 @@
+import { createAMASession, updateActivityId } from '../Data/Database';
+import * as mongoose from 'mongoose';
+import { AMASession } from '../Data/Schemas/AMASession';
 import {
     getQuestionData,
     createQuestion,
     getUserOrCreate,
 } from '../Data/Database';
-import { AMASession } from '../Data/Schemas/AMASession';
 import { Question } from '../Data/Schemas/Question';
 import { User } from '../Data/Schemas/User';
-import * as mongoose from 'mongoose';
 
 let testHost, testAMASession, testUser;
 
@@ -51,6 +52,84 @@ afterAll(async () => {
     await User.remove({ _id: testUser._id });
 
     await mongoose.connection.close();
+});
+
+test('can create ama session', async () => {
+    const title = 'testAMA',
+        description = 'testDescription',
+        userName = 'user',
+        userAadObjId = 'aadObject',
+        activityId = 'activityId',
+        tenantId = 'tenantId',
+        scopeId = 'scopeId',
+        isChannel = true;
+
+    const result = await createAMASession(
+        title,
+        description,
+        userName,
+        userAadObjId,
+        activityId,
+        tenantId,
+        scopeId,
+        isChannel
+    );
+
+    expect(result.amaSessionId).toBeTruthy();
+    expect(result.hostId).toBe(userAadObjId);
+
+    const amaSessionDoc = await AMASession.findById(result.amaSessionId);
+
+    expect(amaSessionDoc).not.toBeNull();
+    const doc = (amaSessionDoc as any).toObject();
+
+    const expectedData = {
+        title: doc.title,
+        description: doc.description,
+        userAadObjId: doc.hostId,
+        activityId: doc.activityId,
+        tenantId: doc.tenantId,
+        scopeId: doc.scope.scopeId,
+        isChannel: doc.scope.isChannel,
+        userName: userName,
+    };
+
+    expect(doc.isActive).toBe(true);
+    expect(expectedData).toEqual({
+        title,
+        description,
+        userName,
+        userAadObjId,
+        activityId,
+        tenantId,
+        scopeId,
+        isChannel,
+    });
+
+    return;
+});
+
+test('can update activity id', async () => {
+    /** Setup Mock DB **/
+    const testAMASession = await new AMASession({
+        title: 'test AMA',
+        description: 'AMA session to test bot',
+        isActive: true,
+        hostId: '123',
+        tenantId: '789',
+        scope: {
+            scopeId: '123',
+            isChannel: true,
+        },
+    }).save();
+
+    const activityId = '12345';
+    await updateActivityId(testAMASession._id, activityId);
+
+    const doc: any = await AMASession.findById(testAMASession);
+    expect(doc).not.toBeNull();
+    expect(doc._id).toEqual(testAMASession._id);
+    expect(doc.toObject().activityId).toEqual(activityId);
 });
 
 test('retrieve question data in empty AMA', async () => {

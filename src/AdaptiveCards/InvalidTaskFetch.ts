@@ -8,7 +8,7 @@ export default {
     body: [
         {
             type: 'TextBlock',
-            text: 'Fetching task module failed.',
+            text: '${errorMsg}',
         },
     ],
 };
