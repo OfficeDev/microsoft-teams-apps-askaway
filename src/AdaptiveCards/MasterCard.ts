@@ -49,7 +49,7 @@ export default {
         },
         {
             type: 'TextBlock',
-            text: 'Created by ${user}',
+            text: 'Initiated by ${user}',
             wrap: true,
             isSubtle: true,
         },
