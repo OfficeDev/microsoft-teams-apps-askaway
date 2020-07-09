@@ -1,9 +1,39 @@
+import { IAdaptiveCard } from 'adaptivecards';
+import { err, ok, Result } from '../util';
+import { ISubmitAction } from 'adaptivecards/lib/schema';
+
+/**
+ * Adaptive Card template for view leaderboard submit action (i.e, the `View Leaderboard` button).
+ */
+export const viewLeaderboardButton: ISubmitAction = {
+    id: 'viewLeaderboard',
+    type: 'Action.Submit',
+    title: 'View leaderboard',
+    data: {
+        msteams: {
+            type: 'task/fetch',
+        },
+        id: 'viewLeaderboard',
+        amaSessionId: '${amaId}',
+        aadObjectId: '${userId}',
+    },
+};
+
+/**
+ * Data injected into the MasterCard
+ */
+export type MasterCardData = {
+    title: string;
+    description: string;
+    userName: string;
+    amaSessionId: string;
+    userId: string;
+    ended: boolean;
+};
+
 /**
  * Master Adaptive Card for the Questionly Bot
  */
-
-import { IAdaptiveCard } from 'adaptivecards';
-
 export default <IAdaptiveCard>{
     $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
     type: 'AdaptiveCard',
@@ -33,6 +63,14 @@ export default <IAdaptiveCard>{
             size: 'medium',
         },
         {
+            type: 'TextBlock',
+            text: 'Updated ${dateLastUpdated}',
+            wrap: true,
+            size: 'Small',
+            isSubtle: true,
+            $when: '${count($root.dateLastUpdated) > 0}',
+        },
+        {
             type: 'Container',
             items: [
                 {
@@ -45,7 +83,7 @@ export default <IAdaptiveCard>{
         },
         {
             type: 'TextBlock',
-            text: 'Initiated by ${user}',
+            text: '${actionBy} ${user}',
             wrap: true,
             isSubtle: true,
         },
@@ -55,7 +93,7 @@ export default <IAdaptiveCard>{
             actions: [
                 {
                     type: 'Action.Submit',
-                    title: 'Ask a question',
+                    title: 'Data Store',
                     data: '${data}',
                 },
             ],
@@ -74,23 +112,11 @@ export default <IAdaptiveCard>{
                 amaSessionId: '${amaId}',
             },
         },
-        {
-            id: 'viewLeaderboard',
-            type: 'Action.Submit',
-            title: 'View leaderboard',
-            data: {
-                msteams: {
-                    type: 'task/fetch',
-                },
-                id: 'viewLeaderboard',
-                amaSessionId: '${amaId}',
-                aadObjectId: '${userId}',
-            },
-        },
+        viewLeaderboardButton,
         {
             id: 'endAMA',
             type: 'Action.Submit',
-            title: 'End the AMA',
+            title: 'End AMA',
             data: {
                 msteams: {
                     type: 'task/fetch',
@@ -100,4 +126,20 @@ export default <IAdaptiveCard>{
             },
         },
     ],
+};
+
+/**
+ * Extracts injected data from the master card
+ * @param card - the master card
+ */
+export const extractMasterCardData = (
+    card: IAdaptiveCard
+): Result<MasterCardData, null> => {
+    try {
+        if (!card.body) throw Error('Non-existent card body');
+        return ok(card.body[card.body.length - 1].actions[0].data);
+    } catch (error) {
+        console.error(error);
+        return err(error);
+    }
 };

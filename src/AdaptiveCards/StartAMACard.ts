@@ -20,12 +20,19 @@ export default <IAdaptiveCard>{
                             items: [
                                 {
                                     type: 'TextBlock',
+                                    text: '${errorMessage}',
+                                    color: 'Attention',
+                                },
+                                {
+                                    type: 'TextBlock',
                                     text: 'Title of AMA',
                                     wrap: true,
                                 },
                                 {
                                     type: 'Input.Text',
                                     id: 'title',
+                                    value: '${title}',
+                                    maxLength: 250,
                                     placeholder: 'Ex. Weekly Product AMA',
                                 },
                                 {
@@ -36,8 +43,15 @@ export default <IAdaptiveCard>{
                                 {
                                     type: 'Input.Text',
                                     id: 'description',
+                                    value: '${description}',
+                                    maxLength: 250,
                                     placeholder:
                                         'Ex. Brighu is running a town hall. Ask your questions here!',
+                                },
+                                {
+                                    type: 'TextBlock',
+                                    text: 'Maximum number of characters: 250',
+                                    spacing: 'Large',
                                 },
                             ],
                         },
