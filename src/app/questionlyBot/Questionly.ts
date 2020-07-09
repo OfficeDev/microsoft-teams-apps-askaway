@@ -199,24 +199,24 @@ export class Questionly extends TeamsActivityHandler {
             const status = await controller.endAMASession(amaSessionId);
             if (!status.isOk()) {
                 return this._handleTeamsTaskModuleSubmitError();
-            } else {
-                const amaTitle = status.value.amaTitle;
-                const amaDesc = status.value.amaDesc;
-                const amaActivityId = status.value.amaActivityId;
-
-                const endAmaMastercard = controller.getEndAMAMastercard(
-                    amaTitle,
-                    amaDesc,
-                    amaSessionId,
-                    userName
-                );
-
-                await context.updateActivity({
-                    attachments: [CardFactory.adaptiveCard(endAmaMastercard)],
-                    id: amaActivityId,
-                    type: 'message',
-                });
             }
+
+            const amaTitle = status.value.amaTitle;
+            const amaDesc = status.value.amaDesc;
+            const amaActivityId = status.value.amaActivityId;
+
+            const endAmaMastercard = controller.getEndAMAMastercard(
+                amaTitle,
+                amaDesc,
+                amaSessionId,
+                userName
+            );
+
+            await context.updateActivity({
+                attachments: [CardFactory.adaptiveCard(endAmaMastercard)],
+                id: amaActivityId,
+                type: 'message',
+            });
         }
 
         return null as any;
