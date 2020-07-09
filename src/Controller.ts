@@ -9,7 +9,9 @@ db.initiateConnection(process.env.MONGO_URI as string);
 
 export const getMasterCard = adaptiveCardBuilder.getMasterCard;
 export const getStartAMACard = adaptiveCardBuilder.getStartAMACard;
-export const getErrorCard = adaptiveCardBuilder.getErrorCard;
+export const getTaskFetchErrorCard = adaptiveCardBuilder.getTaskFetchErrorCard;
+export const getTaskSubmitErrorCard =
+    adaptiveCardBuilder.getTaskSubmitErrorCard;
 
 /**
  * Starts the AMA session
@@ -102,13 +104,6 @@ export const setActivityId = async (
 };
 
 /**
- * Returns an adaptive card with a message that the task/fetch failed.
- */
-export const getInvalidTaskFetch = adaptiveCardBuilder.getInvalidTaskFetch;
-
-db.initiateConnection(process.env.MONGO_DB_CONNECTION_STRING as string);
-
-/**
  * Calls adaptiveCardbuilder to get the newQuestionCard.
  * @returns Adaptive Card associated with creating a new question
  */
@@ -117,17 +112,11 @@ export const getNewQuestionCard = (amaSessionId: string): AdaptiveCard => {
 };
 
 /**
- * Calls adaptiveCardBuilder to get the QuestionErrorCard.
- * @returns Adaptive Card associated with errors from creating a new question
- */
-export const getQuestionErrorCard = (): AdaptiveCard => {
-    return adaptiveCardBuilder.getQuestionErrorCard();
-};
-
-/**
  * Handles and formats the parameters, then sends new question details to the database.
- * @param taskModuleRequest - Object that contains information about the newly submitted question
- * @param user - Object that contains information about the associated user
+ * @param amaSessionId - id of the current AMA session
+ * @param userAadObjId - AAD Obj ID of the current user
+ * @param userName - name of the user
+ * @param questionContent - question content asked by the user
  * @returns Returns ok object if successful, otherwise returns error
  */
 export const submitNewQuestion = async (
@@ -147,7 +136,79 @@ export const submitNewQuestion = async (
         return ok({
             status: true,
         });
-    } catch (err) {
+    } catch (error) {
+        console.error(error);
         return err(Error('Failed to submit new question'));
     }
+};
+
+/**
+ * Calls adaptiveCardBuilder to get the endAMAConfirmationCard.
+ * @param amaSessionId - id of the current AMA session
+ * @returns Adaptive Card associated with confirming the ending of an AMA
+ */
+export const getEndAMAConfirmationCard = (
+    amaSessionId: string
+): AdaptiveCard => {
+    return adaptiveCardBuilder.getEndAMAConfirmationCard(amaSessionId);
+};
+
+/**
+ * Communicates with database to end the AMA and retrieves details
+ * @param amaSessionId - id of the current AMA session
+ * @returns Ok object with amaTitle, amaDesc, and amaActivityId
+ */
+export const endAMASession = async (
+    amaSessionId: string
+): Promise<Result<any, Error>> => {
+    try {
+        const result = await db.endAMASession(amaSessionId);
+        return ok({
+            status: true,
+            amaTitle: result.amaTitle,
+            amaDesc: result.amaDesc,
+            amaActivityId: result.amaActivityId,
+        });
+    } catch (error) {
+        console.error(error);
+        return err(Error('Failed to end AMA session'));
+    }
+};
+
+/**
+ * Calls adaptiveCardBuilder to get the endAMAMastercard.
+ * @param amaTitle - title of the AMA
+ * @param amaDesc - desc of the AMA
+ * @param amaSessionId - id of the current AMA session
+ * @param userName - name of the user
+ * @returns Mastercard that is displayed after ending the AMA
+ */
+export const getEndAMAMastercard = (
+    amaTitle: string,
+    amaDesc: string,
+    amaSessionId: string,
+    userName: string
+): AdaptiveCard => {
+    return adaptiveCardBuilder.getEndAMAMastercard(
+        amaTitle,
+        amaDesc,
+        amaSessionId,
+        userName
+    );
+};
+
+/**
+ * Calls adaptiveCardBuilder to get resubmitQuestionCard.
+ * @param amaSessionId - id of the current AMA session
+ * @param questionContent - question asked that failed to save when error occured
+ * @returns Adaptive Card with question asked in text box
+ */
+export const getResubmitQuestionCard = (
+    amaSessionId: string,
+    questionContent: string
+): AdaptiveCard => {
+    return adaptiveCardBuilder.getResubmitQuestionErrorCard(
+        amaSessionId,
+        questionContent
+    );
 };

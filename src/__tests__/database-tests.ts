@@ -1,20 +1,31 @@
-import { createAMASession, updateActivityId } from '../Data/Database';
 import * as mongoose from 'mongoose';
 import { AMASession } from '../Data/Schemas/AMASession';
 import {
     getQuestionData,
     createQuestion,
     getUserOrCreate,
+    endAMASession,
+    createAMASession,
+    updateActivityId,
 } from '../Data/Database';
 import { Question } from '../Data/Schemas/Question';
 import { User } from '../Data/Schemas/User';
 
 let testHost, testAMASession, testUser;
 
+// sample data used for tests
 const sampleUserAADObjId = 'be36140g-9729-3024-8yg1-147bbi67g2c9';
 const sampleUserName = 'Sample Name';
 const sampleQuestionContent = 'Sample Question?';
 const sampleAmaTeamsSessionId = '5ee25f76c7e152311cf94d99';
+const title = 'testAMA';
+const description = 'testDescription';
+const userName = 'user';
+const userAadObjId = 'aadObject';
+const activityId = 'activityId';
+const tenantId = 'tenantId';
+const scopeId = 'scopeId';
+const isChannel = true;
 
 beforeAll(async () => {
     await mongoose.connect(process.env.MONGO_URL as string, {
@@ -55,15 +66,6 @@ afterAll(async () => {
 });
 
 test('can create ama session', async () => {
-    const title = 'testAMA',
-        description = 'testDescription',
-        userName = 'user',
-        userAadObjId = 'aadObject',
-        activityId = 'activityId',
-        tenantId = 'tenantId',
-        scopeId = 'scopeId',
-        isChannel = true;
-
     const result = await createAMASession(
         title,
         description,
@@ -193,8 +195,54 @@ test('new question with new user', async () => {
     const data = await createQuestion(
         sampleAmaTeamsSessionId,
         randomString,
-        'Earnest Cream', //using same name and question because only checks AADObjId
+        'Earnest Cream', //using same name and question because the bot only checks for AADObjId
         sampleQuestionContent
     );
     expect(data).toEqual(true);
+});
+
+test('ending ama with no questions', async () => {
+    const result = await createAMASession(
+        title,
+        description,
+        userName,
+        userAadObjId,
+        activityId,
+        tenantId,
+        scopeId,
+        isChannel
+    );
+
+    const data = await endAMASession(result.amaSessionId);
+
+    expect(data.amaDesc).toBe(description);
+    expect(data.amaTitle).toBe(title);
+});
+
+test('ending ama with a few questions', async () => {
+    const result = await createAMASession(
+        title,
+        description,
+        userName,
+        userAadObjId,
+        activityId,
+        tenantId,
+        scopeId,
+        isChannel
+    );
+
+    for (let i = 0; i < 5; i++) {
+        const randomString = Math.random().toString(36);
+        await createQuestion(
+            result.amaSessionId,
+            randomString,
+            'Earnest Cream', //using same name and question because the bot only checks for AADObjId
+            sampleQuestionContent
+        );
+    }
+
+    const data = await endAMASession(result.amaSessionId);
+
+    expect(data.amaDesc).toBe(description);
+    expect(data.amaTitle).toBe(title);
 });

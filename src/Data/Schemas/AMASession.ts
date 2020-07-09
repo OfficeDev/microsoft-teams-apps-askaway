@@ -41,11 +41,11 @@ const AMASessionSchema = new mongoose.Schema({
             required: true,
         },
     },
-    datetimeCreated: {
+    dateTimeCreated: {
         type: Date,
         default: Date.now,
     },
-    datetimeEnded: {
+    dateTimeEnded: {
         type: Date,
         required: false,
     },
