@@ -6,6 +6,7 @@ import * as debug from 'debug';
 import * as compression from 'compression';
 import * as appInsights from 'applicationinsights';
 import { config as dotenvConfig } from 'dotenv';
+import { join } from 'path';
 
 // Initialize debug logging module
 const log = debug('msteams');
@@ -47,6 +48,9 @@ express.use(
 );
 
 express.use(Express.urlencoded({ extended: true }));
+
+// Add serving of static files
+express.use(Express.static(join(__dirname, 'public')));
 
 // Add simple logging
 express.use(morgan('tiny'));

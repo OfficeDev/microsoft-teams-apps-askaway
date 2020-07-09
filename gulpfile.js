@@ -227,7 +227,7 @@ task('start-ngrok', (cb) => {
             hostName = hostName.replace('https://', '');
 
             log('[NGROK] HOSTNAME: ' + hostName);
-            // process.env.HOSTNAME = hostName
+            process.env.HOSTNAME = hostName;
 
             // updates azure bot registraion endpoint //
             // check if script exists
