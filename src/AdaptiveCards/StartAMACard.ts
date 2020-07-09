@@ -1,7 +1,9 @@
+import { IAdaptiveCard } from 'adaptivecards';
+
 /**
  * Adaptive Card form used to collect information to start the AMA.
  */
-export default {
+export default <IAdaptiveCard>{
     $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
     type: 'AdaptiveCard',
     version: '1.2',
@@ -46,6 +48,7 @@ export default {
     ],
     actions: [
         {
+            id: 'submit',
             type: 'Action.Submit',
             title: 'Submit',
         },

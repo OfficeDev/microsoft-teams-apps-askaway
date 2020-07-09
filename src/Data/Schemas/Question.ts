@@ -18,7 +18,7 @@ const QuestionSchema = new mongoose.Schema({
         trim: true,
     },
     voters: [{ type: String, ref: 'User' }],
-    datetimeCreated: {
+    dateTimeCreated: {
         type: Date,
         default: Date.now,
     },

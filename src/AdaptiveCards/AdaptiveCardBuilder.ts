@@ -1,16 +1,18 @@
 import MasterCard from './MasterCard';
 import * as ACData from 'adaptivecards-templating';
 import StartAMACard from './StartAMACard';
-import { AdaptiveCard } from 'adaptivecards';
-import InvalidTaskFetch from './InvalidTaskFetch';
+import { AdaptiveCard, IAdaptiveCard } from 'adaptivecards';
+import InvalidTaskError from './InvalidTaskError';
+
 // All the functions to populate the adaptive cards should go in here
 import {
     Leaderboard,
     LeaderboardEmpty,
     LeaderboardFailed,
 } from './Leaderboard';
+import endAMAConfirmationCardTemplate from './EndAMAConfirmation';
 import newQuestionCardTemplate from './NewQuestion';
-import newQuestionErrorCardTemplate from './NewQuestionError';
+import endAMAMastercardTemplate from './EndAMA';
 
 const imageURLPrefix =
     'https://prod-20.westcentralus.logic.azure.com/workflows/221a2c4d287d4491b865fc07811621ce/triggers/manual/paths/invoke/image/';
@@ -59,12 +61,26 @@ export const getMasterCard = async (
 export const getStartAMACard = (): AdaptiveCard => _adaptiveCard(StartAMACard);
 
 /**
- * @returns The adaptive card displayed when an error occurs.
+ * @returns The adaptive card displayed when a task/fetch error occurs.
  */
-export const getErrorCard = (): AdaptiveCard => {
-    const template = new ACData.Template(InvalidTaskFetch).expand({
+export const getTaskFetchErrorCard = (): AdaptiveCard => {
+    const template = new ACData.Template(InvalidTaskError).expand({
         $root: {
-            errorMsg: 'Something went wrong.',
+            errorMsg: 'Something went wrong. Please try opening again.',
+        },
+    });
+
+    return _adaptiveCard(template);
+};
+
+/**
+ * @returns The adaptive card displayed when a task/submit error occurs.
+ */
+export const getTaskSubmitErrorCard = (): AdaptiveCard => {
+    const template = new ACData.Template(InvalidTaskError).expand({
+        $root: {
+            errorMsg:
+                'Your submission encountered an error. Please try submitting again!',
         },
     });
 
@@ -113,7 +129,7 @@ export const generateLeaderboard = (
 };
 
 /**
- * Returns an adaptive card informing the user that the generatio of the leaderboard failed.
+ * Returns an adaptive card informing the user that the generation of the leaderboard failed.
  */
 export const generateLeaderboardFailed = (): AdaptiveCard => {
     return _adaptiveCard(LeaderboardFailed);
@@ -124,14 +140,8 @@ const getPersonImage = (aadObjectId: string) => {
 };
 
 /**
- * Returns an adaptive card informing the user that the task/fetch failed.
- */
-export const getInvalidTaskFetch = (): AdaptiveCard => {
-    return _adaptiveCard(InvalidTaskFetch);
-};
-
-/**
  * Creates and parses the adaptive card for creating a new question.
+ * @param amaSessionId - id of the current AMA session
  * @returns Adaptive Card associated with creating a new question
  */
 export const getNewQuestionCard = (amaSessionId: string): AdaptiveCard => {
@@ -143,16 +153,74 @@ export const getNewQuestionCard = (amaSessionId: string): AdaptiveCard => {
     return _adaptiveCard(template);
 };
 
-/**
- * Creates and parses the adaptive card for errors when creating a new question.
- * @returns Adaptive Card associated with errors from creating a new question
- */
-export const getQuestionErrorCard = (): AdaptiveCard =>
-    _adaptiveCard(newQuestionErrorCardTemplate);
-
-const _adaptiveCard = (template: any): AdaptiveCard => {
+// exported for testing
+export const _adaptiveCard = (template: IAdaptiveCard): AdaptiveCard => {
     // Parses the adaptive card template
     const adaptiveCard = new AdaptiveCard();
     adaptiveCard.parse(template);
     return adaptiveCard;
+};
+
+/**
+ * Creates and parses the adaptive card for confirming the ending of an AMA.
+ * @param amaSessionId - id of the current AMA session
+ * @returns Adaptive Card for confirming end of AMA
+ */
+export const getEndAMAConfirmationCard = (
+    amaSessionId: string
+): AdaptiveCard => {
+    const template = new ACData.Template(endAMAConfirmationCardTemplate).expand(
+        {
+            $root: {
+                amaId: amaSessionId,
+            },
+        }
+    );
+    return _adaptiveCard(template);
+};
+
+/**
+ * Creates and parses the adaptive card used to display the ending mastercard.
+ * @param amaTitle - title of the AMA
+ * @param amaDesc - description of the AMA
+ * @param amaSessionId - id of the AMA session
+ * @param userName - name of the user who ended the AMA
+ * @returns Adaptive Card that is the ending Mastercard
+ */
+export const getEndAMAMastercard = (
+    amaTitle: string,
+    amaDesc: string,
+    amaSessionId: string,
+    userName: string
+): AdaptiveCard => {
+    const template = new ACData.Template(endAMAMastercardTemplate).expand({
+        $root: {
+            title: amaTitle,
+            description: amaDesc,
+            amaId: amaSessionId,
+            user: userName,
+            image:
+                'https://github.com/kavins14/random/blob/master/title_bg.png?raw=true', // TODO: Find reliable image hosting,
+        },
+    });
+    return _adaptiveCard(template);
+};
+
+/**
+ * Creates and parses the adaptive card used to address errors when asking a new question.
+ * @param amaSessionId - id of the AMA session
+ * @param questionContent - question asked that failed to save when error occured
+ * @returns Adaptive Card with question asked inside text box
+ */
+export const getResubmitQuestionErrorCard = (
+    amaSessionId: string,
+    questionContent: string
+): AdaptiveCard => {
+    const template = new ACData.Template(newQuestionCardTemplate).expand({
+        $root: {
+            amaId: amaSessionId,
+            question: questionContent,
+        },
+    });
+    return _adaptiveCard(template);
 };

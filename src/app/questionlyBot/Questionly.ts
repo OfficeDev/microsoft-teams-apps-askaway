@@ -5,17 +5,15 @@ import {
 } from 'express-msteams-host';
 import * as debug from 'debug';
 import {
-    StatePropertyAccessor,
     CardFactory,
     TurnContext,
     MemoryStorage,
-    ConversationState,
     TeamsActivityHandler,
     TaskModuleResponse,
     TaskModuleRequest,
+    ChannelAccount,
 } from 'botbuilder';
 import StartAmaMessageExtension from '../MessageExtension/StartAmaMessageExtension';
-
 import * as controller from './../../Controller';
 
 // Initialize debug logging module
@@ -59,6 +57,8 @@ export class Questionly extends TeamsActivityHandler {
                 id: 'viewLeaderboard',
                 amaSessionId:
                     <put the amaSessionId here>
+                aadObjId:
+                    <put the aadObjId here>
             }
             ================================================================================================================================*/
             const leaderboard = await controller.generateLeaderboard(
@@ -75,55 +75,21 @@ export class Questionly extends TeamsActivityHandler {
                                 'application/vnd.microsoft.card.adaptive',
                             content: leaderboard.value,
                         },
+                        title: 'View the Leaderboard',
                     },
                 },
             };
 
             return response;
         } else if (taskModuleRequest.data.id == 'askQuestion') {
-            /*================================================================================================================================
-            A payload of the following format should be in the 'data' field of the 'Ask a Question' Action.Submit button in the master card.
-            {
-                msteams: {
-                    type: 'task/fetch',
-                },
-                id: 'askQuestion',
-                amaSessionId:
-                    <put the amaSessionId here>
-            }
-            ================================================================================================================================*/
-            const response: TaskModuleResponse = <TaskModuleResponse>{
-                task: {
-                    type: 'continue',
-                    value: {
-                        card: CardFactory.adaptiveCard(
-                            controller.getNewQuestionCard(
-                                taskModuleRequest.data.amaSessionId
-                            )
-                        ),
-                        height: 220,
-                        width: 700,
-                    },
-                },
-            };
-
-            return response;
-        } else {
-            const response: TaskModuleResponse = <TaskModuleResponse>{
-                task: {
-                    type: 'continue',
-                    value: {
-                        card: {
-                            contentType:
-                                'application/vnd.microsoft.card.adaptive',
-                            content: controller.getInvalidTaskFetch(),
-                        },
-                    },
-                },
-            };
-
-            return response;
+            return this._handleTeamsTaskModuleFetchAskQuestion(
+                taskModuleRequest
+            );
+        } else if (taskModuleRequest.data.id == 'endAMA') {
+            return this._handleTeamsTaskModuleFetchEndAMA(taskModuleRequest);
         }
+
+        return this._handleTeamsTaskModuleFetchError();
     }
 
     async handleTeamsTaskModuleSubmit(
@@ -131,42 +97,212 @@ export class Questionly extends TeamsActivityHandler {
         taskModuleRequest: TaskModuleRequest
     ): Promise<TaskModuleResponse> {
         const user = context.activity.from;
-        const amaSessionId = taskModuleRequest.data.amaSessionId;
-        const userAadObjId = user.aadObjectId;
-        const userName = user.name;
-        const questionContent = taskModuleRequest.data.usertext;
+        const endAMAIds = ['submitEndAma', 'cancelEndAma'];
 
-        const status = await controller.submitNewQuestion(
-            amaSessionId,
-            userAadObjId as string,
-            userName,
-            questionContent
-        );
-
-        if (status.isOk()) {
-            const response: TaskModuleResponse = <TaskModuleResponse>{
-                task: {
-                    type: 'message',
-                    value:
-                        'Submitted! You asked: ' +
-                        taskModuleRequest.data.usertext,
-                },
-            };
-
-            return response;
+        if (taskModuleRequest.data.id == 'submitQuestion') {
+            return this._handleTeamsTaskModuleSubmitQuestion(
+                user,
+                taskModuleRequest
+            );
+        } else if (endAMAIds.includes(taskModuleRequest.data.id)) {
+            return this._handleTeamsTaskModuleSubmitEndAMA(
+                user,
+                taskModuleRequest,
+                context
+            );
         }
 
-        const errorResponse: TaskModuleResponse = <TaskModuleResponse>{
+        return this._handleTeamsTaskModuleSubmitError();
+    }
+
+    private _handleTeamsTaskModuleFetchAskQuestion(
+        taskModuleRequest: TaskModuleRequest
+    ): TaskModuleResponse {
+        const askQuestionResponse: TaskModuleResponse = <TaskModuleResponse>{
             task: {
                 type: 'continue',
                 value: {
-                    card: CardFactory.adaptiveCard(
-                        controller.getQuestionErrorCard()
-                    ),
+                    card: {
+                        contentType: 'application/vnd.microsoft.card.adaptive',
+                        content: controller.getNewQuestionCard(
+                            taskModuleRequest.data.amaSessionId
+                        ),
+                    },
+                    title: 'Ask a Question',
                 },
             },
         };
 
-        return errorResponse;
+        return askQuestionResponse;
+    }
+
+    private async _handleTeamsTaskModuleSubmitQuestion(
+        user: ChannelAccount,
+        taskModuleRequest: TaskModuleRequest
+    ): Promise<TaskModuleResponse> {
+        const amaSessionId = taskModuleRequest.data.amaSessionId;
+        const userAADObjId = user.aadObjectId as string;
+        const userName = user.name;
+        const questionContent = taskModuleRequest.data.usertext as string;
+
+        if (questionContent == null || questionContent.trim() === '') {
+            return this._handleTeamsTaskModuleResubmitQuestion(
+                amaSessionId,
+                ''
+            );
+        } else {
+            const status = await controller.submitNewQuestion(
+                amaSessionId,
+                userAADObjId,
+                userName,
+                questionContent
+            );
+            if (!status.isOk()) {
+                return this._handleTeamsTaskModuleResubmitQuestion(
+                    amaSessionId,
+                    questionContent
+                );
+            }
+            return null as any;
+        }
+    }
+
+    private _handleTeamsTaskModuleFetchEndAMA(
+        taskModuleRequest: TaskModuleRequest
+    ): TaskModuleResponse {
+        const endAMAResponse: TaskModuleResponse = <TaskModuleResponse>{
+            task: {
+                type: 'continue',
+                value: {
+                    card: {
+                        contentType: 'application/vnd.microsoft.card.adaptive',
+                        content: controller.getEndAMAConfirmationCard(
+                            taskModuleRequest.data.amaSessionId
+                        ),
+                    },
+                    title: 'End the AMA',
+                },
+            },
+        };
+
+        return endAMAResponse;
+    }
+
+    private async _handleTeamsTaskModuleSubmitEndAMA(
+        user: ChannelAccount,
+        taskModuleRequest: TaskModuleRequest,
+        context: TurnContext
+    ): Promise<TaskModuleResponse> {
+        const amaSessionId = taskModuleRequest.data.amaSessionId;
+        const userName = user.name;
+
+        if (taskModuleRequest.data.id == 'submitEndAma') {
+            const status = await controller.endAMASession(amaSessionId);
+            if (!status.isOk()) {
+                return this._handleTeamsTaskModuleSubmitError();
+            } else {
+                const amaTitle = status.value.amaTitle;
+                const amaDesc = status.value.amaDesc;
+                const amaActivityId = status.value.amaActivityId;
+
+                const endAmaMastercard = controller.getEndAMAMastercard(
+                    amaTitle,
+                    amaDesc,
+                    amaSessionId,
+                    userName
+                );
+
+                await context.updateActivity({
+                    attachments: [CardFactory.adaptiveCard(endAmaMastercard)],
+                    id: amaActivityId,
+                    type: 'message',
+                });
+            }
+        }
+
+        /* if (context.activity.value.data.endAMAToggle == 'true') {
+            const status = await controller.endAMASession(amaSessionId);
+            if (!status.isOk()) {
+                return this._handleTeamsTaskModuleSubmitError();
+            } else {
+                const amaTitle = status.value.amaTitle;
+                const amaDesc = status.value.amaDesc;
+                const amaActivityId = status.value.amaActivityId;
+
+                const endAmaMastercard = controller.getEndAMAMastercard(
+                    amaTitle,
+                    amaDesc,
+                    amaSessionId,
+                    userName
+                );
+
+                await context.updateActivity({
+                    attachments: [CardFactory.adaptiveCard(endAmaMastercard)],
+                    id: amaActivityId,
+                    type: 'message',
+                });
+            }
+        } */
+
+        return null as any;
+    }
+
+    private _handleTeamsTaskModuleFetchError(): TaskModuleResponse {
+        const taskFetchErrorResponse: TaskModuleResponse = <TaskModuleResponse>{
+            task: {
+                type: 'continue',
+                value: {
+                    card: {
+                        contentType: 'application/vnd.microsoft.card.adaptive',
+                        content: controller.getTaskFetchErrorCard(),
+                    },
+                },
+            },
+        };
+
+        return taskFetchErrorResponse;
+    }
+
+    private _handleTeamsTaskModuleSubmitError(): TaskModuleResponse {
+        const taskSubmitErrorResponse: TaskModuleResponse = <
+            TaskModuleResponse
+        >{
+            task: {
+                type: 'continue',
+                value: {
+                    card: {
+                        contentType: 'application/vnd.microsoft.card.adaptive',
+                        content: controller.getTaskSubmitErrorCard(),
+                    },
+                },
+            },
+        };
+
+        return taskSubmitErrorResponse;
+    }
+
+    private _handleTeamsTaskModuleResubmitQuestion(
+        amaSessionId: string,
+        questionContent: string
+    ): TaskModuleResponse {
+        const resubmitQuestionResponse: TaskModuleResponse = <
+            TaskModuleResponse
+        >{
+            task: {
+                type: 'continue',
+                value: {
+                    card: {
+                        contentType: 'application/vnd.microsoft.card.adaptive',
+                        content: controller.getResubmitQuestionCard(
+                            amaSessionId,
+                            questionContent
+                        ),
+                    },
+                    title: 'Resubmit a Question',
+                },
+            },
+        };
+
+        return resubmitQuestionResponse;
     }
 }

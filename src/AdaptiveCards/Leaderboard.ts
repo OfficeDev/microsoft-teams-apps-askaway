@@ -1,7 +1,9 @@
+import { IAdaptiveCard } from 'adaptivecards';
+
 /**
  * Leaderboard adaptive card template. Fields must be filled in using a data payload with the templating sdk.
  */
-export const Leaderboard = {
+export const Leaderboard = <IAdaptiveCard>{
     type: 'AdaptiveCard',
     $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
     version: '1.2',
@@ -157,7 +159,7 @@ export const Leaderboard = {
 /**
  * Adaptive card for an empty leaderboard when there are no questions in an AMA.
  */
-export const LeaderboardEmpty = {
+export const LeaderboardEmpty = <IAdaptiveCard>{
     $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
     type: 'AdaptiveCard',
     version: '1.0',
@@ -172,7 +174,7 @@ export const LeaderboardEmpty = {
 /**
  * Adaptive card informing the user that retrieving the leaderboard failed.
  */
-export const LeaderboardFailed = {
+export const LeaderboardFailed = <IAdaptiveCard>{
     $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
     type: 'AdaptiveCard',
     version: '1.0',

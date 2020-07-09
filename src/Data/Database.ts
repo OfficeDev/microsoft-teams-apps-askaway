@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
 import * as mongoose from 'mongoose';
-
 import { AMASession } from './Schemas/AMASession';
 import { User } from './Schemas/User';
 import { Question } from './Schemas/Question';
@@ -13,7 +12,7 @@ export const initiateConnection = async (
     mongoURI: string
 ): Promise<boolean> => {
     await mongoose
-        .connect(mongoURI)
+        .connect(mongoURI, { useFindAndModify: false })
         .then(() => console.log('Connection to CosmosDB successful'))
         .catch((error) => console.error(error));
     return true;
@@ -113,7 +112,7 @@ export const getQuestionData = async (amaSessionId: string) => {
 
 /**
  * Writes a new question to the database.
- * @param amaTeamsSessionId - Teams Channel or Group Chat ID
+ * @param amaTeamsSessionId - id of the current AMA session
  * @param userAadObjId - AAD Object ID of user
  * @param userTeamsName - Name of user on Teams
  * @param questionContent - Question asked by user
@@ -127,6 +126,7 @@ export const createQuestion = async (
     questionContent: string
 ): Promise<boolean> => {
     await getUserOrCreate(userAadObjId, userTeamsName);
+    await getAMASession(amaTeamsSessionId);
 
     const question = new Question({
         amaSessionId: amaTeamsSessionId,
@@ -134,18 +134,13 @@ export const createQuestion = async (
         content: questionContent,
     });
 
-    const response = await question
-        .save()
-        .then((saveQuestion) => {
-            console.log(saveQuestion);
-            return true;
-        })
-        .catch((err) => {
-            console.log(err);
-            throw new Error('Failed to save question ');
-        });
+    const response = await question.save().catch((err) => {
+        console.error(err);
+        throw new Error('Failed to save question ');
+    });
 
-    return response;
+    console.log(response);
+    return true;
 };
 
 /**
@@ -165,8 +160,53 @@ export const getUserOrCreate = async (
         { $set: { _id: userAadObjId, userName: userTeamsName } },
         { upsert: true }
     ).catch((err) => {
-        console.log(err);
+        console.error(err);
         throw new Error('Failed to find and create/update user');
+    });
+
+    return true;
+};
+
+/**
+ * Ends the AMA by changing fields: isActive to false and dateTimeEnded to current time
+ * @param amaSessionId - id of the current AMA session
+ * @returns Returns the AMA title, description, and mastercard activity id
+ * @throws Error thrown when database fails to execute changes
+ */
+export const endAMASession = async (
+    amaSessionId: string
+): Promise<{ amaTitle: string; amaDesc: string; amaActivityId: string }> => {
+    const resultAMA: any = await AMASession.findByIdAndUpdate(amaSessionId, {
+        $set: { isActive: false, dateTimeEnded: Date.now() },
+    })
+        .exec()
+        .catch((err) => {
+            console.error(err);
+            throw new Error(
+                'Failed to change isActive for AMASession to false and change dateTimeEnded to current time'
+            );
+        });
+
+    return {
+        amaTitle: resultAMA.title,
+        amaDesc: resultAMA.description,
+        amaActivityId: resultAMA.activityId,
+    };
+};
+
+/**
+ * If AMA session exists, will return true
+ * Otherwise, if AMA session doesn't exist, will throw an error.
+ * @param amaTeamsSessionId - id of the current AMA session
+ * @returns true if amaTeamsSessionId is in the database
+ * @throws Error thrown when database fails to find the amaTeamsSessionId
+ */
+export const getAMASession = async (
+    amaTeamsSessionId: string
+): Promise<boolean> => {
+    await AMASession.findById(amaTeamsSessionId).catch((err) => {
+        console.error(err);
+        throw new Error('Failed to find AMA Session');
     });
 
     return true;

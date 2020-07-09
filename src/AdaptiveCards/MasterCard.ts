@@ -2,7 +2,9 @@
  * Master Adaptive Card for the Questionly Bot
  */
 
-export default {
+import { IAdaptiveCard } from 'adaptivecards';
+
+export default <IAdaptiveCard>{
     $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
     type: 'AdaptiveCard',
     version: '1.2',
@@ -35,12 +37,6 @@ export default {
             items: [
                 {
                     type: 'TextBlock',
-                    text: 'Question Leaderboard',
-                    wrap: true,
-                    isSubtle: true,
-                },
-                {
-                    type: 'TextBlock',
                     text: 'No questions yet. Be the first one to ask.',
                     color: 'accent',
                 },
@@ -67,6 +63,7 @@ export default {
     ],
     actions: [
         {
+            id: 'askQuestion',
             type: 'Action.Submit',
             title: 'Ask a question',
             data: {
@@ -75,10 +72,10 @@ export default {
                 },
                 id: 'askQuestion',
                 amaSessionId: '${amaId}',
-                aadObjectId: '${userId}',
             },
         },
         {
+            id: 'viewLeaderboard',
             type: 'Action.Submit',
             title: 'View leaderboard',
             data: {
@@ -88,6 +85,18 @@ export default {
                 id: 'viewLeaderboard',
                 amaSessionId: '${amaId}',
                 aadObjectId: '${userId}',
+            },
+        },
+        {
+            id: 'endAMA',
+            type: 'Action.Submit',
+            title: 'End the AMA',
+            data: {
+                msteams: {
+                    type: 'task/fetch',
+                },
+                id: 'endAMA',
+                amaSessionId: '${amaId}',
             },
         },
     ],
