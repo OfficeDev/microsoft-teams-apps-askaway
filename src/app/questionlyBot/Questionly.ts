@@ -150,21 +150,20 @@ export class Questionly extends TeamsActivityHandler {
                 amaSessionId,
                 ''
             );
-        } else {
-            const status = await controller.submitNewQuestion(
+        }
+        const status = await controller.submitNewQuestion(
+            amaSessionId,
+            userAADObjId,
+            userName,
+            questionContent
+        );
+        if (!status.isOk()) {
+            return this._handleTeamsTaskModuleResubmitQuestion(
                 amaSessionId,
-                userAADObjId,
-                userName,
                 questionContent
             );
-            if (!status.isOk()) {
-                return this._handleTeamsTaskModuleResubmitQuestion(
-                    amaSessionId,
-                    questionContent
-                );
-            }
-            return null as any;
         }
+        return null as any;
     }
 
     private _handleTeamsTaskModuleFetchEndAMA(
@@ -219,30 +218,6 @@ export class Questionly extends TeamsActivityHandler {
                 });
             }
         }
-
-        /* if (context.activity.value.data.endAMAToggle == 'true') {
-            const status = await controller.endAMASession(amaSessionId);
-            if (!status.isOk()) {
-                return this._handleTeamsTaskModuleSubmitError();
-            } else {
-                const amaTitle = status.value.amaTitle;
-                const amaDesc = status.value.amaDesc;
-                const amaActivityId = status.value.amaActivityId;
-
-                const endAmaMastercard = controller.getEndAMAMastercard(
-                    amaTitle,
-                    amaDesc,
-                    amaSessionId,
-                    userName
-                );
-
-                await context.updateActivity({
-                    attachments: [CardFactory.adaptiveCard(endAmaMastercard)],
-                    id: amaActivityId,
-                    type: 'message',
-                });
-            }
-        } */
 
         return null as any;
     }
