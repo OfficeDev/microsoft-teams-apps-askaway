@@ -1,8 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import {
-    BotDeclaration,
-    MessageExtensionDeclaration,
-} from 'express-msteams-host';
+import { BotDeclaration } from 'express-msteams-host';
 import * as debug from 'debug';
 import {
     CardFactory,
@@ -11,10 +8,17 @@ import {
     TeamsActivityHandler,
     TaskModuleResponse,
     TaskModuleRequest,
+    MessagingExtensionAction,
+    MessagingExtensionActionResponse,
+    teamsGetChannelId,
+    MessageFactory,
+    InputHints,
+    Activity,
     ChannelAccount,
 } from 'botbuilder';
-import StartAmaMessageExtension from '../MessageExtension/StartAmaMessageExtension';
 import * as controller from './../../Controller';
+import { AdaptiveCard } from 'adaptivecards';
+import { extractMasterCardData } from '../../AdaptiveCards/MasterCard';
 
 // Initialize debug logging module
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -30,17 +34,11 @@ const log = debug('msteams');
     process.env.MICROSOFT_APP_PASSWORD
 )
 export class Questionly extends TeamsActivityHandler {
-    /** Local property for StartAmaMessageExtension */
-    @MessageExtensionDeclaration('startAMA')
-    private _startAmaMessageExtension: StartAmaMessageExtension;
-
     /**
      * The constructor
      */
     public constructor() {
         super();
-        // Message extension StartAmaMessageExtension
-        this._startAmaMessageExtension = new StartAmaMessageExtension();
     }
 
     async handleTeamsTaskModuleFetch(
@@ -280,4 +278,187 @@ export class Questionly extends TeamsActivityHandler {
 
         return resubmitQuestionResponse;
     }
+
+    async handleTeamsMessagingExtensionFetchTask(): Promise<
+        MessagingExtensionActionResponse
+    > {
+        // commandId: 'startAMA'
+        return this._buildTaskModuleContinueResponse(
+            controller.getStartAMACard()
+        );
+    }
+
+    async handleTeamsMessagingExtensionBotMessagePreviewEdit(
+        context: TurnContext,
+        action: MessagingExtensionAction
+    ): Promise<MessagingExtensionActionResponse> {
+        // activity payload includes preview attachments
+        if (
+            !action.botActivityPreview ||
+            !action.botActivityPreview[0].attachments
+        )
+            return null as any;
+        const attachments = action.botActivityPreview[0].attachments;
+        const cardDataResponse = extractMasterCardData(attachments[0].content);
+        let cardData;
+
+        if (cardDataResponse.isOk()) {
+            cardData = cardDataResponse.value;
+        } else {
+            // cardDataResponse.isErr()
+            console.error(
+                'Unable to extract master card data: ' + cardDataResponse.value
+            );
+            cardData = { title: '', description: '' };
+        }
+
+        return this._buildTaskModuleContinueResponse(
+            controller.getStartAMACard(cardData.title, cardData.description)
+        );
+    }
+
+    async handleTeamsMessagingExtensionBotMessagePreviewSend(
+        context: TurnContext,
+        action: MessagingExtensionAction
+    ): Promise<MessagingExtensionActionResponse> {
+        // commandId - 'startAMA'
+        if (
+            !action.botActivityPreview ||
+            !action.botActivityPreview[0].attachments
+        )
+            return null as any;
+        // activity payload includes preview attachments
+        const attachments = action.botActivityPreview[0].attachments;
+        const cardDataResponse = extractMasterCardData(attachments[0].content);
+        let cardData;
+
+        if (cardDataResponse.isOk()) {
+            cardData = cardDataResponse.value;
+        } else {
+            // this error will create a broken experience for the user and so
+            // the AMA session will not be created.
+            console.error(
+                'Unable to extract master card data' + cardDataResponse.value
+            );
+            return null as any;
+        }
+
+        const conversation = context.activity.conversation;
+        const title = cardData.title,
+            description = cardData.description,
+            userName = context.activity.from.name,
+            userAadObjId = context.activity.from.aadObjectId as string,
+            activityId = '',
+            tenantId = conversation.tenantId,
+            isChannel = conversation.conversationType === 'channel',
+            scopeId = isChannel
+                ? teamsGetChannelId(context.activity)
+                : conversation.id;
+
+        const response = await controller.startAMASession(
+            title,
+            description,
+            userName,
+            userAadObjId,
+            activityId,
+            tenantId,
+            scopeId,
+            isChannel
+        );
+
+        if (response.isOk()) {
+            const data = response.value;
+            const resource = await context.sendActivity({
+                attachments: [CardFactory.adaptiveCard(data.card)],
+            });
+            if (resource !== undefined) {
+                const status = await controller.setActivityId(
+                    data.amaSessionId,
+                    resource.id
+                );
+                if (status.isErr()) {
+                    console.error(status.value);
+                }
+            }
+        } else {
+            // response.isErr();
+            console.error(response.value);
+        }
+
+        return null as any;
+    }
+
+    async handleTeamsMessagingExtensionSubmitAction(
+        context: TurnContext,
+        action: MessagingExtensionAction
+    ): Promise<MessagingExtensionActionResponse> {
+        /*================================================================================================================================
+            The following elements must be in the `StartAMACard`:
+            {
+                type: 'Input.Text',
+                id: 'title',
+            },
+            {
+                type: 'Input.Text',
+                id: 'description',
+            },
+        ================================================================================================================================*/
+        const value = action;
+        const title = value.data.title.trim(),
+            description = value.data.description.trim(),
+            username = context.activity.from.name,
+            amaSessionId = '',
+            userId = context.activity.from.aadObjectId as string;
+
+        if (!(title && description)) {
+            return this._buildTaskModuleContinueResponse(
+                controller.getStartAMACard(
+                    title,
+                    description,
+                    'Please fill out all fields'
+                )
+            );
+        }
+
+        const card = CardFactory.adaptiveCard(
+            await controller.getMasterCard(
+                title,
+                description,
+                username,
+                amaSessionId,
+                userId
+            )
+        );
+        return {
+            composeExtension: {
+                type: 'botMessagePreview',
+                activityPreview: MessageFactory.attachment(
+                    card,
+                    null as any,
+                    null as any,
+                    InputHints.ExpectingInput
+                ) as Activity,
+            },
+        };
+    }
+
+    private _buildTaskModuleContinueResponse = (
+        adaptiveCard: AdaptiveCard,
+        height?: number,
+        width?: number
+    ): TaskModuleResponse => {
+        return <TaskModuleResponse>{
+            task: {
+                type: 'continue',
+                value: {
+                    card: {
+                        contentType: 'application/vnd.microsoft.card.adaptive',
+                        content: adaptiveCard,
+                        height,
+                        width,
+                    },
+                },
+            },
+        };
+    };
 }

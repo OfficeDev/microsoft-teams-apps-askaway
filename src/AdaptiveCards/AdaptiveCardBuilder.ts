@@ -1,4 +1,7 @@
-import MasterCard from './MasterCard';
+import MasterCard, {
+    MasterCardData,
+    viewLeaderboardButton,
+} from './MasterCard';
 import * as ACData from 'adaptivecards-templating';
 import StartAMACard from './StartAMACard';
 import { AdaptiveCard, IAdaptiveCard } from 'adaptivecards';
@@ -12,6 +15,8 @@ import {
 } from './Leaderboard';
 import endAMAConfirmationCardTemplate from './EndAMAConfirmation';
 import newQuestionCardTemplate from './NewQuestion';
+import newQuestionErrorCardTemplate from './NewQuestionError';
+import * as moment from 'moment';
 import endAMAMastercardTemplate from './EndAMA';
 
 const imageURLPrefix =
@@ -28,6 +33,7 @@ const imageURLPostfix =
  * @param amaSessionId - document database id of the AMA session
  * @param userId - Id of the user who created the AMA session
  * @param ended - whether the AMA session has ended or not
+ * @param showDate - whether to show last updated date or not
  * @returns The AMA Master Card
  */
 export const getMasterCard = async (
@@ -36,9 +42,27 @@ export const getMasterCard = async (
     userName: string,
     amaSessionId: string,
     userId: string,
-    ended?: boolean
+    ended = false,
+    showDate = false
 ): Promise<AdaptiveCard> => {
-    const data = { title, description, userName, amaSessionId, userId, ended };
+    const data: MasterCardData = {
+        title,
+        description,
+        userName,
+        amaSessionId,
+        userId,
+        ended,
+    };
+    const dateUpdated = showDate
+        ? moment().format('ddd, MMM D, YYYY, h:mm A')
+        : '';
+
+    const masterCard = MasterCard;
+    if (ended) {
+        // remove `Ask a Question` and `End AMA` buttons
+        masterCard.actions = [viewLeaderboardButton];
+    }
+
     const template = new ACData.Template(MasterCard).expand({
         $root: {
             title: title,
@@ -48,6 +72,8 @@ export const getMasterCard = async (
             userId: userId,
             image: `https://${process.env.HOSTNAME}/images/title_bg.png`,
             data: data,
+            actionBy: ended ? 'Ended by' : 'Initiated by',
+            dateLastUpdated: dateUpdated,
         },
     });
 
@@ -57,7 +83,20 @@ export const getMasterCard = async (
 /**
  * @returns The adaptive card used to collect data to create the AMA session
  */
-export const getStartAMACard = (): AdaptiveCard => _adaptiveCard(StartAMACard);
+export const getStartAMACard = (
+    title = '',
+    description = '',
+    errorMessage = ''
+): AdaptiveCard => {
+    const template = new ACData.Template(StartAMACard).expand({
+        $root: {
+            title,
+            description,
+            errorMessage,
+        },
+    });
+    return _adaptiveCard(template);
+};
 
 /**
  * @returns The adaptive card displayed when a task/fetch error occurs.
@@ -152,7 +191,17 @@ export const getNewQuestionCard = (amaSessionId: string): AdaptiveCard => {
     return _adaptiveCard(template);
 };
 
-// exported for testing
+/**
+ * Creates and parses the adaptive card for errors when creating a new question.
+ * @returns Adaptive Card associated with errors from creating a new question
+ */
+export const getQuestionErrorCard = (): AdaptiveCard =>
+    _adaptiveCard(newQuestionErrorCardTemplate);
+
+/**
+ * Makes an adaptive card template into an adaptive card object.
+ * @param template - adaptive card template to parse
+ */
 export const _adaptiveCard = (template: IAdaptiveCard): AdaptiveCard => {
     // Parses the adaptive card template
     const adaptiveCard = new AdaptiveCard();
