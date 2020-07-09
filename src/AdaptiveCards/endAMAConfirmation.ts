@@ -10,19 +10,6 @@ export default <IAdaptiveCard>{
     type: 'AdaptiveCard',
     version: '1.0',
     body: [
-        /* {
-            type: 'Container',
-            bleed: true,
-            items: [
-                {
-                    type: 'Input.Toggle',
-                    id: 'endAMAToggle',
-                    text: 'End the AMA. I am aware this cannot be undone.',
-                     value: 'false',
-                },
-            ],
-            wrap: true,
-        }, */
         {
             type: 'TextBlock',
             text: 'End the AMA. I am aware this cannot be undone.',
