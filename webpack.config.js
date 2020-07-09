@@ -7,6 +7,7 @@ const Dotenv = require('dotenv-webpack');
 
 var path = require('path');
 var fs = require('fs');
+const copyWebpackPlugin = require('copy-webpack-plugin');
 var argv = require('yargs').argv;
 
 var debug = argv.debug !== undefined;
@@ -51,7 +52,13 @@ var config = [{
                 loader: "ts-loader"
             },]
         },
-        plugins: []
+        plugins: [
+            new copyWebpackPlugin({
+                patterns: [
+                    { from: path.join(__dirname, 'src/public'), to: path.join(__dirname, 'dist/public') }
+                ]
+            })
+        ]
     },
 ];
 

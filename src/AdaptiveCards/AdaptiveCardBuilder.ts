@@ -46,8 +46,7 @@ export const getMasterCard = async (
             user: userName,
             amaId: amaSessionId,
             userId: userId,
-            image:
-                'https://github.com/kavins14/random/blob/master/title_bg.png?raw=true', // TODO: Find reliable image hosting
+            image: `https://${process.env.HOSTNAME}/images/title_bg.png`,
             data: data,
         },
     });
