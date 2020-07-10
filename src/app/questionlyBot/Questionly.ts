@@ -40,44 +40,33 @@ export class Questionly extends TeamsActivityHandler {
         super();
     }
 
+    private _buildTaskModuleContinueResponse = (
+        adaptiveCard: AdaptiveCard,
+        title?: string
+    ): TaskModuleResponse => {
+        return <TaskModuleResponse>{
+            task: {
+                type: 'continue',
+                value: {
+                    card: {
+                        contentType: 'application/vnd.microsoft.card.adaptive',
+                        content: adaptiveCard,
+                    },
+                    title,
+                },
+            },
+        };
+    };
+
     async handleTeamsTaskModuleFetch(
         context: TurnContext,
         taskModuleRequest: TaskModuleRequest
     ): Promise<TaskModuleResponse> {
         if (taskModuleRequest.data.id === 'viewLeaderboard') {
-            /*================================================================================================================================
-            A payload of the following format should be in the 'data' field of the 'View Leaderboard' Action.Submit button in the master card.
-            {
-                msteams: {
-                    type: 'task/fetch',
-                },
-                id: 'viewLeaderboard',
-                amaSessionId:
-                    <put the amaSessionId here>
-                aadObjId:
-                    <put the aadObjId here>
-            }
-            ================================================================================================================================*/
-            const leaderboard = await controller.generateLeaderboard(
-                taskModuleRequest.data.amaSessionId,
-                context.activity.from.aadObjectId as string
+            return await this._handleTeamsTaskModuleFetchViewLeaderboard(
+                context,
+                taskModuleRequest
             );
-
-            const response: TaskModuleResponse = <TaskModuleResponse>{
-                task: {
-                    type: 'continue',
-                    value: {
-                        card: {
-                            contentType:
-                                'application/vnd.microsoft.card.adaptive',
-                            content: leaderboard.value,
-                        },
-                        title: 'View the Leaderboard',
-                    },
-                },
-            };
-
-            return response;
         } else if (taskModuleRequest.data.id == 'askQuestion') {
             return this._handleTeamsTaskModuleFetchAskQuestion(
                 taskModuleRequest
@@ -101,6 +90,11 @@ export class Questionly extends TeamsActivityHandler {
                 user,
                 taskModuleRequest
             );
+        } else if (taskModuleRequest.data.id === 'upvote') {
+            return await this._handleTeamsTaskModuleSubmitUpvote(
+                context,
+                taskModuleRequest
+            );
         } else if (endAMAIds.includes(taskModuleRequest.data.id)) {
             return this._handleTeamsTaskModuleSubmitEndAMA(
                 user,
@@ -115,22 +109,10 @@ export class Questionly extends TeamsActivityHandler {
     private _handleTeamsTaskModuleFetchAskQuestion(
         taskModuleRequest: TaskModuleRequest
     ): TaskModuleResponse {
-        const askQuestionResponse: TaskModuleResponse = <TaskModuleResponse>{
-            task: {
-                type: 'continue',
-                value: {
-                    card: {
-                        contentType: 'application/vnd.microsoft.card.adaptive',
-                        content: controller.getNewQuestionCard(
-                            taskModuleRequest.data.amaSessionId
-                        ),
-                    },
-                    title: 'Ask a Question',
-                },
-            },
-        };
-
-        return askQuestionResponse;
+        return this._buildTaskModuleContinueResponse(
+            controller.getNewQuestionCard(taskModuleRequest.data.amaSessionId),
+            'Ask a Question'
+        );
     }
 
     private async _handleTeamsTaskModuleSubmitQuestion(
@@ -166,22 +148,12 @@ export class Questionly extends TeamsActivityHandler {
     private _handleTeamsTaskModuleFetchEndAMA(
         taskModuleRequest: TaskModuleRequest
     ): TaskModuleResponse {
-        const endAMAResponse: TaskModuleResponse = <TaskModuleResponse>{
-            task: {
-                type: 'continue',
-                value: {
-                    card: {
-                        contentType: 'application/vnd.microsoft.card.adaptive',
-                        content: controller.getEndAMAConfirmationCard(
-                            taskModuleRequest.data.amaSessionId
-                        ),
-                    },
-                    title: 'End the AMA',
-                },
-            },
-        };
-
-        return endAMAResponse;
+        return this._buildTaskModuleContinueResponse(
+            controller.getEndAMAConfirmationCard(
+                taskModuleRequest.data.amaSessionId
+            ),
+            'End the AMA'
+        );
     }
 
     private async _handleTeamsTaskModuleSubmitEndAMA(
@@ -220,63 +192,82 @@ export class Questionly extends TeamsActivityHandler {
     }
 
     private _handleTeamsTaskModuleFetchError(): TaskModuleResponse {
-        const taskFetchErrorResponse: TaskModuleResponse = <TaskModuleResponse>{
-            task: {
-                type: 'continue',
-                value: {
-                    card: {
-                        contentType: 'application/vnd.microsoft.card.adaptive',
-                        content: controller.getTaskFetchErrorCard(),
-                    },
-                },
-            },
-        };
-
-        return taskFetchErrorResponse;
+        return this._buildTaskModuleContinueResponse(
+            controller.getTaskFetchErrorCard()
+        );
     }
 
     private _handleTeamsTaskModuleSubmitError(): TaskModuleResponse {
-        const taskSubmitErrorResponse: TaskModuleResponse = <
-            TaskModuleResponse
-        >{
-            task: {
-                type: 'continue',
-                value: {
-                    card: {
-                        contentType: 'application/vnd.microsoft.card.adaptive',
-                        content: controller.getTaskSubmitErrorCard(),
-                    },
-                },
-            },
-        };
-
-        return taskSubmitErrorResponse;
+        return this._buildTaskModuleContinueResponse(
+            controller.getTaskSubmitErrorCard()
+        );
     }
 
     private _handleTeamsTaskModuleResubmitQuestion(
         amaSessionId: string,
         questionContent: string
     ): TaskModuleResponse {
-        const resubmitQuestionResponse: TaskModuleResponse = <
-            TaskModuleResponse
-        >{
-            task: {
-                type: 'continue',
-                value: {
-                    card: {
-                        contentType: 'application/vnd.microsoft.card.adaptive',
-                        content: controller.getResubmitQuestionCard(
-                            amaSessionId,
-                            questionContent
-                        ),
-                    },
-                    title: 'Resubmit a Question',
-                },
-            },
-        };
-
-        return resubmitQuestionResponse;
+        return this._buildTaskModuleContinueResponse(
+            controller.getResubmitQuestionCard(amaSessionId, questionContent),
+            'Resubmit a Question'
+        );
     }
+
+    private _handleTeamsTaskModuleFetchViewLeaderboard = async (
+        context: TurnContext,
+        taskModuleRequest: TaskModuleRequest
+    ): Promise<TaskModuleResponse> => {
+        /*================================================================================================================================
+        A payload of the following format should be in the 'data' field of the 'View Leaderboard' Action.Submit button in the master card.
+        {
+            msteams: {
+                type: 'task/fetch',
+            },
+            id: 'viewLeaderboard',
+            amaSessionId:
+                <put the amaSessionId here>
+        }
+        ================================================================================================================================*/
+        const leaderboard = await controller.generateLeaderboard(
+            taskModuleRequest.data.amaSessionId,
+            context.activity.from.aadObjectId as string
+        );
+
+        let response: TaskModuleResponse;
+        if (leaderboard.isOk()) {
+            response = this._buildTaskModuleContinueResponse(leaderboard.value);
+        } else {
+            response = this._buildTaskModuleContinueResponse(
+                controller.getErrorCard(leaderboard.value.message)
+            );
+        }
+
+        return response;
+    };
+
+    private _handleTeamsTaskModuleSubmitUpvote = async (
+        context: TurnContext,
+        taskModuleRequest: TaskModuleRequest
+    ): Promise<TaskModuleResponse> => {
+        const updatedLeaderboard = await controller.addUpvote(
+            taskModuleRequest.data.questionId,
+            context.activity.from.aadObjectId as string,
+            context.activity.from.name
+        );
+
+        let response: TaskModuleResponse;
+        if (updatedLeaderboard.isOk()) {
+            response = this._buildTaskModuleContinueResponse(
+                updatedLeaderboard.value
+            );
+        } else {
+            response = this._buildTaskModuleContinueResponse(
+                controller.getErrorCard('Upvoting failed. Please try again.')
+            );
+        }
+
+        return response;
+    };
 
     async handleTeamsMessagingExtensionFetchTask(): Promise<
         MessagingExtensionActionResponse
@@ -440,24 +431,4 @@ export class Questionly extends TeamsActivityHandler {
             },
         };
     }
-
-    private _buildTaskModuleContinueResponse = (
-        adaptiveCard: AdaptiveCard,
-        height?: number,
-        width?: number
-    ): TaskModuleResponse => {
-        return <TaskModuleResponse>{
-            task: {
-                type: 'continue',
-                value: {
-                    card: {
-                        contentType: 'application/vnd.microsoft.card.adaptive',
-                        content: adaptiveCard,
-                        height,
-                        width,
-                    },
-                },
-            },
-        };
-    };
 }

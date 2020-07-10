@@ -41,7 +41,8 @@
         "mongoose": "^5.9.18",
         "morgan": "1.9.1",
         "msteams-react-base-component": "^2.1.0",
-        "pretty-quick": "^2.0.1"
+        "pretty-quick": "^2.0.1",
+        "random-material-color": "^1.0.5"
     },
     "devDependencies": {
         "@shelf/jest-mongodb": "^1.1.5",

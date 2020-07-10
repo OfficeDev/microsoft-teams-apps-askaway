@@ -1,29 +1,26 @@
+// All the functions to populate the adaptive cards should go in here
+
+import { AdaptiveCard, IAdaptiveCard } from 'adaptivecards';
+import * as ACData from 'adaptivecards-templating';
+import * as moment from 'moment';
+import * as randomMC from 'random-material-color';
+
+import { IQuestionPopulatedUser } from '../Data/Schemas/Question';
+
 import MasterCard, {
     MasterCardData,
     viewLeaderboardButton,
 } from './MasterCard';
-import * as ACData from 'adaptivecards-templating';
 import StartAMACard from './StartAMACard';
-import { AdaptiveCard, IAdaptiveCard } from 'adaptivecards';
-import InvalidTaskError from './InvalidTaskError';
-
-// All the functions to populate the adaptive cards should go in here
-import {
-    Leaderboard,
-    LeaderboardEmpty,
-    LeaderboardFailed,
-} from './Leaderboard';
+import endAMAMastercardTemplate from './EndAMA';
 import endAMAConfirmationCardTemplate from './EndAMAConfirmation';
+
+import { Leaderboard, LeaderboardEmpty } from './Leaderboard';
+
 import newQuestionCardTemplate from './NewQuestion';
 import newQuestionErrorCardTemplate from './NewQuestionError';
-import * as moment from 'moment';
-import endAMAMastercardTemplate from './EndAMA';
 
-const imageURLPrefix =
-    'https://prod-20.westcentralus.logic.azure.com/workflows/221a2c4d287d4491b865fc07811621ce/triggers/manual/paths/invoke/image/';
-
-const imageURLPostfix =
-    '?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=W00knTG9588splfzI-euRE5UuILYTEhTGzy23fuAHRc';
+import InvalidTaskError from './ErrorCard';
 
 /**
  * Creates the AMA Master Card
@@ -99,26 +96,13 @@ export const getStartAMACard = (
 };
 
 /**
- * @returns The adaptive card displayed when a task/fetch error occurs.
- */
-export const getTaskFetchErrorCard = (): AdaptiveCard => {
-    const template = new ACData.Template(InvalidTaskError).expand({
-        $root: {
-            errorMsg: 'Something went wrong. Please try opening again.',
-        },
-    });
-
-    return _adaptiveCard(template);
-};
-
-/**
  * @returns The adaptive card displayed when a task/submit error occurs.
  */
-export const getTaskSubmitErrorCard = (): AdaptiveCard => {
+export const getErrorCard = (errorMessage: string): AdaptiveCard => {
     const template = new ACData.Template(InvalidTaskError).expand({
         $root: {
-            errorMsg:
-                'Your submission encountered an error. Please try submitting again!',
+            // 'Your submission encountered an error. Please try submitting again!',
+            errorMessage,
         },
     });
 
@@ -132,7 +116,7 @@ export const getTaskSubmitErrorCard = (): AdaptiveCard => {
  * @returns - Adaptive Card for the leaderboard populated with the questions provided.
  */
 export const generateLeaderboard = (
-    questionData,
+    questionData: IQuestionPopulatedUser[],
     aadObjectId: string
 ): AdaptiveCard => {
     if (!questionData.length) {
@@ -145,9 +129,17 @@ export const generateLeaderboard = (
         const questionObject = question.toObject();
         questionObject.upvotes = questionObject.voters.length;
         questionObject.upvotable = aadObjectId !== questionObject.userId._id;
-        questionObject.userId.picture = getPersonImage(
-            questionObject.userId._id
-        );
+
+        const userNameArray = questionObject.userId.userName.split(' ');
+
+        // Currently using the following external API for generating user initials avatars. Will switch to local library after consulting with
+        // Kiran and designers.
+        questionObject.userId.picture = `https://ui-avatars.com/api/?name=${
+            userNameArray[0][0]
+        }+${userNameArray[1][0]}&background=${randomMC
+            .getColor()
+            .substring(1)}`;
+
         return questionObject;
     });
     const userQuestions = questionData.filter(
@@ -164,17 +156,6 @@ export const generateLeaderboard = (
 
     const leaderboardPopulated = leaderboardTemplate.expand(data);
     return _adaptiveCard(leaderboardPopulated);
-};
-
-/**
- * Returns an adaptive card informing the user that the generation of the leaderboard failed.
- */
-export const generateLeaderboardFailed = (): AdaptiveCard => {
-    return _adaptiveCard(LeaderboardFailed);
-};
-
-const getPersonImage = (aadObjectId: string) => {
-    return `${imageURLPrefix}${aadObjectId}${imageURLPostfix}`;
 };
 
 /**

@@ -5,8 +5,8 @@ import { IAdaptiveCard } from 'adaptivecards';
  */
 export default <IAdaptiveCard>{
     version: '1.0.0',
-    type: 'AdaptiveCard',
     $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
+    type: 'AdaptiveCard',
     body: [
         {
             type: 'TextBlock',
@@ -34,8 +34,8 @@ export default <IAdaptiveCard>{
             type: 'Action.Submit',
             title: 'Submit',
             data: {
-                amaSessionId: '${amaId}',
                 id: 'submitQuestion',
+                amaSessionId: '${amaId}',
             },
         },
     ],
