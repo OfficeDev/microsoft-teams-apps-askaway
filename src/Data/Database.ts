@@ -177,7 +177,7 @@ export const endAMASession = async (
     amaSessionId: string
 ): Promise<{ amaTitle: string; amaDesc: string; amaActivityId: string }> => {
     const resultAMA: any = await AMASession.findByIdAndUpdate(amaSessionId, {
-        $set: { isActive: false, dateTimeEnded: Date.now() },
+        $set: { isActive: false, dateTimeEnded: new Date() },
     })
         .exec()
         .catch((err) => {

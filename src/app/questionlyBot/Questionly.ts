@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { BotDeclaration } from 'express-msteams-host';
 import * as debug from 'debug';
 import {

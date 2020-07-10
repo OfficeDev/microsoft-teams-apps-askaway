@@ -8,7 +8,7 @@ import {
     createAMASession,
     updateActivityId,
 } from '../Data/Database';
-import { Question } from '../Data/Schemas/Question';
+import { Question, IQuestion } from '../Data/Schemas/Question';
 import { User } from '../Data/Schemas/User';
 
 let testHost, testAMASession, testUser;
@@ -140,7 +140,7 @@ test('retrieve question data in empty AMA', async () => {
 });
 
 test('retrieve question data in non-empty AMA', async () => {
-    let questions = [
+    const questions: IQuestion[] = [
         new Question({
             amaSessionId: testAMASession._id,
             userId: testUser._id,
@@ -157,8 +157,6 @@ test('retrieve question data in non-empty AMA', async () => {
 
     await questions[0].save();
     await questions[1].save();
-
-    questions = await User.populate(questions, { path: 'userId' });
 
     const questionData = await getQuestionData(testAMASession._id);
 

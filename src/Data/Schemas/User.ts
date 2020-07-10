@@ -14,6 +14,14 @@ const UserSchema = new mongoose.Schema({
 });
 
 /**
+ * Exports the IUser interface for external use.
+ */
+export interface IUser extends mongoose.Document {
+    _id: string;
+    userName: string;
+}
+
+/**
  * Exports the User schema model for external use.
  */
-export const User = mongoose.model('User', UserSchema);
+export const User = mongoose.model<IUser>('User', UserSchema);
