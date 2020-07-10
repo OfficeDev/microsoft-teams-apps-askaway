@@ -2,7 +2,11 @@
 import * as mongoose from 'mongoose';
 import { AMASession } from './Schemas/AMASession';
 import { User } from './Schemas/User';
-import { Question } from './Schemas/Question';
+import {
+    Question,
+    IQuestion,
+    IQuestionPopulatedUser,
+} from './Schemas/Question';
 
 /**
  * Initiates the connection to the CosmosDB database.
@@ -95,8 +99,10 @@ export const disconnect = async (): Promise<void> => {
  * @returns - Array of Question documents under the AMA.
  * @throws - Error thrown when finding questions or populating userId field of question documents fails.
  */
-export const getQuestionData = async (amaSessionId: string) => {
-    const questionData = await Question.find({
+export const getQuestionData = async (
+    amaSessionId: string
+): Promise<Array<IQuestionPopulatedUser>> => {
+    const questionData: IQuestion[] = await Question.find({
         amaSessionId: amaSessionId,
     })
         .populate({ path: 'userId', model: User })
@@ -107,7 +113,31 @@ export const getQuestionData = async (amaSessionId: string) => {
                 'Retrieving questions or populating user details failed'
             );
         });
-    return questionData;
+    if (isIQuestion_populatedUserArray(questionData))
+        return questionData as IQuestionPopulatedUser[];
+    else {
+        throw new Error('Incorrect type received for questions array');
+    }
+};
+
+/**
+ * Type guard to check if an array of Question documents has the userId field populated or not. This type guard should be made stronger.
+ * @param questions - array of Question documents
+ */
+const isIQuestion_populatedUserArray = (
+    questions: IQuestionPopulatedUser[] | IQuestion[]
+): questions is IQuestionPopulatedUser[] => {
+    const unknownUser = new User({
+        _id: 'unknownUser',
+        userName: 'Unkown User',
+    });
+
+    for (let i = 0; i < questions.length; i++) {
+        if (questions[i].userId === null) {
+            questions[i].userId = unknownUser;
+        }
+    }
+    return true;
 };
 
 /**
@@ -168,6 +198,38 @@ export const getUserOrCreate = async (
 };
 
 /**
+ * Adds the aadObjectId of the user upvoting the question to the 'voters' array of that question document.
+ * @param questionId - The DBID of the question document for the question being upvoted.
+ * @param aadObjectId - The aadObjectId of the user upvoting the question.
+ * @param name - The name of the user upvoting the question, used for creating a new User document if one doesn't exist.
+ */
+export const addUpvote = async (
+    questionId: string,
+    aadObjectId: string,
+    name: string
+): Promise<IQuestion> => {
+    await getUserOrCreate(aadObjectId, name).catch((error) => {
+        console.error(error);
+        throw new Error('finding or creating user failed.');
+    });
+
+    const question: IQuestion = await Question.findByIdAndUpdate(
+        questionId,
+        {
+            $addToSet: { voters: aadObjectId },
+        },
+        {
+            new: true,
+        }
+    ).catch((error) => {
+        console.error(error);
+        throw new Error('adding upvote to question failed in database.');
+    });
+
+    return question;
+};
+
+/*
  * Ends the AMA by changing fields: isActive to false and dateTimeEnded to current time
  * @param amaSessionId - id of the current AMA session
  * @returns Returns the AMA title, description, and mastercard activity id

@@ -4,6 +4,7 @@ import {
     getQuestionData,
     createQuestion,
     getUserOrCreate,
+    addUpvote,
     endAMASession,
     createAMASession,
     updateActivityId,
@@ -11,7 +12,7 @@ import {
 import { Question, IQuestion } from '../Data/Schemas/Question';
 import { User } from '../Data/Schemas/User';
 
-let testHost, testAMASession, testUser;
+let testHost, testAMASession, testUser, userUpvoting;
 
 // sample data used for tests
 const sampleUserAADObjId = 'be36140g-9729-3024-8yg1-147bbi67g2c9';
@@ -31,6 +32,7 @@ beforeAll(async () => {
     await mongoose.connect(process.env.MONGO_URL as string, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
+        useFindAndModify: false,
     });
 
     testHost = await new User({
@@ -54,6 +56,11 @@ beforeAll(async () => {
     testUser = await new User({
         _id: '456',
         userName: 'Khayan Shalili',
+    }).save();
+
+    userUpvoting = await new User({
+        _id: '098',
+        userName: 'Upvoting User',
     }).save();
 });
 
@@ -197,6 +204,85 @@ test('new question with new user', async () => {
         sampleQuestionContent
     );
     expect(data).toEqual(true);
+});
+
+test('upvote question that has not been upvoted yet with existing user', async () => {
+    const newQuestion = new Question({
+        amaSessionId: testAMASession._id,
+        userId: testUser._id,
+        content: 'This is a question to test upvotes?',
+        voters: [],
+    });
+
+    await newQuestion.save();
+
+    const questionUpvoted = await addUpvote(
+        newQuestion._id,
+        userUpvoting._id,
+        userUpvoting.userName
+    );
+
+    expect(questionUpvoted.voters).toContain(userUpvoting._id);
+
+    await Question.remove(questionUpvoted);
+    await User.remove(userUpvoting);
+});
+
+test('upvote question that has already been upvoted with existing user', async () => {
+    const newQuestion = new Question({
+        amaSessionId: testAMASession._id,
+        userId: testUser._id,
+        content: 'This is a question to test upvotes?',
+        voters: [],
+    });
+
+    await newQuestion.save();
+
+    let questionUpvoted = await addUpvote(
+        newQuestion._id,
+        userUpvoting._id,
+        userUpvoting.userName
+    );
+
+    expect(questionUpvoted.voters).toContain(userUpvoting._id);
+
+    questionUpvoted = await addUpvote(
+        newQuestion._id,
+        userUpvoting._id,
+        userUpvoting.userName
+    );
+
+    expect(questionUpvoted.voters).toContain(userUpvoting._id);
+
+    expect(
+        questionUpvoted.voters.filter((userId) => userId === userUpvoting._id)
+            .length
+    ).toEqual(1);
+
+    await Question.remove(questionUpvoted);
+    await User.remove(userUpvoting);
+});
+
+test('upvote question with new user not in database', async () => {
+    const newQuestion = new Question({
+        amaSessionId: testAMASession._id,
+        userId: testUser._id,
+        content: 'This is a question to test upvotes?',
+        voters: [],
+    });
+
+    await newQuestion.save();
+
+    const questionUpvoted = await addUpvote(
+        newQuestion._id,
+        '134679',
+        'New User Junior'
+    );
+
+    expect(questionUpvoted.voters).toContain('134679');
+
+    await Question.remove(questionUpvoted);
+    await User.remove(userUpvoting);
 });
 
 test('ending ama with no questions', async () => {

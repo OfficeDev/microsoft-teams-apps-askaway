@@ -10,7 +10,7 @@ export default <IAdaptiveCard>{
     body: [
         {
             type: 'TextBlock',
-            text: '${errorMsg}',
+            text: '${errorMessage}',
         },
     ],
 };

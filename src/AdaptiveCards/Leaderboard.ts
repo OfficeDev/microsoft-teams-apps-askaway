@@ -3,7 +3,7 @@ import { IAdaptiveCard } from 'adaptivecards';
 /**
  * Leaderboard adaptive card template. Fields must be filled in using a data payload with the templating sdk.
  */
-export const Leaderboard = <IAdaptiveCard>{
+export const Leaderboard: IAdaptiveCard = {
     type: 'AdaptiveCard',
     $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
     version: '1.2',
@@ -11,7 +11,7 @@ export const Leaderboard = <IAdaptiveCard>{
         {
             type: 'TextBlock',
             text: 'My Questions',
-            weight: 'Bolder',
+            weight: 'bolder',
             $when: '${$root.userHasQuestions}',
         },
         {
@@ -79,7 +79,7 @@ export const Leaderboard = <IAdaptiveCard>{
         {
             type: 'TextBlock',
             text: 'All Questions',
-            weight: 'Bolder',
+            weight: 'bolder',
         },
         {
             type: 'Container',
@@ -139,7 +139,10 @@ export const Leaderboard = <IAdaptiveCard>{
                                             selectAction: {
                                                 type: 'Action.Submit',
                                                 id: 'upvote',
-                                                data: '${_id}',
+                                                data: {
+                                                    id: 'upvote',
+                                                    questionId: '${_id}',
+                                                },
                                             },
                                             $when: '${upvotable}',
                                         },
@@ -159,7 +162,7 @@ export const Leaderboard = <IAdaptiveCard>{
 /**
  * Adaptive card for an empty leaderboard when there are no questions in an AMA.
  */
-export const LeaderboardEmpty = <IAdaptiveCard>{
+export const LeaderboardEmpty: IAdaptiveCard = {
     $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
     type: 'AdaptiveCard',
     version: '1.0',
@@ -167,21 +170,6 @@ export const LeaderboardEmpty = <IAdaptiveCard>{
         {
             type: 'TextBlock',
             text: 'There are no questions to show.',
-        },
-    ],
-};
-
-/**
- * Adaptive card informing the user that retrieving the leaderboard failed.
- */
-export const LeaderboardFailed = <IAdaptiveCard>{
-    $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
-    type: 'AdaptiveCard',
-    version: '1.0',
-    body: [
-        {
-            type: 'TextBlock',
-            text: 'Retrieving Leaderboard Failed.',
         },
     ],
 };

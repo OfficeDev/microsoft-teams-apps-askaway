@@ -4,14 +4,19 @@ import * as db from './Data/Database'; // For database calls
 import * as adaptiveCardBuilder from './AdaptiveCards/AdaptiveCardBuilder'; // To populate adaptive cards
 import { ok, err, Result } from './util';
 import { AdaptiveCard } from 'adaptivecards';
+import { IQuestion, IQuestionPopulatedUser } from './Data/Schemas/Question';
 
 db.initiateConnection(process.env.MONGO_URI as string);
 
 export const getMasterCard = adaptiveCardBuilder.getMasterCard;
 export const getStartAMACard = adaptiveCardBuilder.getStartAMACard;
-export const getTaskFetchErrorCard = adaptiveCardBuilder.getTaskFetchErrorCard;
-export const getTaskSubmitErrorCard =
-    adaptiveCardBuilder.getTaskSubmitErrorCard;
+export const getTaskFetchErrorCard = adaptiveCardBuilder.getErrorCard.bind(
+    'Something went wrong. Please try opening again.'
+);
+export const getTaskSubmitErrorCard = adaptiveCardBuilder.getErrorCard.bind(
+    'Your submission encountered an error. Please try submitting again!'
+);
+export const getErrorCard = adaptiveCardBuilder.getErrorCard;
 
 /**
  * Starts the AMA session
@@ -74,15 +79,17 @@ export const startAMASession = async (
 export const generateLeaderboard = async (
     amaSessionId: string,
     aadObjectId: string
-): Promise<Result<AdaptiveCard, AdaptiveCard>> => {
+): Promise<Result<AdaptiveCard, Error>> => {
     try {
-        const questionData = await db.getQuestionData(amaSessionId);
+        const questionData: IQuestionPopulatedUser[] = await db.getQuestionData(
+            amaSessionId
+        );
         return ok(
             adaptiveCardBuilder.generateLeaderboard(questionData, aadObjectId)
         );
     } catch (error) {
         console.error(error);
-        return err(adaptiveCardBuilder.generateLeaderboardFailed());
+        return err(new Error('Retrieving Leaderboard Failed.'));
     }
 };
 
@@ -143,6 +150,30 @@ export const submitNewQuestion = async (
 };
 
 /**
+ * Upvotes a question and returns an updated leaderboard
+ * @param questionId - DBID of the question being upvoted
+ * @param aadObjectId - aadObjectId of the user upvoting the question
+ * @param name - Name of the user upvoting the question
+ */
+export const addUpvote = async (
+    questionId: string,
+    aadObjectId: string,
+    name: string
+): Promise<Result<AdaptiveCard, Error>> => {
+    try {
+        const question: IQuestion = await db.addUpvote(
+            questionId,
+            aadObjectId,
+            name
+        );
+        return generateLeaderboard(question.amaSessionId, aadObjectId);
+    } catch (error) {
+        console.error(error);
+        return err(new Error('Failed to upvote question.'));
+    }
+};
+
+/*
  * Calls adaptiveCardBuilder to get the endAMAConfirmationCard.
  * @param amaSessionId - id of the current AMA session
  * @returns Adaptive Card associated with confirming the ending of an AMA
