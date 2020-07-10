@@ -1,4 +1,5 @@
 import * as mongoose from 'mongoose';
+import { IUser } from './User';
 
 const AMASessionSchema = new mongoose.Schema({
     title: {
@@ -43,7 +44,7 @@ const AMASessionSchema = new mongoose.Schema({
     },
     dateTimeCreated: {
         type: Date,
-        default: Date.now,
+        default: new Date(),
     },
     dateTimeEnded: {
         type: Date,
@@ -51,7 +52,38 @@ const AMASessionSchema = new mongoose.Schema({
     },
 });
 
+interface IAMASessionBase extends mongoose.Document {
+    title: string;
+    description: string;
+    isActive: boolean;
+    activityId?: string;
+    tenantId: string;
+    scope: {
+        scopeId: string;
+        isChannel: boolean;
+    };
+    dateTimeCreated: Date;
+    dateTimeEnded?: Date;
+}
+
+/**
+ * Exports the IAMASession interface for external use. This interface should be used when the hostId field is a string reference.
+ */
+export interface IAMASession extends IAMASessionBase {
+    hostId: IUser['_id'];
+}
+
+/**
+ * Exports the IAMASession_populated interface for external use. This interface should be used when the hostId field is populated.
+ */
+export interface IAMASession_populated extends IAMASessionBase {
+    hostId: IUser;
+}
+
 /**
  * Exports the AMASession schema model for external use.
  */
-export const AMASession = mongoose.model('AMASession', AMASessionSchema);
+export const AMASession = mongoose.model<IAMASession>(
+    'AMASession',
+    AMASessionSchema
+);

@@ -1,4 +1,6 @@
 import * as mongoose from 'mongoose';
+import { IAMASession } from './AMASession';
+import { IUser } from './User';
 
 const QuestionSchema = new mongoose.Schema({
     amaSessionId: {
@@ -20,11 +22,34 @@ const QuestionSchema = new mongoose.Schema({
     voters: [{ type: String, ref: 'User' }],
     dateTimeCreated: {
         type: Date,
-        default: Date.now,
+        default: new Date(),
     },
 });
+
+interface IQuestionBase extends mongoose.Document {
+    content: string;
+    dateTimeCreated: Date;
+}
+
+/**
+ * Exports the IQuestion interface for external use. This interface should be used when all of the referencing fields are string references (not populated).
+ */
+export interface IQuestion extends IQuestionBase {
+    amaSessionId: IAMASession['_id'];
+    userId: IUser['_id'];
+    voters: Array<IUser['_id']>;
+}
+
+/**
+ * Exports the IQuestion_populatedUser interface for external use. This interface should be used when out of all of the referencing fields only the userId field is populated.
+ */
+export interface IQuestionPopulatedUser extends IQuestionBase {
+    amaSessionId: IAMASession['_id'];
+    userId: IUser;
+    voters: Array<IUser['_id']>;
+}
 
 /**
  * Exports the Question schema model for external use.
  */
-export const Question = mongoose.model('Question', QuestionSchema);
+export const Question = mongoose.model<IQuestion>('Question', QuestionSchema);
