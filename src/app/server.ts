@@ -27,7 +27,7 @@ appInsights
     .setAutoCollectDependencies(true) // enables tracking for mongoDB
     .setAutoCollectConsole(true, true) //includes console.log errors
     .setUseDiskRetryCaching(true)
-    .setSendLiveMetrics(false)
+    .setSendLiveMetrics(true)
     .setDistributedTracingMode(appInsights.DistributedTracingModes.AI);
 appInsights.start();
 
