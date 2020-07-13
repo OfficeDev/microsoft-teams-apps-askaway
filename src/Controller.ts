@@ -85,7 +85,11 @@ export const generateLeaderboard = async (
             amaSessionId
         );
         return ok(
-            adaptiveCardBuilder.generateLeaderboard(questionData, aadObjectId)
+            adaptiveCardBuilder.generateLeaderboard(
+                questionData,
+                aadObjectId,
+                amaSessionId
+            )
         );
     } catch (error) {
         console.error(error);
@@ -149,6 +153,40 @@ export const submitNewQuestion = async (
     }
 };
 
+export const getUpdatedMasterCard = async (
+    amaSessionId: string,
+    ended = false
+): Promise<Result<{ card: AdaptiveCard; activityId: string }, Error>> => {
+    try {
+        const amaSessionData = await db.getAMASessionData(amaSessionId);
+        // eslint-disable-next-line prefer-const
+        const {
+            topQuestions,
+            recentQuestions,
+            numQuestions,
+        } = await db.getQuestions(amaSessionId, 3, 3);
+
+        // generate and return mastercard
+        return ok({
+            card: await getMasterCard(
+                amaSessionData.title,
+                amaSessionData.description,
+                amaSessionData.userName,
+                amaSessionId,
+                amaSessionData.userAadObjId,
+                ended,
+                topQuestions,
+                recentQuestions,
+                true
+            ),
+            activityId: amaSessionData.activityId,
+            numQuestions,
+        });
+    } catch (errorMsg) {
+        console.error(errorMsg);
+        return err(Error('Failed to get top questions'));
+    }
+};
 /**
  * Upvotes a question and returns an updated leaderboard
  * @param questionId - DBID of the question being upvoted
@@ -187,45 +225,26 @@ export const getEndAMAConfirmationCard = (
 /**
  * Communicates with database to end the AMA and retrieves details
  * @param amaSessionId - id of the current AMA session
- * @returns Ok object with amaTitle, amaDesc, and amaActivityId
+ * @returns Ok object with updated Master Card
  */
 export const endAMASession = async (
     amaSessionId: string
-): Promise<Result<any, Error>> => {
+): Promise<Result<{ card: AdaptiveCard; activityId: string }, Error>> => {
     try {
-        const result = await db.endAMASession(amaSessionId);
-        return ok({
-            status: true,
-            amaTitle: result.amaTitle,
-            amaDesc: result.amaDesc,
-            amaActivityId: result.amaActivityId,
-        });
+        await db.endAMASession(amaSessionId);
+
+        const updatedMasterCard = await getUpdatedMasterCard(
+            amaSessionId,
+            true
+        );
+
+        if (updatedMasterCard.isErr()) throw updatedMasterCard.value;
+
+        return updatedMasterCard;
     } catch (error) {
         console.error(error);
         return err(Error('Failed to end AMA session'));
     }
-};
-
-/**
- * Calls adaptiveCardBuilder to get the endAMAMastercard.
- * @param amaTitle - title of the AMA
- * @param amaDesc - desc of the AMA
- * @param amaSessionId - id of the current AMA session
- * @param userName - name of the user
- * @returns Mastercard that is displayed after ending the AMA
- */
-export const getEndAMAMastercard = (
-    amaTitle: string,
-    amaDesc: string,
-    amaSessionId: string,
-    userName: string
-): AdaptiveCard => {
-    return adaptiveCardBuilder.getEndAMAMastercard(
-        amaTitle,
-        amaDesc,
-        amaSessionId,
-        userName
-    );
 };
 
 /**

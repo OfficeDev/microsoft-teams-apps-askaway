@@ -72,20 +72,218 @@ export default <IAdaptiveCard>{
         },
         {
             type: 'Container',
+            spacing: 'Large',
             items: [
+                {
+                    type: 'ColumnSet',
+                    columns: [
+                        {
+                            type: 'Column',
+                            width: 'stretch',
+                            items: [
+                                {
+                                    type: 'TextBlock',
+                                    text: 'Top Questions',
+                                    wrap: true,
+                                    size: 'Medium',
+                                    weight: 'Bolder',
+                                },
+                            ],
+                        },
+                        {
+                            type: 'Column',
+                            width: 'auto',
+                            items: [
+                                {
+                                    type: 'TextBlock',
+                                    text: 'Upvotes',
+                                    wrap: true,
+                                    weight: 'Lighter',
+                                },
+                            ],
+                        },
+                    ],
+                },
                 {
                     type: 'TextBlock',
                     text: 'No questions yet. Be the first one to ask.',
                     color: 'accent',
+                    $when: '${count($root.topQuestions) < 1}',
+                },
+                {
+                    type: 'Container',
+                    separator: true,
+                    items: [
+                        {
+                            type: 'ColumnSet',
+                            columns: [
+                                {
+                                    type: 'Column',
+                                    width: 'auto',
+                                    items: [
+                                        {
+                                            type: 'Image',
+                                            style: 'Person',
+                                            size: 'Small',
+                                            url: '${userId.picture}',
+                                        },
+                                    ],
+                                },
+                                {
+                                    type: 'Column',
+                                    width: 'stretch',
+                                    items: [
+                                        {
+                                            type: 'TextBlock',
+                                            text: '${userId.userName}',
+                                            weight: 'Bolder',
+                                        },
+                                        {
+                                            type: 'TextBlock',
+                                            text: '${content}',
+                                            spacing: 'None',
+                                        },
+                                    ],
+                                },
+                                {
+                                    type: 'Column',
+                                    width: 'auto',
+                                    items: [
+                                        {
+                                            type: 'TextBlock',
+                                            text: '${string(upvotes)}',
+                                        },
+                                    ],
+                                    verticalContentAlignment: 'Center',
+                                },
+                            ],
+                        },
+                    ],
+                    $data: '${$root.topQuestions}',
                 },
             ],
             wrap: true,
         },
         {
+            type: 'ActionSet',
+            separator: true,
+            spacing: 'Large',
+            horizontalAlignment: 'Center',
+            actions: [
+                {
+                    type: 'Action.ShowCard',
+                    title: 'Show Recent Questions',
+                    card: {
+                        $schema:
+                            'http://adaptivecards.io/schemas/adaptive-card.json',
+                        type: 'AdaptiveCard',
+                        version: '1.2',
+                        body: [
+                            {
+                                type: 'Container',
+                                spacing: 'Large',
+                                id: 'recentQuestions',
+                                items: [
+                                    {
+                                        type: 'ColumnSet',
+                                        columns: [
+                                            {
+                                                type: 'Column',
+                                                width: 'stretch',
+                                                items: [
+                                                    {
+                                                        type: 'TextBlock',
+                                                        text:
+                                                            'Recent Questions',
+                                                        wrap: true,
+                                                        weight: 'Bolder',
+                                                        size: 'Medium',
+                                                    },
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                    {
+                                        type: 'TextBlock',
+                                        text:
+                                            'No questions yet. Be the first one to ask.',
+                                        color: 'accent',
+                                        $when:
+                                            '${count($root.recentQuestions) < 1}',
+                                    },
+                                    {
+                                        type: 'Container',
+                                        separator: true,
+                                        items: [
+                                            {
+                                                type: 'ColumnSet',
+                                                columns: [
+                                                    {
+                                                        type: 'Column',
+                                                        width: 'auto',
+                                                        items: [
+                                                            {
+                                                                type: 'Image',
+                                                                style: 'Person',
+                                                                size: 'Small',
+                                                                url:
+                                                                    '${userId.picture}',
+                                                            },
+                                                        ],
+                                                    },
+                                                    {
+                                                        type: 'Column',
+                                                        width: 'stretch',
+                                                        items: [
+                                                            {
+                                                                type:
+                                                                    'TextBlock',
+                                                                text:
+                                                                    '${userId.userName}',
+                                                                weight:
+                                                                    'Bolder',
+                                                            },
+                                                            {
+                                                                type:
+                                                                    'TextBlock',
+                                                                text:
+                                                                    '${content}',
+                                                                spacing: 'None',
+                                                            },
+                                                        ],
+                                                    },
+                                                    {
+                                                        type: 'Column',
+                                                        width: 'auto',
+                                                        items: [
+                                                            {
+                                                                type:
+                                                                    'TextBlock',
+                                                                text:
+                                                                    '${string(upvotes)}',
+                                                            },
+                                                        ],
+                                                        verticalContentAlignment:
+                                                            'Center',
+                                                    },
+                                                ],
+                                            },
+                                        ],
+                                        $data: '${$root.recentQuestions}',
+                                    },
+                                ],
+                                wrap: true,
+                            },
+                        ],
+                    },
+                },
+            ],
+        },
+        {
             type: 'TextBlock',
             text: '${actionBy} ${user}',
             wrap: true,
-            isSubtle: true,
+            spacing: 'Large',
         },
         {
             type: 'ActionSet',

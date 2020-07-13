@@ -1,5 +1,4 @@
 import { BotDeclaration } from 'express-msteams-host';
-import * as debug from 'debug';
 import {
     CardFactory,
     TurnContext,
@@ -15,13 +14,18 @@ import {
     Activity,
     ChannelAccount,
 } from 'botbuilder';
+import { clone, debounce } from 'lodash';
 import * as controller from './../../Controller';
 import { AdaptiveCard } from 'adaptivecards';
-import { extractMasterCardData } from '../../AdaptiveCards/MasterCard';
+import {
+    extractMasterCardData,
+    MasterCardData,
+} from '../../AdaptiveCards/MasterCard';
+import * as config from '../../config.json';
+import { Result, err } from '../../util';
 
 // Initialize debug logging module
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const log = debug('msteams');
 
 /**
  * Main bot activity handler class
@@ -33,11 +37,17 @@ const log = debug('msteams');
     process.env.MICROSOFT_APP_PASSWORD
 )
 export class Questionly extends TeamsActivityHandler {
+    /** Local property for StartAmaMessageExtension */
+    // Each AMA sesion gets mapped to a unique function used to update the Master Card.
+    private _updateMasterCardFunctionMap: {
+        [key: string]: (context: TurnContext, amaSessionId: string) => void;
+    };
     /**
      * The constructor
      */
     public constructor() {
         super();
+        this._updateMasterCardFunctionMap = {};
     }
 
     private _buildTaskModuleContinueResponse = (
@@ -62,18 +72,17 @@ export class Questionly extends TeamsActivityHandler {
         context: TurnContext,
         taskModuleRequest: TaskModuleRequest
     ): Promise<TaskModuleResponse> {
-        if (taskModuleRequest.data.id === 'viewLeaderboard') {
+        if (taskModuleRequest.data.id === 'viewLeaderboard')
             return await this._handleTeamsTaskModuleFetchViewLeaderboard(
                 context,
                 taskModuleRequest
             );
-        } else if (taskModuleRequest.data.id == 'askQuestion') {
+        else if (taskModuleRequest.data.id == 'askQuestion')
             return this._handleTeamsTaskModuleFetchAskQuestion(
                 taskModuleRequest
             );
-        } else if (taskModuleRequest.data.id == 'endAMA') {
+        else if (taskModuleRequest.data.id == 'endAMA')
             return this._handleTeamsTaskModuleFetchEndAMA(taskModuleRequest);
-        }
 
         return this._handleTeamsTaskModuleFetchError();
     }
@@ -85,23 +94,22 @@ export class Questionly extends TeamsActivityHandler {
         const user = context.activity.from;
         const endAMAIds = ['submitEndAma', 'cancelEndAma'];
 
-        if (taskModuleRequest.data.id == 'submitQuestion') {
+        if (taskModuleRequest.data.id == 'submitQuestion')
             return this._handleTeamsTaskModuleSubmitQuestion(
+                context,
                 user,
                 taskModuleRequest
             );
-        } else if (taskModuleRequest.data.id === 'upvote') {
+        else if (taskModuleRequest.data.id === 'upvote')
             return await this._handleTeamsTaskModuleSubmitUpvote(
                 context,
                 taskModuleRequest
             );
-        } else if (endAMAIds.includes(taskModuleRequest.data.id)) {
+        else if (endAMAIds.includes(taskModuleRequest.data.id))
             return this._handleTeamsTaskModuleSubmitEndAMA(
-                user,
                 taskModuleRequest,
                 context
             );
-        }
 
         return this._handleTeamsTaskModuleSubmitError();
     }
@@ -116,6 +124,7 @@ export class Questionly extends TeamsActivityHandler {
     }
 
     private async _handleTeamsTaskModuleSubmitQuestion(
+        context,
         user: ChannelAccount,
         taskModuleRequest: TaskModuleRequest
     ): Promise<TaskModuleResponse> {
@@ -124,24 +133,27 @@ export class Questionly extends TeamsActivityHandler {
         const userName = user.name;
         const questionContent = taskModuleRequest.data.usertext as string;
 
-        if (questionContent == null || questionContent.trim() === '') {
+        if (questionContent == null || questionContent.trim() === '')
             return this._handleTeamsTaskModuleResubmitQuestion(
                 amaSessionId,
                 ''
             );
-        }
+
         const status = await controller.submitNewQuestion(
             amaSessionId,
             userAADObjId,
             userName,
             questionContent
         );
-        if (!status.isOk()) {
+
+        this._updateMasterCard(taskModuleRequest.data.amaSessionId, context);
+
+        if (!status.isOk())
             return this._handleTeamsTaskModuleResubmitQuestion(
                 amaSessionId,
                 questionContent
             );
-        }
+
         return null as any;
     }
 
@@ -157,33 +169,19 @@ export class Questionly extends TeamsActivityHandler {
     }
 
     private async _handleTeamsTaskModuleSubmitEndAMA(
-        user: ChannelAccount,
         taskModuleRequest: TaskModuleRequest,
         context: TurnContext
     ): Promise<TaskModuleResponse> {
         const amaSessionId = taskModuleRequest.data.amaSessionId;
-        const userName = user.name;
 
         if (taskModuleRequest.data.id == 'submitEndAma') {
-            const status = await controller.endAMASession(amaSessionId);
-            if (!status.isOk()) {
-                return this._handleTeamsTaskModuleSubmitError();
-            }
+            const result = await controller.endAMASession(amaSessionId);
 
-            const amaTitle = status.value.amaTitle;
-            const amaDesc = status.value.amaDesc;
-            const amaActivityId = status.value.amaActivityId;
-
-            const endAmaMastercard = controller.getEndAMAMastercard(
-                amaTitle,
-                amaDesc,
-                amaSessionId,
-                userName
-            );
+            if (result.isErr()) return this._handleTeamsTaskModuleSubmitError();
 
             await context.updateActivity({
-                attachments: [CardFactory.adaptiveCard(endAmaMastercard)],
-                id: amaActivityId,
+                attachments: [CardFactory.adaptiveCard(result.value.card)],
+                id: result.value.activityId,
                 type: 'message',
             });
         }
@@ -233,14 +231,11 @@ export class Questionly extends TeamsActivityHandler {
             context.activity.from.aadObjectId as string
         );
 
-        let response: TaskModuleResponse;
-        if (leaderboard.isOk()) {
-            response = this._buildTaskModuleContinueResponse(leaderboard.value);
-        } else {
-            response = this._buildTaskModuleContinueResponse(
-                controller.getErrorCard(leaderboard.value.message)
-            );
-        }
+        const response: TaskModuleResponse = leaderboard.isOk()
+            ? this._buildTaskModuleContinueResponse(leaderboard.value)
+            : this._buildTaskModuleContinueResponse(
+                  controller.getErrorCard(leaderboard.value.message)
+              );
 
         return response;
     };
@@ -255,18 +250,13 @@ export class Questionly extends TeamsActivityHandler {
             context.activity.from.name
         );
 
-        let response: TaskModuleResponse;
-        if (updatedLeaderboard.isOk()) {
-            response = this._buildTaskModuleContinueResponse(
-                updatedLeaderboard.value
-            );
-        } else {
-            response = this._buildTaskModuleContinueResponse(
-                controller.getErrorCard('Upvoting failed. Please try again.')
-            );
-        }
+        this._updateMasterCard(taskModuleRequest.data.amaSessionId, context);
 
-        return response;
+        return updatedLeaderboard.isOk()
+            ? this._buildTaskModuleContinueResponse(updatedLeaderboard.value)
+            : this._buildTaskModuleContinueResponse(
+                  controller.getErrorCard('Upvoting failed. Please try again.')
+              );
     };
 
     async handleTeamsMessagingExtensionFetchTask(): Promise<
@@ -282,19 +272,13 @@ export class Questionly extends TeamsActivityHandler {
         context: TurnContext,
         action: MessagingExtensionAction
     ): Promise<MessagingExtensionActionResponse> {
-        // activity payload includes preview attachments
-        if (
-            !action.botActivityPreview ||
-            !action.botActivityPreview[0].attachments
-        )
-            return null as any;
-        const attachments = action.botActivityPreview[0].attachments;
-        const cardDataResponse = extractMasterCardData(attachments[0].content);
-        let cardData;
+        const cardDataResponse = this._extractMasterCardFromActivityPreveiw(
+            action
+        );
+        let cardData: Partial<MasterCardData>;
 
-        if (cardDataResponse.isOk()) {
-            cardData = cardDataResponse.value;
-        } else {
+        if (cardDataResponse.isOk()) cardData = cardDataResponse.value;
+        else {
             // cardDataResponse.isErr()
             console.error(
                 'Unable to extract master card data: ' + cardDataResponse.value
@@ -311,20 +295,13 @@ export class Questionly extends TeamsActivityHandler {
         context: TurnContext,
         action: MessagingExtensionAction
     ): Promise<MessagingExtensionActionResponse> {
-        // commandId - 'startAMA'
-        if (
-            !action.botActivityPreview ||
-            !action.botActivityPreview[0].attachments
-        )
-            return null as any;
-        // activity payload includes preview attachments
-        const attachments = action.botActivityPreview[0].attachments;
-        const cardDataResponse = extractMasterCardData(attachments[0].content);
-        let cardData;
+        const cardDataResponse = this._extractMasterCardFromActivityPreveiw(
+            action
+        );
+        let cardData: MasterCardData | { title: string; description: string };
 
-        if (cardDataResponse.isOk()) {
-            cardData = cardDataResponse.value;
-        } else {
+        if (cardDataResponse.isOk()) cardData = cardDataResponse.value;
+        else {
             // this error will create a broken experience for the user and so
             // the AMA session will not be created.
             console.error(
@@ -366,9 +343,7 @@ export class Questionly extends TeamsActivityHandler {
                     data.amaSessionId,
                     resource.id
                 );
-                if (status.isErr()) {
-                    console.error(status.value);
-                }
+                if (status.isErr()) console.error(status.value);
             }
         } else {
             // response.isErr();
@@ -400,7 +375,7 @@ export class Questionly extends TeamsActivityHandler {
             amaSessionId = '',
             userId = context.activity.from.aadObjectId as string;
 
-        if (!(title && description)) {
+        if (!(title && description))
             return this._buildTaskModuleContinueResponse(
                 controller.getStartAMACard(
                     title,
@@ -408,7 +383,6 @@ export class Questionly extends TeamsActivityHandler {
                     'Please fill out all fields'
                 )
             );
-        }
 
         const card = CardFactory.adaptiveCard(
             await controller.getMasterCard(
@@ -431,4 +405,67 @@ export class Questionly extends TeamsActivityHandler {
             },
         };
     }
+
+    /**
+     * Handles proactively updating the master card with the top questions.
+     * @param context - Current bot turn context.
+     * @param amaSessionId - AMA session database document id.
+     */
+    private _getHandleMasterCardTopQuestion = () => {
+        const _function = async (
+            context: TurnContext,
+            amaSessionId: string
+        ) => {
+            const updatedMastercard = await controller.getUpdatedMasterCard(
+                amaSessionId
+            );
+
+            if (updatedMastercard.isOk()) {
+                const card = CardFactory.adaptiveCard(
+                    updatedMastercard.value.card
+                );
+
+                context.updateActivity({
+                    id: updatedMastercard.value.activityId,
+                    attachments: [card],
+                    type: 'message',
+                });
+            }
+        };
+
+        return debounce(
+            _function,
+            config.updateMasterCardDebounceTimeInterval,
+            {
+                leading: true,
+                trailing: true,
+                maxWait: config.updateMasterCardDebounceMaxWait,
+            }
+        );
+    };
+
+    private _updateMasterCard = (
+        amaSessionId: string,
+        context: TurnContext
+    ) => {
+        const _context = clone(context);
+        if (!(amaSessionId in this._updateMasterCardFunctionMap))
+            this._updateMasterCardFunctionMap[
+                amaSessionId
+            ] = this._getHandleMasterCardTopQuestion();
+
+        this._updateMasterCardFunctionMap[amaSessionId](_context, amaSessionId);
+    };
+
+    private _extractMasterCardFromActivityPreveiw = (
+        action: MessagingExtensionAction
+    ): Result<MasterCardData, null> => {
+        if (
+            !action.botActivityPreview ||
+            !action.botActivityPreview[0].attachments
+        )
+            return err(null);
+        const attachments = action.botActivityPreview[0].attachments;
+        return extractMasterCardData(attachments[0].content);
+    };
 }

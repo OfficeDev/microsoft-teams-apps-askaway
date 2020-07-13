@@ -8,25 +8,32 @@ import {
     endAMASession,
     createAMASession,
     updateActivityId,
+    getAMASessionData,
+    getQuestions,
 } from '../Data/Database';
-import { Question, IQuestion } from '../Data/Schemas/Question';
+import {
+    Question,
+    IQuestion,
+    IQuestionPopulatedUser,
+} from '../Data/Schemas/Question';
 import { User } from '../Data/Schemas/User';
 
-let testHost, testAMASession, testUser, userUpvoting;
+let testHost, testAMASession, testUser, testUserUpvoting;
 
-// sample data used for tests
-const sampleUserAADObjId = 'be36140g-9729-3024-8yg1-147bbi67g2c9';
-const sampleUserName = 'Sample Name';
+const sampleUserAADObjId1 = 'be36140g-9729-3024-8yg1-147bbi67g2c9';
+const sampleUserAADObjId2 = 'different from obj id 1';
+const sampleUserAADObjId3 = 'different fr0m obj id 0';
+const sampleUserName1 = 'Shayan Khalili';
+const sampleUserName2 = 'Lily Du';
+const sampleUserName3 = 'Kavin Singh';
 const sampleQuestionContent = 'Sample Question?';
+// must be 24 hex character string
 const sampleAmaTeamsSessionId = '5ee25f76c7e152311cf94d99';
-const title = 'testAMA';
-const description = 'testDescription';
-const userName = 'user';
-const userAadObjId = 'aadObject';
-const activityId = 'activityId';
-const tenantId = 'tenantId';
-const scopeId = 'scopeId';
-const isChannel = true;
+const sampleTitle = 'Weekly AMA Test';
+const sampleDescription = 'Weekly AMA Test description';
+const sampleActivityId = '1234';
+const sampleTenantId = '11121';
+const sampleScopeId = '12311';
 
 beforeAll(async () => {
     await mongoose.connect(process.env.MONGO_URL as string, {
@@ -34,58 +41,74 @@ beforeAll(async () => {
         useUnifiedTopology: true,
         useFindAndModify: false,
     });
+});
 
+beforeEach(async () => {
     testHost = await new User({
-        _id: '123',
-        userName: 'Shayan Khalili',
+        _id: sampleUserAADObjId1,
+        userName: sampleUserName1,
     }).save();
 
     testAMASession = await new AMASession({
-        title: 'test AMA',
-        description: 'AMA session to test bot',
+        title: sampleTitle,
+        description: sampleDescription,
         isActive: true,
-        hostId: '123',
-        activityId: '456',
-        tenantId: '789',
+        hostId: sampleUserAADObjId1,
+        activityId: sampleActivityId,
+        tenantId: sampleTenantId,
         scope: {
-            scopeId: '123',
+            scopeId: sampleScopeId,
             isChannel: true,
         },
     }).save();
 
     testUser = await new User({
-        _id: '456',
-        userName: 'Khayan Shalili',
+        _id: sampleUserAADObjId2,
+        userName: sampleUserName2,
     }).save();
 
-    userUpvoting = await new User({
-        _id: '098',
-        userName: 'Upvoting User',
+    testUserUpvoting = await new User({
+        _id: sampleUserAADObjId3,
+        userName: sampleUserName3,
     }).save();
 });
 
-afterAll(async () => {
+afterEach(async () => {
     await AMASession.remove({ _id: testAMASession._id });
     await User.remove({ _id: testHost._id });
     await User.remove({ _id: testUser._id });
+    await User.remove({ _id: testUserUpvoting._id });
+});
 
+afterAll(async () => {
     await mongoose.connection.close();
 });
 
 test('can create ama session', async () => {
+    const data = {
+        title: sampleTitle,
+        description: sampleDescription,
+        userName: sampleUserName1,
+        userAadObjId: sampleUserAADObjId1,
+        activityId: sampleActivityId,
+        tenantId: sampleTenantId,
+        scopeId: sampleScopeId,
+        isChannel: true,
+    };
+
     const result = await createAMASession(
-        title,
-        description,
-        userName,
-        userAadObjId,
-        activityId,
-        tenantId,
-        scopeId,
-        isChannel
+        data.title,
+        data.description,
+        data.userName,
+        data.userAadObjId,
+        data.activityId,
+        data.tenantId,
+        data.scopeId,
+        data.isChannel
     );
 
     expect(result.amaSessionId).toBeTruthy();
-    expect(result.hostId).toBe(userAadObjId);
+    expect(result.hostId).toBe(data.userAadObjId);
 
     const amaSessionDoc = await AMASession.findById(result.amaSessionId);
 
@@ -100,45 +123,123 @@ test('can create ama session', async () => {
         tenantId: doc.tenantId,
         scopeId: doc.scope.scopeId,
         isChannel: doc.scope.isChannel,
-        userName: userName,
+        userName: data.userName,
     };
 
     expect(doc.isActive).toBe(true);
-    expect(expectedData).toEqual({
-        title,
-        description,
-        userName,
-        userAadObjId,
-        activityId,
-        tenantId,
-        scopeId,
-        isChannel,
-    });
+    expect(expectedData).toEqual(data);
 
     return;
 });
 
 test('can update activity id', async () => {
-    /** Setup Mock DB **/
-    const testAMASession = await new AMASession({
-        title: 'test AMA',
-        description: 'AMA session to test bot',
-        isActive: true,
-        hostId: '123',
-        tenantId: '789',
-        scope: {
-            scopeId: '123',
-            isChannel: true,
-        },
-    }).save();
-
     const activityId = '12345';
     await updateActivityId(testAMASession._id, activityId);
 
-    const doc: any = await AMASession.findById(testAMASession);
+    const doc: any = await AMASession.findById(testAMASession._id);
     expect(doc).not.toBeNull();
     expect(doc._id).toEqual(testAMASession._id);
     expect(doc.toObject().activityId).toEqual(activityId);
+});
+
+test('get AMA session data', async () => {
+    const {
+        title,
+        userName,
+        activityId,
+        userAadObjId,
+        description,
+    } = await getAMASessionData(testAMASession._id);
+
+    expect(title).toBe(sampleTitle);
+    expect(userName).toBe(sampleUserName1);
+    expect(activityId).toBe(sampleActivityId);
+    expect(userAadObjId).toBe(sampleUserAADObjId1);
+    expect(description).toBe(sampleDescription);
+});
+
+test('retrieve most recent/top questions with three questions', async () => {
+    const doc: any = await AMASession.findById(testAMASession._id);
+    expect(doc).not.toBeNull();
+
+    // create a new questions
+    const questions: any = [
+        {
+            amaSessionId: testAMASession._id,
+            userId: testUser._id,
+            content: 'This is test question 1',
+            voters: [
+                {
+                    _id: '456',
+                    userName: 'Khayan Shalili',
+                },
+                {
+                    _id: '456',
+                    userName: 'Khayan Shalili',
+                },
+            ],
+        },
+        {
+            amaSessionId: testAMASession._id,
+            userId: testUser._id,
+            content: 'This is test question 2',
+            voters: [],
+        },
+        {
+            amaSessionId: testAMASession._id,
+            userId: testUser._id,
+            content: 'This is test question 3',
+            voters: [
+                {
+                    _id: '456',
+                    userName: 'Khayan Shalili',
+                },
+            ],
+        },
+    ];
+
+    const _sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+    questions[1] = await new Question(questions[1]).save();
+    await _sleep(50);
+    questions[0] = await new Question(questions[0]).save();
+    await _sleep(1000);
+    questions[2] = await new Question(questions[2]).save();
+
+    const results = await getQuestions(testAMASession._id, 3, 3);
+    const topQuestions: any = results.topQuestions;
+    const recentQuestions: any = results.recentQuestions;
+    const numQuestions = results.numQuestions;
+
+    expect(topQuestions).not.toBe(null);
+    expect(recentQuestions).not.toBe(null);
+    expect(numQuestions).toEqual(3);
+
+    expect(topQuestions[0]._id).toEqual(questions[0]._id);
+    expect(topQuestions[1]._id).toEqual(questions[2]._id);
+    expect(topQuestions[2]._id).toEqual(questions[1]._id);
+
+    expect(recentQuestions[0]._id).toEqual(questions[2]._id);
+    expect(recentQuestions[1]._id).toEqual(questions[0]._id);
+    expect(recentQuestions[2]._id).toEqual(questions[1]._id);
+
+    // cleanup
+    await Question.remove({ amaSessionId: testAMASession._id });
+});
+
+test('retrieve most recent/top questions with no questions', async () => {
+    const doc: any = await AMASession.findById(testAMASession._id);
+    expect(doc).not.toBeNull();
+
+    const results = await getQuestions(testAMASession._id, 3, 3);
+    const topQuestions: any = results.topQuestions;
+    const recentQuestions: any = results.recentQuestions;
+    const numQuestions: any = results.numQuestions;
+
+    expect(topQuestions).toEqual([]);
+    expect(recentQuestions).toEqual([]);
+    expect(numQuestions).toEqual(0);
+    // cleanup
+    await Question.remove({ amaSessionId: testAMASession._id });
 });
 
 test('retrieve question data in empty AMA', async () => {
@@ -175,21 +276,21 @@ test('retrieve question data in non-empty AMA', async () => {
 });
 
 test('create new user', async () => {
-    const data = await getUserOrCreate(sampleUserAADObjId, sampleUserName);
+    const data = await getUserOrCreate(sampleUserAADObjId1, sampleUserName1);
     expect(data).toBe(true);
 });
 
 test('update existing user', async () => {
     const randomString = Math.random().toString(36);
-    const data = await getUserOrCreate(sampleUserAADObjId, randomString);
+    const data = await getUserOrCreate(sampleUserAADObjId1, randomString);
     expect(data).toBe(true);
 });
 
 test('new question with existing user', async () => {
     const data = await createQuestion(
         sampleAmaTeamsSessionId,
-        sampleUserAADObjId,
-        sampleUserName,
+        sampleUserAADObjId1,
+        sampleUserName1,
         sampleQuestionContent
     );
     expect(data).toEqual(true);
@@ -218,14 +319,14 @@ test('upvote question that has not been upvoted yet with existing user', async (
 
     const questionUpvoted = await addUpvote(
         newQuestion._id,
-        userUpvoting._id,
-        userUpvoting.userName
+        testUserUpvoting._id,
+        testUserUpvoting.userName
     );
 
-    expect(questionUpvoted.voters).toContain(userUpvoting._id);
+    expect(questionUpvoted.voters).toContain(testUserUpvoting._id);
 
     await Question.remove(questionUpvoted);
-    await User.remove(userUpvoting);
+    await User.remove(testUserUpvoting);
 });
 
 test('upvote question that has already been upvoted with existing user', async () => {
@@ -240,27 +341,28 @@ test('upvote question that has already been upvoted with existing user', async (
 
     let questionUpvoted = await addUpvote(
         newQuestion._id,
-        userUpvoting._id,
-        userUpvoting.userName
+        testUserUpvoting._id,
+        testUserUpvoting.userName
     );
 
-    expect(questionUpvoted.voters).toContain(userUpvoting._id);
+    expect(questionUpvoted.voters).toContain(testUserUpvoting._id);
 
     questionUpvoted = await addUpvote(
         newQuestion._id,
-        userUpvoting._id,
-        userUpvoting.userName
+        testUserUpvoting._id,
+        testUserUpvoting.userName
     );
 
-    expect(questionUpvoted.voters).toContain(userUpvoting._id);
+    expect(questionUpvoted.voters).toContain(testUserUpvoting._id);
 
     expect(
-        questionUpvoted.voters.filter((userId) => userId === userUpvoting._id)
-            .length
+        questionUpvoted.voters.filter(
+            (userId) => userId === testUserUpvoting._id
+        ).length
     ).toEqual(1);
 
     await Question.remove(questionUpvoted);
-    await User.remove(userUpvoting);
+    await User.remove(testUserUpvoting);
 });
 
 test('upvote question with new user not in database', async () => {
@@ -282,51 +384,45 @@ test('upvote question with new user not in database', async () => {
     expect(questionUpvoted.voters).toContain('134679');
 
     await Question.remove(questionUpvoted);
-    await User.remove(userUpvoting);
+    await User.remove(testUserUpvoting);
 });
 
 test('ending ama with no questions', async () => {
-    const result = await createAMASession(
-        title,
-        description,
-        userName,
-        userAadObjId,
-        activityId,
-        tenantId,
-        scopeId,
-        isChannel
-    );
+    await endAMASession(testAMASession._id);
 
-    const data = await endAMASession(result.amaSessionId);
+    // get data
+    const amaSessionData: any = await AMASession.findById(testAMASession._id)
+        .exec()
+        .catch((error) => {
+            console.error(error);
+            throw new Error('Retrieving AMA Session details');
+        });
 
-    expect(data.amaDesc).toBe(description);
-    expect(data.amaTitle).toBe(title);
+    expect(amaSessionData.isActive).toBe(false);
+    expect(amaSessionData.dateTimeEnded).not.toBe(null);
 });
 
 test('ending ama with a few questions', async () => {
-    const result = await createAMASession(
-        title,
-        description,
-        userName,
-        userAadObjId,
-        activityId,
-        tenantId,
-        scopeId,
-        isChannel
-    );
-
     for (let i = 0; i < 5; i++) {
         const randomString = Math.random().toString(36);
         await createQuestion(
-            result.amaSessionId,
+            testAMASession._id,
             randomString,
             'Earnest Cream', //using same name and question because the bot only checks for AADObjId
             sampleQuestionContent
         );
     }
 
-    const data = await endAMASession(result.amaSessionId);
+    await endAMASession(testAMASession._id);
 
-    expect(data.amaDesc).toBe(description);
-    expect(data.amaTitle).toBe(title);
+    // get data
+    const amaSessionData: any = await AMASession.findById(testAMASession._id)
+        .exec()
+        .catch((error) => {
+            console.error(error);
+            throw new Error('Retrieving AMA Session details');
+        });
+
+    expect(amaSessionData.isActive).toBe(false);
+    expect(amaSessionData.dateTimeEnded).not.toBe(null);
 });
