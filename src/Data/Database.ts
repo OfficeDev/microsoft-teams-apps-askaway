@@ -1,6 +1,10 @@
 /* eslint-disable no-console */
 import * as mongoose from 'mongoose';
-import { AMASession } from './Schemas/AMASession';
+import {
+    AMASession,
+    IAMASession_populated,
+    IAMASession,
+} from './Schemas/AMASession';
 import { User } from './Schemas/User';
 import {
     Question,
@@ -43,7 +47,7 @@ export const createAMASession = async (
     scopeId: string,
     isChannel: boolean
 ): Promise<{ amaSessionId: string; hostId: string }> => {
-    const hostId = await getUserOrCreate(userAadObjId, userName);
+    await getUserOrCreate(userAadObjId, userName);
 
     const amaSession = new AMASession({
         title: title,
@@ -133,11 +137,75 @@ const isIQuestion_populatedUserArray = (
     });
 
     for (let i = 0; i < questions.length; i++) {
-        if (questions[i].userId === null) {
-            questions[i].userId = unknownUser;
-        }
+        if (questions[i].userId === null) questions[i].userId = unknownUser;
     }
     return true;
+};
+
+/**
+ * Retrives top N questions with the highest number of votes.
+ * @param amaSessionId - the DBID of the AMA session from which to retrieve the questions.
+ * @param n - number of questions to retrieve. Must be positive.
+ * @returns - Array of Question documents in the AMA and total questions in AMA.
+ */
+export const getQuestions = async (
+    amaSessionId: string,
+    topN?: number,
+    recentN?: number
+): Promise<{
+    topQuestions?: IQuestionPopulatedUser[];
+    recentQuestions?: IQuestionPopulatedUser[];
+    numQuestions: number;
+}> => {
+    const questionData = await getQuestionData(amaSessionId);
+    let voteSorted, recentSorted;
+
+    if (recentN)
+        // most recent question comes first at index 0
+        recentSorted = questionData
+            .sort(
+                (a: any, b: any) =>
+                    new Date(b.dateTimeCreated).getTime() -
+                    new Date(a.dateTimeCreated).getTime()
+            )
+            .slice(0, recentN);
+
+    if (topN)
+        // descending order, so [0, 1, 2] => [2, 1, 0]
+        voteSorted = questionData
+            .sort((a: any, b: any) => b.voters.length - a.voters.length)
+            .slice(0, topN);
+
+    return {
+        topQuestions: topN ? voteSorted : null,
+        recentQuestions: recentN ? recentSorted : null,
+        numQuestions: questionData.length,
+    };
+};
+
+export const getAMASessionData = async (amaSessionId: string) => {
+    const amaSessionData = await AMASession.findById(amaSessionId)
+        .populate({ path: 'hostId', modle: User })
+        .exec()
+        .catch((error) => {
+            console.error(error);
+            throw new Error('Retrieving AMA Session details');
+        });
+    if (!amaSessionData) throw new Error('AMA Session not found');
+
+    const _amaSessionData: IAMASession_populated = (amaSessionData as IAMASession).toObject();
+
+    // activity id must be set before this function gets called
+    if (!_amaSessionData.activityId)
+        throw new Error('AMA Session `activityId` not found');
+
+    return {
+        title: _amaSessionData.title,
+        userName: _amaSessionData.hostId.userName,
+        activityId: _amaSessionData.activityId,
+        userAadObjId: _amaSessionData.hostId._id,
+        description: _amaSessionData.description,
+    };
 };
 
 /**
@@ -232,13 +300,10 @@ export const addUpvote = async (
 /*
  * Ends the AMA by changing fields: isActive to false and dateTimeEnded to current time
  * @param amaSessionId - id of the current AMA session
- * @returns Returns the AMA title, description, and mastercard activity id
  * @throws Error thrown when database fails to execute changes
  */
-export const endAMASession = async (
-    amaSessionId: string
-): Promise<{ amaTitle: string; amaDesc: string; amaActivityId: string }> => {
-    const resultAMA: any = await AMASession.findByIdAndUpdate(amaSessionId, {
+export const endAMASession = async (amaSessionId: string) => {
+    await AMASession.findByIdAndUpdate(amaSessionId, {
         $set: { isActive: false, dateTimeEnded: new Date() },
     })
         .exec()
@@ -248,12 +313,6 @@ export const endAMASession = async (
                 'Failed to change isActive for AMASession to false and change dateTimeEnded to current time'
             );
         });
-
-    return {
-        amaTitle: resultAMA.title,
-        amaDesc: resultAMA.description,
-        amaActivityId: resultAMA.activityId,
-    };
 };
 
 /**

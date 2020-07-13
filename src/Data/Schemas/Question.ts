@@ -22,7 +22,7 @@ const QuestionSchema = new mongoose.Schema({
     voters: [{ type: String, ref: 'User' }],
     dateTimeCreated: {
         type: Date,
-        default: new Date(),
+        default: () => new Date(),
     },
 });
 

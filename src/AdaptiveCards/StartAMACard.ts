@@ -68,3 +68,10 @@ export default <IAdaptiveCard>{
         },
     ],
 };
+
+export const startAMAMetadata = {
+    title: 'Questionly',
+    height: 270,
+    heightError: 285,
+    width: 600,
+};

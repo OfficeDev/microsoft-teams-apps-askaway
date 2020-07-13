@@ -3,14 +3,10 @@
 import { AdaptiveCard, IAdaptiveCard } from 'adaptivecards';
 import * as ACData from 'adaptivecards-templating';
 import * as moment from 'moment';
-import * as randomMC from 'random-material-color';
 
 import { IQuestionPopulatedUser } from '../Data/Schemas/Question';
 
-import MasterCard, {
-    MasterCardData,
-    viewLeaderboardButton,
-} from './MasterCard';
+import MasterCard, { viewLeaderboardButton } from './MasterCard';
 import StartAMACard from './StartAMACard';
 import endAMAMastercardTemplate from './EndAMA';
 import endAMAConfirmationCardTemplate from './EndAMAConfirmation';
@@ -30,7 +26,9 @@ import InvalidTaskError from './ErrorCard';
  * @param amaSessionId - document database id of the AMA session
  * @param userId - Id of the user who created the AMA session
  * @param ended - whether the AMA session has ended or not
- * @param showDate - whether to show last updated date or not
+ * @param topQuestionsData - array of questions to display under `Top Questions`
+ * @param recentQuestionsData - array of questions to display under `Recent Questions`
+ * @param showDateUpdated - whether to show last updated date or not
  * @returns The AMA Master Card
  */
 export const getMasterCard = async (
@@ -38,35 +36,58 @@ export const getMasterCard = async (
     description: string,
     userName: string,
     amaSessionId: string,
-    userId: string,
-    ended = false,
-    showDate = false
+    aadObjectId: string,
+    ended?: boolean,
+    topQuestionsData?: IQuestionPopulatedUser[],
+    recentQuestionsData?: IQuestionPopulatedUser[],
+    showDateUpdated = false
 ): Promise<AdaptiveCard> => {
-    const data: MasterCardData = {
+    const data = {
         title,
         description,
         userName,
         amaSessionId,
-        userId,
+        aadObjectId,
         ended,
     };
-    const dateUpdated = showDate
+    const _processQuestions = (questions: IQuestionPopulatedUser[]) =>
+        questions.map((question: IQuestionPopulatedUser) => {
+            const questionObject = question.toObject();
+            questionObject.userId.picture = _getPersonImage(
+                questionObject.userId.userName
+            );
+            questionObject.upvotes = questionObject.voters.length;
+            questionObject.upvotable =
+                aadObjectId !== questionObject.userId._id;
+            return questionObject;
+        });
+
+    topQuestionsData = topQuestionsData
+        ? _processQuestions(topQuestionsData)
+        : [];
+
+    recentQuestionsData = recentQuestionsData
+        ? _processQuestions(recentQuestionsData)
+        : [];
+
+    const dateUpdated = showDateUpdated
         ? moment().format('ddd, MMM D, YYYY, h:mm A')
         : '';
 
     const masterCard = MasterCard;
-    if (ended) {
+    if (ended)
         // remove `Ask a Question` and `End AMA` buttons
         masterCard.actions = [viewLeaderboardButton];
-    }
 
-    const template = new ACData.Template(MasterCard).expand({
+    const template = new ACData.Template(masterCard).expand({
         $root: {
             title: title,
             description: description,
             user: userName,
             amaId: amaSessionId,
-            userId: userId,
+            topQuestions: topQuestionsData,
+            recentQuestions: recentQuestionsData,
+            userId: aadObjectId,
             image: `https://${process.env.HOSTNAME}/images/title_bg.png`,
             data: data,
             actionBy: ended ? 'Ended by' : 'Initiated by',
@@ -113,15 +134,15 @@ export const getErrorCard = (errorMessage: string): AdaptiveCard => {
  * Returns the adaptive card for the leaderboard populated with the questions provided.
  * @param questionData - Array of question documents to populate the leaderboard with. The 'userId' field of each Questoin document should be populated prior to passing into this function.
  * @param aadObjectId - aadObjectId of the user opening the leaderboard. Used to format "My Questions" area of the leaderboard properly, as well as disallow users from upvoting their own questions.
+ * @param amaSessionId - Database document id of the AMA session.
  * @returns - Adaptive Card for the leaderboard populated with the questions provided.
  */
 export const generateLeaderboard = (
     questionData: IQuestionPopulatedUser[],
-    aadObjectId: string
+    aadObjectId: string,
+    amaSessionId: string
 ): AdaptiveCard => {
-    if (!questionData.length) {
-        return _adaptiveCard(LeaderboardEmpty);
-    }
+    if (!questionData.length) return _adaptiveCard(LeaderboardEmpty);
 
     const leaderboardTemplate = new ACData.Template(Leaderboard);
 
@@ -129,16 +150,9 @@ export const generateLeaderboard = (
         const questionObject = question.toObject();
         questionObject.upvotes = questionObject.voters.length;
         questionObject.upvotable = aadObjectId !== questionObject.userId._id;
-
-        const userNameArray = questionObject.userId.userName.split(' ');
-
-        // Currently using the following external API for generating user initials avatars. Will switch to local library after consulting with
-        // Kiran and designers.
-        questionObject.userId.picture = `https://ui-avatars.com/api/?name=${
-            userNameArray[0][0]
-        }+${userNameArray[1][0]}&background=${randomMC
-            .getColor()
-            .substring(1)}`;
+        questionObject.userId.picture = _getPersonImage(
+            questionObject.userId.userName
+        );
 
         return questionObject;
     });
@@ -151,6 +165,7 @@ export const generateLeaderboard = (
             userHasQuestions: userQuestions.length > 0,
             userQuestions,
             questions: questionData,
+            amaSessionId: amaSessionId,
         },
     };
 
@@ -252,4 +267,18 @@ export const getResubmitQuestionErrorCard = (
         },
     });
     return _adaptiveCard(template);
+};
+
+const _getPersonImage = (name: string) => {
+    if (!name) return '';
+
+    const userNameArray = name.split(' ');
+    const str =
+        userNameArray.length > 1
+            ? `${userNameArray[0][0]}+${userNameArray[1][0]}`
+            : `${userNameArray[0][0]}`;
+
+    // Currently using the following external API for generating user initials avatars. Will switch to local library after consulting with
+    // Kiran and designers.
+    return `https://ui-avatars.com/api/?name=${str}`;
 };

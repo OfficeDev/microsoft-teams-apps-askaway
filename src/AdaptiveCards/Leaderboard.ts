@@ -142,6 +142,8 @@ export const Leaderboard: IAdaptiveCard = {
                                                 data: {
                                                     id: 'upvote',
                                                     questionId: '${_id}',
+                                                    amaSessionId:
+                                                        '${amaSessionId}',
                                                 },
                                             },
                                             $when: '${upvotable}',

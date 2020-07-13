@@ -44,7 +44,7 @@ const AMASessionSchema = new mongoose.Schema({
     },
     dateTimeCreated: {
         type: Date,
-        default: new Date(),
+        default: () => new Date(),
     },
     dateTimeEnded: {
         type: Date,
