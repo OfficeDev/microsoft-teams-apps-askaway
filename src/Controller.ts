@@ -174,7 +174,7 @@ export const getUpdatedMasterCard = async (
                 amaSessionData.userName,
                 amaSessionId,
                 amaSessionData.userAadObjId,
-                ended,
+                ended || !amaSessionData.isActive,
                 topQuestions,
                 recentQuestions,
                 true

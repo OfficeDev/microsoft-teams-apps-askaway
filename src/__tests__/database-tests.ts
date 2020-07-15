@@ -149,6 +149,7 @@ test('get AMA session data', async () => {
         activityId,
         userAadObjId,
         description,
+        isActive,
     } = await getAMASessionData(testAMASession._id);
 
     expect(title).toBe(sampleTitle);
@@ -156,6 +157,7 @@ test('get AMA session data', async () => {
     expect(activityId).toBe(sampleActivityId);
     expect(userAadObjId).toBe(sampleUserAADObjId1);
     expect(description).toBe(sampleDescription);
+    expect(isActive).toBe(true);
 });
 
 test('retrieve most recent/top questions with three questions', async () => {
