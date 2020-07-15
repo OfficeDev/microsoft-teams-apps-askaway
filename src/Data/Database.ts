@@ -175,7 +175,6 @@ export const getQuestions = async (
         voteSorted = questionData
             .sort((a: any, b: any) => b.voters.length - a.voters.length)
             .slice(0, topN);
-
     return {
         topQuestions: topN ? voteSorted : null,
         recentQuestions: recentN ? recentSorted : null,
@@ -205,6 +204,7 @@ export const getAMASessionData = async (amaSessionId: string) => {
         activityId: _amaSessionData.activityId,
         userAadObjId: _amaSessionData.hostId._id,
         description: _amaSessionData.description,
+        isActive: _amaSessionData.isActive,
     };
 };
 
