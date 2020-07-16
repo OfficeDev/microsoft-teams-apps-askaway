@@ -303,6 +303,7 @@ export const addUpvote = async (
  * @throws Error thrown when database fails to execute changes
  */
 export const endAMASession = async (amaSessionId: string) => {
+    await getAMASession(amaSessionId);
     await AMASession.findByIdAndUpdate(amaSessionId, {
         $set: { isActive: false, dateTimeEnded: new Date() },
     })
