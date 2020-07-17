@@ -10,12 +10,9 @@ import {
     updateActivityId,
     getAMASessionData,
     getQuestions,
+    getAMASession,
 } from '../Data/Database';
-import {
-    Question,
-    IQuestion,
-    IQuestionPopulatedUser,
-} from '../Data/Schemas/Question';
+import { Question, IQuestion } from '../Data/Schemas/Question';
 import { User } from '../Data/Schemas/User';
 
 let testHost, testAMASession, testUser, testUserUpvoting;
@@ -23,17 +20,18 @@ let testHost, testAMASession, testUser, testUserUpvoting;
 const sampleUserAADObjId1 = 'be36140g-9729-3024-8yg1-147bbi67g2c9';
 const sampleUserAADObjId2 = 'different from obj id 1';
 const sampleUserAADObjId3 = 'different fr0m obj id 0';
+const sampleUserAADObjId4 = 'different from obj id 2';
 const sampleUserName1 = 'Shayan Khalili';
 const sampleUserName2 = 'Lily Du';
 const sampleUserName3 = 'Kavin Singh';
+const sampleUserName4 = 'Sample Name';
 const sampleQuestionContent = 'Sample Question?';
-// must be 24 hex character string
-const sampleAmaTeamsSessionId = '5ee25f76c7e152311cf94d99';
 const sampleTitle = 'Weekly AMA Test';
 const sampleDescription = 'Weekly AMA Test description';
 const sampleActivityId = '1234';
 const sampleTenantId = '11121';
 const sampleScopeId = '12311';
+const sampleAMASessionID = '32323232';
 
 beforeAll(async () => {
     await mongoose.connect(process.env.MONGO_URL as string, {
@@ -288,24 +286,45 @@ test('update existing user', async () => {
     expect(data).toBe(true);
 });
 
-test('new question with existing user', async () => {
+test('new question with existing user in existing AMA session', async () => {
     const data = await createQuestion(
-        sampleAmaTeamsSessionId,
-        sampleUserAADObjId1,
-        sampleUserName1,
+        testAMASession._id,
+        testUser._id,
+        testUser.userName,
         sampleQuestionContent
     );
     expect(data).toEqual(true);
 });
 
-test('new question with new user', async () => {
-    const randomString = Math.random().toString(36);
+test('new question with new user in existing AMA session', async () => {
     const data = await createQuestion(
-        sampleAmaTeamsSessionId,
-        randomString,
-        'Earnest Cream', //using same name and question because the bot only checks for AADObjId
+        testAMASession._id,
+        sampleUserAADObjId4,
+        sampleUserName4,
         sampleQuestionContent
     );
+    expect(data).toEqual(true);
+});
+
+test('new question with existing user in non-existing AMA session', async () => {
+    await createQuestion(
+        sampleAMASessionID,
+        sampleUserAADObjId4,
+        sampleUserName4,
+        sampleQuestionContent
+    ).catch((error) => {
+        expect(error).toEqual(new Error('Failed to find AMA Session'));
+    });
+});
+
+test('get non-existing AMA session', async () => {
+    await getAMASession(sampleAMASessionID).catch((error) => {
+        expect(error).toEqual(new Error('Failed to find AMA Session'));
+    });
+});
+
+test('get existing AMA session', async () => {
+    const data = await getAMASession(testAMASession._id);
     expect(data).toEqual(true);
 });
 
@@ -389,7 +408,13 @@ test('upvote question with new user not in database', async () => {
     await User.remove(testUserUpvoting);
 });
 
-test('ending ama with no questions', async () => {
+test('ending non-existing ama', async () => {
+    await endAMASession(sampleAMASessionID).catch((error) => {
+        expect(error).toEqual(new Error('Failed to find AMA Session'));
+    });
+});
+
+test('ending existing ama with no questions', async () => {
     await endAMASession(testAMASession._id);
 
     // get data
@@ -404,13 +429,13 @@ test('ending ama with no questions', async () => {
     expect(amaSessionData.dateTimeEnded).not.toBe(null);
 });
 
-test('ending ama with a few questions', async () => {
+test('ending existing ama with a few questions', async () => {
     for (let i = 0; i < 5; i++) {
         const randomString = Math.random().toString(36);
         await createQuestion(
             testAMASession._id,
             randomString,
-            'Earnest Cream', //using same name and question because the bot only checks for AADObjId
+            sampleUserName4,
             sampleQuestionContent
         );
     }
