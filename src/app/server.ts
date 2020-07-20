@@ -20,16 +20,18 @@ dotenvConfig();
 // Set up app insights
 appInsights
     .setup(process.env.APPINSIGHTS_INSTRUMENTATIONKEY)
-    .setAutoDependencyCorrelation(true) // track a request across external dependencies and later callbacks
+    .setAutoDependencyCorrelation(true)
     .setAutoCollectRequests(true)
     .setAutoCollectPerformance(true, true)
     .setAutoCollectExceptions(true)
-    .setAutoCollectDependencies(true) // enables tracking for mongoDB
-    .setAutoCollectConsole(true, true) //includes console.log errors
+    .setAutoCollectDependencies(true)
+    .setAutoCollectConsole(true, true)
     .setUseDiskRetryCaching(true)
     .setSendLiveMetrics(true)
     .setDistributedTracingMode(appInsights.DistributedTracingModes.AI);
 appInsights.start();
+
+export const aiClient = appInsights.defaultClient;
 
 // The import of components has to be done AFTER the dotenv config
 import * as allComponents from './TeamsAppsComponents';
