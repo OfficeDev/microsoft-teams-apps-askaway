@@ -90,7 +90,7 @@
             }
         },
         "gitRepoUrl": {
-            "type": "string", //NEED TO CHANGE THIS VALUE ONCE CREATED
+            "type": "string", // TEMPORARY LINK, NEED TO CHANGE THIS VALUE ONCE CREATED
             "defaultValue": "https://github.com/OfficeDev/microsoft-teams-celebrations-app.git",
             "metadata": {
                 "description": "The URL to the GitHub repository to deploy."
@@ -102,23 +102,29 @@
             "metadata": {
                 "description": "The branch of the GitHub repository to deploy."
             }
+        },
+        "accountName": {
+            "type": "string",
+            "defaultValue": "[concat('mongodb-', uniqueString(resourceGroup().id))]",
+            "metadata": {
+                "description": "Cosmos DB account name"
+            }
         }
     },
     "variables": {
-        "uniqueString": "[uniqueString(subscription().id, resourceGroup().id, parameters('baseResourceName'))]",
         "botName": "[parameters('baseResourceName')]",
         "botAppName": "[parameters('baseResourceName')]",
         "botAppDomain": "[concat(variables('botAppName'), '.azurewebsites.net')]",
         "botAppUrl": "[concat('https://', variables('botAppDomain'))]",
         "hostingPlanName": "[parameters('baseResourceName')]",
-        "cosmosDbName": "[variables('uniqueString')]",
+        "cosmosDbName": "[toLower(parameters('accountName'))]",
         "botAppInsightsName": "[parameters('baseResourceName')]",
         "sharedSkus": ["Free", "Shared"],
         "isSharedPlan": "[contains(variables('sharedSkus'), parameters('sku'))]",
         "skuFamily": "[if(equals(parameters('sku'), 'Shared'), 'D', take(parameters('sku'), 1))]",
         "botMessagingUrl": "[concat(variables('botAppUrl'), '/api/messages')]",
         "manifestAppId": "[parameters('botClientId')]",
-        "cosmosDBDatabaseName": "Questionly"
+        "accountName": "[toLower(parameters('accountName'))]"
     },
     "outputs": {
         "botId": {
@@ -193,11 +199,11 @@
             ]
         },
         {
-            "name": "[variables('cosmosDbName')]",
+            "name": "[variables('accountName')]",
             "type": "Microsoft.DocumentDB/databaseAccounts",
             "apiVersion": "2015-04-08",
             "location": "[parameters('location')]",
-            "kind": "GlobalDocumentDB",
+            "kind": "MongoDB",
             "scale": null,
             "properties": {
                 "ipRangeFilter": "",
@@ -219,9 +225,6 @@
                     }
                 ],
                 "capabilities": []
-            },
-            "tags": {
-                "defaultExperience": "Core (SQL)"
             }
         },
         {
@@ -273,8 +276,24 @@
                             "value": "[concat('https://', variables('botAppDomain'))]"
                         },
                         {
+                            "name": "Bot:Version",
+                            "value": "1.0.0"
+                        },
+                        {
+                            "name": "Bot:Company",
+                            "value": "TBD"
+                        },
+                        {
+                            "name": "MongoDbUri",
+                            "value": "[listConnectionStrings(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('accountName')), '2019-12-12').connectionStrings[0].connectionString]"
+                        },
+                        {
                             "name": "Bot:TenantId",
                             "value": "[parameters('tenantId')]"
+                        },
+                        {
+                            "name": "AvatarKey",
+                            "value": "[uniqueString(parameters('botClientSecret'))]"
                         },
                         {
                             "name": "CosmosDBEndpointUrl",
@@ -286,11 +305,19 @@
                         },
                         {
                             "name": "CosmosDBDatabaseName",
-                            "value": "[variables('cosmosDBDatabaseName')]"
+                            "value": "[parameters('accountName')]"
                         },
                         {
                             "name": "BotDisplayName",
                             "value": "[variables('botName')]"
+                        },
+                        {
+                            "name": "updateMasterCardDebounceTimeInterval",
+                            "value": "3000"
+                        },
+                        {
+                            "name": "updateMasterCardDebounceMaxWait",
+                            "value": "5000"
                         },
                         {
                             "name": "ActiveDirectoryTenant",
@@ -300,7 +327,6 @@
                             "name": "i18n:DefaultCulture",
                             "value": "[parameters('defaultCulture')]"
                         },
-
                         {
                             "name": "ManifestAppId",
                             "value": "[variables('manifestAppId')]"
@@ -345,6 +371,7 @@
         {
             "name": "[variables('botAppInsightsName')]",
             "type": "Microsoft.Insights/components",
+            "kind": "other",
             "apiVersion": "2015-05-01",
             "location": "[parameters('location')]",
             "tags": {
