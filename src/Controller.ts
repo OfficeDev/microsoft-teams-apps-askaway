@@ -145,9 +145,7 @@ export const submitNewQuestion = async (
             questionContent
         );
 
-        return ok({
-            status: true,
-        });
+        return ok(true);
     } catch (error) {
         aiClient.trackException({ exception: error });
         return err(Error('Failed to submit new question'));
@@ -276,9 +274,7 @@ export const isHost = async (
     try {
         await db.isHost(amaSessionId, userAadObjId);
 
-        return ok({
-            status: true,
-        });
+        return ok(true);
     } catch (error) {
         aiClient.trackException({ exception: error });
         return err(
