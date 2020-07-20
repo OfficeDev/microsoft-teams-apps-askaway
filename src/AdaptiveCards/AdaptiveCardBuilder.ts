@@ -134,16 +134,21 @@ export const getErrorCard = (errorMessage: string): AdaptiveCard => {
  * @param questionData - Array of question documents to populate the leaderboard with. The 'userId' field of each Questoin document should be populated prior to passing into this function.
  * @param aadObjectId - aadObjectId of the user opening the leaderboard. Used to format "My Questions" area of the leaderboard properly, as well as disallow users from upvoting their own questions.
  * @param amaSessionId - Database document id of the AMA session.
+ * @param isHost - boolean value indicating if user is the host of this current AMA session
+ * @param isActiveAMA - boolean value indicating if current AMA session is active
  * @returns - Adaptive Card for the leaderboard populated with the questions provided.
  */
 export const generateLeaderboard = (
     questionData: IQuestionPopulatedUser[],
     aadObjectId: string,
-    amaSessionId: string
+    amaSessionId: string,
+    isHost?: boolean,
+    isActiveAMA?: boolean
 ): AdaptiveCard => {
-    if (!questionData.length) return _adaptiveCard(LeaderboardEmpty);
+    if (!questionData.length)
+        return generateEmptyLeaderboard(amaSessionId, isHost, isActiveAMA);
 
-    const leaderboardTemplate = new ACData.Template(Leaderboard);
+    const leaderboardTemplate = Leaderboard();
 
     questionData = questionData.map((question) => {
         const questionObject = question.toObject();
@@ -165,11 +170,45 @@ export const generateLeaderboard = (
             userQuestions,
             questions: questionData,
             amaSessionId: amaSessionId,
+            amaId: amaSessionId,
+            isUserHost: isHost,
+            isActive: isActiveAMA,
         },
     };
 
-    const leaderboardPopulated = leaderboardTemplate.expand(data);
+    const leaderboardPopulated = new ACData.Template(
+        leaderboardTemplate
+    ).expand(data);
+
     return _adaptiveCard(leaderboardPopulated);
+};
+
+/**
+ * Generates the empty leaderboard
+ * @param amaSessionId - id of the current AMA session
+ * @param isHost - boolean value indicating if user is the host of this current AMA session
+ * @param isActiveAMA - boolean value indicating if current AMA session is active
+ */
+const generateEmptyLeaderboard = (
+    amaSessionId: string,
+    isHost?: boolean,
+    isActiveAMA?: boolean
+): AdaptiveCard => {
+    const leaderboardTemplate = LeaderboardEmpty();
+
+    const data = {
+        $root: {
+            amaId: amaSessionId,
+            isUserHost: isHost,
+            isActive: isActiveAMA,
+        },
+    };
+
+    const emptyLeaderboard = new ACData.Template(leaderboardTemplate).expand(
+        data
+    );
+
+    return _adaptiveCard(emptyLeaderboard);
 };
 
 /**

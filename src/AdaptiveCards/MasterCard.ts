@@ -312,18 +312,6 @@ export default <IAdaptiveCard>{
             },
         },
         viewLeaderboardButton,
-        {
-            id: 'endAMA',
-            type: 'Action.Submit',
-            title: 'End AMA',
-            data: {
-                msteams: {
-                    type: 'task/fetch',
-                },
-                id: 'endAMA',
-                amaSessionId: '${amaId}',
-            },
-        },
     ],
 };
 
