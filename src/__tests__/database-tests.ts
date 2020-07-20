@@ -10,7 +10,9 @@ import {
     updateActivityId,
     getAMASessionData,
     getQuestions,
-    getAMASession,
+    isHost,
+    isActiveAMA,
+    isExistingAMASession,
 } from '../Data/Database';
 import { Question, IQuestion } from '../Data/Schemas/Question';
 import { User } from '../Data/Schemas/User';
@@ -318,13 +320,13 @@ test('new question with existing user in non-existing AMA session', async () => 
 });
 
 test('get non-existing AMA session', async () => {
-    await getAMASession(sampleAMASessionID).catch((error) => {
+    await isExistingAMASession(sampleAMASessionID).catch((error) => {
         expect(error).toEqual(new Error('Failed to find AMA Session'));
     });
 });
 
 test('get existing AMA session', async () => {
-    const data = await getAMASession(testAMASession._id);
+    const data = await isExistingAMASession(testAMASession._id);
     expect(data).toEqual(true);
 });
 
@@ -452,4 +454,48 @@ test('ending existing ama with a few questions', async () => {
 
     expect(amaSessionData.isActive).toBe(false);
     expect(amaSessionData.dateTimeEnded).not.toBe(null);
+});
+
+test('checking if current host is the host', async () => {
+    const data = await isHost(testAMASession._id, testAMASession.hostId);
+    expect(data).toEqual(true);
+});
+
+test('checking if random attendee is the host', async () => {
+    const data = await isHost(testAMASession._id, sampleUserAADObjId3);
+    expect(data).toEqual(false);
+});
+
+test('checking if active AMA is currently active', async () => {
+    const data = await isActiveAMA(testAMASession._id);
+    expect(data).toEqual(true);
+});
+
+test('checking if inactive AMA is currently active', async () => {
+    const data = {
+        title: sampleTitle,
+        description: sampleDescription,
+        userName: sampleUserName2,
+        userAadObjId: sampleUserAADObjId2,
+        activityId: sampleActivityId,
+        tenantId: sampleTenantId,
+        scopeId: sampleScopeId,
+        isChannel: true,
+    };
+
+    const result = await createAMASession(
+        data.title,
+        data.description,
+        data.userName,
+        data.userAadObjId,
+        data.activityId,
+        data.tenantId,
+        data.scopeId,
+        data.isChannel
+    );
+
+    endAMASession(result.amaSessionId);
+
+    const isActive = await isActiveAMA(result.amaSessionId);
+    expect(isActive).toEqual(false);
 });

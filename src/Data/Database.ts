@@ -224,7 +224,7 @@ export const createQuestion = async (
     questionContent: string
 ): Promise<boolean> => {
     await getUserOrCreate(userAadObjId, userTeamsName);
-    await getAMASession(amaTeamsSessionId);
+    await isExistingAMASession(amaTeamsSessionId);
 
     const question = new Question({
         amaSessionId: amaTeamsSessionId,
@@ -303,7 +303,7 @@ export const addUpvote = async (
  * @throws Error thrown when database fails to execute changes
  */
 export const endAMASession = async (amaSessionId: string) => {
-    await getAMASession(amaSessionId);
+    await isExistingAMASession(amaSessionId);
     const result = await AMASession.findByIdAndUpdate(amaSessionId, {
         $set: { isActive: false, dateTimeEnded: new Date() },
     })
@@ -325,7 +325,7 @@ export const endAMASession = async (amaSessionId: string) => {
  * @returns true if amaTeamsSessionId is in the database
  * @throws Error thrown when database fails to find the amaTeamsSessionId
  */
-export const getAMASession = async (
+export const isExistingAMASession = async (
     amaTeamsSessionId: string
 ): Promise<boolean> => {
     const result = await AMASession.findById(amaTeamsSessionId).catch((err) => {
@@ -333,13 +333,14 @@ export const getAMASession = async (
         throw new Error('Failed to find AMA Session');
     });
 
-    if (!result) throw new Error('AMA Session not found');
+    if (!result) throw new Error('AMA Session record not found');
 
     return true;
 };
 
 /**
- * Checks if the user is the host for this AMA session
+ * Checks if the user is the host for this AMA session, returns true if
+ * id matches records, false otherwise
  * @param amaSessionId - id of the current AMA session
  * @param userAadjObjId - aadObjId of the current user
  * @throws Error when failed to find matching AMA session with the user ID
@@ -351,13 +352,34 @@ export const isHost = async (
     const result = await AMASession.find({
         _id: amaSessionId,
         hostId: userAadjObjId,
-    }).catch((err) => {
-        console.error(err);
-        throw new Error('Failed to find matching AMA session with user ID');
-    });
+    })
+        .exec()
+        .catch((err) => {
+            console.error(err);
+            throw new Error('Failed to find matching AMA session with user ID');
+        });
 
-    if (!result)
-        throw new Error('AMA session with specified user ID not found');
+    if (result.length == 0) return false;
 
     return true;
+};
+
+/**
+ * Checks the status of the AMA session, returns true if
+ * database records indicate active otherwise returns false
+ * @param amaTeamsSessionId - id of the current AMA session
+ */
+export const isActiveAMA = async (
+    amaTeamsSessionId: string
+): Promise<boolean> => {
+    const result = await AMASession.findById(amaTeamsSessionId)
+        .exec()
+        .catch((err) => {
+            console.error(err);
+            throw new Error('Failed to find AMA Session');
+        });
+
+    if (!result) throw new Error('AMA Session record not found');
+
+    return result.isActive;
 };

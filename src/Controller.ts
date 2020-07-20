@@ -18,7 +18,6 @@ export const getTaskSubmitErrorCard = adaptiveCardBuilder.getErrorCard.bind(
     'Your submission encountered an error. Please try submitting again!'
 );
 export const getErrorCard = adaptiveCardBuilder.getErrorCard;
-
 /**
  * Starts the AMA session
  * @param title - title of AMA
@@ -75,11 +74,15 @@ export const startAMASession = async (
  * Returns the populated leaderboard adaptive card for the AMA session attached to the id provided.
  * @param amaSessionId - ID of the AMA session for which the leaderboard shouold be retrieived.
  * @param aadObjectId - aadObjectId of the user who is trying view the leaderboard. This is to used to control certain factors such as not letting the user upvote their own questions.
+ * @param isHost - boolean value indicating if user is the host of this current AMA session
+ * @param isActiveAMA - boolean value indicating if current AMA session is active
  * @returns - A promise containing a result object which, on success, contains the populated leaderboard adaptive card, and on failure, contains an error card.
  */
 export const generateLeaderboard = async (
     amaSessionId: string,
-    aadObjectId: string
+    aadObjectId: string,
+    isHost?: boolean,
+    isActiveAMA?: boolean
 ): Promise<Result<AdaptiveCard, Error>> => {
     try {
         const questionData: IQuestionPopulatedUser[] = await db.getQuestionData(
@@ -89,7 +92,9 @@ export const generateLeaderboard = async (
             adaptiveCardBuilder.generateLeaderboard(
                 questionData,
                 aadObjectId,
-                amaSessionId
+                amaSessionId,
+                isHost,
+                isActiveAMA
             )
         );
     } catch (error) {
@@ -191,11 +196,15 @@ export const getUpdatedMasterCard = async (
  * @param questionId - DBID of the question being upvoted
  * @param aadObjectId - aadObjectId of the user upvoting the question
  * @param name - Name of the user upvoting the question
+ * @param isHost - boolean value indicating if user is the host of this current AMA session
+ * @param isActiveAMA - boolean value indicating if current AMA session is active
  */
 export const addUpvote = async (
     questionId: string,
     aadObjectId: string,
-    name: string
+    name: string,
+    isHost?: boolean,
+    isActiveAMA?: boolean
 ): Promise<Result<AdaptiveCard, Error>> => {
     try {
         const question: IQuestion = await db.addUpvote(
@@ -203,7 +212,12 @@ export const addUpvote = async (
             aadObjectId,
             name
         );
-        return generateLeaderboard(question.amaSessionId, aadObjectId);
+        return generateLeaderboard(
+            question.amaSessionId,
+            aadObjectId,
+            isHost,
+            isActiveAMA
+        );
     } catch (error) {
         aiClient.trackException({ exception: error });
         return err(Error('Failed to upvote question.'));
@@ -280,5 +294,24 @@ export const isHost = async (
         return err(
             Error('Failed to check if user is host for this AMA session')
         );
+    }
+};
+
+/**
+ * Calls database to check if current AMA session is active
+ * @param amaSessionId - id of the current AMA session
+ */
+export const isActiveAMA = async (
+    amaSessionId: string
+): Promise<Result<any, Error>> => {
+    try {
+        const result = await db.isActiveAMA(amaSessionId);
+
+        return ok({
+            status: result,
+        });
+    } catch (error) {
+        aiClient.trackException({ exception: error });
+        return err(Error('Failed to check if AMA session is active'));
     }
 };

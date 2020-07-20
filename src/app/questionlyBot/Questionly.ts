@@ -80,11 +80,6 @@ export class Questionly extends TeamsActivityHandler {
             return this._handleTeamsTaskModuleFetchAskQuestion(
                 taskModuleRequest
             );
-        else if (taskModuleRequest.data.id == 'endAMA')
-            return this._handleTeamsTaskModuleFetchEndAMA(
-                taskModuleRequest,
-                context
-            );
 
         aiClient.trackException({ exception: new Error('Invalid Task Fetch') });
         return this._handleTeamsTaskModuleFetchError();
@@ -106,6 +101,10 @@ export class Questionly extends TeamsActivityHandler {
         else if (taskModuleRequest.data.id === 'upvote')
             return await this._handleTeamsTaskModuleSubmitUpvote(
                 context,
+                taskModuleRequest
+            );
+        else if (taskModuleRequest.data.id == 'confirmEndAMA')
+            return this._handleTeamsTaskModuleSubmitConfirmEndAMA(
                 taskModuleRequest
             );
         else if (endAMAIds.includes(taskModuleRequest.data.id))
@@ -164,28 +163,15 @@ export class Questionly extends TeamsActivityHandler {
         return null as any;
     }
 
-    private async _handleTeamsTaskModuleFetchEndAMA(
-        taskModuleRequest: TaskModuleRequest,
-        context: TurnContext
+    private async _handleTeamsTaskModuleSubmitConfirmEndAMA(
+        taskModuleRequest: TaskModuleRequest
     ): Promise<TaskModuleResponse> {
-        const amaSessionId = taskModuleRequest.data.amaSessionId;
-        const userAadObjId = context.activity.from.aadObjectId;
-
-        const isHost = await controller.isHost(
-            amaSessionId,
-            userAadObjId as string
+        return this._buildTaskModuleContinueResponse(
+            controller.getEndAMAConfirmationCard(
+                taskModuleRequest.data.amaSessionId
+            ),
+            'End session'
         );
-
-        if (isHost.isOk()) {
-            return this._buildTaskModuleContinueResponse(
-                controller.getEndAMAConfirmationCard(
-                    taskModuleRequest.data.amaSessionId
-                ),
-                'End the AMA'
-            );
-        }
-
-        return null as any;
     }
 
     private async _handleTeamsTaskModuleSubmitEndAMA(
@@ -246,37 +232,79 @@ export class Questionly extends TeamsActivityHandler {
                 <put the amaSessionId here>
         }
         ================================================================================================================================*/
-        const leaderboard = await controller.generateLeaderboard(
-            taskModuleRequest.data.amaSessionId,
-            context.activity.from.aadObjectId as string
+
+        const isHostAndActive = await this._isHostAndActive(
+            taskModuleRequest,
+            context
         );
 
-        const response: TaskModuleResponse = leaderboard.isOk()
-            ? this._buildTaskModuleContinueResponse(leaderboard.value)
-            : this._buildTaskModuleContinueResponse(
-                  controller.getErrorCard(leaderboard.value.message)
-              );
+        const isHost = isHostAndActive[0];
+        const isActiveAMA = isHostAndActive[1];
 
-        return response;
+        if (isHost.isOk() && isActiveAMA.isOk()) {
+            const leaderboard = await controller.generateLeaderboard(
+                taskModuleRequest.data.amaSessionId,
+                context.activity.from.aadObjectId as string,
+                isHost.value.status,
+                isActiveAMA.value.status
+            );
+
+            const response: TaskModuleResponse = leaderboard.isOk()
+                ? this._buildTaskModuleContinueResponse(leaderboard.value)
+                : this._buildTaskModuleContinueResponse(
+                      controller.getErrorCard(leaderboard.value.message)
+                  );
+
+            return response;
+        }
+
+        return this._buildTaskModuleContinueResponse(
+            controller.getErrorCard(
+                'Could not retrieve leaderboard. Please try again'
+            )
+        );
     };
 
     private _handleTeamsTaskModuleSubmitUpvote = async (
         context: TurnContext,
         taskModuleRequest: TaskModuleRequest
     ): Promise<TaskModuleResponse> => {
-        const updatedLeaderboard = await controller.addUpvote(
-            taskModuleRequest.data.questionId,
-            context.activity.from.aadObjectId as string,
-            context.activity.from.name
+        const isHostAndActive = await this._isHostAndActive(
+            taskModuleRequest,
+            context
         );
 
-        this._updateMasterCard(taskModuleRequest.data.amaSessionId, context);
+        const isHost = isHostAndActive[0];
+        const isActiveAMA = isHostAndActive[1];
 
-        return updatedLeaderboard.isOk()
-            ? this._buildTaskModuleContinueResponse(updatedLeaderboard.value)
-            : this._buildTaskModuleContinueResponse(
-                  controller.getErrorCard('Upvoting failed. Please try again.')
-              );
+        if (isHost.isOk() && isActiveAMA.isOk()) {
+            const updatedLeaderboard = await controller.addUpvote(
+                taskModuleRequest.data.questionId,
+                context.activity.from.aadObjectId as string,
+                context.activity.from.name,
+                isHost.value.status,
+                isActiveAMA.value.status
+            );
+
+            this._updateMasterCard(
+                taskModuleRequest.data.amaSessionId,
+                context
+            );
+
+            return updatedLeaderboard.isOk()
+                ? this._buildTaskModuleContinueResponse(
+                      updatedLeaderboard.value
+                  )
+                : this._buildTaskModuleContinueResponse(
+                      controller.getErrorCard(
+                          'Upvoting failed. Please try again.'
+                      )
+                  );
+        }
+
+        return this._buildTaskModuleContinueResponse(
+            controller.getErrorCard('Upvoting failed. Please try again.')
+        );
     };
 
     async handleTeamsMessagingExtensionFetchTask(): Promise<
@@ -483,5 +511,20 @@ export class Questionly extends TeamsActivityHandler {
             return err(null);
         const attachments = action.botActivityPreview[0].attachments;
         return extractMasterCardData(attachments[0].content);
+    };
+
+    private _isHostAndActive = async (
+        taskModuleRequest: TaskModuleRequest,
+        context: TurnContext
+    ): Promise<Array<Result<any, Error>>> => {
+        const amaSessionId = taskModuleRequest.data.amaSessionId;
+        const userAadObjId = context.activity.from.aadObjectId as string;
+
+        const isHost = await controller.isHost(amaSessionId, userAadObjId);
+        const isActiveAMA = await controller.isActiveAMA(
+            taskModuleRequest.data.amaSessionId
+        );
+
+        return [isHost, isActiveAMA];
     };
 }
