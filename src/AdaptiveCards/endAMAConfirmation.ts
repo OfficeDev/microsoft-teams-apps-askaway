@@ -12,20 +12,11 @@ export default <IAdaptiveCard>{
     body: [
         {
             type: 'TextBlock',
-            text: 'End the AMA. I am aware this cannot be undone.',
+            text: 'Are you sure you want to stop gathering questions?',
             size: 'large',
         },
     ],
     actions: [
-        {
-            id: 'submitEndAma',
-            type: 'Action.Submit',
-            title: 'Submit',
-            data: {
-                amaSessionId: '${amaId}',
-                id: 'submitEndAma',
-            },
-        },
         {
             id: 'cancelEndAma',
             type: 'Action.Submit',
@@ -33,6 +24,15 @@ export default <IAdaptiveCard>{
             data: {
                 amaSessionId: '${amaId}',
                 id: 'cancelEndAma',
+            },
+        },
+        {
+            id: 'submitEndAma',
+            type: 'Action.Submit',
+            title: 'End session',
+            data: {
+                amaSessionId: '${amaId}',
+                id: 'submitEndAma',
             },
         },
     ],

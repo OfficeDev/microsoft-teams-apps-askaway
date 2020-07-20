@@ -14,7 +14,6 @@ import endAMAConfirmationCardTemplate from './EndAMAConfirmation';
 import { Leaderboard, LeaderboardEmpty } from './Leaderboard';
 
 import newQuestionCardTemplate from './NewQuestion';
-import newQuestionErrorCardTemplate from './NewQuestionError';
 
 import InvalidTaskError from './ErrorCard';
 
@@ -186,13 +185,6 @@ export const getNewQuestionCard = (amaSessionId: string): AdaptiveCard => {
     });
     return _adaptiveCard(template);
 };
-
-/**
- * Creates and parses the adaptive card for errors when creating a new question.
- * @returns Adaptive Card associated with errors from creating a new question
- */
-export const getQuestionErrorCard = (): AdaptiveCard =>
-    _adaptiveCard(newQuestionErrorCardTemplate);
 
 /**
  * Makes an adaptive card template into an adaptive card object.

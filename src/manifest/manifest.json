@@ -5,18 +5,18 @@
     "version": "{{VERSION}}",
     "packageName": "{{PACKAGE_NAME}}",
     "developer": {
-        "name": "TBD",
+        "name": "{{COMPANYNAME}}",
         "websiteUrl": "https://{{HOSTNAME}}",
         "privacyUrl": "https://{{HOSTNAME}}/privacy.html",
         "termsOfUseUrl": "https://{{HOSTNAME}}/tou.html"
     },
     "name": {
-        "short": "Questionly",
-        "full": "Questionly"
+        "short": "Ask Away",
+        "full": "Ask Away"
     },
     "description": {
-        "short": "Questionly helps AMA hosts and attendees manage and interact with AMA sessions.",
-        "full": "Questionly assists AMA hosts and attendees with the tasks associated with conducting an AMA session such as help start an AMA, count attendee votes for questions, track questions, accept new questions, show a leaderboard, etc."
+        "short": "Ask Away helps crowdsource questions for your next Q & A",
+        "full": "Planning a Q & A event? Ask Away helps you easily gather questions from within a Teams channel or chat. Team members can submit questions and upvote others shared by colleagues, resulting in a list of top-of-mind questions to give to your Q & A host."
     },
     "icons": {
         "outline": "icon-outline.png",
@@ -42,8 +42,8 @@
                 {
                     "id": "startAMA",
                     "type": "action",
-                    "title": "Start AMA",
-                    "description": "Run an \"Ask Me Anything\" Poll",
+                    "title": "Start session",
+                    "description": "Start gathering questions",
                     "fetchTask": true,
                     "context": ["compose", "message"]
                 }
