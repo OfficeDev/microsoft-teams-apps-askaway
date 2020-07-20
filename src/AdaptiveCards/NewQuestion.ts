@@ -10,22 +10,21 @@ export default <IAdaptiveCard>{
     body: [
         {
             type: 'TextBlock',
-            text:
-                'There was an error submitting your question. Please try again.',
+            text: 'Something went wrong submitting your question. Try again.',
             color: 'attention',
             $when: '${question != null}',
         },
         {
+            type: 'TextBlock',
+            text: 'Question (250 characters max)',
+        },
+        {
             type: 'Input.Text',
             id: 'usertext',
-            placeholder: 'Ex. What is your favourite type of pizza?',
+            placeholder: 'Type a question',
             maxLength: 250,
             isMultiline: true,
             value: '${if(question != null, question, null)}',
-        },
-        {
-            type: 'TextBlock',
-            text: 'Maximum number of characters: 250',
         },
     ],
     actions: [

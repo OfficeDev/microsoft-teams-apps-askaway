@@ -126,7 +126,7 @@ export class Questionly extends TeamsActivityHandler {
     ): TaskModuleResponse {
         return this._buildTaskModuleContinueResponse(
             controller.getNewQuestionCard(taskModuleRequest.data.amaSessionId),
-            'Ask a Question'
+            'Ask a question'
         );
     }
 
@@ -227,7 +227,7 @@ export class Questionly extends TeamsActivityHandler {
     ): TaskModuleResponse {
         return this._buildTaskModuleContinueResponse(
             controller.getResubmitQuestionCard(amaSessionId, questionContent),
-            'Resubmit a Question'
+            'Ask a question'
         );
     }
 
