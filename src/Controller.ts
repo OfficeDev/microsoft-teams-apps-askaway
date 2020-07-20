@@ -5,6 +5,7 @@ import * as adaptiveCardBuilder from './AdaptiveCards/AdaptiveCardBuilder'; // T
 import { ok, err, Result } from './util';
 import { AdaptiveCard } from 'adaptivecards';
 import { IQuestion, IQuestionPopulatedUser } from './Data/Schemas/Question';
+import { aiClient } from './app/server';
 
 db.initiateConnection(process.env.MONGO_URI as string);
 
@@ -65,7 +66,7 @@ export const startAMASession = async (
             amaSessionId: response.amaSessionId,
         });
     } catch (error) {
-        console.error(error);
+        aiClient.trackException({ exception: error });
         return err(Error('Failed to start AMA'));
     }
 };
@@ -92,7 +93,7 @@ export const generateLeaderboard = async (
             )
         );
     } catch (error) {
-        console.error(error);
+        aiClient.trackException({ exception: error });
         return err(new Error('Retrieving Leaderboard Failed.'));
     }
 };
@@ -109,7 +110,7 @@ export const setActivityId = async (
     try {
         return ok(await db.updateActivityId(amaSessionId, activityId));
     } catch (error) {
-        console.error(error);
+        aiClient.trackException({ exception: error });
         return err(error);
     }
 };
@@ -135,7 +136,7 @@ export const submitNewQuestion = async (
     userAadObjId: string,
     userName: string,
     questionContent: string
-): Promise<Result<any, Error>> => {
+): Promise<Result<boolean, Error>> => {
     try {
         await db.createQuestion(
             amaSessionId,
@@ -148,7 +149,7 @@ export const submitNewQuestion = async (
             status: true,
         });
     } catch (error) {
-        console.error(error);
+        aiClient.trackException({ exception: error });
         return err(Error('Failed to submit new question'));
     }
 };
@@ -182,8 +183,8 @@ export const getUpdatedMasterCard = async (
             activityId: amaSessionData.activityId,
             numQuestions,
         });
-    } catch (errorMsg) {
-        console.error(errorMsg);
+    } catch (error) {
+        aiClient.trackException({ exception: error });
         return err(Error('Failed to get top questions'));
     }
 };
@@ -206,8 +207,8 @@ export const addUpvote = async (
         );
         return generateLeaderboard(question.amaSessionId, aadObjectId);
     } catch (error) {
-        console.error(error);
-        return err(new Error('Failed to upvote question.'));
+        aiClient.trackException({ exception: error });
+        return err(Error('Failed to upvote question.'));
     }
 };
 
@@ -242,7 +243,7 @@ export const endAMASession = async (
 
         return updatedMasterCard;
     } catch (error) {
-        console.error(error);
+        aiClient.trackException({ exception: error });
         return err(Error('Failed to end AMA session'));
     }
 };
@@ -261,4 +262,27 @@ export const getResubmitQuestionCard = (
         amaSessionId,
         questionContent
     );
+};
+
+/**
+ * Calls database to check if specified user is the host for the current AMA session
+ * @param amaSessionId - id of the current AMA session
+ * @param userAadObjId - aadObjId of the current user
+ */
+export const isHost = async (
+    amaSessionId: string,
+    userAadObjId: string
+): Promise<Result<boolean, Error>> => {
+    try {
+        await db.isHost(amaSessionId, userAadObjId);
+
+        return ok({
+            status: true,
+        });
+    } catch (error) {
+        aiClient.trackException({ exception: error });
+        return err(
+            Error('Failed to check if user is host for this AMA session')
+        );
+    }
 };

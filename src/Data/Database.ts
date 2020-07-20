@@ -304,7 +304,7 @@ export const addUpvote = async (
  */
 export const endAMASession = async (amaSessionId: string) => {
     await getAMASession(amaSessionId);
-    await AMASession.findByIdAndUpdate(amaSessionId, {
+    const result = await AMASession.findByIdAndUpdate(amaSessionId, {
         $set: { isActive: false, dateTimeEnded: new Date() },
     })
         .exec()
@@ -314,6 +314,8 @@ export const endAMASession = async (amaSessionId: string) => {
                 'Failed to change isActive for AMASession to false and change dateTimeEnded to current time'
             );
         });
+
+    if (!result) throw new Error('AMA Session not found');
 };
 
 /**
@@ -326,10 +328,36 @@ export const endAMASession = async (amaSessionId: string) => {
 export const getAMASession = async (
     amaTeamsSessionId: string
 ): Promise<boolean> => {
-    await AMASession.findById(amaTeamsSessionId).catch((err) => {
+    const result = await AMASession.findById(amaTeamsSessionId).catch((err) => {
         console.error(err);
         throw new Error('Failed to find AMA Session');
     });
+
+    if (!result) throw new Error('AMA Session not found');
+
+    return true;
+};
+
+/**
+ * Checks if the user is the host for this AMA session
+ * @param amaSessionId - id of the current AMA session
+ * @param userAadjObjId - aadObjId of the current user
+ * @throws Error when failed to find matching AMA session with the user ID
+ */
+export const isHost = async (
+    amaSessionId: string,
+    userAadjObjId: string
+): Promise<boolean> => {
+    const result = await AMASession.find({
+        _id: amaSessionId,
+        hostId: userAadjObjId,
+    }).catch((err) => {
+        console.error(err);
+        throw new Error('Failed to find matching AMA session with user ID');
+    });
+
+    if (!result)
+        throw new Error('AMA session with specified user ID not found');
 
     return true;
 };

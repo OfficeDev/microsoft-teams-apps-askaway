@@ -1,6 +1,7 @@
 import { IAdaptiveCard } from 'adaptivecards';
 import { err, ok, Result } from '../util';
 import { ISubmitAction } from 'adaptivecards/lib/schema';
+import { aiClient } from '../app/server';
 
 /**
  * Adaptive Card template for view leaderboard submit action (i.e, the `View Leaderboard` button).
@@ -337,7 +338,7 @@ export const extractMasterCardData = (
         if (!card.body) throw Error('Non-existent card body');
         return ok(card.body[card.body.length - 1].actions[0].data);
     } catch (error) {
-        console.error(error);
+        aiClient.trackException({ exception: error });
         return err(error);
     }
 };

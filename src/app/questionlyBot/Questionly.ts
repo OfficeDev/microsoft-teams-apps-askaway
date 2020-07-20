@@ -23,10 +23,9 @@ import {
 } from '../../AdaptiveCards/MasterCard';
 import * as config from '../../config.json';
 import { Result, err } from '../../util';
+import { aiClient } from '../server';
 
 // Initialize debug logging module
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-
 /**
  * Main bot activity handler class
  */
@@ -82,8 +81,12 @@ export class Questionly extends TeamsActivityHandler {
                 taskModuleRequest
             );
         else if (taskModuleRequest.data.id == 'endAMA')
-            return this._handleTeamsTaskModuleFetchEndAMA(taskModuleRequest);
+            return this._handleTeamsTaskModuleFetchEndAMA(
+                taskModuleRequest,
+                context
+            );
 
+        aiClient.trackException({ exception: new Error('Invalid Task Fetch') });
         return this._handleTeamsTaskModuleFetchError();
     }
 
@@ -110,6 +113,10 @@ export class Questionly extends TeamsActivityHandler {
                 taskModuleRequest,
                 context
             );
+
+        aiClient.trackException({
+            exception: new Error('Invalid Task Submit'),
+        });
 
         return this._handleTeamsTaskModuleSubmitError();
     }
@@ -157,15 +164,28 @@ export class Questionly extends TeamsActivityHandler {
         return null as any;
     }
 
-    private _handleTeamsTaskModuleFetchEndAMA(
-        taskModuleRequest: TaskModuleRequest
-    ): TaskModuleResponse {
-        return this._buildTaskModuleContinueResponse(
-            controller.getEndAMAConfirmationCard(
-                taskModuleRequest.data.amaSessionId
-            ),
-            'End the AMA'
+    private async _handleTeamsTaskModuleFetchEndAMA(
+        taskModuleRequest: TaskModuleRequest,
+        context: TurnContext
+    ): Promise<TaskModuleResponse> {
+        const amaSessionId = taskModuleRequest.data.amaSessionId;
+        const userAadObjId = context.activity.from.aadObjectId;
+
+        const isHost = await controller.isHost(
+            amaSessionId,
+            userAadObjId as string
         );
+
+        if (isHost.isOk()) {
+            return this._buildTaskModuleContinueResponse(
+                controller.getEndAMAConfirmationCard(
+                    taskModuleRequest.data.amaSessionId
+                ),
+                'End the AMA'
+            );
+        }
+
+        return null as any;
     }
 
     private async _handleTeamsTaskModuleSubmitEndAMA(
@@ -279,10 +299,11 @@ export class Questionly extends TeamsActivityHandler {
 
         if (cardDataResponse.isOk()) cardData = cardDataResponse.value;
         else {
-            // cardDataResponse.isErr()
-            console.error(
-                'Unable to extract master card data: ' + cardDataResponse.value
-            );
+            aiClient.trackException({
+                exception: new Error(
+                    'Unable to extract mastercard data' + cardDataResponse.value
+                ),
+            });
             cardData = { title: '', description: '' };
         }
 
@@ -304,9 +325,11 @@ export class Questionly extends TeamsActivityHandler {
         else {
             // this error will create a broken experience for the user and so
             // the AMA session will not be created.
-            console.error(
-                'Unable to extract master card data' + cardDataResponse.value
-            );
+            aiClient.trackException({
+                exception: new Error(
+                    'Unable to extract mastercard data' + cardDataResponse.value
+                ),
+            });
             return null as any;
         }
 
@@ -339,15 +362,8 @@ export class Questionly extends TeamsActivityHandler {
                 attachments: [CardFactory.adaptiveCard(data.card)],
             });
             if (resource !== undefined) {
-                const status = await controller.setActivityId(
-                    data.amaSessionId,
-                    resource.id
-                );
-                if (status.isErr()) console.error(status.value);
+                await controller.setActivityId(data.amaSessionId, resource.id);
             }
-        } else {
-            // response.isErr();
-            console.error(response.value);
         }
 
         return null as any;
