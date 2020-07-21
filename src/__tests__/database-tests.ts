@@ -475,8 +475,8 @@ test('checking if inactive AMA is currently active', async () => {
     const data = {
         title: sampleTitle,
         description: sampleDescription,
-        userName: sampleUserName2,
-        userAadObjId: sampleUserAADObjId2,
+        userName: sampleUserName4,
+        userAadObjId: sampleUserAADObjId4,
         activityId: sampleActivityId,
         tenantId: sampleTenantId,
         scopeId: sampleScopeId,
@@ -494,7 +494,7 @@ test('checking if inactive AMA is currently active', async () => {
         data.isChannel
     );
 
-    endAMASession(result.amaSessionId);
+    await endAMASession(result.amaSessionId);
 
     const isActive = await isActiveAMA(result.amaSessionId);
     expect(isActive).toEqual(false);

@@ -245,8 +245,8 @@ export class Questionly extends TeamsActivityHandler {
             const leaderboard = await controller.generateLeaderboard(
                 taskModuleRequest.data.amaSessionId,
                 context.activity.from.aadObjectId as string,
-                isHost.value.status,
-                isActiveAMA.value.status
+                isHost.value,
+                isActiveAMA.value
             );
 
             const response: TaskModuleResponse = leaderboard.isOk()

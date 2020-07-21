@@ -372,14 +372,8 @@ export const isHost = async (
 export const isActiveAMA = async (
     amaTeamsSessionId: string
 ): Promise<boolean> => {
-    const result = await AMASession.findById(amaTeamsSessionId)
-        .exec()
-        .catch((err) => {
-            console.error(err);
-            throw new Error('Failed to find AMA Session');
-        });
-
-    if (!result) throw new Error('AMA Session record not found');
+    const result = await AMASession.findById(amaTeamsSessionId).exec();
+    if (!result) throw new Error('Result is empty');
 
     return result.isActive;
 };
