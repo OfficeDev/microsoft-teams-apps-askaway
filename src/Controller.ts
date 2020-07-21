@@ -6,6 +6,7 @@ import { ok, err, Result } from './util';
 import { AdaptiveCard } from 'adaptivecards';
 import { IQuestion, IQuestionPopulatedUser } from './Data/Schemas/Question';
 import { aiClient } from './app/server';
+import * as jimp from 'jimp';
 
 db.initiateConnection(process.env.MONGO_URI as string).catch((error) => {
     aiClient.trackException({ exception: error });
@@ -20,6 +21,25 @@ export const getTaskSubmitErrorCard = adaptiveCardBuilder.getErrorCard.bind(
     'Your submission encountered an error. Please try submitting again!'
 );
 export const getErrorCard = adaptiveCardBuilder.getErrorCard;
+
+// color pallete used for user avatars
+const avatarColors: string[] = [
+    '#B3DBF2',
+    '#A7CFE8',
+    '#92E0EA',
+    '#ABDDD3',
+    '#F7B189',
+    '#EE9889',
+    '#EEC7C2',
+    '#FAC1B4',
+    '#FFB8C6',
+    '#D8A3D8',
+    '#BBB0D6',
+    '#B4A0FF',
+    '#AAE5AA',
+    '#E6EDC0',
+];
+
 /**
  * Starts the AMA session
  * @param title - title of AMA
@@ -296,6 +316,32 @@ export const isHost = async (
             Error('Failed to check if user is host for this AMA session')
         );
     }
+};
+
+/**
+ * Generate 256px * 256px avatar with provided initials and the background color set to the color of the provided index of the color pallete.
+ * @param initials - initials of the user the avatar is being generated for
+ * @param index - index of the color to use from the color pallete. Integer from 0 to 13
+ * @returns - An instance of a jimp object. This object has methods to convert to a file, a buffered stream, or other formats such as base64
+ */
+export const generateInitialsImage = async (
+    initials: string,
+    index: number
+): Promise<jimp> => {
+    const image = new jimp(128, 128, avatarColors[index]);
+    const font = await jimp.loadFont(jimp.FONT_SANS_64_WHITE);
+    return image.print(
+        font,
+        0,
+        0,
+        {
+            text: initials,
+            alignmentX: jimp.HORIZONTAL_ALIGN_CENTER,
+            alignmentY: jimp.VERTICAL_ALIGN_MIDDLE,
+        },
+        128,
+        128
+    );
 };
 
 /**

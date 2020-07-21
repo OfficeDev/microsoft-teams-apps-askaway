@@ -26,7 +26,7 @@ export const Leaderboard = () =>
         body: [
             {
                 type: 'TextBlock',
-                text: 'My Questions',
+                text: 'My questions',
                 weight: 'bolder',
                 $when: '${$root.userHasQuestions}',
             },
@@ -34,94 +34,26 @@ export const Leaderboard = () =>
                 type: 'Container',
                 items: [
                     {
-                        type: 'Container',
-                        items: [
+                        type: 'ColumnSet',
+                        columns: [
                             {
-                                type: 'ColumnSet',
-                                columns: [
+                                type: 'Column',
+                                width: 'auto',
+                                items: [
                                     {
-                                        type: 'Column',
-                                        width: 'auto',
-                                        items: [
-                                            {
-                                                type: 'Image',
-                                                url: '${userId.picture}',
-                                                style: 'Person',
-                                                size: 'Small',
-                                            },
-                                        ],
-                                    },
-                                    {
-                                        type: 'Column',
-                                        width: 'stretch',
-                                        items: [
-                                            {
-                                                type: 'Container',
-                                                items: [
-                                                    {
-                                                        type: 'TextBlock',
-                                                        text:
-                                                            '${userId.userName}',
-                                                        weight: 'Bolder',
-                                                    },
-                                                    {
-                                                        type: 'TextBlock',
-                                                        text: '${content}',
-                                                        spacing: 'None',
-                                                        wrap: true,
-                                                    },
-                                                ],
-                                            },
-                                        ],
-                                    },
-                                    {
-                                        type: 'Column',
-                                        width: 'auto',
-                                        items: [
-                                            {
-                                                type: 'TextBlock',
-                                                text: '${upvotes} ↑',
-                                            },
-                                        ],
-                                        verticalContentAlignment: 'Center',
+                                        type: 'Image',
+                                        url: '${userId.picture}',
+                                        style: 'Person',
+                                        size: 'Small',
                                     },
                                 ],
-                                $when: '${$root.userHasQuestions}',
                             },
-                        ],
-                    },
-                ],
-                $data: '${$root.userQuestions}',
-            },
-            {
-                type: 'TextBlock',
-                text: 'All Questions',
-                weight: 'bolder',
-            },
-            {
-                type: 'Container',
-                items: [
-                    {
-                        type: 'Container',
-                        items: [
                             {
-                                type: 'ColumnSet',
-                                columns: [
+                                type: 'Column',
+                                width: 'stretch',
+                                items: [
                                     {
-                                        type: 'Column',
-                                        width: 'auto',
-                                        items: [
-                                            {
-                                                type: 'Image',
-                                                style: 'Person',
-                                                size: 'Small',
-                                                url: '${userId.picture}',
-                                            },
-                                        ],
-                                    },
-                                    {
-                                        type: 'Column',
-                                        width: 'stretch',
+                                        type: 'Container',
                                         items: [
                                             {
                                                 type: 'TextBlock',
@@ -136,21 +68,93 @@ export const Leaderboard = () =>
                                             },
                                         ],
                                     },
+                                ],
+                            },
+                            {
+                                type: 'Column',
+                                width: 'auto',
+                                items: [
                                     {
-                                        type: 'Column',
-                                        width: 'auto',
+                                        type: 'TextBlock',
+                                        text: '${upvotes} ',
+                                        size: 'Medium',
+                                    },
+                                ],
+                                verticalContentAlignment: 'Center',
+                            },
+                        ],
+                        $when: '${$root.userHasQuestions}',
+                        $data: '${$root.userQuestions}',
+                    },
+                ],
+            },
+            {
+                type: 'TextBlock',
+                text: 'All questions',
+                weight: 'bolder',
+            },
+            {
+                type: 'Container',
+                items: [
+                    {
+                        type: 'ColumnSet',
+                        columns: [
+                            {
+                                type: 'Column',
+                                width: 'auto',
+                                items: [
+                                    {
+                                        type: 'Image',
+                                        style: 'Person',
+                                        size: 'Small',
+                                        url: '${userId.picture}',
+                                    },
+                                ],
+                            },
+                            {
+                                type: 'Column',
+                                width: 'stretch',
+                                items: [
+                                    {
+                                        type: 'Container',
                                         items: [
                                             {
                                                 type: 'TextBlock',
-                                                text: '${upvotes} ↑',
-                                                $when: '${!upvotable}',
+                                                text: '${userId.userName}',
+                                                weight: 'Bolder',
                                             },
+                                            {
+                                                type: 'TextBlock',
+                                                text: '${content}',
+                                                spacing: 'None',
+                                                wrap: true,
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            {
+                                type: 'Column',
+                                width: 'auto',
+                                items: [
+                                    {
+                                        type: 'Container',
+                                        items: [
                                             {
                                                 type: 'Container',
                                                 items: [
                                                     {
                                                         type: 'TextBlock',
-                                                        text: '${upvotes} ↑',
+                                                        text: '⭡',
+                                                        size: 'Large',
+                                                        $when: '${!upvoted}',
+                                                    },
+                                                    {
+                                                        type: 'TextBlock',
+                                                        text: '⭡',
+                                                        size: 'Large',
+                                                        color: 'Accent',
+                                                        $when: '${upvoted}',
                                                     },
                                                 ],
                                                 selectAction: {
@@ -163,17 +167,50 @@ export const Leaderboard = () =>
                                                             '${amaSessionId}',
                                                     },
                                                 },
-                                                $when: '${upvotable}',
+                                                $when:
+                                                    '${upvotable && isActive}',
+                                            },
+                                            {
+                                                type: 'TextBlock',
+                                                text: ' ',
+                                                $when:
+                                                    '${!upvotable || !isActive}',
                                             },
                                         ],
-                                        verticalContentAlignment: 'Center',
                                     },
                                 ],
+                                verticalContentAlignment: 'Center',
+                            },
+                            {
+                                type: 'Column',
+                                width: 'auto',
+                                items: [
+                                    {
+                                        type: 'Container',
+                                        items: [
+                                            {
+                                                type: 'TextBlock',
+                                                text: '${upvotes} ',
+                                                size: 'Medium',
+                                                $when: '${!upvoted}',
+                                            },
+                                            {
+                                                type: 'TextBlock',
+                                                text: '${upvotes} ',
+                                                size: 'Medium',
+                                                color: 'Accent',
+                                                weight: 'Bolder',
+                                                $when: '${upvoted}',
+                                            },
+                                        ],
+                                    },
+                                ],
+                                verticalContentAlignment: 'Center',
                             },
                         ],
+                        $data: '${$root.questions}',
                     },
                 ],
-                $data: '${$root.questions}',
             },
             {
                 type: 'ActionSet',
