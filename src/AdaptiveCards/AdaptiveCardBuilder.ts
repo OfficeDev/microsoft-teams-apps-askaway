@@ -70,13 +70,13 @@ export const getMasterCard = async (
         : [];
 
     const dateUpdated = showDateUpdated
-        ? moment().format('ddd, MMM D, YYYY, h:mm A')
+        ? moment().format('ddd, MMM D, YYYY, h:mm A [GMT] Z')
         : '';
 
-    const masterCard = MasterCard;
+    const masterCard = MasterCard();
     if (ended)
         // remove `Ask a Question` and `End AMA` buttons
-        masterCard.actions = [viewLeaderboardButton];
+        masterCard.actions = [viewLeaderboardButton()];
 
     const template = new ACData.Template(masterCard).expand({
         $root: {
@@ -96,7 +96,9 @@ export const getMasterCard = async (
         },
     });
 
-    return _adaptiveCard(template);
+    // it is not wrapped around by _adaptiveCard() because it will remove
+    // the `msTeams` property from the master card.
+    return template;
 };
 
 /**
@@ -107,7 +109,7 @@ export const getStartAMACard = (
     description = '',
     errorMessage = ''
 ): AdaptiveCard => {
-    const template = new ACData.Template(StartAMACard).expand({
+    const template = new ACData.Template(StartAMACard()).expand({
         $root: {
             title,
             description,
@@ -121,7 +123,7 @@ export const getStartAMACard = (
  * @returns The adaptive card displayed when a task/submit error occurs.
  */
 export const getErrorCard = (errorMessage: string): AdaptiveCard => {
-    const template = new ACData.Template(InvalidTaskError).expand({
+    const template = new ACData.Template(InvalidTaskError()).expand({
         $root: {
             // 'Your submission encountered an error. Please try submitting again!',
             errorMessage,
@@ -219,7 +221,7 @@ const generateEmptyLeaderboard = (
  * @returns Adaptive Card associated with creating a new question
  */
 export const getNewQuestionCard = (amaSessionId: string): AdaptiveCard => {
-    const template = new ACData.Template(newQuestionCardTemplate).expand({
+    const template = new ACData.Template(newQuestionCardTemplate()).expand({
         $root: {
             amaId: amaSessionId,
         },
@@ -246,13 +248,13 @@ export const _adaptiveCard = (template: IAdaptiveCard): AdaptiveCard => {
 export const getEndAMAConfirmationCard = (
     amaSessionId: string
 ): AdaptiveCard => {
-    const template = new ACData.Template(endAMAConfirmationCardTemplate).expand(
-        {
-            $root: {
-                amaId: amaSessionId,
-            },
-        }
-    );
+    const template = new ACData.Template(
+        endAMAConfirmationCardTemplate()
+    ).expand({
+        $root: {
+            amaId: amaSessionId,
+        },
+    });
     return _adaptiveCard(template);
 };
 
@@ -270,7 +272,7 @@ export const getEndAMAMastercard = (
     amaSessionId: string,
     userName: string
 ): AdaptiveCard => {
-    const template = new ACData.Template(endAMAMastercardTemplate).expand({
+    const template = new ACData.Template(endAMAMastercardTemplate()).expand({
         $root: {
             title: amaTitle,
             description: amaDesc,
@@ -293,7 +295,7 @@ export const getResubmitQuestionErrorCard = (
     amaSessionId: string,
     questionContent: string
 ): AdaptiveCard => {
-    const template = new ACData.Template(newQuestionCardTemplate).expand({
+    const template = new ACData.Template(newQuestionCardTemplate()).expand({
         $root: {
             amaId: amaSessionId,
             question: questionContent,

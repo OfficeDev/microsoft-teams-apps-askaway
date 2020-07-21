@@ -33,7 +33,7 @@ const sampleDescription = 'Weekly AMA Test description';
 const sampleActivityId = '1234';
 const sampleTenantId = '11121';
 const sampleScopeId = '12311';
-const sampleAMASessionID = '32323232';
+const sampleAMASessionID = '5f160b862655575054393a0e';
 
 beforeAll(async () => {
     await mongoose.connect(process.env.MONGO_URL as string, {
@@ -315,13 +315,13 @@ test('new question with existing user in non-existing AMA session', async () => 
         sampleUserName4,
         sampleQuestionContent
     ).catch((error) => {
-        console.error('caught the error' + error);
+        expect(error).toEqual(new Error('AMA Session record not found'));
     });
 });
 
 test('get non-existing AMA session', async () => {
     await isExistingAMASession(sampleAMASessionID).catch((error) => {
-        console.error('caught the error' + error);
+        expect(error).toEqual(new Error('AMA Session record not found'));
     });
 });
 
@@ -412,7 +412,7 @@ test('upvote question with new user not in database', async () => {
 
 test('ending non-existing ama', async () => {
     await endAMASession(sampleAMASessionID).catch((error) => {
-        console.error('caught the error' + error);
+        expect(error).toEqual(new Error('AMA Session record not found'));
     });
 });
 

@@ -14,14 +14,13 @@ import {
     Activity,
     ChannelAccount,
 } from 'botbuilder';
-import { clone, debounce } from 'lodash';
+import { clone, debounce, delay } from 'lodash';
 import * as controller from './../../Controller';
 import { AdaptiveCard } from 'adaptivecards';
 import {
     extractMasterCardData,
     MasterCardData,
 } from '../../AdaptiveCards/MasterCard';
-import * as config from '../../config.json';
 import { Result, err } from '../../util';
 import { aiClient } from '../server';
 
@@ -39,7 +38,16 @@ export class Questionly extends TeamsActivityHandler {
     /** Local property for StartAmaMessageExtension */
     // Each AMA sesion gets mapped to a unique function used to update the Master Card.
     private _updateMasterCardFunctionMap: {
-        [key: string]: (context: TurnContext, amaSessionId: string) => void;
+        [key: string]: {
+            func: (context: TurnContext, amaSessionId: string) => void;
+            timeLastUpdated: number;
+        };
+    };
+
+    private _config: {
+        updateMasterCardDebounceTimeInterval: number;
+        updateMasterCardDebounceMaxWait: number;
+        updateMasterCardPostDebounceTimeInterval: number;
     };
     /**
      * The constructor
@@ -47,6 +55,20 @@ export class Questionly extends TeamsActivityHandler {
     public constructor() {
         super();
         this._updateMasterCardFunctionMap = {};
+
+        const env = process.env;
+        const maxWait = env.updateMasterCardDebounceMaxWait;
+        const timeInterval = env.updateMasterCardDebounceTimeInterval;
+        const postTimeInterval = env.updateMasterCardPostDebounceTimeInterval;
+        this._config = {
+            updateMasterCardDebounceTimeInterval: timeInterval
+                ? Number(timeInterval)
+                : 15000,
+            updateMasterCardDebounceMaxWait: maxWait ? Number(maxWait) : 20000,
+            updateMasterCardPostDebounceTimeInterval: postTimeInterval
+                ? Number(postTimeInterval)
+                : 5000,
+        };
     }
 
     private _buildTaskModuleContinueResponse = (
@@ -351,6 +373,12 @@ export class Questionly extends TeamsActivityHandler {
         );
         let cardData: MasterCardData | { title: string; description: string };
 
+        // if starting AMA from reply chain, update conversation id so that card is sent to channel as a new conversation
+        const conversationId = context.activity.conversation.id;
+        if (conversationId.match('messageid') !== null)
+            // true if conversation is a reply chain
+            context.activity.conversation.id = conversationId.split(';')[0];
+
         if (cardDataResponse.isOk()) cardData = cardDataResponse.value;
         else {
             // this error will create a broken experience for the user and so
@@ -467,25 +495,33 @@ export class Questionly extends TeamsActivityHandler {
             );
 
             if (updatedMastercard.isOk()) {
+                this._updateMasterCardFunctionMap[
+                    amaSessionId
+                ].timeLastUpdated = Date.now();
+
                 const card = CardFactory.adaptiveCard(
                     updatedMastercard.value.card
                 );
 
-                context.updateActivity({
-                    id: updatedMastercard.value.activityId,
-                    attachments: [card],
-                    type: 'message',
-                });
+                try {
+                    await context.updateActivity({
+                        id: updatedMastercard.value.activityId,
+                        attachments: [card],
+                        type: 'message',
+                    });
+                } catch (error) {
+                    aiClient.trackException({ exception: error });
+                }
             }
         };
 
         return debounce(
             _function,
-            config.updateMasterCardDebounceTimeInterval,
+            this._config.updateMasterCardDebounceTimeInterval,
             {
                 leading: true,
                 trailing: true,
-                maxWait: config.updateMasterCardDebounceMaxWait,
+                maxWait: this._config.updateMasterCardDebounceMaxWait,
             }
         );
     };
@@ -495,12 +531,23 @@ export class Questionly extends TeamsActivityHandler {
         context: TurnContext
     ) => {
         const _context = clone(context);
-        if (!(amaSessionId in this._updateMasterCardFunctionMap))
-            this._updateMasterCardFunctionMap[
-                amaSessionId
-            ] = this._getHandleMasterCardTopQuestion();
+        if (!(amaSessionId in this._updateMasterCardFunctionMap)) {
+            this._updateMasterCardFunctionMap[amaSessionId] = {
+                func: this._getHandleMasterCardTopQuestion(),
+                timeLastUpdated: 0,
+            };
+        }
 
-        this._updateMasterCardFunctionMap[amaSessionId](_context, amaSessionId);
+        const map = this._updateMasterCardFunctionMap[amaSessionId];
+        if (
+            Date.now() - map.timeLastUpdated <
+            this._config.updateMasterCardPostDebounceTimeInterval
+        )
+            delay(
+                () => map.func(_context, amaSessionId),
+                this._config.updateMasterCardPostDebounceTimeInterval
+            );
+        else map.func(_context, amaSessionId);
     };
 
     private _extractMasterCardFromActivityPreveiw = (
