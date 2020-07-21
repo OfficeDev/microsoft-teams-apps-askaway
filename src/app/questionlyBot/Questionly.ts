@@ -312,7 +312,8 @@ export class Questionly extends TeamsActivityHandler {
     > {
         // commandId: 'startAMA'
         return this._buildTaskModuleContinueResponse(
-            controller.getStartAMACard()
+            controller.getStartAMACard(),
+            'Start session to gather questions'
         );
     }
 
@@ -336,7 +337,8 @@ export class Questionly extends TeamsActivityHandler {
         }
 
         return this._buildTaskModuleContinueResponse(
-            controller.getStartAMACard(cardData.title, cardData.description)
+            controller.getStartAMACard(cardData.title, cardData.description),
+            'Edit details'
         );
     }
 
@@ -424,7 +426,7 @@ export class Questionly extends TeamsActivityHandler {
                 controller.getStartAMACard(
                     title,
                     description,
-                    'Please fill out all fields'
+                    'Fields cannot be empty'
                 )
             );
 

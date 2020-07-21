@@ -25,7 +25,7 @@ export default <IAdaptiveCard>{
                                 },
                                 {
                                     type: 'TextBlock',
-                                    text: 'Title of AMA',
+                                    text: 'Title of Q & A*',
                                     wrap: true,
                                 },
                                 {
@@ -33,11 +33,10 @@ export default <IAdaptiveCard>{
                                     id: 'title',
                                     value: '${title}',
                                     maxLength: 250,
-                                    placeholder: 'Ex. Weekly Product AMA',
                                 },
                                 {
                                     type: 'TextBlock',
-                                    text: 'Description of AMA',
+                                    text: 'Message* (250 characters max)',
                                     wrap: true,
                                 },
                                 {
@@ -46,12 +45,7 @@ export default <IAdaptiveCard>{
                                     value: '${description}',
                                     maxLength: 250,
                                     placeholder:
-                                        'Ex. Brighu is running a town hall. Ask your questions here!',
-                                },
-                                {
-                                    type: 'TextBlock',
-                                    text: 'Maximum number of characters: 250',
-                                    spacing: 'Large',
+                                        'Ex. Please submit and upvote quesions for the CEO!',
                                 },
                             ],
                         },
@@ -64,14 +58,7 @@ export default <IAdaptiveCard>{
         {
             id: 'submit',
             type: 'Action.Submit',
-            title: 'Submit',
+            title: 'Preview',
         },
     ],
-};
-
-export const startAMAMetadata = {
-    title: 'Questionly',
-    height: 270,
-    heightError: 285,
-    width: 600,
 };

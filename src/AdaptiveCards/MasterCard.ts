@@ -9,7 +9,7 @@ import { aiClient } from '../app/server';
 export const viewLeaderboardButton: ISubmitAction = {
     id: 'viewLeaderboard',
     type: 'Action.Submit',
-    title: 'View leaderboard',
+    title: 'Upvote questions',
     data: {
         msteams: {
             type: 'task/fetch',
@@ -84,7 +84,7 @@ export default <IAdaptiveCard>{
                             items: [
                                 {
                                     type: 'TextBlock',
-                                    text: 'Top Questions',
+                                    text: 'Top questions',
                                     wrap: true,
                                     size: 'Medium',
                                     weight: 'Bolder',
@@ -107,7 +107,7 @@ export default <IAdaptiveCard>{
                 },
                 {
                     type: 'TextBlock',
-                    text: 'No questions yet. Be the first one to ask.',
+                    text: 'Be the first to ask a question.',
                     color: 'accent',
                     $when: '${count($root.topQuestions) < 1}',
                 },
@@ -195,7 +195,7 @@ export default <IAdaptiveCard>{
                                                     {
                                                         type: 'TextBlock',
                                                         text:
-                                                            'Recent Questions',
+                                                            'Recent questions',
                                                         wrap: true,
                                                         weight: 'Bolder',
                                                         size: 'Medium',
@@ -206,8 +206,7 @@ export default <IAdaptiveCard>{
                                     },
                                     {
                                         type: 'TextBlock',
-                                        text:
-                                            'No questions yet. Be the first one to ask.',
+                                        text: 'Be the first to ask a question.',
                                         color: 'accent',
                                         $when:
                                             '${count($root.recentQuestions) < 1}',
@@ -282,7 +281,7 @@ export default <IAdaptiveCard>{
         },
         {
             type: 'TextBlock',
-            text: '${actionBy} ${user}',
+            text: '${sessionDetails}',
             wrap: true,
             spacing: 'Large',
         },
