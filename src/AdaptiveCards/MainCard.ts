@@ -16,25 +16,25 @@ export const viewLeaderboardButton = () =>
                 type: 'task/fetch',
             },
             id: 'viewLeaderboard',
-            amaSessionId: '${amaId}',
+            qnaSessionId: '${qnaId}',
             aadObjectId: '${userId}',
         },
     };
 
 /**
- * Data injected into the MasterCard
+ * Data injected into the MainCard
  */
-export type MasterCardData = {
+export type MainCardData = {
     title: string;
     description: string;
     userName: string;
-    amaSessionId: string;
+    qnaSessionId: string;
     userId: string;
     ended: boolean;
 };
 
 /**
- * Master Adaptive Card for the Questionly Bot
+ * Master Adaptive Card for the AskAway Bot
  */
 export default () =>
     <IAdaptiveCard>{
@@ -317,7 +317,7 @@ export default () =>
                         type: 'task/fetch',
                     },
                     id: 'askQuestion',
-                    amaSessionId: '${amaId}',
+                    qnaSessionId: '${qnaId}',
                 },
             },
             viewLeaderboardButton(),
@@ -328,9 +328,9 @@ export default () =>
  * Extracts injected data from the master card
  * @param card - the master card
  */
-export const extractMasterCardData = (
+export const extractMainCardData = (
     card: IAdaptiveCard
-): Result<MasterCardData, null> => {
+): Result<MainCardData, null> => {
     try {
         if (!card.body) throw Error('Non-existent card body');
         return ok(card.msTeams.entities[0].data);

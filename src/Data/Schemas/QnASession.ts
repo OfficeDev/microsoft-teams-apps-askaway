@@ -1,7 +1,7 @@
 import * as mongoose from 'mongoose';
 import { IUser } from './User';
 
-const AMASessionSchema = new mongoose.Schema({
+const QnASessionSchema = new mongoose.Schema({
     title: {
         type: String,
         required: true,
@@ -52,7 +52,7 @@ const AMASessionSchema = new mongoose.Schema({
     },
 });
 
-interface IAMASessionBase extends mongoose.Document {
+interface IQnASessionBase extends mongoose.Document {
     title: string;
     description: string;
     isActive: boolean;
@@ -67,23 +67,23 @@ interface IAMASessionBase extends mongoose.Document {
 }
 
 /**
- * Exports the IAMASession interface for external use. This interface should be used when the hostId field is a string reference.
+ * Exports the IQnASession interface for external use. This interface should be used when the hostId field is a string reference.
  */
-export interface IAMASession extends IAMASessionBase {
+export interface IQnASession extends IQnASessionBase {
     hostId: IUser['_id'];
 }
 
 /**
- * Exports the IAMASession_populated interface for external use. This interface should be used when the hostId field is populated.
+ * Exports the IQnASession_populated interface for external use. This interface should be used when the hostId field is populated.
  */
-export interface IAMASession_populated extends IAMASessionBase {
+export interface IQnASession_populated extends IQnASessionBase {
     hostId: IUser;
 }
 
 /**
- * Exports the AMASession schema model for external use.
+ * Exports the QnASession schema model for external use.
  */
-export const AMASession = mongoose.model<IAMASession>(
-    'AMASession',
-    AMASessionSchema
+export const QnASession = mongoose.model<IQnASession>(
+    'QnASession',
+    QnASessionSchema
 );

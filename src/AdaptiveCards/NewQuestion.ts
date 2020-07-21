@@ -36,7 +36,7 @@ export default () =>
                 title: 'Submit',
                 data: {
                     id: 'submitQuestion',
-                    amaSessionId: '${amaId}',
+                    qnaSessionId: '${qnaId}',
                 },
             },
         ],

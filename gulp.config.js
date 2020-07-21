@@ -8,7 +8,7 @@ const config = {
     ],
     watches: [
         "./src/**/*.*",
-        "!./src/app/questionlyBot/dialogs/**"
+        "!./src/app/askAwayBot/dialogs/**"
     ],
     // Supported Schemas
     SCHEMAS: [{
@@ -33,7 +33,7 @@ const config = {
     }
     ],
     // This is the name of the packaged manifest file
-    manifestFileName: "Questionly.zip"
+    manifestFileName: "AskAway.zip"
 };
 
 module.exports = config;

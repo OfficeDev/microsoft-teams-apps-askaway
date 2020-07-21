@@ -12,8 +12,8 @@ db.initiateConnection(process.env.MONGO_URI as string).catch((error) => {
     aiClient.trackException({ exception: error });
 });
 
-export const getMasterCard = adaptiveCardBuilder.getMasterCard;
-export const getStartAMACard = adaptiveCardBuilder.getStartAMACard;
+export const getMainCard = adaptiveCardBuilder.getMainCard;
+export const getStartQnACard = adaptiveCardBuilder.getStartQnACard;
 export const getTaskFetchErrorCard = adaptiveCardBuilder.getErrorCard.bind(
     'Something went wrong. Please try opening again.'
 );
@@ -41,18 +41,18 @@ const avatarColors: string[] = [
 ];
 
 /**
- * Starts the AMA session
- * @param title - title of AMA
- * @param description - description of AMA
- * @param userName - name of the user who created the AMA
- * @param userAadObjId - AAD Object Id of the suer who created the AMA
+ * Starts the QnA session
+ * @param title - title of QnA
+ * @param description - description of QnA
+ * @param userName - name of the user who created the QnA
+ * @param userAadObjId - AAD Object Id of the suer who created the QnA
  * @param activityId - id of the master card message used for proactive updating
  * @param tenantId - id of tenant the bot is running on.
  * @param scopeId - channel id or group chat id
- * @param isChannel - whether the AMA session was started in a channel or group chat
+ * @param isChannel - whether the QnA session was started in a channel or group chat
  * @returns the master adaptive card
  */
-export const startAMASession = async (
+export const startQnASession = async (
     title: string,
     description: string,
     userName: string,
@@ -61,10 +61,10 @@ export const startAMASession = async (
     tenantId: string,
     scopeId: string,
     isChannel: boolean
-): Promise<Result<{ card: AdaptiveCard; amaSessionId: string }, Error>> => {
+): Promise<Result<{ card: AdaptiveCard; qnaSessionId: string }, Error>> => {
     try {
         // save data to db
-        const response = await db.createAMASession(
+        const response = await db.createQnASession(
             title,
             description,
             userName,
@@ -75,48 +75,48 @@ export const startAMASession = async (
             isChannel
         );
 
-        // generate and return mastercard
+        // generate and return maincard
         return ok({
-            card: await getMasterCard(
+            card: await getMainCard(
                 title,
                 description,
                 userName,
-                response.amaSessionId,
+                response.qnaSessionId,
                 response.hostId
             ),
-            amaSessionId: response.amaSessionId,
+            qnaSessionId: response.qnaSessionId,
         });
     } catch (error) {
         aiClient.trackException({ exception: error });
-        return err(Error('Failed to start AMA'));
+        return err(Error('Failed to start QnA'));
     }
 };
 
 /**
- * Returns the populated leaderboard adaptive card for the AMA session attached to the id provided.
- * @param amaSessionId - ID of the AMA session for which the leaderboard shouold be retrieived.
+ * Returns the populated leaderboard adaptive card for the QnA session attached to the id provided.
+ * @param qnaSessionId - ID of the QnA session for which the leaderboard shouold be retrieived.
  * @param aadObjectId - aadObjectId of the user who is trying view the leaderboard. This is to used to control certain factors such as not letting the user upvote their own questions.
- * @param isHost - boolean value indicating if user is the host of this current AMA session
- * @param isActiveAMA - boolean value indicating if current AMA session is active
+ * @param isHost - boolean value indicating if user is the host of this current QnA session
+ * @param isActiveQnA - boolean value indicating if current QnA session is active
  * @returns - A promise containing a result object which, on success, contains the populated leaderboard adaptive card, and on failure, contains an error card.
  */
 export const generateLeaderboard = async (
-    amaSessionId: string,
+    qnaSessionId: string,
     aadObjectId: string,
     isHost?: boolean,
-    isActiveAMA?: boolean
+    isActiveQnA?: boolean
 ): Promise<Result<AdaptiveCard, Error>> => {
     try {
         const questionData: IQuestionPopulatedUser[] = await db.getQuestionData(
-            amaSessionId
+            qnaSessionId
         );
         return ok(
             adaptiveCardBuilder.generateLeaderboard(
                 questionData,
                 aadObjectId,
-                amaSessionId,
+                qnaSessionId,
                 isHost,
-                isActiveAMA
+                isActiveQnA
             )
         );
     } catch (error) {
@@ -126,16 +126,16 @@ export const generateLeaderboard = async (
 };
 
 /**
- * Sets the activity id of an existing AMA session
- * @param amaSessionId - document database id of the AMA session
+ * Sets the activity id of an existing QnA session
+ * @param qnaSessionId - document database id of the QnA session
  * @param activityId - id of the master card message used for proactive updating of the card
  */
 export const setActivityId = async (
-    amaSessionId: string,
+    qnaSessionId: string,
     activityId: string
 ) => {
     try {
-        return ok(await db.updateActivityId(amaSessionId, activityId));
+        return ok(await db.updateActivityId(qnaSessionId, activityId));
     } catch (error) {
         aiClient.trackException({ exception: error });
         return err(error);
@@ -146,27 +146,27 @@ export const setActivityId = async (
  * Calls adaptiveCardbuilder to get the newQuestionCard.
  * @returns Adaptive Card associated with creating a new question
  */
-export const getNewQuestionCard = (amaSessionId: string): AdaptiveCard => {
-    return adaptiveCardBuilder.getNewQuestionCard(amaSessionId);
+export const getNewQuestionCard = (qnaSessionId: string): AdaptiveCard => {
+    return adaptiveCardBuilder.getNewQuestionCard(qnaSessionId);
 };
 
 /**
  * Handles and formats the parameters, then sends new question details to the database.
- * @param amaSessionId - id of the current AMA session
+ * @param qnaSessionId - id of the current QnA session
  * @param userAadObjId - AAD Obj ID of the current user
  * @param userName - name of the user
  * @param questionContent - question content asked by the user
  * @returns Returns ok object if successful, otherwise returns error
  */
 export const submitNewQuestion = async (
-    amaSessionId: string,
+    qnaSessionId: string,
     userAadObjId: string,
     userName: string,
     questionContent: string
 ): Promise<Result<boolean, Error>> => {
     try {
         await db.createQuestion(
-            amaSessionId,
+            qnaSessionId,
             userAadObjId as string,
             userName,
             questionContent
@@ -179,33 +179,33 @@ export const submitNewQuestion = async (
     }
 };
 
-export const getUpdatedMasterCard = async (
-    amaSessionId: string,
+export const getUpdatedMainCard = async (
+    qnaSessionId: string,
     ended = false
 ): Promise<Result<{ card: AdaptiveCard; activityId: string }, Error>> => {
     try {
-        const amaSessionData = await db.getAMASessionData(amaSessionId);
+        const qnaSessionData = await db.getQnASessionData(qnaSessionId);
         // eslint-disable-next-line prefer-const
         const {
             topQuestions,
             recentQuestions,
             numQuestions,
-        } = await db.getQuestions(amaSessionId, 3, 3);
+        } = await db.getQuestions(qnaSessionId, 3, 3);
 
-        // generate and return mastercard
+        // generate and return maincard
         return ok({
-            card: await getMasterCard(
-                amaSessionData.title,
-                amaSessionData.description,
-                amaSessionData.userName,
-                amaSessionId,
-                amaSessionData.userAadObjId,
-                ended || !amaSessionData.isActive,
+            card: await getMainCard(
+                qnaSessionData.title,
+                qnaSessionData.description,
+                qnaSessionData.userName,
+                qnaSessionId,
+                qnaSessionData.userAadObjId,
+                ended || !qnaSessionData.isActive,
                 topQuestions,
                 recentQuestions,
                 true
             ),
-            activityId: amaSessionData.activityId,
+            activityId: qnaSessionData.activityId,
             numQuestions,
         });
     } catch (error) {
@@ -218,15 +218,15 @@ export const getUpdatedMasterCard = async (
  * @param questionId - DBID of the question being upvoted
  * @param aadObjectId - aadObjectId of the user upvoting the question
  * @param name - Name of the user upvoting the question
- * @param isHost - boolean value indicating if user is the host of this current AMA session
- * @param isActiveAMA - boolean value indicating if current AMA session is active
+ * @param isHost - boolean value indicating if user is the host of this current QnA session
+ * @param isActiveQnA - boolean value indicating if current QnA session is active
  */
 export const addUpvote = async (
     questionId: string,
     aadObjectId: string,
     name: string,
     isHost?: boolean,
-    isActiveAMA?: boolean
+    isActiveQnA?: boolean
 ): Promise<Result<AdaptiveCard, Error>> => {
     try {
         const question: IQuestion = await db.addUpvote(
@@ -235,10 +235,10 @@ export const addUpvote = async (
             name
         );
         return generateLeaderboard(
-            question.amaSessionId,
+            question.qnaSessionId,
             aadObjectId,
             isHost,
-            isActiveAMA
+            isActiveQnA
         );
     } catch (error) {
         aiClient.trackException({ exception: error });
@@ -247,73 +247,70 @@ export const addUpvote = async (
 };
 
 /*
- * Calls adaptiveCardBuilder to get the endAMAConfirmationCard.
- * @param amaSessionId - id of the current AMA session
- * @returns Adaptive Card associated with confirming the ending of an AMA
+ * Calls adaptiveCardBuilder to get the endQnAConfirmationCard.
+ * @param qnaSessionId - id of the current QnA session
+ * @returns Adaptive Card associated with confirming the ending of an QnA
  */
-export const getEndAMAConfirmationCard = (
-    amaSessionId: string
+export const getEndQnAConfirmationCard = (
+    qnaSessionId: string
 ): AdaptiveCard => {
-    return adaptiveCardBuilder.getEndAMAConfirmationCard(amaSessionId);
+    return adaptiveCardBuilder.getEndQnAConfirmationCard(qnaSessionId);
 };
 
 /**
- * Communicates with database to end the AMA and retrieves details
- * @param amaSessionId - id of the current AMA session
+ * Communicates with database to end the QnA and retrieves details
+ * @param qnaSessionId - id of the current QnA session
  * @returns Ok object with updated Master Card
  */
-export const endAMASession = async (
-    amaSessionId: string
+export const endQnASession = async (
+    qnaSessionId: string
 ): Promise<Result<{ card: AdaptiveCard; activityId: string }, Error>> => {
     try {
-        await db.endAMASession(amaSessionId);
+        await db.endQnASession(qnaSessionId);
 
-        const updatedMasterCard = await getUpdatedMasterCard(
-            amaSessionId,
-            true
-        );
+        const updatedMainCard = await getUpdatedMainCard(qnaSessionId, true);
 
-        if (updatedMasterCard.isErr()) throw updatedMasterCard.value;
+        if (updatedMainCard.isErr()) throw updatedMainCard.value;
 
-        return updatedMasterCard;
+        return updatedMainCard;
     } catch (error) {
         aiClient.trackException({ exception: error });
-        return err(Error('Failed to end AMA session'));
+        return err(Error('Failed to end QnA session'));
     }
 };
 
 /**
  * Calls adaptiveCardBuilder to get resubmitQuestionCard.
- * @param amaSessionId - id of the current AMA session
+ * @param qnaSessionId - id of the current QnA session
  * @param questionContent - question asked that failed to save when error occured
  * @returns Adaptive Card with question asked in text box
  */
 export const getResubmitQuestionCard = (
-    amaSessionId: string,
+    qnaSessionId: string,
     questionContent: string
 ): AdaptiveCard => {
     return adaptiveCardBuilder.getResubmitQuestionErrorCard(
-        amaSessionId,
+        qnaSessionId,
         questionContent
     );
 };
 
 /**
- * Calls database to check if specified user is the host for the current AMA session
- * @param amaSessionId - id of the current AMA session
+ * Calls database to check if specified user is the host for the current QnA session
+ * @param qnaSessionId - id of the current QnA session
  * @param userAadObjId - aadObjId of the current user
  */
 export const isHost = async (
-    amaSessionId: string,
+    qnaSessionId: string,
     userAadObjId: string
 ): Promise<Result<boolean, Error>> => {
     try {
-        const result = await db.isHost(amaSessionId, userAadObjId);
+        const result = await db.isHost(qnaSessionId, userAadObjId);
         return ok(result);
     } catch (error) {
         aiClient.trackException({ exception: error });
         return err(
-            Error('Failed to check if user is host for this AMA session')
+            Error('Failed to check if user is host for this QnA session')
         );
     }
 };
@@ -345,17 +342,17 @@ export const generateInitialsImage = async (
 };
 
 /**
- * Calls database to check if current AMA session is active
- * @param amaSessionId - id of the current AMA session
+ * Calls database to check if current QnA session is active
+ * @param qnaSessionId - id of the current QnA session
  */
-export const isActiveAMA = async (
-    amaSessionId: string
+export const isActiveQnA = async (
+    qnaSessionId: string
 ): Promise<Result<boolean, Error>> => {
     try {
-        const result = await db.isActiveAMA(amaSessionId);
+        const result = await db.isActiveQnA(qnaSessionId);
         return ok(result);
     } catch (error) {
         aiClient.trackException({ exception: error });
-        return err(Error('Failed to check if AMA session is active'));
+        return err(Error('Failed to check if QnA session is active'));
     }
 };

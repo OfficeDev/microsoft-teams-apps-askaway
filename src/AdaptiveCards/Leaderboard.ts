@@ -2,16 +2,16 @@ import { IAdaptiveCard } from 'adaptivecards';
 import { ISubmitAction } from 'adaptivecards/lib/schema';
 
 /**
- * End AMA button
+ * End QnA button
  */
-export const endAMAButton: () => ISubmitAction = () =>
+export const endQnAButton: () => ISubmitAction = () =>
     <ISubmitAction>{
-        id: 'confirmEndAMA',
+        id: 'confirmEndQnA',
         type: 'Action.Submit',
         title: 'End session',
         data: {
-            id: 'confirmEndAMA',
-            amaSessionId: '${amaId}',
+            id: 'confirmEndQnA',
+            qnaSessionId: '${qnaId}',
         },
     };
 
@@ -163,8 +163,8 @@ export const Leaderboard = () =>
                                                     data: {
                                                         id: 'upvote',
                                                         questionId: '${_id}',
-                                                        amaSessionId:
-                                                            '${amaSessionId}',
+                                                        qnaSessionId:
+                                                            '${qnaSessionId}',
                                                     },
                                                 },
                                                 $when:
@@ -215,13 +215,13 @@ export const Leaderboard = () =>
             {
                 type: 'ActionSet',
                 $when: '${isUserHost && isActive}',
-                actions: [endAMAButton()],
+                actions: [endQnAButton()],
             },
         ],
     };
 
 /**
- * Adaptive card for an empty leaderboard when there are no questions in an AMA.
+ * Adaptive card for an empty leaderboard when there are no questions in an QnA.
  */
 export const LeaderboardEmpty = () =>
     <IAdaptiveCard>{
@@ -237,7 +237,7 @@ export const LeaderboardEmpty = () =>
                 type: 'ActionSet',
                 $when: '${isUserHost && isActive}',
                 style: 'destructive',
-                actions: [endAMAButton()],
+                actions: [endQnAButton()],
             },
         ],
     };

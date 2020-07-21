@@ -40,7 +40,7 @@
             "canUpdateConfiguration": true,
             "commands": [
                 {
-                    "id": "startAMA",
+                    "id": "startQnA",
                     "type": "action",
                     "title": "Start session",
                     "description": "Start gathering questions",

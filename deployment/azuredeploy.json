@@ -27,7 +27,7 @@
         "appDisplayName": {
             "type": "string",
             "minLength": 1,
-            "defaultValue": "Questionly",
+            "defaultValue": "AskAway",
             "metadata": {
                 "description": "Application name."
             }
@@ -35,7 +35,7 @@
         "appDescription": {
             "type": "string",
             "minLength": 1,
-            "defaultValue": "Questionly helps AMA hosts and attendees manage and interact with ​AMA sessions.",
+            "defaultValue": "Ask Away helps QnA hosts and attendees manage and interact with ​QnA sessions.",
             "metadata": {
                 "description": "The description for the app."
             }
@@ -43,7 +43,7 @@
         "appIconUrl": {
             "type": "string",
             "minLength": 1, //NEED TO CHANGE THIS VALUE ONCE DESIGNER IS DONE
-            "defaultValue": "https://raw.githubusercontent.com/OfficeDev/microsoft-teams-questionly-app/master/Manifest/color.png",
+            "defaultValue": "https://raw.githubusercontent.com/OfficeDev/microsoft-teams-askAway-app/master/Manifest/color.png",
             "metadata": {
                 "description": "The link to the icon for the app. It must resolve to a PNG file."
             }
@@ -312,15 +312,15 @@
                             "value": "[variables('botName')]"
                         },
                         {
-                            "name": "updateMasterCardDebounceTimeInterval",
+                            "name": "updateMainCardDebounceTimeInterval",
                             "value": "15000"
                         },
                         {
-                            "name": "updateMasterCardDebounceMaxWait",
+                            "name": "updateMainCardDebounceMaxWait",
                             "value": "20000"
                         },
                         {
-                            "name": "updateMasterCardPostDebounceTimeInterval",
+                            "name": "updateMainCardPostDebounceTimeInterval",
                             "value": "5000"
                         },
                         {

@@ -1,11 +1,11 @@
 import * as mongoose from 'mongoose';
-import { IAMASession } from './AMASession';
+import { IQnASession } from './QnASession';
 import { IUser } from './User';
 
 const QuestionSchema = new mongoose.Schema({
-    amaSessionId: {
+    qnaSessionId: {
         type: mongoose.SchemaTypes.ObjectId,
-        ref: 'AMASession',
+        ref: 'QnASession',
         required: true,
     },
     userId: {
@@ -35,7 +35,7 @@ interface IQuestionBase extends mongoose.Document {
  * Exports the IQuestion interface for external use. This interface should be used when all of the referencing fields are string references (not populated).
  */
 export interface IQuestion extends IQuestionBase {
-    amaSessionId: IAMASession['_id'];
+    qnaSessionId: IQnASession['_id'];
     userId: IUser['_id'];
     voters: Array<IUser['_id']>;
 }
@@ -44,7 +44,7 @@ export interface IQuestion extends IQuestionBase {
  * Exports the IQuestion_populatedUser interface for external use. This interface should be used when out of all of the referencing fields only the userId field is populated.
  */
 export interface IQuestionPopulatedUser extends IQuestionBase {
-    amaSessionId: IAMASession['_id'];
+    qnaSessionId: IQnASession['_id'];
     userId: IUser;
     voters: Array<IUser['_id']>;
 }
