@@ -88,7 +88,7 @@ const _webpack = (idx, callback) => {
     });
 };
 
-task('webpack:server', (callback) => {
+task('build', (callback) => {
     _webpack(0, callback);
 });
 
@@ -97,7 +97,7 @@ task('webpack:server', (callback) => {
  */
 const watches = () => {
     // watches for changes in files
-    watch(config.watches, series('webpack:server'));
+    watch(config.watches, series('build'));
 };
 
 task('watch', watches);
@@ -267,7 +267,7 @@ task('zip', () => {
         .pipe(dest('package'));
 });
 
-task('serve', series('nuke', 'webpack:server', 'nodemon', 'watch'));
+task('serve', series('nuke', 'build', 'nodemon', 'watch'));
 
 task('manifest', series('validate-manifest', 'zip'));
 
