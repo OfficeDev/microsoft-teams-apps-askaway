@@ -9,36 +9,34 @@ import * as jwt from 'jsonwebtoken';
 
 import { IQuestionPopulatedUser } from '../Data/Schemas/Question';
 
-import MasterCard, { viewLeaderboardButton } from './MasterCard';
-import StartAMACard from './StartAMACard';
-import endAMAMastercardTemplate from './EndAMA';
-import endAMAConfirmationCardTemplate from './EndAMAConfirmation';
+import MainCard, { viewLeaderboardButton } from './MainCard';
+import StartQnACard from './StartQnACard';
+import endQnAConfirmationCardTemplate from './endQnAConfirmation';
 
 import { Leaderboard, LeaderboardEmpty } from './Leaderboard';
 
 import newQuestionCardTemplate from './NewQuestion';
 
 import InvalidTaskError from './ErrorCard';
-import { aiClient } from '../app/server';
 
 /**
- * Creates the AMA Master Card
- * @param title - title of AMA
- * @param description - description of AMA
- * @param userName - name of the user who created the AMA session
- * @param amaSessionId - document database id of the AMA session
- * @param userId - Id of the user who created the AMA session
- * @param ended - whether the AMA session has ended or not
+ * Creates the QnA Master Card
+ * @param title - title of QnA
+ * @param description - description of QnA
+ * @param userName - name of the user who created the QnA session
+ * @param qnaSessionId - document database id of the QnA session
+ * @param userId - Id of the user who created the QnA session
+ * @param ended - whether the QnA session has ended or not
  * @param topQuestionsData - array of questions to display under `Top Questions`
  * @param recentQuestionsData - array of questions to display under `Recent Questions`
  * @param showDateUpdated - whether to show last updated date or not
- * @returns The AMA Master Card
+ * @returns The QnA Master Card
  */
-export const getMasterCard = async (
+export const getMainCard = async (
     title: string,
     description: string,
     userName: string,
-    amaSessionId: string,
+    qnaSessionId: string,
     aadObjectId: string,
     ended?: boolean,
     topQuestionsData?: IQuestionPopulatedUser[],
@@ -49,7 +47,7 @@ export const getMasterCard = async (
         title,
         description,
         userName,
-        amaSessionId,
+        qnaSessionId,
         aadObjectId,
         ended,
     };
@@ -78,17 +76,17 @@ export const getMasterCard = async (
         ? moment().format('ddd, MMM D, YYYY, h:mm A [GMT] Z')
         : '';
 
-    const masterCard = MasterCard();
+    const mainCard = MainCard();
     if (ended)
-        // remove `Ask a Question` and `End AMA` buttons
-        masterCard.actions = [viewLeaderboardButton()];
+        // remove `Ask a Question` and `End QnA` buttons
+        mainCard.actions = [viewLeaderboardButton()];
 
-    const template = new ACData.Template(masterCard).expand({
+    const template = new ACData.Template(mainCard).expand({
         $root: {
             title: title,
             description: description,
             user: userName,
-            amaId: amaSessionId,
+            qnaId: qnaSessionId,
             topQuestions: topQuestionsData,
             recentQuestions: recentQuestionsData,
             userId: aadObjectId,
@@ -107,14 +105,14 @@ export const getMasterCard = async (
 };
 
 /**
- * @returns The adaptive card used to collect data to create the AMA session
+ * @returns The adaptive card used to collect data to create the QnA session
  */
-export const getStartAMACard = (
+export const getStartQnACard = (
     title = '',
     description = '',
     errorMessage = ''
 ): AdaptiveCard => {
-    const template = new ACData.Template(StartAMACard()).expand({
+    const template = new ACData.Template(StartQnACard()).expand({
         $root: {
             title,
             description,
@@ -142,20 +140,20 @@ export const getErrorCard = (errorMessage: string): AdaptiveCard => {
  * Returns the adaptive card for the leaderboard populated with the questions provided.
  * @param questionData - Array of question documents to populate the leaderboard with. The 'userId' field of each Questoin document should be populated prior to passing into this function.
  * @param aadObjectId - aadObjectId of the user opening the leaderboard. Used to format "My Questions" area of the leaderboard properly, as well as disallow users from upvoting their own questions.
- * @param amaSessionId - Database document id of the AMA session.
- * @param isHost - boolean value indicating if user is the host of this current AMA session
- * @param isActiveAMA - boolean value indicating if current AMA session is active
+ * @param qnaSessionId - Database document id of the QnA session.
+ * @param isHost - boolean value indicating if user is the host of this current QnA session
+ * @param isActiveQnA - boolean value indicating if current QnA session is active
  * @returns - Adaptive Card for the leaderboard populated with the questions provided.
  */
 export const generateLeaderboard = (
     questionData: IQuestionPopulatedUser[],
     aadObjectId: string,
-    amaSessionId: string,
+    qnaSessionId: string,
     isHost?: boolean,
-    isActiveAMA?: boolean
+    isActiveQnA?: boolean
 ): AdaptiveCard => {
     if (!questionData.length)
-        return generateEmptyLeaderboard(amaSessionId, isHost, isActiveAMA);
+        return generateEmptyLeaderboard(qnaSessionId, isHost, isActiveQnA);
 
     const leaderboardTemplate = Leaderboard();
 
@@ -168,7 +166,7 @@ export const generateLeaderboard = (
             questionObject.userId.userName,
             question.userId._id
         );
-        questionObject.isActive = isActiveAMA;
+        questionObject.isActive = isActiveQnA;
 
         return questionObject;
     });
@@ -181,10 +179,10 @@ export const generateLeaderboard = (
             userHasQuestions: userQuestions.length > 0,
             userQuestions,
             questions: questionData,
-            amaSessionId: amaSessionId,
-            amaId: amaSessionId,
+            qnaSessionId: qnaSessionId,
+            qnaId: qnaSessionId,
             isUserHost: isHost,
-            isActive: isActiveAMA,
+            isActive: isActiveQnA,
         },
     };
 
@@ -197,22 +195,22 @@ export const generateLeaderboard = (
 
 /**
  * Generates the empty leaderboard
- * @param amaSessionId - id of the current AMA session
- * @param isHost - boolean value indicating if user is the host of this current AMA session
- * @param isActiveAMA - boolean value indicating if current AMA session is active
+ * @param qnaSessionId - id of the current QnA session
+ * @param isHost - boolean value indicating if user is the host of this current QnA session
+ * @param isActiveQnA - boolean value indicating if current QnA session is active
  */
 const generateEmptyLeaderboard = (
-    amaSessionId: string,
+    qnaSessionId: string,
     isHost?: boolean,
-    isActiveAMA?: boolean
+    isActiveQnA?: boolean
 ): AdaptiveCard => {
     const leaderboardTemplate = LeaderboardEmpty();
 
     const data = {
         $root: {
-            amaId: amaSessionId,
+            qnaId: qnaSessionId,
             isUserHost: isHost,
-            isActive: isActiveAMA,
+            isActive: isActiveQnA,
         },
     };
 
@@ -225,13 +223,13 @@ const generateEmptyLeaderboard = (
 
 /**
  * Creates and parses the adaptive card for creating a new question.
- * @param amaSessionId - id of the current AMA session
+ * @param qnaSessionId - id of the current QnA session
  * @returns Adaptive Card associated with creating a new question
  */
-export const getNewQuestionCard = (amaSessionId: string): AdaptiveCard => {
+export const getNewQuestionCard = (qnaSessionId: string): AdaptiveCard => {
     const template = new ACData.Template(newQuestionCardTemplate()).expand({
         $root: {
-            amaId: amaSessionId,
+            qnaId: qnaSessionId,
         },
     });
     return _adaptiveCard(template);
@@ -249,45 +247,18 @@ export const _adaptiveCard = (template: IAdaptiveCard): AdaptiveCard => {
 };
 
 /**
- * Creates and parses the adaptive card for confirming the ending of an AMA.
- * @param amaSessionId - id of the current AMA session
- * @returns Adaptive Card for confirming end of AMA
+ * Creates and parses the adaptive card for confirming the ending of an QnA.
+ * @param qnaSessionId - id of the current QnA session
+ * @returns Adaptive Card for confirming end of QnA
  */
-export const getEndAMAConfirmationCard = (
-    amaSessionId: string
+export const getEndQnAConfirmationCard = (
+    qnaSessionId: string
 ): AdaptiveCard => {
     const template = new ACData.Template(
-        endAMAConfirmationCardTemplate()
+        endQnAConfirmationCardTemplate()
     ).expand({
         $root: {
-            amaId: amaSessionId,
-        },
-    });
-    return _adaptiveCard(template);
-};
-
-/**
- * Creates and parses the adaptive card used to display the ending mastercard.
- * @param amaTitle - title of the AMA
- * @param amaDesc - description of the AMA
- * @param amaSessionId - id of the AMA session
- * @param userName - name of the user who ended the AMA
- * @returns Adaptive Card that is the ending Mastercard
- */
-export const getEndAMAMastercard = (
-    amaTitle: string,
-    amaDesc: string,
-    amaSessionId: string,
-    userName: string
-): AdaptiveCard => {
-    const template = new ACData.Template(endAMAMastercardTemplate()).expand({
-        $root: {
-            title: amaTitle,
-            description: amaDesc,
-            amaId: amaSessionId,
-            user: userName,
-            image:
-                'https://github.com/kavins14/random/blob/master/title_bg.png?raw=true', // TODO: Find reliable image hosting,
+            qnaId: qnaSessionId,
         },
     });
     return _adaptiveCard(template);
@@ -295,17 +266,17 @@ export const getEndAMAMastercard = (
 
 /**
  * Creates and parses the adaptive card used to address errors when asking a new question.
- * @param amaSessionId - id of the AMA session
+ * @param qnaSessionId - id of the QnA session
  * @param questionContent - question asked that failed to save when error occured
  * @returns Adaptive Card with question asked inside text box
  */
 export const getResubmitQuestionErrorCard = (
-    amaSessionId: string,
+    qnaSessionId: string,
     questionContent: string
 ): AdaptiveCard => {
     const template = new ACData.Template(newQuestionCardTemplate()).expand({
         $root: {
-            amaId: amaSessionId,
+            qnaId: qnaSessionId,
             question: questionContent,
         },
     });

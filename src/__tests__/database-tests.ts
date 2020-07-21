@@ -1,23 +1,23 @@
 import * as mongoose from 'mongoose';
-import { AMASession } from '../Data/Schemas/AMASession';
+import { QnASession } from '../Data/Schemas/QnASession';
 import {
     getQuestionData,
     createQuestion,
     getUserOrCreate,
     addUpvote,
-    endAMASession,
-    createAMASession,
+    endQnASession,
+    createQnASession,
     updateActivityId,
-    getAMASessionData,
+    getQnASessionData,
     getQuestions,
     isHost,
-    isActiveAMA,
-    isExistingAMASession,
+    isActiveQnA,
+    isExistingQnASession,
 } from '../Data/Database';
 import { Question, IQuestion } from '../Data/Schemas/Question';
 import { User } from '../Data/Schemas/User';
 
-let testHost, testAMASession, testUser, testUserUpvoting;
+let testHost, testQnASession, testUser, testUserUpvoting;
 
 const sampleUserAADObjId1 = 'be36140g-9729-3024-8yg1-147bbi67g2c9';
 const sampleUserAADObjId2 = 'different from obj id 1';
@@ -28,12 +28,12 @@ const sampleUserName2 = 'Lily Du';
 const sampleUserName3 = 'Kavin Singh';
 const sampleUserName4 = 'Sample Name';
 const sampleQuestionContent = 'Sample Question?';
-const sampleTitle = 'Weekly AMA Test';
-const sampleDescription = 'Weekly AMA Test description';
+const sampleTitle = 'Weekly QnA Test';
+const sampleDescription = 'Weekly QnA Test description';
 const sampleActivityId = '1234';
 const sampleTenantId = '11121';
 const sampleScopeId = '12311';
-const sampleAMASessionID = '5f160b862655575054393a0e';
+const sampleQnASessionID = '5f160b862655575054393a0e';
 
 beforeAll(async () => {
     await mongoose.connect(process.env.MONGO_URL as string, {
@@ -49,7 +49,7 @@ beforeEach(async () => {
         userName: sampleUserName1,
     }).save();
 
-    testAMASession = await new AMASession({
+    testQnASession = await new QnASession({
         title: sampleTitle,
         description: sampleDescription,
         isActive: true,
@@ -74,7 +74,7 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
-    await AMASession.remove({ _id: testAMASession._id });
+    await QnASession.remove({ _id: testQnASession._id });
     await User.remove({ _id: testHost._id });
     await User.remove({ _id: testUser._id });
     await User.remove({ _id: testUserUpvoting._id });
@@ -84,7 +84,7 @@ afterAll(async () => {
     await mongoose.connection.close();
 });
 
-test('can create ama session', async () => {
+test('can create qna session', async () => {
     const data = {
         title: sampleTitle,
         description: sampleDescription,
@@ -96,7 +96,7 @@ test('can create ama session', async () => {
         isChannel: true,
     };
 
-    const result = await createAMASession(
+    const result = await createQnASession(
         data.title,
         data.description,
         data.userName,
@@ -107,13 +107,13 @@ test('can create ama session', async () => {
         data.isChannel
     );
 
-    expect(result.amaSessionId).toBeTruthy();
+    expect(result.qnaSessionId).toBeTruthy();
     expect(result.hostId).toBe(data.userAadObjId);
 
-    const amaSessionDoc = await AMASession.findById(result.amaSessionId);
+    const qnaSessionDoc = await QnASession.findById(result.qnaSessionId);
 
-    expect(amaSessionDoc).not.toBeNull();
-    const doc = (amaSessionDoc as any).toObject();
+    expect(qnaSessionDoc).not.toBeNull();
+    const doc = (qnaSessionDoc as any).toObject();
 
     const expectedData = {
         title: doc.title,
@@ -134,15 +134,15 @@ test('can create ama session', async () => {
 
 test('can update activity id', async () => {
     const activityId = '12345';
-    await updateActivityId(testAMASession._id, activityId);
+    await updateActivityId(testQnASession._id, activityId);
 
-    const doc: any = await AMASession.findById(testAMASession._id);
+    const doc: any = await QnASession.findById(testQnASession._id);
     expect(doc).not.toBeNull();
-    expect(doc._id).toEqual(testAMASession._id);
+    expect(doc._id).toEqual(testQnASession._id);
     expect(doc.toObject().activityId).toEqual(activityId);
 });
 
-test('get AMA session data', async () => {
+test('get QnA session data', async () => {
     const {
         title,
         userName,
@@ -150,7 +150,7 @@ test('get AMA session data', async () => {
         userAadObjId,
         description,
         isActive,
-    } = await getAMASessionData(testAMASession._id);
+    } = await getQnASessionData(testQnASession._id);
 
     expect(title).toBe(sampleTitle);
     expect(userName).toBe(sampleUserName1);
@@ -161,13 +161,13 @@ test('get AMA session data', async () => {
 });
 
 test('retrieve most recent/top questions with three questions', async () => {
-    const doc: any = await AMASession.findById(testAMASession._id);
+    const doc: any = await QnASession.findById(testQnASession._id);
     expect(doc).not.toBeNull();
 
     // create a new questions
     const questions: any = [
         {
-            amaSessionId: testAMASession._id,
+            qnaSessionId: testQnASession._id,
             userId: testUser._id,
             content: 'This is test question 1',
             voters: [
@@ -182,13 +182,13 @@ test('retrieve most recent/top questions with three questions', async () => {
             ],
         },
         {
-            amaSessionId: testAMASession._id,
+            qnaSessionId: testQnASession._id,
             userId: testUser._id,
             content: 'This is test question 2',
             voters: [],
         },
         {
-            amaSessionId: testAMASession._id,
+            qnaSessionId: testQnASession._id,
             userId: testUser._id,
             content: 'This is test question 3',
             voters: [
@@ -207,7 +207,7 @@ test('retrieve most recent/top questions with three questions', async () => {
     await _sleep(1000);
     questions[2] = await new Question(questions[2]).save();
 
-    const results = await getQuestions(testAMASession._id, 3, 3);
+    const results = await getQuestions(testQnASession._id, 3, 3);
     const topQuestions: any = results.topQuestions;
     const recentQuestions: any = results.recentQuestions;
     const numQuestions = results.numQuestions;
@@ -225,14 +225,14 @@ test('retrieve most recent/top questions with three questions', async () => {
     expect(recentQuestions[2]._id).toEqual(questions[1]._id);
 
     // cleanup
-    await Question.remove({ amaSessionId: testAMASession._id });
+    await Question.remove({ qnaSessionId: testQnASession._id });
 });
 
 test('retrieve most recent/top questions with no questions', async () => {
-    const doc: any = await AMASession.findById(testAMASession._id);
+    const doc: any = await QnASession.findById(testQnASession._id);
     expect(doc).not.toBeNull();
 
-    const results = await getQuestions(testAMASession._id, 3, 3);
+    const results = await getQuestions(testQnASession._id, 3, 3);
     const topQuestions: any = results.topQuestions;
     const recentQuestions: any = results.recentQuestions;
     const numQuestions: any = results.numQuestions;
@@ -241,24 +241,24 @@ test('retrieve most recent/top questions with no questions', async () => {
     expect(recentQuestions).toEqual([]);
     expect(numQuestions).toEqual(0);
     // cleanup
-    await Question.remove({ amaSessionId: testAMASession._id });
+    await Question.remove({ qnaSessionId: testQnASession._id });
 });
 
-test('retrieve question data in empty AMA', async () => {
-    const questionData = await getQuestionData(testAMASession._id);
+test('retrieve question data in empty QnA', async () => {
+    const questionData = await getQuestionData(testQnASession._id);
     expect(questionData).toEqual([]);
 });
 
-test('retrieve question data in non-empty AMA', async () => {
+test('retrieve question data in non-empty QnA', async () => {
     const questions: IQuestion[] = [
         new Question({
-            amaSessionId: testAMASession._id,
+            qnaSessionId: testQnASession._id,
             userId: testUser._id,
             content: 'This is test question 1',
             voters: [],
         }),
         new Question({
-            amaSessionId: testAMASession._id,
+            qnaSessionId: testQnASession._id,
             userId: testUser._id,
             content: 'This is test question 2',
             voters: [],
@@ -268,7 +268,7 @@ test('retrieve question data in non-empty AMA', async () => {
     await questions[0].save();
     await questions[1].save();
 
-    const questionData = await getQuestionData(testAMASession._id);
+    const questionData = await getQuestionData(testQnASession._id);
 
     expect(questionData[0]._id).toEqual(questions[0]._id);
     expect(questionData[1]._id).toEqual(questions[1]._id);
@@ -288,9 +288,9 @@ test('update existing user', async () => {
     expect(data).toBe(true);
 });
 
-test('new question with existing user in existing AMA session', async () => {
+test('new question with existing user in existing QnA session', async () => {
     const data = await createQuestion(
-        testAMASession._id,
+        testQnASession._id,
         testUser._id,
         testUser.userName,
         sampleQuestionContent
@@ -298,9 +298,9 @@ test('new question with existing user in existing AMA session', async () => {
     expect(data).toEqual(true);
 });
 
-test('new question with new user in existing AMA session', async () => {
+test('new question with new user in existing QnA session', async () => {
     const data = await createQuestion(
-        testAMASession._id,
+        testQnASession._id,
         sampleUserAADObjId4,
         sampleUserName4,
         sampleQuestionContent
@@ -308,31 +308,31 @@ test('new question with new user in existing AMA session', async () => {
     expect(data).toEqual(true);
 });
 
-test('new question with existing user in non-existing AMA session', async () => {
+test('new question with existing user in non-existing QnA session', async () => {
     await createQuestion(
-        sampleAMASessionID,
+        sampleQnASessionID,
         sampleUserAADObjId4,
         sampleUserName4,
         sampleQuestionContent
     ).catch((error) => {
-        expect(error).toEqual(new Error('AMA Session record not found'));
+        expect(error).toEqual(new Error('QnA Session record not found'));
     });
 });
 
-test('get non-existing AMA session', async () => {
-    await isExistingAMASession(sampleAMASessionID).catch((error) => {
-        expect(error).toEqual(new Error('AMA Session record not found'));
+test('get non-existing QnA session', async () => {
+    await isExistingQnASession(sampleQnASessionID).catch((error) => {
+        expect(error).toEqual(new Error('QnA Session record not found'));
     });
 });
 
-test('get existing AMA session', async () => {
-    const data = await isExistingAMASession(testAMASession._id);
+test('get existing QnA session', async () => {
+    const data = await isExistingQnASession(testQnASession._id);
     expect(data).toEqual(true);
 });
 
 test('upvote question that has not been upvoted yet with existing user', async () => {
     const newQuestion = new Question({
-        amaSessionId: testAMASession._id,
+        qnaSessionId: testQnASession._id,
         userId: testUser._id,
         content: 'This is a question to test upvotes?',
         voters: [],
@@ -354,7 +354,7 @@ test('upvote question that has not been upvoted yet with existing user', async (
 
 test('upvote question that has already been upvoted with existing user', async () => {
     const newQuestion = new Question({
-        amaSessionId: testAMASession._id,
+        qnaSessionId: testQnASession._id,
         userId: testUser._id,
         content: 'This is a question to test upvotes?',
         voters: [],
@@ -390,7 +390,7 @@ test('upvote question that has already been upvoted with existing user', async (
 
 test('upvote question with new user not in database', async () => {
     const newQuestion = new Question({
-        amaSessionId: testAMASession._id,
+        qnaSessionId: testQnASession._id,
         userId: testUser._id,
         content: 'This is a question to test upvotes?',
         voters: [],
@@ -410,68 +410,68 @@ test('upvote question with new user not in database', async () => {
     await User.remove(testUserUpvoting);
 });
 
-test('ending non-existing ama', async () => {
-    await endAMASession(sampleAMASessionID).catch((error) => {
-        expect(error).toEqual(new Error('AMA Session record not found'));
+test('ending non-existing qna', async () => {
+    await endQnASession(sampleQnASessionID).catch((error) => {
+        expect(error).toEqual(new Error('QnA Session record not found'));
     });
 });
 
-test('ending existing ama with no questions', async () => {
-    await endAMASession(testAMASession._id);
+test('ending existing qna with no questions', async () => {
+    await endQnASession(testQnASession._id);
 
     // get data
-    const amaSessionData: any = await AMASession.findById(testAMASession._id)
+    const qnaSessionData: any = await QnASession.findById(testQnASession._id)
         .exec()
         .catch((error) => {
             console.error(error);
-            throw new Error('Retrieving AMA Session details');
+            throw new Error('Retrieving QnA Session details');
         });
 
-    expect(amaSessionData.isActive).toBe(false);
-    expect(amaSessionData.dateTimeEnded).not.toBe(null);
+    expect(qnaSessionData.isActive).toBe(false);
+    expect(qnaSessionData.dateTimeEnded).not.toBe(null);
 });
 
-test('ending existing ama with a few questions', async () => {
+test('ending existing qna with a few questions', async () => {
     for (let i = 0; i < 5; i++) {
         const randomString = Math.random().toString(36);
         await createQuestion(
-            testAMASession._id,
+            testQnASession._id,
             randomString,
             sampleUserName4,
             sampleQuestionContent
         );
     }
 
-    await endAMASession(testAMASession._id);
+    await endQnASession(testQnASession._id);
 
     // get data
-    const amaSessionData: any = await AMASession.findById(testAMASession._id)
+    const qnaSessionData: any = await QnASession.findById(testQnASession._id)
         .exec()
         .catch((error) => {
             console.error(error);
-            throw new Error('Retrieving AMA Session details');
+            throw new Error('Retrieving QnA Session details');
         });
 
-    expect(amaSessionData.isActive).toBe(false);
-    expect(amaSessionData.dateTimeEnded).not.toBe(null);
+    expect(qnaSessionData.isActive).toBe(false);
+    expect(qnaSessionData.dateTimeEnded).not.toBe(null);
 });
 
 test('checking if current host is the host', async () => {
-    const data = await isHost(testAMASession._id, testAMASession.hostId);
+    const data = await isHost(testQnASession._id, testQnASession.hostId);
     expect(data).toEqual(true);
 });
 
 test('checking if random attendee is the host', async () => {
-    const data = await isHost(testAMASession._id, sampleUserAADObjId3);
+    const data = await isHost(testQnASession._id, sampleUserAADObjId3);
     expect(data).toEqual(false);
 });
 
-test('checking if active AMA is currently active', async () => {
-    const data = await isActiveAMA(testAMASession._id);
+test('checking if active QnA is currently active', async () => {
+    const data = await isActiveQnA(testQnASession._id);
     expect(data).toEqual(true);
 });
 
-test('checking if inactive AMA is currently active', async () => {
+test('checking if inactive QnA is currently active', async () => {
     const data = {
         title: sampleTitle,
         description: sampleDescription,
@@ -483,7 +483,7 @@ test('checking if inactive AMA is currently active', async () => {
         isChannel: true,
     };
 
-    const result = await createAMASession(
+    const result = await createQnASession(
         data.title,
         data.description,
         data.userName,
@@ -494,8 +494,8 @@ test('checking if inactive AMA is currently active', async () => {
         data.isChannel
     );
 
-    await endAMASession(result.amaSessionId);
+    await endQnASession(result.qnaSessionId);
 
-    const isActive = await isActiveAMA(result.amaSessionId);
+    const isActive = await isActiveQnA(result.qnaSessionId);
     expect(isActive).toEqual(false);
 });

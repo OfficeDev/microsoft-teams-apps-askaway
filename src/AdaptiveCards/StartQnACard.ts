@@ -1,7 +1,7 @@
 import { IAdaptiveCard } from 'adaptivecards';
 
 /**
- * Adaptive Card form used to collect information to start the AMA.
+ * Adaptive Card form used to collect information to start the QnA.
  */
 export default () =>
     <IAdaptiveCard>{

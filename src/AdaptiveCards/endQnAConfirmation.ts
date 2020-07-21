@@ -3,7 +3,7 @@
 import { IAdaptiveCard } from 'adaptivecards';
 
 /**
- * Defines the template for the adaptive card used when confirming the ending of the AMA.
+ * Defines the template for the adaptive card used when confirming the ending of the QnA.
  */
 export default () =>
     <IAdaptiveCard>{
@@ -19,21 +19,21 @@ export default () =>
         ],
         actions: [
             {
-                id: 'cancelEndAma',
+                id: 'cancelEndQnA',
                 type: 'Action.Submit',
                 title: 'Cancel',
                 data: {
-                    amaSessionId: '${amaId}',
-                    id: 'cancelEndAma',
+                    qnaSessionId: '${qnaId}',
+                    id: 'cancelEndQnA',
                 },
             },
             {
-                id: 'submitEndAma',
+                id: 'submitEndQnA',
                 type: 'Action.Submit',
                 title: 'End session',
                 data: {
-                    amaSessionId: '${amaId}',
-                    id: 'submitEndAma',
+                    qnaSessionId: '${qnaId}',
+                    id: 'submitEndQnA',
                 },
             },
         ],

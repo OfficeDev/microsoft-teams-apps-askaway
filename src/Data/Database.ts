@@ -1,10 +1,10 @@
 /* eslint-disable no-console */
 import * as mongoose from 'mongoose';
 import {
-    AMASession,
-    IAMASession_populated,
-    IAMASession,
-} from './Schemas/AMASession';
+    QnASession,
+    IQnASession_populated,
+    IQnASession,
+} from './Schemas/QnASession';
 import { User } from './Schemas/User';
 import {
     Question,
@@ -26,17 +26,17 @@ export const initiateConnection = async (
 };
 
 /**
- * Creates initial AMA session document and stores it in the database
- * @param title - title of AMA
- * @param description - description of AMA
- * @param userName - name of the user who created the AMA
- * @param userAadObjId - AAD Object Id of the suer who created the AMA
+ * Creates initial QnA session document and stores it in the database
+ * @param title - title of QnA
+ * @param description - description of QnA
+ * @param userName - name of the user who created the QnA
+ * @param userAadObjId - AAD Object Id of the suer who created the QnA
  * @param activityId - id of the master card message used for proactive updating
  * @param tenantId - id of tenant the bot is running on.
  * @param scopeId - channel id or group chat id
- * @param isChannel - whether the AMA session was started in a channel or group chat
+ * @param isChannel - whether the QnA session was started in a channel or group chat
  */
-export const createAMASession = async (
+export const createQnASession = async (
     title: string,
     description: string,
     userName: string,
@@ -45,10 +45,10 @@ export const createAMASession = async (
     tenantId: string,
     scopeId: string,
     isChannel: boolean
-): Promise<{ amaSessionId: string; hostId: string }> => {
+): Promise<{ qnaSessionId: string; hostId: string }> => {
     await getUserOrCreate(userAadObjId, userName);
 
-    const amaSession = new AMASession({
+    const qnaSession = new QnASession({
         title: title,
         description: description,
         hostId: userAadObjId,
@@ -61,21 +61,21 @@ export const createAMASession = async (
         },
     });
 
-    const savedSession: mongoose.MongooseDocument = await amaSession.save();
+    const savedSession: mongoose.MongooseDocument = await qnaSession.save();
 
-    return { amaSessionId: savedSession._id, hostId: userAadObjId };
+    return { qnaSessionId: savedSession._id, hostId: userAadObjId };
 };
 
 /**
- * Updates the activity id of an existing AMA session
- * @param amaSessionId - document database id of the AMA session
+ * Updates the activity id of an existing QnA session
+ * @param qnaSessionId - document database id of the QnA session
  * @param activityId - id of the master card message used for proactive updating of the card
  */
 export const updateActivityId = async (
-    amaSessionId: string,
+    qnaSessionId: string,
     activityId: string
 ) => {
-    await AMASession.findByIdAndUpdate({ _id: amaSessionId }, { activityId });
+    await QnASession.findByIdAndUpdate({ _id: qnaSessionId }, { activityId });
 };
 
 /**
@@ -86,16 +86,16 @@ export const disconnect = async (): Promise<void> => {
 };
 
 /**
- * Returns all the questions under an AMA with the details of the users filled.
- * @param amaSessionId - the DBID of the AMA session from which to retrieve the questions.
- * @returns - Array of Question documents under the AMA.
+ * Returns all the questions under an QnA with the details of the users filled.
+ * @param qnaSessionId - the DBID of the QnA session from which to retrieve the questions.
+ * @returns - Array of Question documents under the QnA.
  * @throws - Error thrown when finding questions or populating userId field of question documents fails.
  */
 export const getQuestionData = async (
-    amaSessionId: string
+    qnaSessionId: string
 ): Promise<Array<IQuestionPopulatedUser>> => {
     const questionData: IQuestion[] = await Question.find({
-        amaSessionId: amaSessionId,
+        qnaSessionId: qnaSessionId,
     })
         .populate({ path: 'userId', model: User })
         .exec();
@@ -126,12 +126,12 @@ const isIQuestion_populatedUserArray = (
 
 /**
  * Retrives top N questions with the highest number of votes.
- * @param amaSessionId - the DBID of the AMA session from which to retrieve the questions.
+ * @param qnaSessionId - the DBID of the QnA session from which to retrieve the questions.
  * @param n - number of questions to retrieve. Must be positive.
- * @returns - Array of Question documents in the AMA and total questions in AMA.
+ * @returns - Array of Question documents in the QnA and total questions in QnA.
  */
 export const getQuestions = async (
-    amaSessionId: string,
+    qnaSessionId: string,
     topN?: number,
     recentN?: number
 ): Promise<{
@@ -139,7 +139,7 @@ export const getQuestions = async (
     recentQuestions?: IQuestionPopulatedUser[];
     numQuestions: number;
 }> => {
-    const questionData = await getQuestionData(amaSessionId);
+    const questionData = await getQuestionData(qnaSessionId);
     let voteSorted, recentSorted;
 
     if (recentN)
@@ -164,31 +164,31 @@ export const getQuestions = async (
     };
 };
 
-export const getAMASessionData = async (amaSessionId: string) => {
-    const amaSessionData = await AMASession.findById(amaSessionId)
+export const getQnASessionData = async (qnaSessionId: string) => {
+    const qnaSessionData = await QnASession.findById(qnaSessionId)
         .populate({ path: 'hostId', modle: User })
         .exec();
-    if (!amaSessionData) throw new Error('AMA Session not found');
+    if (!qnaSessionData) throw new Error('QnA Session not found');
 
-    const _amaSessionData: IAMASession_populated = (amaSessionData as IAMASession).toObject();
+    const _qnaSessionData: IQnASession_populated = (qnaSessionData as IQnASession).toObject();
 
     // activity id must be set before this function gets called
-    if (!_amaSessionData.activityId)
-        throw new Error('AMA Session `activityId` not found');
+    if (!_qnaSessionData.activityId)
+        throw new Error('QnA Session `activityId` not found');
 
     return {
-        title: _amaSessionData.title,
-        userName: _amaSessionData.hostId.userName,
-        activityId: _amaSessionData.activityId,
-        userAadObjId: _amaSessionData.hostId._id,
-        description: _amaSessionData.description,
-        isActive: _amaSessionData.isActive,
+        title: _qnaSessionData.title,
+        userName: _qnaSessionData.hostId.userName,
+        activityId: _qnaSessionData.activityId,
+        userAadObjId: _qnaSessionData.hostId._id,
+        description: _qnaSessionData.description,
+        isActive: _qnaSessionData.isActive,
     };
 };
 
 /**
  * Writes a new question to the database.
- * @param amaTeamsSessionId - id of the current AMA session
+ * @param qnaTeamsSessionId - id of the current QnA session
  * @param userAadObjId - AAD Object ID of user
  * @param userTeamsName - Name of user on Teams
  * @param questionContent - Question asked by user
@@ -196,16 +196,16 @@ export const getAMASessionData = async (amaSessionId: string) => {
  * @throws Error thrown when database fails to save the question
  */
 export const createQuestion = async (
-    amaTeamsSessionId: string,
+    qnaTeamsSessionId: string,
     userAadObjId: string,
     userTeamsName: string,
     questionContent: string
 ): Promise<boolean> => {
     await getUserOrCreate(userAadObjId, userTeamsName);
-    await isExistingAMASession(amaTeamsSessionId);
+    await isExistingQnASession(qnaTeamsSessionId);
 
     const question = new Question({
-        amaSessionId: amaTeamsSessionId,
+        qnaSessionId: qnaTeamsSessionId,
         userId: userAadObjId,
         content: questionContent,
     });
@@ -262,49 +262,49 @@ export const addUpvote = async (
 };
 
 /*
- * Ends the AMA by changing fields: isActive to false and dateTimeEnded to current time
- * @param amaSessionId - id of the current AMA session
+ * Ends the QnA by changing fields: isActive to false and dateTimeEnded to current time
+ * @param qnaSessionId - id of the current QnA session
  * @throws Error thrown when database fails to execute changes
  */
-export const endAMASession = async (amaSessionId: string) => {
-    await isExistingAMASession(amaSessionId);
-    const result = await AMASession.findByIdAndUpdate(amaSessionId, {
+export const endQnASession = async (qnaSessionId: string) => {
+    await isExistingQnASession(qnaSessionId);
+    const result = await QnASession.findByIdAndUpdate(qnaSessionId, {
         $set: { isActive: false, dateTimeEnded: new Date() },
     }).exec();
 
-    if (!result) throw new Error('AMA Session not found');
+    if (!result) throw new Error('QnA Session not found');
 };
 
 /**
- * If AMA session exists, will return true
- * Otherwise, if AMA session doesn't exist, will throw an error.
- * @param amaTeamsSessionId - id of the current AMA session
- * @returns true if amaTeamsSessionId is in the database
- * @throws Error thrown when database fails to find the amaTeamsSessionId
+ * If QnA session exists, will return true
+ * Otherwise, if QnA session doesn't exist, will throw an error.
+ * @param qnaTeamsSessionId - id of the current QnA session
+ * @returns true if qnaTeamsSessionId is in the database
+ * @throws Error thrown when database fails to find the qnaTeamsSessionId
  */
-export const isExistingAMASession = async (
-    amaTeamsSessionId: string
+export const isExistingQnASession = async (
+    qnaTeamsSessionId: string
 ): Promise<boolean> => {
-    const result = await AMASession.findById(amaTeamsSessionId);
+    const result = await QnASession.findById(qnaTeamsSessionId);
 
-    if (!result) throw new Error('AMA Session record not found');
+    if (!result) throw new Error('QnA Session record not found');
 
     return true;
 };
 
 /**
- * Checks if the user is the host for this AMA session, returns true if
+ * Checks if the user is the host for this QnA session, returns true if
  * id matches records, false otherwise
- * @param amaSessionId - id of the current AMA session
+ * @param qnaSessionId - id of the current QnA session
  * @param userAadjObjId - aadObjId of the current user
- * @throws Error when failed to find matching AMA session with the user ID
+ * @throws Error when failed to find matching QnA session with the user ID
  */
 export const isHost = async (
-    amaSessionId: string,
+    qnaSessionId: string,
     userAadjObjId: string
 ): Promise<boolean> => {
-    const result = await AMASession.find({
-        _id: amaSessionId,
+    const result = await QnASession.find({
+        _id: qnaSessionId,
         hostId: userAadjObjId,
     }).exec();
 
@@ -314,14 +314,14 @@ export const isHost = async (
 };
 
 /**
- * Checks the status of the AMA session, returns true if
+ * Checks the status of the QnA session, returns true if
  * database records indicate active otherwise returns false
- * @param amaTeamsSessionId - id of the current AMA session
+ * @param qnaTeamsSessionId - id of the current QnA session
  */
-export const isActiveAMA = async (
-    amaTeamsSessionId: string
+export const isActiveQnA = async (
+    qnaTeamsSessionId: string
 ): Promise<boolean> => {
-    const result = await AMASession.findById(amaTeamsSessionId).exec();
+    const result = await QnASession.findById(qnaTeamsSessionId).exec();
     if (!result) throw new Error('Result is empty');
 
     return result.isActive;

@@ -15,12 +15,12 @@ import {
     ChannelAccount,
 } from 'botbuilder';
 import { clone, debounce, delay } from 'lodash';
-import * as controller from './../../Controller';
+import * as controller from '../../Controller';
 import { AdaptiveCard } from 'adaptivecards';
 import {
-    extractMasterCardData,
-    MasterCardData,
-} from '../../AdaptiveCards/MasterCard';
+    extractMainCardData,
+    MainCardData,
+} from '../../AdaptiveCards/MainCard';
 import { Result, err } from '../../util';
 import { aiClient } from '../server';
 
@@ -34,38 +34,38 @@ import { aiClient } from '../server';
     process.env.MICROSOFT_APP_ID,
     process.env.MICROSOFT_APP_PASSWORD
 )
-export class Questionly extends TeamsActivityHandler {
-    /** Local property for StartAmaMessageExtension */
-    // Each AMA sesion gets mapped to a unique function used to update the Master Card.
-    private _updateMasterCardFunctionMap: {
+export class AskAway extends TeamsActivityHandler {
+    /** Local property for StartQnAMessageExtension */
+    // Each QnA sesion gets mapped to a unique function used to update the Master Card.
+    private _updateMainCardFunctionMap: {
         [key: string]: {
-            func: (context: TurnContext, amaSessionId: string) => void;
+            func: (context: TurnContext, qnaSessionId: string) => void;
             timeLastUpdated: number;
         };
     };
 
     private _config: {
-        updateMasterCardDebounceTimeInterval: number;
-        updateMasterCardDebounceMaxWait: number;
-        updateMasterCardPostDebounceTimeInterval: number;
+        updateMainCardDebounceTimeInterval: number;
+        updateMainCardDebounceMaxWait: number;
+        updateMainCardPostDebounceTimeInterval: number;
     };
     /**
      * The constructor
      */
     public constructor() {
         super();
-        this._updateMasterCardFunctionMap = {};
+        this._updateMainCardFunctionMap = {};
 
         const env = process.env;
-        const maxWait = env.updateMasterCardDebounceMaxWait;
-        const timeInterval = env.updateMasterCardDebounceTimeInterval;
-        const postTimeInterval = env.updateMasterCardPostDebounceTimeInterval;
+        const maxWait = env.updateMainCardDebounceMaxWait;
+        const timeInterval = env.updateMainCardDebounceTimeInterval;
+        const postTimeInterval = env.updateMainCardPostDebounceTimeInterval;
         this._config = {
-            updateMasterCardDebounceTimeInterval: timeInterval
+            updateMainCardDebounceTimeInterval: timeInterval
                 ? Number(timeInterval)
                 : 15000,
-            updateMasterCardDebounceMaxWait: maxWait ? Number(maxWait) : 20000,
-            updateMasterCardPostDebounceTimeInterval: postTimeInterval
+            updateMainCardDebounceMaxWait: maxWait ? Number(maxWait) : 20000,
+            updateMainCardPostDebounceTimeInterval: postTimeInterval
                 ? Number(postTimeInterval)
                 : 5000,
         };
@@ -112,7 +112,7 @@ export class Questionly extends TeamsActivityHandler {
         taskModuleRequest: TaskModuleRequest
     ): Promise<TaskModuleResponse> {
         const user = context.activity.from;
-        const endAMAIds = ['submitEndAma', 'cancelEndAma'];
+        const endQnAIds = ['submitEndQnA', 'cancelEndQnA'];
 
         if (taskModuleRequest.data.id == 'submitQuestion')
             return this._handleTeamsTaskModuleSubmitQuestion(
@@ -125,12 +125,12 @@ export class Questionly extends TeamsActivityHandler {
                 context,
                 taskModuleRequest
             );
-        else if (taskModuleRequest.data.id == 'confirmEndAMA')
-            return this._handleTeamsTaskModuleSubmitConfirmEndAMA(
+        else if (taskModuleRequest.data.id == 'confirmEndQnA')
+            return this._handleTeamsTaskModuleSubmitConfirmEndQnA(
                 taskModuleRequest
             );
-        else if (endAMAIds.includes(taskModuleRequest.data.id))
-            return this._handleTeamsTaskModuleSubmitEndAMA(
+        else if (endQnAIds.includes(taskModuleRequest.data.id))
+            return this._handleTeamsTaskModuleSubmitEndQnA(
                 taskModuleRequest,
                 context
             );
@@ -146,7 +146,7 @@ export class Questionly extends TeamsActivityHandler {
         taskModuleRequest: TaskModuleRequest
     ): TaskModuleResponse {
         return this._buildTaskModuleContinueResponse(
-            controller.getNewQuestionCard(taskModuleRequest.data.amaSessionId),
+            controller.getNewQuestionCard(taskModuleRequest.data.qnaSessionId),
             'Ask a question'
         );
     }
@@ -156,54 +156,54 @@ export class Questionly extends TeamsActivityHandler {
         user: ChannelAccount,
         taskModuleRequest: TaskModuleRequest
     ): Promise<TaskModuleResponse> {
-        const amaSessionId = taskModuleRequest.data.amaSessionId;
+        const qnaSessionId = taskModuleRequest.data.qnaSessionId;
         const userAADObjId = user.aadObjectId as string;
         const userName = user.name;
         const questionContent = taskModuleRequest.data.usertext as string;
 
         if (questionContent == null || questionContent.trim() === '')
             return this._handleTeamsTaskModuleResubmitQuestion(
-                amaSessionId,
+                qnaSessionId,
                 ''
             );
 
         const status = await controller.submitNewQuestion(
-            amaSessionId,
+            qnaSessionId,
             userAADObjId,
             userName,
             questionContent
         );
 
-        this._updateMasterCard(taskModuleRequest.data.amaSessionId, context);
+        this._updateMainCard(taskModuleRequest.data.qnaSessionId, context);
 
         if (!status.isOk())
             return this._handleTeamsTaskModuleResubmitQuestion(
-                amaSessionId,
+                qnaSessionId,
                 questionContent
             );
 
         return null as any;
     }
 
-    private async _handleTeamsTaskModuleSubmitConfirmEndAMA(
+    private async _handleTeamsTaskModuleSubmitConfirmEndQnA(
         taskModuleRequest: TaskModuleRequest
     ): Promise<TaskModuleResponse> {
         return this._buildTaskModuleContinueResponse(
-            controller.getEndAMAConfirmationCard(
-                taskModuleRequest.data.amaSessionId
+            controller.getEndQnAConfirmationCard(
+                taskModuleRequest.data.qnaSessionId
             ),
             'End session'
         );
     }
 
-    private async _handleTeamsTaskModuleSubmitEndAMA(
+    private async _handleTeamsTaskModuleSubmitEndQnA(
         taskModuleRequest: TaskModuleRequest,
         context: TurnContext
     ): Promise<TaskModuleResponse> {
-        const amaSessionId = taskModuleRequest.data.amaSessionId;
+        const qnaSessionId = taskModuleRequest.data.qnaSessionId;
 
-        if (taskModuleRequest.data.id == 'submitEndAma') {
-            const result = await controller.endAMASession(amaSessionId);
+        if (taskModuleRequest.data.id == 'submitEndQnA') {
+            const result = await controller.endQnASession(qnaSessionId);
 
             if (result.isErr()) return this._handleTeamsTaskModuleSubmitError();
 
@@ -230,11 +230,11 @@ export class Questionly extends TeamsActivityHandler {
     }
 
     private _handleTeamsTaskModuleResubmitQuestion(
-        amaSessionId: string,
+        qnaSessionId: string,
         questionContent: string
     ): TaskModuleResponse {
         return this._buildTaskModuleContinueResponse(
-            controller.getResubmitQuestionCard(amaSessionId, questionContent),
+            controller.getResubmitQuestionCard(qnaSessionId, questionContent),
             'Ask a question'
         );
     }
@@ -250,8 +250,8 @@ export class Questionly extends TeamsActivityHandler {
                 type: 'task/fetch',
             },
             id: 'viewLeaderboard',
-            amaSessionId:
-                <put the amaSessionId here>
+            qnaSessionId:
+                <put the qnaSessionId here>
         }
         ================================================================================================================================*/
 
@@ -261,14 +261,14 @@ export class Questionly extends TeamsActivityHandler {
         );
 
         const isHost = isHostAndActive[0];
-        const isActiveAMA = isHostAndActive[1];
+        const isActiveQnA = isHostAndActive[1];
 
-        if (isHost.isOk() && isActiveAMA.isOk()) {
+        if (isHost.isOk() && isActiveQnA.isOk()) {
             const leaderboard = await controller.generateLeaderboard(
-                taskModuleRequest.data.amaSessionId,
+                taskModuleRequest.data.qnaSessionId,
                 context.activity.from.aadObjectId as string,
                 isHost.value,
-                isActiveAMA.value
+                isActiveQnA.value
             );
 
             const response: TaskModuleResponse = leaderboard.isOk()
@@ -301,21 +301,18 @@ export class Questionly extends TeamsActivityHandler {
         );
 
         const isHost = isHostAndActive[0];
-        const isActiveAMA = isHostAndActive[1];
+        const isActiveQnA = isHostAndActive[1];
 
-        if (isHost.isOk() && isActiveAMA.isOk()) {
+        if (isHost.isOk() && isActiveQnA.isOk()) {
             const updatedLeaderboard = await controller.addUpvote(
                 taskModuleRequest.data.questionId,
                 context.activity.from.aadObjectId as string,
                 context.activity.from.name,
                 isHost.value,
-                isActiveAMA.value
+                isActiveQnA.value
             );
 
-            this._updateMasterCard(
-                taskModuleRequest.data.amaSessionId,
-                context
-            );
+            this._updateMainCard(taskModuleRequest.data.qnaSessionId, context);
 
             return updatedLeaderboard.isOk()
                 ? this._buildTaskModuleContinueResponse(
@@ -336,9 +333,9 @@ export class Questionly extends TeamsActivityHandler {
     async handleTeamsMessagingExtensionFetchTask(): Promise<
         MessagingExtensionActionResponse
     > {
-        // commandId: 'startAMA'
+        // commandId: 'startQnA'
         return this._buildTaskModuleContinueResponse(
-            controller.getStartAMACard(),
+            controller.getStartQnACard(),
             'Start session to gather questions'
         );
     }
@@ -347,23 +344,23 @@ export class Questionly extends TeamsActivityHandler {
         context: TurnContext,
         action: MessagingExtensionAction
     ): Promise<MessagingExtensionActionResponse> {
-        const cardDataResponse = this._extractMasterCardFromActivityPreveiw(
+        const cardDataResponse = this._extractMainCardFromActivityPreveiw(
             action
         );
-        let cardData: Partial<MasterCardData>;
+        let cardData: Partial<MainCardData>;
 
         if (cardDataResponse.isOk()) cardData = cardDataResponse.value;
         else {
             aiClient.trackException({
                 exception: new Error(
-                    'Unable to extract mastercard data' + cardDataResponse.value
+                    'Unable to extract maincard data' + cardDataResponse.value
                 ),
             });
             cardData = { title: '', description: '' };
         }
 
         return this._buildTaskModuleContinueResponse(
-            controller.getStartAMACard(cardData.title, cardData.description),
+            controller.getStartQnACard(cardData.title, cardData.description),
             'Edit details'
         );
     }
@@ -372,12 +369,12 @@ export class Questionly extends TeamsActivityHandler {
         context: TurnContext,
         action: MessagingExtensionAction
     ): Promise<MessagingExtensionActionResponse> {
-        const cardDataResponse = this._extractMasterCardFromActivityPreveiw(
+        const cardDataResponse = this._extractMainCardFromActivityPreveiw(
             action
         );
-        let cardData: MasterCardData | { title: string; description: string };
+        let cardData: MainCardData | { title: string; description: string };
 
-        // if starting AMA from reply chain, update conversation id so that card is sent to channel as a new conversation
+        // if starting QnA from reply chain, update conversation id so that card is sent to channel as a new conversation
         const conversationId = context.activity.conversation.id;
         if (conversationId.match('messageid') !== null)
             // true if conversation is a reply chain
@@ -386,10 +383,10 @@ export class Questionly extends TeamsActivityHandler {
         if (cardDataResponse.isOk()) cardData = cardDataResponse.value;
         else {
             // this error will create a broken experience for the user and so
-            // the AMA session will not be created.
+            // the QnA session will not be created.
             aiClient.trackException({
                 exception: new Error(
-                    'Unable to extract mastercard data' + cardDataResponse.value
+                    'Unable to extract maincard data' + cardDataResponse.value
                 ),
             });
             return null as any;
@@ -407,7 +404,7 @@ export class Questionly extends TeamsActivityHandler {
                 ? teamsGetChannelId(context.activity)
                 : conversation.id;
 
-        const response = await controller.startAMASession(
+        const response = await controller.startQnASession(
             title,
             description,
             userName,
@@ -424,7 +421,7 @@ export class Questionly extends TeamsActivityHandler {
                 attachments: [CardFactory.adaptiveCard(data.card)],
             });
             if (resource !== undefined) {
-                await controller.setActivityId(data.amaSessionId, resource.id);
+                await controller.setActivityId(data.qnaSessionId, resource.id);
             }
         }
 
@@ -436,7 +433,7 @@ export class Questionly extends TeamsActivityHandler {
         action: MessagingExtensionAction
     ): Promise<MessagingExtensionActionResponse> {
         /*================================================================================================================================
-            The following elements must be in the `StartAMACard`:
+            The following elements must be in the `StartQnACard`:
             {
                 type: 'Input.Text',
                 id: 'title',
@@ -450,12 +447,12 @@ export class Questionly extends TeamsActivityHandler {
         const title = value.data.title.trim(),
             description = value.data.description.trim(),
             username = context.activity.from.name,
-            amaSessionId = '',
+            qnaSessionId = '',
             userId = context.activity.from.aadObjectId as string;
 
         if (!(title && description))
             return this._buildTaskModuleContinueResponse(
-                controller.getStartAMACard(
+                controller.getStartQnACard(
                     title,
                     description,
                     'Fields cannot be empty'
@@ -463,11 +460,11 @@ export class Questionly extends TeamsActivityHandler {
             );
 
         const card = CardFactory.adaptiveCard(
-            await controller.getMasterCard(
+            await controller.getMainCard(
                 title,
                 description,
                 username,
-                amaSessionId,
+                qnaSessionId,
                 userId
             )
         );
@@ -487,29 +484,29 @@ export class Questionly extends TeamsActivityHandler {
     /**
      * Handles proactively updating the master card with the top questions.
      * @param context - Current bot turn context.
-     * @param amaSessionId - AMA session database document id.
+     * @param qnaSessionId - QnA session database document id.
      */
-    private _getHandleMasterCardTopQuestion = () => {
+    private _getHandleMainCardTopQuestion = () => {
         const _function = async (
             context: TurnContext,
-            amaSessionId: string
+            qnaSessionId: string
         ) => {
-            const updatedMastercard = await controller.getUpdatedMasterCard(
-                amaSessionId
+            const updatedMaincard = await controller.getUpdatedMainCard(
+                qnaSessionId
             );
 
-            if (updatedMastercard.isOk()) {
-                this._updateMasterCardFunctionMap[
-                    amaSessionId
+            if (updatedMaincard.isOk()) {
+                this._updateMainCardFunctionMap[
+                    qnaSessionId
                 ].timeLastUpdated = Date.now();
 
                 const card = CardFactory.adaptiveCard(
-                    updatedMastercard.value.card
+                    updatedMaincard.value.card
                 );
 
                 try {
                     await context.updateActivity({
-                        id: updatedMastercard.value.activityId,
+                        id: updatedMaincard.value.activityId,
                         attachments: [card],
                         type: 'message',
                     });
@@ -521,63 +518,60 @@ export class Questionly extends TeamsActivityHandler {
 
         return debounce(
             _function,
-            this._config.updateMasterCardDebounceTimeInterval,
+            this._config.updateMainCardDebounceTimeInterval,
             {
                 leading: true,
                 trailing: true,
-                maxWait: this._config.updateMasterCardDebounceMaxWait,
+                maxWait: this._config.updateMainCardDebounceMaxWait,
             }
         );
     };
 
-    private _updateMasterCard = (
-        amaSessionId: string,
-        context: TurnContext
-    ) => {
+    private _updateMainCard = (qnaSessionId: string, context: TurnContext) => {
         const _context = clone(context);
-        if (!(amaSessionId in this._updateMasterCardFunctionMap)) {
-            this._updateMasterCardFunctionMap[amaSessionId] = {
-                func: this._getHandleMasterCardTopQuestion(),
+        if (!(qnaSessionId in this._updateMainCardFunctionMap)) {
+            this._updateMainCardFunctionMap[qnaSessionId] = {
+                func: this._getHandleMainCardTopQuestion(),
                 timeLastUpdated: 0,
             };
         }
 
-        const map = this._updateMasterCardFunctionMap[amaSessionId];
+        const map = this._updateMainCardFunctionMap[qnaSessionId];
         if (
             Date.now() - map.timeLastUpdated <
-            this._config.updateMasterCardPostDebounceTimeInterval
+            this._config.updateMainCardPostDebounceTimeInterval
         )
             delay(
-                () => map.func(_context, amaSessionId),
-                this._config.updateMasterCardPostDebounceTimeInterval
+                () => map.func(_context, qnaSessionId),
+                this._config.updateMainCardPostDebounceTimeInterval
             );
-        else map.func(_context, amaSessionId);
+        else map.func(_context, qnaSessionId);
     };
 
-    private _extractMasterCardFromActivityPreveiw = (
+    private _extractMainCardFromActivityPreveiw = (
         action: MessagingExtensionAction
-    ): Result<MasterCardData, null> => {
+    ): Result<MainCardData, null> => {
         if (
             !action.botActivityPreview ||
             !action.botActivityPreview[0].attachments
         )
             return err(null);
         const attachments = action.botActivityPreview[0].attachments;
-        return extractMasterCardData(attachments[0].content);
+        return extractMainCardData(attachments[0].content);
     };
 
     private _isHostAndActive = async (
         taskModuleRequest: TaskModuleRequest,
         context: TurnContext
     ): Promise<Array<Result<any, Error>>> => {
-        const amaSessionId = taskModuleRequest.data.amaSessionId;
+        const qnaSessionId = taskModuleRequest.data.qnaSessionId;
         const userAadObjId = context.activity.from.aadObjectId as string;
 
-        const isHost = await controller.isHost(amaSessionId, userAadObjId);
-        const isActiveAMA = await controller.isActiveAMA(
-            taskModuleRequest.data.amaSessionId
+        const isHost = await controller.isHost(qnaSessionId, userAadObjId);
+        const isActiveQnA = await controller.isActiveQnA(
+            taskModuleRequest.data.qnaSessionId
         );
 
-        return [isHost, isActiveAMA];
+        return [isHost, isActiveQnA];
     };
 }
