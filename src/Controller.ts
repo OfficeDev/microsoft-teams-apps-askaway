@@ -7,7 +7,9 @@ import { AdaptiveCard } from 'adaptivecards';
 import { IQuestion, IQuestionPopulatedUser } from './Data/Schemas/Question';
 import { aiClient } from './app/server';
 
-db.initiateConnection(process.env.MONGO_URI as string);
+db.initiateConnection(process.env.MONGO_URI as string).catch((error) => {
+    aiClient.trackException({ exception: error });
+});
 
 export const getMasterCard = adaptiveCardBuilder.getMasterCard;
 export const getStartAMACard = adaptiveCardBuilder.getStartAMACard;
@@ -286,9 +288,8 @@ export const isHost = async (
     userAadObjId: string
 ): Promise<Result<boolean, Error>> => {
     try {
-        await db.isHost(amaSessionId, userAadObjId);
-
-        return ok(true);
+        const result = await db.isHost(amaSessionId, userAadObjId);
+        return ok(result);
     } catch (error) {
         aiClient.trackException({ exception: error });
         return err(
@@ -303,13 +304,10 @@ export const isHost = async (
  */
 export const isActiveAMA = async (
     amaSessionId: string
-): Promise<Result<any, Error>> => {
+): Promise<Result<boolean, Error>> => {
     try {
         const result = await db.isActiveAMA(amaSessionId);
-
-        return ok({
-            status: result,
-        });
+        return ok(result);
     } catch (error) {
         aiClient.trackException({ exception: error });
         return err(Error('Failed to check if AMA session is active'));
