@@ -21,8 +21,7 @@ export const initiateConnection = async (
 ): Promise<boolean> => {
     await mongoose
         .connect(mongoURI, { useFindAndModify: false })
-        .then(() => console.log('Connection to CosmosDB successful'))
-        .catch((error) => console.error(error));
+        .then(() => console.log('Connection to CosmosDB successful'));
     return true;
 };
 
@@ -62,11 +61,7 @@ export const createAMASession = async (
         },
     });
 
-    const savedSession: mongoose.MongooseDocument = await amaSession
-        .save()
-        .catch((err) => {
-            throw new Error('Error saving AMA session: ' + err);
-        });
+    const savedSession: mongoose.MongooseDocument = await amaSession.save();
 
     return { amaSessionId: savedSession._id, hostId: userAadObjId };
 };
@@ -80,14 +75,7 @@ export const updateActivityId = async (
     amaSessionId: string,
     activityId: string
 ) => {
-    await AMASession.findByIdAndUpdate(
-        { _id: amaSessionId },
-        { activityId }
-    ).catch((error) => {
-        new Error(
-            `Failed to update activityId of AMA session: ${amaSessionId}. ${error}`
-        );
-    });
+    await AMASession.findByIdAndUpdate({ _id: amaSessionId }, { activityId });
 };
 
 /**
@@ -110,13 +98,7 @@ export const getQuestionData = async (
         amaSessionId: amaSessionId,
     })
         .populate({ path: 'userId', model: User })
-        .exec()
-        .catch((error) => {
-            console.error(error);
-            throw new Error(
-                'Retrieving questions or populating user details failed'
-            );
-        });
+        .exec();
     if (isIQuestion_populatedUserArray(questionData))
         return questionData as IQuestionPopulatedUser[];
     else {
@@ -185,11 +167,7 @@ export const getQuestions = async (
 export const getAMASessionData = async (amaSessionId: string) => {
     const amaSessionData = await AMASession.findById(amaSessionId)
         .populate({ path: 'hostId', modle: User })
-        .exec()
-        .catch((error) => {
-            console.error(error);
-            throw new Error('Retrieving AMA Session details');
-        });
+        .exec();
     if (!amaSessionData) throw new Error('AMA Session not found');
 
     const _amaSessionData: IAMASession_populated = (amaSessionData as IAMASession).toObject();
@@ -232,12 +210,7 @@ export const createQuestion = async (
         content: questionContent,
     });
 
-    const response = await question.save().catch((err) => {
-        console.error(err);
-        throw new Error('Failed to save question ');
-    });
-
-    console.log(response);
+    await question.save();
     return true;
 };
 
@@ -257,10 +230,7 @@ export const getUserOrCreate = async (
         userAadObjId,
         { $set: { _id: userAadObjId, userName: userTeamsName } },
         { upsert: true }
-    ).catch((err) => {
-        console.error(err);
-        throw new Error('Failed to find and create/update user');
-    });
+    );
 
     return true;
 };
@@ -276,12 +246,9 @@ export const addUpvote = async (
     aadObjectId: string,
     name: string
 ): Promise<IQuestion> => {
-    await getUserOrCreate(aadObjectId, name).catch((error) => {
-        console.error(error);
-        throw new Error('finding or creating user failed.');
-    });
+    await getUserOrCreate(aadObjectId, name);
 
-    const question: IQuestion = await Question.findByIdAndUpdate(
+    const question = (await Question.findByIdAndUpdate(
         questionId,
         {
             $addToSet: { voters: aadObjectId },
@@ -289,10 +256,7 @@ export const addUpvote = async (
         {
             new: true,
         }
-    ).catch((error) => {
-        console.error(error);
-        throw new Error('adding upvote to question failed in database.');
-    });
+    )) as IQuestion;
 
     return question;
 };
@@ -306,14 +270,7 @@ export const endAMASession = async (amaSessionId: string) => {
     await isExistingAMASession(amaSessionId);
     const result = await AMASession.findByIdAndUpdate(amaSessionId, {
         $set: { isActive: false, dateTimeEnded: new Date() },
-    })
-        .exec()
-        .catch((err) => {
-            console.error(err);
-            throw new Error(
-                'Failed to change isActive for AMASession to false and change dateTimeEnded to current time'
-            );
-        });
+    }).exec();
 
     if (!result) throw new Error('AMA Session not found');
 };
@@ -328,10 +285,7 @@ export const endAMASession = async (amaSessionId: string) => {
 export const isExistingAMASession = async (
     amaTeamsSessionId: string
 ): Promise<boolean> => {
-    const result = await AMASession.findById(amaTeamsSessionId).catch((err) => {
-        console.error(err);
-        throw new Error('Failed to find AMA Session');
-    });
+    const result = await AMASession.findById(amaTeamsSessionId);
 
     if (!result) throw new Error('AMA Session record not found');
 
@@ -352,12 +306,7 @@ export const isHost = async (
     const result = await AMASession.find({
         _id: amaSessionId,
         hostId: userAadjObjId,
-    })
-        .exec()
-        .catch((err) => {
-            console.error(err);
-            throw new Error('Failed to find matching AMA session with user ID');
-        });
+    }).exec();
 
     if (result.length == 0) return false;
 
