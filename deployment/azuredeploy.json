@@ -313,10 +313,14 @@
                         },
                         {
                             "name": "updateMasterCardDebounceTimeInterval",
-                            "value": "3000"
+                            "value": "15000"
                         },
                         {
                             "name": "updateMasterCardDebounceMaxWait",
+                            "value": "20000"
+                        },
+                        {
+                            "name": "updateMasterCardPostDebounceTimeInterval",
                             "value": "5000"
                         },
                         {
