@@ -89,7 +89,9 @@ export const getMasterCard = async (
             userId: aadObjectId,
             image: `https://${process.env.HOSTNAME}/images/title_bg.png`,
             data: data,
-            actionBy: ended ? 'Ended by' : 'Initiated by',
+            sessionDetails: ended
+                ? `Ended by ${userName}. No longer accepting questions.`
+                : `Initiated by ${userName}`,
             dateLastUpdated: dateUpdated,
         },
     });
