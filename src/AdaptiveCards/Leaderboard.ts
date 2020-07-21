@@ -83,10 +83,10 @@ export const Leaderboard = () =>
                                 verticalContentAlignment: 'Center',
                             },
                         ],
-                        $when: '${$root.userHasQuestions}',
                         $data: '${$root.userQuestions}',
                     },
                 ],
+                $when: '${$root.userHasQuestions}',
             },
             {
                 type: 'TextBlock',
