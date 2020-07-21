@@ -3,6 +3,9 @@
 import { AdaptiveCard, IAdaptiveCard } from 'adaptivecards';
 import * as ACData from 'adaptivecards-templating';
 import * as moment from 'moment';
+import * as random from 'random';
+import * as seedrandom from 'seedrandom';
+import * as jwt from 'jsonwebtoken';
 
 import { IQuestionPopulatedUser } from '../Data/Schemas/Question';
 
@@ -16,6 +19,7 @@ import { Leaderboard, LeaderboardEmpty } from './Leaderboard';
 import newQuestionCardTemplate from './NewQuestion';
 
 import InvalidTaskError from './ErrorCard';
+import { aiClient } from '../app/server';
 
 /**
  * Creates the AMA Master Card
@@ -53,7 +57,8 @@ export const getMasterCard = async (
         questions.map((question: IQuestionPopulatedUser) => {
             const questionObject = question.toObject();
             questionObject.userId.picture = _getPersonImage(
-                questionObject.userId.userName
+                questionObject.userId.userName,
+                question.userId._id
             );
             questionObject.upvotes = questionObject.voters.length;
             questionObject.upvotable =
@@ -158,9 +163,12 @@ export const generateLeaderboard = (
         const questionObject = question.toObject();
         questionObject.upvotes = questionObject.voters.length;
         questionObject.upvotable = aadObjectId !== questionObject.userId._id;
+        questionObject.upvoted = questionObject.voters.includes(aadObjectId);
         questionObject.userId.picture = _getPersonImage(
-            questionObject.userId.userName
+            questionObject.userId.userName,
+            question.userId._id
         );
+        questionObject.isActive = isActiveAMA;
 
         return questionObject;
     });
@@ -304,16 +312,42 @@ export const getResubmitQuestionErrorCard = (
     return _adaptiveCard(template);
 };
 
-const _getPersonImage = (name: string) => {
+const _getPersonImage = (name: string, aadObjectId: string): string => {
     if (!name) return '';
 
-    const userNameArray = name.split(' ');
-    const str =
-        userNameArray.length > 1
-            ? `${userNameArray[0][0]}+${userNameArray[1][0]}`
-            : `${userNameArray[0][0]}`;
+    let initials = '';
+    let space = true;
+    let pCount = 0;
+    for (let i = 0; i < name.length; i++) {
+        const char = name[i].toUpperCase();
+        if (char === ' ') {
+            space = true;
+        } else if (char === '(') {
+            pCount++;
+            space = false;
+        } else if (char === ')') {
+            pCount--;
+            space = false;
+        } else if (space && pCount === 0) {
+            initials.length === 0
+                ? (initials = char)
+                : (initials = initials[0] + char);
+            space = false;
+        }
+    }
+    if (initials === '')
+        return `https://${process.env.HOSTNAME}/images/anon_avatar.png`;
 
-    // Currently using the following external API for generating user initials avatars. Will switch to local library after consulting with
-    // Kiran and designers.
-    return `https://ui-avatars.com/api/?name=${str}`;
+    random.use(seedrandom(aadObjectId));
+
+    const data = {
+        initials,
+        index: random.int(0, 13),
+    };
+
+    const token = jwt.sign(
+        data,
+        Buffer.from(process.env.AvatarKey as string, 'utf8').toString('hex')
+    );
+    return `https://${process.env.HOSTNAME}/avatar/${token}`;
 };

@@ -8,6 +8,11 @@ import * as appInsights from 'applicationinsights';
 import { config as dotenvConfig } from 'dotenv';
 import { join } from 'path';
 
+import * as jimp from 'jimp';
+import * as jwt from 'jsonwebtoken';
+
+import { generateInitialsImage } from './../Controller';
+
 // Initialize debug logging module
 const log = debug('msteams');
 
@@ -53,6 +58,33 @@ express.use(Express.urlencoded({ extended: true }));
 
 // Add serving of static files
 express.use(Express.static(join(__dirname, 'public')));
+
+interface AvatarRequest {
+    initials: string;
+    index: number;
+}
+
+express.get('/avatar/:token', (req, res) => {
+    const token = req.params.token;
+    // if (token == null) return res.sendStatus(401);
+
+    jwt.verify(
+        token,
+        Buffer.from(process.env.AvatarKey as string, 'utf8').toString('hex'),
+        (err, data: AvatarRequest) => {
+            if (err)
+                return res.sendFile(
+                    join(__dirname, 'public/images/anon_avatar.png')
+                );
+            generateInitialsImage(data.initials, data.index).then((image) => {
+                image.getBuffer(jimp.MIME_PNG, (err, buffer) => {
+                    res.set('Content-Type', jimp.MIME_PNG);
+                    return res.send(buffer);
+                });
+            });
+        }
+    );
+});
 
 // Add simple logging
 express.use(morgan('tiny'));

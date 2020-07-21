@@ -272,9 +272,13 @@ export class Questionly extends TeamsActivityHandler {
             );
 
             const response: TaskModuleResponse = leaderboard.isOk()
-                ? this._buildTaskModuleContinueResponse(leaderboard.value)
+                ? this._buildTaskModuleContinueResponse(
+                      leaderboard.value,
+                      'View questions and upvote'
+                  )
                 : this._buildTaskModuleContinueResponse(
-                      controller.getErrorCard(leaderboard.value.message)
+                      controller.getErrorCard(leaderboard.value.message),
+                      'View questions and upvote'
                   );
 
             return response;
