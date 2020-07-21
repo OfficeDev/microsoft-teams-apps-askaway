@@ -308,8 +308,8 @@ export class Questionly extends TeamsActivityHandler {
                 taskModuleRequest.data.questionId,
                 context.activity.from.aadObjectId as string,
                 context.activity.from.name,
-                isHost.value.status,
-                isActiveAMA.value.status
+                isHost.value,
+                isActiveAMA.value
             );
 
             this._updateMasterCard(
