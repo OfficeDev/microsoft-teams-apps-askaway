@@ -219,13 +219,17 @@ export class AskAway extends TeamsActivityHandler {
 
     private _handleTeamsTaskModuleFetchError(): TaskModuleResponse {
         return this._buildTaskModuleContinueResponse(
-            controller.getTaskFetchErrorCard()
+            controller.getErrorCard(
+                'Something went wrong. Please try opening again.'
+            )
         );
     }
 
     private _handleTeamsTaskModuleSubmitError(): TaskModuleResponse {
         return this._buildTaskModuleContinueResponse(
-            controller.getTaskSubmitErrorCard()
+            controller.getErrorCard(
+                'Your submission encountered an error. Please try submitting again!'
+            )
         );
     }
 
