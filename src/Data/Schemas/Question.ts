@@ -1,4 +1,4 @@
-import * as mongoose from 'mongoose';
+import mongoose from 'mongoose';
 import { IQnASession } from './QnASession';
 import { IUser } from './User';
 

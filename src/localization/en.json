@@ -1,0 +1,55 @@
+{
+    "mainCard": {
+        "updated": "Updated",
+        "initiatedBy": "Initiated by",
+        "endedBy": "Ended by",
+        "topQuestions": "Top questions",
+        "showRecentQuestions": "Show recent questions",
+        "recentQuestions": "Recent questions",
+        "upvotes": "Upvotes",
+        "askQuestion": "Ask a question",
+        "upvoteQuestions": "Upvote questions",
+        "noMoreQuestions": "No longer accepting questions.",
+        "noQuestions": "Be the first to ask a question."
+    },
+    "leaderboard": {
+        "taskModuleTitle": "View questions and upvote",
+        "myQuestions": "My questions",
+        "allQuestions": "All questions",
+        "noQuestions": "There are no questions to show."
+    },
+    "startQnA": {
+        "titleFieldLabel": "Title of Q & A",
+        "titleFieldExample": "Ex. Weekly Product QnA",
+        "descriptionFieldLabel": "Message",
+        "descriptionFieldExample": "Ex. Please submit and upvote quesions for the CEO!",
+        "taskModuleTitle": "Start session to gather questions",
+        "taskModuleTitleEdit": "Edit Details"
+    },
+    "endQnA": {
+        "taskModuleTitle": "End session",
+        "prompt": "Are you sure you want to stop gathering questions?"
+    },
+    "askQuestion": {
+        "textFieldExample": "Type a question",
+        "taskModuleTitle": "Ask a question",
+        "resubmitTaskModuleTitle": "Resubmit a question",
+        "textFieldLabel": "Question"
+    },
+    "errors": {
+        "upvoting": "Upvoting failed. Please try again.",
+        "submittingQuestions": "There was an error submitting your question. Please try again.",
+        "missingFields": "Fields cannot be empty",
+        "taskFetch": "Something went wrong. Please try opening again.",
+        "taskSubmit": "Your submission encountered an error. Please try submitting again!",
+        "leaderboard": "Could not retrieve leaderboard. Please try again"
+    },
+    "generic": {
+        "submit": "Submit",
+        "preview": "Preview",
+        "cancel": "Cancel",
+        "endSession": "End session",
+        "maxCharacters": "characters max",
+        "noQuestions": "No questions yet. Be the first one to ask."
+    }
+}

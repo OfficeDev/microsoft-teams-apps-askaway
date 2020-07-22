@@ -8,6 +8,8 @@
         "jsx": "react",
         "sourceMap": true,
         "experimentalDecorators": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
         "resolveJsonModule": true
     },
     "exclude": ["node_modules"]

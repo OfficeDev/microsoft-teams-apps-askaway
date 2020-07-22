@@ -1,5 +1,6 @@
 import { IAdaptiveCard } from 'adaptivecards';
 import { ISubmitAction } from 'adaptivecards/lib/schema';
+import { genericStrings, leaderboardStrings } from '../localization/locale';
 
 /**
  * End QnA button
@@ -8,7 +9,7 @@ export const endQnAButton: () => ISubmitAction = () =>
     <ISubmitAction>{
         id: 'confirmEndQnA',
         type: 'Action.Submit',
-        title: 'End session',
+        title: genericStrings('endSession'),
         data: {
             id: 'confirmEndQnA',
             qnaSessionId: '${qnaId}',
@@ -26,7 +27,7 @@ export const Leaderboard = () =>
         body: [
             {
                 type: 'TextBlock',
-                text: 'My questions',
+                text: leaderboardStrings('myQuestions'),
                 weight: 'bolder',
                 $when: '${$root.userHasQuestions}',
             },
@@ -90,7 +91,7 @@ export const Leaderboard = () =>
             },
             {
                 type: 'TextBlock',
-                text: 'All questions',
+                text: leaderboardStrings('allQuestions'),
                 weight: 'bolder',
             },
             {
@@ -231,7 +232,7 @@ export const LeaderboardEmpty = () =>
         body: [
             {
                 type: 'TextBlock',
-                text: 'There are no questions to show.',
+                text: leaderboardStrings('noQuestions'),
             },
             {
                 type: 'ActionSet',

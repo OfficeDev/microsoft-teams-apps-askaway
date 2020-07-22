@@ -1,8 +1,8 @@
-import * as Express from 'express';
+import Express from 'express';
 import * as http from 'http';
-import * as morgan from 'morgan';
+import morgan from 'morgan';
 import { MsTeamsApiRouter } from 'express-msteams-host';
-import * as debug from 'debug';
+import debug from 'debug';
 import * as compression from 'compression';
 import * as appInsights from 'applicationinsights';
 import { config as dotenvConfig } from 'dotenv';
@@ -40,6 +40,10 @@ export const aiClient = appInsights.defaultClient;
 
 // The import of components has to be done AFTER the dotenv config
 import * as allComponents from './TeamsAppsComponents';
+import { initLocalization } from '../localization/locale';
+
+// initialize localization
+initLocalization();
 
 // Create the Express webserver
 const express = Express();

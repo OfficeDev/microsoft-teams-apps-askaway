@@ -1,4 +1,5 @@
 import { IAdaptiveCard } from 'adaptivecards';
+import { startQnAStrings, genericStrings } from '../localization/locale';
 
 /**
  * Adaptive Card form used to collect information to start the QnA.
@@ -26,7 +27,9 @@ export default () =>
                                     },
                                     {
                                         type: 'TextBlock',
-                                        text: 'Title of Q & A*',
+                                        text: `${startQnAStrings(
+                                            'titleFieldLabel'
+                                        )}*`,
                                         wrap: true,
                                     },
                                     {
@@ -37,7 +40,11 @@ export default () =>
                                     },
                                     {
                                         type: 'TextBlock',
-                                        text: 'Message* (250 characters max)',
+                                        text: `${startQnAStrings(
+                                            'descriptionFieldLabel'
+                                        )}* (250 ${genericStrings(
+                                            'maxCharacters'
+                                        )})`,
                                         wrap: true,
                                     },
                                     {
@@ -45,8 +52,9 @@ export default () =>
                                         id: 'description',
                                         value: '${description}',
                                         maxLength: 250,
-                                        placeholder:
-                                            'Ex. Please submit and upvote quesions for the CEO!',
+                                        placeholder: startQnAStrings(
+                                            'descriptionFieldExample'
+                                        ),
                                     },
                                 ],
                             },
@@ -59,7 +67,7 @@ export default () =>
             {
                 id: 'submit',
                 type: 'Action.Submit',
-                title: 'Preview',
+                title: genericStrings('preview'),
             },
         ],
     };

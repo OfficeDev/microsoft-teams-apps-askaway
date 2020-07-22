@@ -312,16 +312,24 @@
                             "value": "[variables('botName')]"
                         },
                         {
-                            "name": "updateMainCardDebounceTimeInterval",
+                            "name": "UpdateMainCardDebounceTimeInterval",
                             "value": "15000"
                         },
                         {
-                            "name": "updateMainCardDebounceMaxWait",
+                            "name": "UpdateMainCardDebounceMaxWait",
                             "value": "20000"
                         },
                         {
-                            "name": "updateMainCardPostDebounceTimeInterval",
+                            "name": "UpdateMainCardPostDebounceTimeInterval",
                             "value": "5000"
+                        },
+                        {
+                            "name": "Language",
+                            "value": "en"
+                        },
+                        {
+                            "name": "FallbackLanguage",
+                            "value": "en"
                         },
                         {
                             "name": "ActiveDirectoryTenant",
