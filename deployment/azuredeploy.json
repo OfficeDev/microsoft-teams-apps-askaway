@@ -248,20 +248,8 @@
                     "alwaysOn": true,
                     "appSettings": [
                         {
-                            "name": "Logging:LogLevel:Default",
-                            "value": "Information"
-                        },
-                        {
                             "name": "ApplicationInsightsInstrumentationKey",
                             "value": "[reference(resourceId('Microsoft.Insights/components/', variables('botAppInsightsName')), '2015-05-01').InstrumentationKey]"
-                        },
-                        {
-                            "name": "ApplicationInsights:LogLevel:Default",
-                            "value": "Information"
-                        },
-                        {
-                            "name": "ApplicationInsights:LogLevel:Microsoft",
-                            "value": "Information"
                         },
                         {
                             "name": "MicrosoftAppId",
@@ -300,14 +288,6 @@
                             "value": "[uniqueString(parameters('botClientSecret'))]"
                         },
                         {
-                            "name": "CosmosDBEndpointUrl",
-                            "value": "[reference(concat('Microsoft.DocumentDb/databaseAccounts/', variables('cosmosDbName'))).documentEndpoint]"
-                        },
-                        {
-                            "name": "CosmosDBKey",
-                            "value": "[listKeys(concat('Microsoft.DocumentDB/databaseAccounts/', variables('cosmosDbName')), '2015-04-08').primaryMasterKey]"
-                        },
-                        {
                             "name": "CosmosDBDatabaseName",
                             "value": "[parameters('accountName')]"
                         },
@@ -332,24 +312,8 @@
                             "value": "en"
                         },
                         {
-                            "name": "FallbackLanguage",
-                            "value": "en"
-                        },
-                        {
-                            "name": "ActiveDirectoryTenant",
-                            "value": "[parameters('tenantId')]"
-                        },
-                        {
                             "name": "i18n:DefaultCulture",
                             "value": "[parameters('defaultCulture')]"
-                        },
-                        {
-                            "name": "ManifestAppId",
-                            "value": "[variables('manifestAppId')]"
-                        },
-                        {
-                            "name": "i18n:SupportedCultures",
-                            "value": "en-US"
                         },
                         {
                             "name": "WEBSITE_NODE_DEFAULT_VERSION",
