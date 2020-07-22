@@ -14,12 +14,6 @@ db.initiateConnection(process.env.MONGO_URI as string).catch((error) => {
 
 export const getMainCard = adaptiveCardBuilder.getMainCard;
 export const getStartQnACard = adaptiveCardBuilder.getStartQnACard;
-export const getTaskFetchErrorCard = adaptiveCardBuilder.getErrorCard.bind(
-    'Something went wrong. Please try opening again.'
-);
-export const getTaskSubmitErrorCard = adaptiveCardBuilder.getErrorCard.bind(
-    'Your submission encountered an error. Please try submitting again!'
-);
 export const getErrorCard = adaptiveCardBuilder.getErrorCard;
 
 // color pallete used for user avatars
