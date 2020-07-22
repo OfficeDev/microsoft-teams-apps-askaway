@@ -5,11 +5,10 @@ import * as adaptiveCardBuilder from './AdaptiveCards/AdaptiveCardBuilder'; // T
 import { ok, err, Result } from './util';
 import { AdaptiveCard } from 'adaptivecards';
 import { IQuestion, IQuestionPopulatedUser } from './Data/Schemas/Question';
-import { errorStrings } from './localization/locale';
 import { aiClient } from './app/server';
 import jimp from 'jimp';
 
-db.initiateConnection(process.env.MONGO_URI as string).catch((error) => {
+db.initiateConnection(process.env.MongoDbUri as string).catch((error) => {
     aiClient.trackException({ exception: error });
 });
 

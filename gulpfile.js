@@ -40,7 +40,7 @@ if (env === undefined) {
     log(`Using custom .env`);
     require('dotenv').config({ path: path.resolve(process.cwd(), env) });
 }
-process.env.VERSION = package.version;
+Bot:Version = package.version;
 
 // TASK: nuke
 task('nuke', () => {
@@ -59,7 +59,7 @@ task('nodemon', (callback) => {
         if (!started) {
             callback();
             started = true;
-            log('HOSTNAME: ' + process.env.HOSTNAME);
+            log('HostName: ' + process.env.HostName);
         }
     });
 });
@@ -201,7 +201,7 @@ task('schema-validation', (callback) => {
 task('validate-manifest', series('generate-manifest', 'schema-validation'));
 
 /**
- * Task for starting ngrok and replacing the HOSTNAME with ngrok tunnel url.
+ * Task for starting ngrok and replacing the HostName with ngrok tunnel url.
  * The task also creates a manifest file with ngrok tunnel url.
  * See local .env file for configuration
  */
@@ -226,8 +226,8 @@ task('start-ngrok', (cb) => {
             let hostName = url.replace('http://', '');
             hostName = hostName.replace('https://', '');
 
-            log('[NGROK] HOSTNAME: ' + hostName);
-            process.env.HOSTNAME = hostName;
+            log('[NGROK] HostName: ' + hostName);
+            process.env.HostName = hostName;
 
             // updates azure bot registraion endpoint //
             // check if script exists
