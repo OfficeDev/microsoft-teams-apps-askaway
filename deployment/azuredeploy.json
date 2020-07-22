@@ -280,11 +280,11 @@
                             "value": "[variables('botAppDomain')]"
                         },
                         {
-                            "name": "Bot:Version",
+                            "name": "Version",
                             "value": "1.0.0"
                         },
                         {
-                            "name": "Bot:Company",
+                            "name": "Company",
                             "value": "TBD"
                         },
                         {

@@ -2,10 +2,10 @@
     "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.6/MicrosoftTeams.schema.json",
     "manifestVersion": "1.6",
     "id": "{{MicrosoftAppId}}",
-    "version": "{{Bot:Version}}",
+    "version": "{{Version}}",
     "packageName": "{{BotDisplayName}}",
     "developer": {
-        "name": "{{Bot:Company}}",
+        "name": "{{Company}}",
         "websiteUrl": "https://{{HostName}}",
         "privacyUrl": "https://{{HostName}}/privacy.html",
         "termsOfUseUrl": "https://{{HostName}}/tou.html"
