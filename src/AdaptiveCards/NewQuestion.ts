@@ -1,4 +1,9 @@
 import { IAdaptiveCard } from 'adaptivecards';
+import {
+    askQuestionStrings,
+    genericStrings,
+    errorStrings,
+} from '../localization/locale';
 
 /**
  * Defines the template for the adaptive card used when creating a new question.
@@ -11,19 +16,20 @@ export default () =>
         body: [
             {
                 type: 'TextBlock',
-                text:
-                    'Something went wrong submitting your question. Try again.',
+                text: errorStrings('submittingQuestions'),
                 color: 'attention',
                 $when: '${question != null}',
             },
             {
                 type: 'TextBlock',
-                text: 'Question (250 characters max)',
+                text: `${askQuestionStrings(
+                    'textFieldLabel'
+                )} (250 ${genericStrings('maxCharacters')})`,
             },
             {
                 type: 'Input.Text',
                 id: 'usertext',
-                placeholder: 'Type a question',
+                placeholder: askQuestionStrings('textFieldExample'),
                 maxLength: 250,
                 isMultiline: true,
                 value: '${if(question != null, question, null)}',
@@ -33,7 +39,7 @@ export default () =>
             {
                 id: 'submitQuestion',
                 type: 'Action.Submit',
-                title: 'Submit',
+                title: genericStrings('submit'),
                 data: {
                     id: 'submitQuestion',
                     qnaSessionId: '${qnaId}',

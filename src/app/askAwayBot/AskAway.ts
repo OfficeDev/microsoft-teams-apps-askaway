@@ -22,6 +22,13 @@ import {
     MainCardData,
 } from '../../AdaptiveCards/MainCard';
 import { Result, err } from '../../util';
+import {
+    endQnAStrings,
+    askQuestionStrings,
+    errorStrings,
+    startQnAStrings,
+    leaderboardStrings,
+} from '../../localization/locale';
 import { aiClient } from '../server';
 
 // Initialize debug logging module
@@ -57,9 +64,9 @@ export class AskAway extends TeamsActivityHandler {
         this._updateMainCardFunctionMap = {};
 
         const env = process.env;
-        const maxWait = env.updateMainCardDebounceMaxWait;
-        const timeInterval = env.updateMainCardDebounceTimeInterval;
-        const postTimeInterval = env.updateMainCardPostDebounceTimeInterval;
+        const maxWait = env.UpdateMainCardDebounceMaxWait;
+        const timeInterval = env.UpdateMainCardDebounceTimeInterval;
+        const postTimeInterval = env.UpdateMainCardPostDebounceTimeInterval;
         this._config = {
             updateMainCardDebounceTimeInterval: timeInterval
                 ? Number(timeInterval)
@@ -147,7 +154,7 @@ export class AskAway extends TeamsActivityHandler {
     ): TaskModuleResponse {
         return this._buildTaskModuleContinueResponse(
             controller.getNewQuestionCard(taskModuleRequest.data.qnaSessionId),
-            'Ask a question'
+            askQuestionStrings('taskModuleTitle')
         );
     }
 
@@ -192,7 +199,7 @@ export class AskAway extends TeamsActivityHandler {
             controller.getEndQnAConfirmationCard(
                 taskModuleRequest.data.qnaSessionId
             ),
-            'End session'
+            endQnAStrings('taskModuleTitle')
         );
     }
 
@@ -219,17 +226,13 @@ export class AskAway extends TeamsActivityHandler {
 
     private _handleTeamsTaskModuleFetchError(): TaskModuleResponse {
         return this._buildTaskModuleContinueResponse(
-            controller.getErrorCard(
-                'Something went wrong. Please try opening again.'
-            )
+            controller.getErrorCard(errorStrings('taskFetch'))
         );
     }
 
     private _handleTeamsTaskModuleSubmitError(): TaskModuleResponse {
         return this._buildTaskModuleContinueResponse(
-            controller.getErrorCard(
-                'Your submission encountered an error. Please try submitting again!'
-            )
+            controller.getErrorCard(errorStrings('taskSubmit'))
         );
     }
 
@@ -239,7 +242,7 @@ export class AskAway extends TeamsActivityHandler {
     ): TaskModuleResponse {
         return this._buildTaskModuleContinueResponse(
             controller.getResubmitQuestionCard(qnaSessionId, questionContent),
-            'Ask a question'
+            askQuestionStrings('resubmitTaskModuleTitle')
         );
     }
 
@@ -278,20 +281,18 @@ export class AskAway extends TeamsActivityHandler {
             const response: TaskModuleResponse = leaderboard.isOk()
                 ? this._buildTaskModuleContinueResponse(
                       leaderboard.value,
-                      'View questions and upvote'
+                      leaderboardStrings('taskModuleTitle')
                   )
                 : this._buildTaskModuleContinueResponse(
                       controller.getErrorCard(leaderboard.value.message),
-                      'View questions and upvote'
+                      leaderboardStrings('taskModuleTitle')
                   );
 
             return response;
         }
 
         return this._buildTaskModuleContinueResponse(
-            controller.getErrorCard(
-                'Could not retrieve leaderboard. Please try again'
-            )
+            controller.getErrorCard(errorStrings('leaderboard'))
         );
     };
 
@@ -323,14 +324,12 @@ export class AskAway extends TeamsActivityHandler {
                       updatedLeaderboard.value
                   )
                 : this._buildTaskModuleContinueResponse(
-                      controller.getErrorCard(
-                          'Upvoting failed. Please try again.'
-                      )
+                      controller.getErrorCard(errorStrings('upvoting'))
                   );
         }
 
         return this._buildTaskModuleContinueResponse(
-            controller.getErrorCard('Upvoting failed. Please try again.')
+            controller.getErrorCard(errorStrings('upvoting'))
         );
     };
 
@@ -340,7 +339,7 @@ export class AskAway extends TeamsActivityHandler {
         // commandId: 'startQnA'
         return this._buildTaskModuleContinueResponse(
             controller.getStartQnACard(),
-            'Start session to gather questions'
+            startQnAStrings('taskModuleTitle')
         );
     }
 
@@ -365,7 +364,7 @@ export class AskAway extends TeamsActivityHandler {
 
         return this._buildTaskModuleContinueResponse(
             controller.getStartQnACard(cardData.title, cardData.description),
-            'Edit details'
+            startQnAStrings('taskModuleTitleEdit')
         );
     }
 
@@ -459,7 +458,7 @@ export class AskAway extends TeamsActivityHandler {
                 controller.getStartQnACard(
                     title,
                     description,
-                    'Fields cannot be empty'
+                    errorStrings('missingFields')
                 )
             );
 

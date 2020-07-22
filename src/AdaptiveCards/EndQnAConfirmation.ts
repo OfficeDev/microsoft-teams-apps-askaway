@@ -1,6 +1,7 @@
 'use strict';
 
 import { IAdaptiveCard } from 'adaptivecards';
+import { endQnAStrings, genericStrings } from '../localization/locale';
 
 /**
  * Defines the template for the adaptive card used when confirming the ending of the QnA.
@@ -13,7 +14,7 @@ export default () =>
         body: [
             {
                 type: 'TextBlock',
-                text: 'Are you sure you want to stop gathering questions?',
+                text: endQnAStrings('prompt'),
                 size: 'large',
             },
         ],
@@ -21,7 +22,7 @@ export default () =>
             {
                 id: 'cancelEndQnA',
                 type: 'Action.Submit',
-                title: 'Cancel',
+                title: genericStrings('cancel'),
                 data: {
                     qnaSessionId: '${qnaId}',
                     id: 'cancelEndQnA',
@@ -30,7 +31,7 @@ export default () =>
             {
                 id: 'submitEndQnA',
                 type: 'Action.Submit',
-                title: 'End session',
+                title: genericStrings('endSession'),
                 data: {
                     qnaSessionId: '${qnaId}',
                     id: 'submitEndQnA',

@@ -2,6 +2,7 @@ import { IAdaptiveCard } from 'adaptivecards';
 import { err, ok, Result } from '../util';
 import { ISubmitAction } from 'adaptivecards/lib/schema';
 import { aiClient } from '../app/server';
+import { mainCardStrings } from '../localization/locale';
 
 /**
  * Adaptive Card template for view leaderboard submit action (i.e, the `View Leaderboard` button).
@@ -10,7 +11,7 @@ export const viewLeaderboardButton = () =>
     <ISubmitAction>{
         id: 'viewLeaderboard',
         type: 'Action.Submit',
-        title: 'Upvote questions',
+        title: mainCardStrings('upvoteQuestions'),
         data: {
             msteams: {
                 type: 'task/fetch',
@@ -67,7 +68,7 @@ export default () =>
             },
             {
                 type: 'TextBlock',
-                text: 'Updated ${dateLastUpdated}',
+                text: `${mainCardStrings('updated')} \${dateLastUpdated}`,
                 wrap: true,
                 size: 'Small',
                 isSubtle: true,
@@ -86,7 +87,7 @@ export default () =>
                                 items: [
                                     {
                                         type: 'TextBlock',
-                                        text: 'Top questions',
+                                        text: mainCardStrings('topQuestions'),
                                         wrap: true,
                                         size: 'Medium',
                                         weight: 'Bolder',
@@ -99,7 +100,7 @@ export default () =>
                                 items: [
                                     {
                                         type: 'TextBlock',
-                                        text: 'Upvotes',
+                                        text: mainCardStrings('upvotes'),
                                         wrap: true,
                                         weight: 'Lighter',
                                     },
@@ -109,7 +110,7 @@ export default () =>
                     },
                     {
                         type: 'TextBlock',
-                        text: 'Be the first to ask a question.',
+                        text: mainCardStrings('noQuestions'),
                         color: 'accent',
                         $when: '${count($root.topQuestions) < 1}',
                     },
@@ -178,7 +179,7 @@ export default () =>
                 actions: [
                     {
                         type: 'Action.ShowCard',
-                        title: 'Show recent questions',
+                        title: mainCardStrings('showRecentQuestions'),
                         card: {
                             $schema:
                                 'http://adaptivecards.io/schemas/adaptive-card.json',
@@ -199,8 +200,9 @@ export default () =>
                                                     items: [
                                                         {
                                                             type: 'TextBlock',
-                                                            text:
-                                                                'Recent questions',
+                                                            text: mainCardStrings(
+                                                                'recentQuestions'
+                                                            ),
                                                             wrap: true,
                                                             weight: 'Bolder',
                                                             size: 'Medium',
@@ -211,8 +213,9 @@ export default () =>
                                         },
                                         {
                                             type: 'TextBlock',
-                                            text:
-                                                'Be the first to ask a question.',
+                                            text: mainCardStrings(
+                                                'noQuestions'
+                                            ),
                                             color: 'accent',
                                             $when:
                                                 '${count($root.recentQuestions) < 1}',
@@ -311,7 +314,7 @@ export default () =>
             {
                 id: 'askQuestion',
                 type: 'Action.Submit',
-                title: 'Ask a question',
+                title: mainCardStrings('askQuestion'),
                 data: {
                     msteams: {
                         type: 'task/fetch',

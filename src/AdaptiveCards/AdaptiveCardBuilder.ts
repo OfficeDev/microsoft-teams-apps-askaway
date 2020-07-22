@@ -2,22 +2,23 @@
 
 import { AdaptiveCard, IAdaptiveCard } from 'adaptivecards';
 import * as ACData from 'adaptivecards-templating';
-import * as moment from 'moment';
+import moment from 'moment';
 import * as random from 'random';
-import * as seedrandom from 'seedrandom';
+import seedrandom from 'seedrandom';
 import * as jwt from 'jsonwebtoken';
 
 import { IQuestionPopulatedUser } from '../Data/Schemas/Question';
 
 import MainCard, { viewLeaderboardButton } from './MainCard';
 import StartQnACard from './StartQnACard';
-import endQnAConfirmationCardTemplate from './endQnAConfirmation';
+import endQnAConfirmationCardTemplate from './EndQnAConfirmation';
 
 import { Leaderboard, LeaderboardEmpty } from './Leaderboard';
 
 import newQuestionCardTemplate from './NewQuestion';
 
 import InvalidTaskError from './ErrorCard';
+import { mainCardStrings } from '../localization/locale';
 
 /**
  * Creates the QnA Master Card
@@ -93,8 +94,10 @@ export const getMainCard = async (
             image: `https://${process.env.HOSTNAME}/images/title_bg.png`,
             data: data,
             sessionDetails: ended
-                ? `Ended by ${userName}. No longer accepting questions.`
-                : `Initiated by ${userName}`,
+                ? `${mainCardStrings('endedBy')} ${userName}. ${mainCardStrings(
+                      'noMoreQuestions'
+                  )}`
+                : `${mainCardStrings('initiatedBy')} ${userName}`,
             dateLastUpdated: dateUpdated,
         },
     });
