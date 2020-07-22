@@ -1,14 +1,14 @@
 {
     "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.6/MicrosoftTeams.schema.json",
     "manifestVersion": "1.6",
-    "id": "{{APPLICATION_ID}}",
-    "version": "{{VERSION}}",
-    "packageName": "{{PACKAGE_NAME}}",
+    "id": "{{MicrosoftAppId}}",
+    "version": "{{Bot:Version}}",
+    "packageName": "{{BotDisplayName}}",
     "developer": {
-        "name": "{{COMPANYNAME}}",
-        "websiteUrl": "https://{{HOSTNAME}}",
-        "privacyUrl": "https://{{HOSTNAME}}/privacy.html",
-        "termsOfUseUrl": "https://{{HOSTNAME}}/tou.html"
+        "name": "{{Bot:Company}}",
+        "websiteUrl": "https://{{HostName}}",
+        "privacyUrl": "https://{{HostName}}/privacy.html",
+        "termsOfUseUrl": "https://{{HostName}}/tou.html"
     },
     "name": {
         "short": "Ask Away",
@@ -27,7 +27,7 @@
     "staticTabs": [],
     "bots": [
         {
-            "botId": "{{MICROSOFT_APP_ID}}",
+            "botId": "{{MicrosoftAppId}}",
             "needsChannelSelector": true,
             "isNotificationOnly": false,
             "scopes": ["team", "groupchat"]
@@ -36,7 +36,7 @@
     "connectors": [],
     "composeExtensions": [
         {
-            "botId": "{{MICROSOFT_APP_ID}}",
+            "botId": "{{MicrosoftAppId}}",
             "canUpdateConfiguration": true,
             "commands": [
                 {
@@ -51,6 +51,6 @@
         }
     ],
     "permissions": ["identity", "messageTeamMembers"],
-    "validDomains": ["{{HOSTNAME}}"],
+    "validDomains": ["{{HostName}}"],
     "showLoadingIndicator": false
 }

@@ -91,7 +91,7 @@ export const getMainCard = async (
             topQuestions: topQuestionsData,
             recentQuestions: recentQuestionsData,
             userId: aadObjectId,
-            image: `https://${process.env.HOSTNAME}/images/title_bg.png`,
+            image: `https://${process.env.HostName}/images/title_bg.png`,
             data: data,
             sessionDetails: ended
                 ? `${mainCardStrings('endedBy')} ${userName}. ${mainCardStrings(
@@ -310,7 +310,7 @@ const _getPersonImage = (name: string, aadObjectId: string): string => {
         }
     }
     if (initials === '')
-        return `https://${process.env.HOSTNAME}/images/anon_avatar.png`;
+        return `https://${process.env.HostName}/images/anon_avatar.png`;
 
     random.use(seedrandom(aadObjectId));
 
@@ -323,5 +323,5 @@ const _getPersonImage = (name: string, aadObjectId: string): string => {
         data,
         Buffer.from(process.env.AvatarKey as string, 'utf8').toString('hex')
     );
-    return `https://${process.env.HOSTNAME}/avatar/${token}`;
+    return `https://${process.env.HostName}/avatar/${token}`;
 };

@@ -24,7 +24,7 @@ dotenvConfig();
 
 // Set up app insights
 appInsights
-    .setup(process.env.APPINSIGHTS_INSTRUMENTATIONKEY)
+    .setup(process.env.ApplicationInsightsInstrumentationKey)
     .setAutoDependencyCorrelation(true)
     .setAutoCollectRequests(true)
     .setAutoCollectPerformance(true, true)

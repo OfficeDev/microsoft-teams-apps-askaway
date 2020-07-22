@@ -20,7 +20,7 @@ export const initiateConnection = async (
     mongoURI: string
 ): Promise<boolean> => {
     await mongoose
-        .connect(mongoURI, { useFindAndModify: false })
+        .connect(mongoURI, { useFindAndModify: false, useNewUrlParser: true })
         .then(() => console.log('Connection to CosmosDB successful'));
     return true;
 };

@@ -252,7 +252,7 @@
                             "value": "Information"
                         },
                         {
-                            "name": "ApplicationInsights:InstrumentationKey",
+                            "name": "ApplicationInsightsInstrumentationKey",
                             "value": "[reference(resourceId('Microsoft.Insights/components/', variables('botAppInsightsName')), '2015-05-01').InstrumentationKey]"
                         },
                         {
@@ -274,6 +274,10 @@
                         {
                             "name": "Bot:AppBaseUri",
                             "value": "[concat('https://', variables('botAppDomain'))]"
+                        },
+                        {
+                            "name": "HostName",
+                            "value": "[variables('botAppDomain')]"
                         },
                         {
                             "name": "Bot:Version",
@@ -346,10 +350,6 @@
                         {
                             "name": "i18n:SupportedCultures",
                             "value": "en-US"
-                        },
-                        {
-                            "name": "BaseUrl",
-                            "value": "[variables('botAppUrl')]"
                         },
                         {
                             "name": "WEBSITE_NODE_DEFAULT_VERSION",

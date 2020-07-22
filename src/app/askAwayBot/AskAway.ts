@@ -38,8 +38,8 @@ import { aiClient } from '../server';
 @BotDeclaration(
     '/api/messages',
     new MemoryStorage(),
-    process.env.MICROSOFT_APP_ID,
-    process.env.MICROSOFT_APP_PASSWORD
+    process.env.MicrosoftAppId,
+    process.env.MicrosoftAppPassword
 )
 export class AskAway extends TeamsActivityHandler {
     /** Local property for StartQnAMessageExtension */
