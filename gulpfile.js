@@ -40,7 +40,7 @@ if (env === undefined) {
     log(`Using custom .env`);
     require('dotenv').config({ path: path.resolve(process.cwd(), env) });
 }
-Version = package.version;
+process.env.Version = package.version;
 
 // TASK: nuke
 task('nuke', () => {

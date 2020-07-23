@@ -312,6 +312,34 @@
                             "value": "en"
                         },
                         {
+                            "name": "FallbackLanguage",
+                            "value": "en"
+                        },
+                        {
+                            "name": "DefaultMaxRetryCount",
+                            "value": "5"
+                        },
+                        {
+                            "name": "DefaultMaxWaitTime",
+                            "value": "5000"
+                        },
+                        {
+                            "name": "DefaultRetryAfterMs",
+                            "value": "500"
+                        },
+                        {
+                            "name": "ExponentialRetryMaxWaitTime",
+                            "value": "10000"
+                        },
+                        {
+                            "name": "ExponentialRetryAfterMs",
+                            "value": "100"
+                        },
+                        {
+                            "name": "ActiveDirectoryTenant",
+                            "value": "[parameters('tenantId')]"
+                        },
+                        {
                             "name": "i18n:DefaultCulture",
                             "value": "[parameters('defaultCulture')]"
                         },

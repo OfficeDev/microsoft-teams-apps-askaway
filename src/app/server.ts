@@ -1,7 +1,6 @@
 import Express from 'express';
 import * as http from 'http';
 import morgan from 'morgan';
-import { MsTeamsApiRouter } from 'express-msteams-host';
 import debug from 'debug';
 import compression from 'compression';
 import * as appInsights from 'applicationinsights';
@@ -12,6 +11,7 @@ import * as jimp from 'jimp';
 import * as jwt from 'jsonwebtoken';
 
 import { generateInitialsImage } from './../Controller';
+import { ConnectorClient } from 'botframework-connector';
 
 // Initialize debug logging module
 const log = debug('msteams');
@@ -39,8 +39,12 @@ appInsights.start();
 export const aiClient = appInsights.defaultClient;
 
 // The import of components has to be done AFTER the dotenv config
-import * as allComponents from './TeamsAppsComponents';
 import { initLocalization } from '../localization/locale';
+import { BotFrameworkAdapter, ActivityHandler } from 'botbuilder';
+import createRequestPolicyFactories from './RequestPolicyHelper';
+import { USER_AGENT } from 'botbuilder/lib/botFrameworkAdapter';
+import { AskAway } from './askAwayBot/AskAway';
+import { ifNumber } from '../util/RetryPolicies';
 
 // initialize localization
 initLocalization();
@@ -96,9 +100,51 @@ express.use(morgan('tiny'));
 // Add compression - uncomment to remove compression
 express.use(compression());
 
-// routing for bots, connectors and incoming web hooks - based on the decorators
-// For more information see: https://www.npmjs.com/package/express-msteams-host
-express.use(MsTeamsApiRouter(allComponents));
+// Override ConnecterClient to update ExponentialRetryPolicy configuration
+(BotFrameworkAdapter.prototype as any).createConnectorClientInternal = function (
+    serviceUrl,
+    credentials
+) {
+    const retryAfterMs = ifNumber(process.env.ExponentialRetryAfterMs, 500);
+    const factories = createRequestPolicyFactories(credentials, {
+        retryCount: ifNumber(process.env.DefaultMaxRetryCount, 5),
+        retryInterval: retryAfterMs,
+        minRetryInterval: retryAfterMs * 0.5,
+        maxRetryInterval: retryAfterMs * 10,
+    });
+    const client = new ConnectorClient(credentials, {
+        baseUri: serviceUrl,
+        userAgent: USER_AGENT,
+        requestPolicyFactories: factories as any,
+    });
+    return client;
+};
+
+// Set up bot and routing
+const adapter = new BotFrameworkAdapter({
+    appId: process.env.MICROSOFT_APP_ID,
+    appPassword: process.env.MICROSOFT_APP_PASSWORD,
+});
+
+adapter.onTurnError = async (context, error) => {
+    aiClient.trackException({ exception: error });
+};
+
+const bot: ActivityHandler = new AskAway();
+
+express.post('/api/messages', (req: any, res: any) => {
+    adapter.processActivity(
+        req,
+        res,
+        async (turnContext): Promise<any> => {
+            try {
+                await bot.run(turnContext);
+            } catch (err) {
+                adapter.onTurnError(turnContext, err);
+            }
+        }
+    );
+});
 
 // Set the port
 express.set('port', port);
