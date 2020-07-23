@@ -1,8 +1,6 @@
-import { BotDeclaration } from 'express-msteams-host';
 import {
     CardFactory,
     TurnContext,
-    MemoryStorage,
     TeamsActivityHandler,
     TaskModuleResponse,
     TaskModuleRequest,
@@ -13,6 +11,7 @@ import {
     InputHints,
     Activity,
     ChannelAccount,
+    BotMessagePreviewActionType,
 } from 'botbuilder';
 import { clone, debounce, delay } from 'lodash';
 import * as controller from '../../Controller';
@@ -21,7 +20,7 @@ import {
     extractMainCardData,
     MainCardData,
 } from '../../AdaptiveCards/MainCard';
-import { Result, err } from '../../util';
+import { Result, err } from '../../util/ResultWrapper';
 import {
     endQnAStrings,
     askQuestionStrings,
@@ -30,17 +29,11 @@ import {
     leaderboardStrings,
 } from '../../localization/locale';
 import { aiClient } from '../server';
+import { ifNumber } from '../../util/RetryPolicies';
 
-// Initialize debug logging module
 /**
  * Main bot activity handler class
  */
-@BotDeclaration(
-    '/api/messages',
-    new MemoryStorage(),
-    process.env.MicrosoftAppId,
-    process.env.MicrosoftAppPassword
-)
 export class AskAway extends TeamsActivityHandler {
     /** Local property for StartQnAMessageExtension */
     // Each QnA sesion gets mapped to a unique function used to update the Master Card.
@@ -68,13 +61,12 @@ export class AskAway extends TeamsActivityHandler {
         const timeInterval = env.UpdateMainCardDebounceTimeInterval;
         const postTimeInterval = env.UpdateMainCardPostDebounceTimeInterval;
         this._config = {
-            updateMainCardDebounceTimeInterval: timeInterval
-                ? Number(timeInterval)
-                : 15000,
-            updateMainCardDebounceMaxWait: maxWait ? Number(maxWait) : 20000,
-            updateMainCardPostDebounceTimeInterval: postTimeInterval
-                ? Number(postTimeInterval)
-                : 5000,
+            updateMainCardDebounceTimeInterval: ifNumber(timeInterval, 15000),
+            updateMainCardDebounceMaxWait: ifNumber(maxWait, 20000),
+            updateMainCardPostDebounceTimeInterval: ifNumber(
+                postTimeInterval,
+                5000
+            ),
         };
     }
 
@@ -84,7 +76,8 @@ export class AskAway extends TeamsActivityHandler {
     ): TaskModuleResponse => {
         return <TaskModuleResponse>{
             task: {
-                type: 'continue',
+                // `type` should actually be of type `BotMessagePreviewType`, it's a bug on the Sdk's end
+                type: ('continue' as unknown) as BotMessagePreviewActionType,
                 value: {
                     card: {
                         contentType: 'application/vnd.microsoft.card.adaptive',

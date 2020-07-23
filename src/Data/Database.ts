@@ -11,6 +11,7 @@ import {
     IQuestion,
     IQuestionPopulatedUser,
 } from './Schemas/Question';
+import { retryWrapper, ExponentialBackOff } from '../util/RetryPolicies';
 
 /**
  * Initiates the connection to the CosmosDB database.
@@ -61,7 +62,9 @@ export const createQnASession = async (
         },
     });
 
-    const savedSession: mongoose.MongooseDocument = await qnaSession.save();
+    const savedSession: mongoose.MongooseDocument = await retryWrapper(() =>
+        qnaSession.save()
+    );
 
     return { qnaSessionId: savedSession._id, hostId: userAadObjId };
 };
@@ -75,7 +78,11 @@ export const updateActivityId = async (
     qnaSessionId: string,
     activityId: string
 ) => {
-    await QnASession.findByIdAndUpdate({ _id: qnaSessionId }, { activityId });
+    await retryWrapper(
+        () =>
+            QnASession.findByIdAndUpdate({ _id: qnaSessionId }, { activityId }),
+        new ExponentialBackOff()
+    );
 };
 
 /**
@@ -94,11 +101,13 @@ export const disconnect = async (): Promise<void> => {
 export const getQuestionData = async (
     qnaSessionId: string
 ): Promise<Array<IQuestionPopulatedUser>> => {
-    const questionData: IQuestion[] = await Question.find({
-        qnaSessionId: qnaSessionId,
-    })
-        .populate({ path: 'userId', model: User })
-        .exec();
+    const questionData: IQuestion[] = await retryWrapper<IQuestion[]>(() =>
+        Question.find({
+            qnaSessionId: qnaSessionId,
+        })
+            .populate({ path: 'userId', model: User })
+            .exec()
+    );
     if (isIQuestion_populatedUserArray(questionData))
         return questionData as IQuestionPopulatedUser[];
     else {
@@ -165,9 +174,14 @@ export const getQuestions = async (
 };
 
 export const getQnASessionData = async (qnaSessionId: string) => {
-    const qnaSessionData = await QnASession.findById(qnaSessionId)
-        .populate({ path: 'hostId', modle: User })
-        .exec();
+    const qnaSessionData = await retryWrapper(() =>
+        QnASession.findById(qnaSessionId)
+            .populate({
+                path: 'hostId',
+                modle: User,
+            })
+            .exec()
+    );
     if (!qnaSessionData) throw new Error('QnA Session not found');
 
     const _qnaSessionData: IQnASession_populated = (qnaSessionData as IQnASession).toObject();
@@ -210,7 +224,12 @@ export const createQuestion = async (
         content: questionContent,
     });
 
-    await question.save();
+    const response = await retryWrapper(
+        () => question.save(),
+        new ExponentialBackOff()
+    );
+
+    console.log(response);
     return true;
 };
 
@@ -226,10 +245,12 @@ export const getUserOrCreate = async (
     userAadObjId: string,
     userTeamsName: string
 ): Promise<boolean> => {
-    await User.findByIdAndUpdate(
-        userAadObjId,
-        { $set: { _id: userAadObjId, userName: userTeamsName } },
-        { upsert: true }
+    await retryWrapper(() =>
+        User.findByIdAndUpdate(
+            userAadObjId,
+            { $set: { _id: userAadObjId, userName: userTeamsName } },
+            { upsert: true }
+        )
     );
 
     return true;
@@ -248,15 +269,19 @@ export const addUpvote = async (
 ): Promise<IQuestion> => {
     await getUserOrCreate(aadObjectId, name);
 
-    const question = (await Question.findByIdAndUpdate(
-        questionId,
-        {
-            $addToSet: { voters: aadObjectId },
-        },
-        {
-            new: true,
-        }
-    )) as IQuestion;
+    const question: IQuestion = await retryWrapper<IQuestion>(
+        () =>
+            Question.findByIdAndUpdate(
+                questionId,
+                {
+                    $addToSet: { voters: aadObjectId },
+                },
+                {
+                    new: true,
+                }
+            ),
+        new ExponentialBackOff()
+    );
 
     return question;
 };
@@ -268,9 +293,13 @@ export const addUpvote = async (
  */
 export const endQnASession = async (qnaSessionId: string) => {
     await isExistingQnASession(qnaSessionId);
-    const result = await QnASession.findByIdAndUpdate(qnaSessionId, {
-        $set: { isActive: false, dateTimeEnded: new Date() },
-    }).exec();
+    const result = await retryWrapper(
+        () =>
+            QnASession.findByIdAndUpdate(qnaSessionId, {
+                $set: { isActive: false, dateTimeEnded: new Date() },
+            }).exec(),
+        new ExponentialBackOff()
+    );
 
     if (!result) throw new Error('QnA Session not found');
 };
@@ -285,10 +314,11 @@ export const endQnASession = async (qnaSessionId: string) => {
 export const isExistingQnASession = async (
     qnaTeamsSessionId: string
 ): Promise<boolean> => {
-    const result = await QnASession.findById(qnaTeamsSessionId);
+    const result = await retryWrapper(() =>
+        QnASession.findById(qnaTeamsSessionId)
+    );
 
     if (!result) throw new Error('QnA Session record not found');
-
     return true;
 };
 
@@ -303,10 +333,12 @@ export const isHost = async (
     qnaSessionId: string,
     userAadjObjId: string
 ): Promise<boolean> => {
-    const result = await QnASession.find({
-        _id: qnaSessionId,
-        hostId: userAadjObjId,
-    }).exec();
+    const result = await retryWrapper<IQnASession[]>(() =>
+        QnASession.find({
+            _id: qnaSessionId,
+            hostId: userAadjObjId,
+        }).exec()
+    );
 
     if (result.length == 0) return false;
 
@@ -321,7 +353,9 @@ export const isHost = async (
 export const isActiveQnA = async (
     qnaTeamsSessionId: string
 ): Promise<boolean> => {
-    const result = await QnASession.findById(qnaTeamsSessionId).exec();
+    const result = await retryWrapper<IQnASession | null>(() =>
+        QnASession.findById(qnaTeamsSessionId).exec()
+    );
     if (!result) throw new Error('Result is empty');
 
     return result.isActive;

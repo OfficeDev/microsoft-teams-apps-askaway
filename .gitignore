@@ -50,3 +50,6 @@ typings/
 
 # azure endpoint file
 azure-update-endpoint.sh
+
+# vscode
+.vscode
