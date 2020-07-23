@@ -3,7 +3,7 @@ import * as http from 'http';
 import morgan from 'morgan';
 import { MsTeamsApiRouter } from 'express-msteams-host';
 import debug from 'debug';
-import * as compression from 'compression';
+import compression from 'compression';
 import * as appInsights from 'applicationinsights';
 import { config as dotenvConfig } from 'dotenv';
 import { join } from 'path';
