@@ -30,6 +30,7 @@ export interface Errors {
     taskFetch: string;
     taskSubmit: string;
     leaderboard: string;
+    conversationInvalid: string;
 }
 
 export interface Generic {

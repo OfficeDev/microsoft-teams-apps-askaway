@@ -27,6 +27,10 @@ const QnASessionSchema = new mongoose.Schema({
         type: String,
         required: false,
     },
+    conversationId: {
+        type: String,
+        required: true,
+    },
     tenantId: {
         type: String,
         required: true,
@@ -57,6 +61,7 @@ interface IQnASessionBase extends mongoose.Document {
     description: string;
     isActive: boolean;
     activityId?: string;
+    conversationId: string;
     tenantId: string;
     scope: {
         scopeId: string;

@@ -42,7 +42,8 @@
         "missingFields": "missingFields",
         "taskFetch": "taskFetch",
         "taskSubmit": "taskSubmit",
-        "leaderboard": "leaderboard"
+        "leaderboard": "leaderboard",
+        "conversationInvalid": "conversationInvalid"
     },
     "generic": {
         "submit": "submit",

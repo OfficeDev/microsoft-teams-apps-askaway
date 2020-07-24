@@ -43,6 +43,7 @@ export const createQnASession = async (
     userName: string,
     userAadObjId: string,
     activityId: string,
+    conversationId: string,
     tenantId: string,
     scopeId: string,
     isChannel: boolean
@@ -54,6 +55,7 @@ export const createQnASession = async (
         description: description,
         hostId: userAadObjId,
         activityId: activityId,
+        conversationId: conversationId,
         tenantId: tenantId,
         isActive: true,
         scope: {
@@ -194,6 +196,7 @@ export const getQnASessionData = async (qnaSessionId: string) => {
         title: _qnaSessionData.title,
         userName: _qnaSessionData.hostId.userName,
         activityId: _qnaSessionData.activityId,
+        conversationId: _qnaSessionData.conversationId,
         userAadObjId: _qnaSessionData.hostId._id,
         description: _qnaSessionData.description,
         isActive: _qnaSessionData.isActive,
