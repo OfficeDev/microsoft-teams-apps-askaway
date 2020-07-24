@@ -3,15 +3,15 @@ import {
     askQuestionStrings,
     genericStrings,
     errorStrings,
-} from '../localization/locale';
+} from 'src/localization/locale';
 
 /**
  * Defines the template for the adaptive card used when creating a new question.
  */
-export default () =>
+export const NewQuestion = () =>
     <IAdaptiveCard>{
         version: '1.0.0',
-        $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
+        $schema: 'https://adaptivecards.io/schemas/adaptive-card.json',
         type: 'AdaptiveCard',
         body: [
             {

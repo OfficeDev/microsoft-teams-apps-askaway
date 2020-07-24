@@ -1,13 +1,13 @@
 // Middleman file to allow for communication between the bot, database, and adaptive card builder.
-import * as db from './Data/Database'; // For database calls
-import * as adaptiveCardBuilder from './AdaptiveCards/AdaptiveCardBuilder'; // To populate adaptive cards
-import { ok, err, Result } from './util/ResultWrapper';
+import * as db from 'src/Data/Database'; // For database calls
+import * as adaptiveCardBuilder from 'src/AdaptiveCards/AdaptiveCardBuilder'; // To populate adaptive cards
+import { ok, err, Result } from 'src/util/ResultWrapper';
 import { AdaptiveCard } from 'adaptivecards';
-import { IQuestion, IQuestionPopulatedUser } from './Data/Schemas/Question';
-import { aiClient } from './app/server';
+import { IQuestion, IQuestionPopulatedUser } from 'src/Data/Schemas/Question';
+import { aiClient } from 'src/app/server';
 import jimp from 'jimp';
 
-db.initiateConnection(process.env.MongoDbUri as string).catch((error) => {
+db.initiateConnection(<string>process.env.MongoDbUri).catch((error) => {
     aiClient.trackException({ exception: error });
 });
 
@@ -160,7 +160,7 @@ export const submitNewQuestion = async (
     try {
         await db.createQuestion(
             qnaSessionId,
-            userAadObjId as string,
+            <string>userAadObjId,
             userName,
             questionContent
         );

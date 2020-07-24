@@ -7,18 +7,18 @@ import * as random from 'random';
 import seedrandom from 'seedrandom';
 import * as jwt from 'jsonwebtoken';
 
-import { IQuestionPopulatedUser } from '../Data/Schemas/Question';
+import { IQuestionPopulatedUser } from 'src/Data/Schemas/Question';
 
-import MainCard, { viewLeaderboardButton } from './MainCard';
-import StartQnACard from './StartQnACard';
-import endQnAConfirmationCardTemplate from './EndQnAConfirmation';
+import { MainCard, viewLeaderboardButton } from 'src/AdaptiveCards/MainCard';
+import { StartQnACard } from 'src/AdaptiveCards/StartQnACard';
+import { EndQnaConfirmation } from 'src/AdaptiveCards/EndQnAConfirmation';
 
-import { Leaderboard, LeaderboardEmpty } from './Leaderboard';
+import { Leaderboard, LeaderboardEmpty } from 'src/AdaptiveCards/Leaderboard';
 
-import newQuestionCardTemplate from './NewQuestion';
+import { NewQuestion } from 'src/AdaptiveCards/NewQuestion';
 
-import InvalidTaskError from './ErrorCard';
-import { mainCardStrings } from '../localization/locale';
+import { ErrorCard } from 'src/AdaptiveCards/ErrorCard';
+import { mainCardStrings } from 'src/localization/locale';
 
 /**
  * Creates the QnA Master Card
@@ -82,7 +82,9 @@ export const getMainCard = async (
         // remove `Ask a Question` and `End QnA` buttons
         mainCard.actions = [viewLeaderboardButton()];
 
-    const template = new ACData.Template(mainCard).expand({
+    // it is not wrapped around by _adaptiveCard() because it will remove
+    // the `msTeams` property from the master card.
+    return new ACData.Template(mainCard).expand({
         $root: {
             title: title,
             description: description,
@@ -101,10 +103,6 @@ export const getMainCard = async (
             dateLastUpdated: dateUpdated,
         },
     });
-
-    // it is not wrapped around by _adaptiveCard() because it will remove
-    // the `msTeams` property from the master card.
-    return template;
 };
 
 /**
@@ -129,7 +127,7 @@ export const getStartQnACard = (
  * @returns The adaptive card displayed when a task/submit error occurs.
  */
 export const getErrorCard = (errorMessage: string): AdaptiveCard => {
-    const template = new ACData.Template(InvalidTaskError()).expand({
+    const template = new ACData.Template(ErrorCard()).expand({
         $root: {
             // 'Your submission encountered an error. Please try submitting again!',
             errorMessage,
@@ -230,7 +228,7 @@ const generateEmptyLeaderboard = (
  * @returns Adaptive Card associated with creating a new question
  */
 export const getNewQuestionCard = (qnaSessionId: string): AdaptiveCard => {
-    const template = new ACData.Template(newQuestionCardTemplate()).expand({
+    const template = new ACData.Template(NewQuestion()).expand({
         $root: {
             qnaId: qnaSessionId,
         },
@@ -257,9 +255,7 @@ export const _adaptiveCard = (template: IAdaptiveCard): AdaptiveCard => {
 export const getEndQnAConfirmationCard = (
     qnaSessionId: string
 ): AdaptiveCard => {
-    const template = new ACData.Template(
-        endQnAConfirmationCardTemplate()
-    ).expand({
+    const template = new ACData.Template(EndQnaConfirmation()).expand({
         $root: {
             qnaId: qnaSessionId,
         },
@@ -277,7 +273,7 @@ export const getResubmitQuestionErrorCard = (
     qnaSessionId: string,
     questionContent: string
 ): AdaptiveCard => {
-    const template = new ACData.Template(newQuestionCardTemplate()).expand({
+    const template = new ACData.Template(NewQuestion()).expand({
         $root: {
             qnaId: qnaSessionId,
             question: questionContent,
@@ -319,9 +315,13 @@ const _getPersonImage = (name: string, aadObjectId: string): string => {
         index: random.int(0, 13),
     };
 
+    const avatarKey = process.env.AvatarKey;
+    if (!avatarKey)
+        return `https://${process.env.HostName}/images/anon_avatar.png`;
+
     const token = jwt.sign(
         data,
-        Buffer.from(process.env.AvatarKey as string, 'utf8').toString('hex')
+        Buffer.from(avatarKey, 'utf8').toString('hex')
     );
     return `https://${process.env.HostName}/avatar/${token}`;
 };

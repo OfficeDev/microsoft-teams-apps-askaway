@@ -1,14 +1,14 @@
 'use strict';
 
 import { IAdaptiveCard } from 'adaptivecards';
-import { endQnAStrings, genericStrings } from '../localization/locale';
+import { endQnAStrings, genericStrings } from 'src/localization/locale';
 
 /**
  * Defines the template for the adaptive card used when confirming the ending of the QnA.
  */
-export default () =>
+export const EndQnaConfirmation = () =>
     <IAdaptiveCard>{
-        $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
+        $schema: 'https://adaptivecards.io/schemas/adaptive-card.json',
         type: 'AdaptiveCard',
         version: '1.0',
         body: [

@@ -1,29 +1,23 @@
-/* eslint-disable no-console */
 import * as mongoose from 'mongoose';
 import {
     QnASession,
     IQnASession_populated,
     IQnASession,
-} from './Schemas/QnASession';
-import { User } from './Schemas/User';
+} from 'src/Data/Schemas/QnASession';
+import { User } from 'src/Data/Schemas/User';
 import {
     Question,
     IQuestion,
     IQuestionPopulatedUser,
-} from './Schemas/Question';
-import { retryWrapper, ExponentialBackOff } from '../util/RetryPolicies';
+} from 'src/Data/Schemas/Question';
+import { retryWrapper, ExponentialBackOff } from 'src/util/RetryPolicies';
 
 /**
  * Initiates the connection to the CosmosDB database.
  * @param mongoURI - The mongoDB connection string for the CosmosDB database.
  */
-export const initiateConnection = async (
-    mongoURI: string
-): Promise<boolean> => {
-    await mongoose
-        .connect(mongoURI, { useFindAndModify: false })
-        .then(() => console.log('Connection to CosmosDB successful'));
-    return true;
+export const initiateConnection = async (mongoURI: string) => {
+    await mongoose.connect(mongoURI, { useFindAndModify: false });
 };
 
 /**
@@ -102,7 +96,7 @@ export const disconnect = async (): Promise<void> => {
  */
 export const getQuestionData = async (
     qnaSessionId: string
-): Promise<Array<IQuestionPopulatedUser>> => {
+): Promise<IQuestionPopulatedUser[]> => {
     const questionData: IQuestion[] = await retryWrapper<IQuestion[]>(() =>
         Question.find({
             qnaSessionId: qnaSessionId,
@@ -111,7 +105,7 @@ export const getQuestionData = async (
             .exec()
     );
     if (isIQuestion_populatedUserArray(questionData))
-        return questionData as IQuestionPopulatedUser[];
+        return <IQuestionPopulatedUser[]>questionData;
     else {
         throw new Error('Incorrect type received for questions array');
     }
@@ -186,7 +180,9 @@ export const getQnASessionData = async (qnaSessionId: string) => {
     );
     if (!qnaSessionData) throw new Error('QnA Session not found');
 
-    const _qnaSessionData: IQnASession_populated = (qnaSessionData as IQnASession).toObject();
+    const _qnaSessionData: IQnASession_populated = (<IQnASession>(
+        qnaSessionData
+    )).toObject();
 
     // activity id must be set before this function gets called
     if (!_qnaSessionData.activityId)
@@ -227,12 +223,8 @@ export const createQuestion = async (
         content: questionContent,
     });
 
-    const response = await retryWrapper(
-        () => question.save(),
-        new ExponentialBackOff()
-    );
+    await retryWrapper(() => question.save(), new ExponentialBackOff());
 
-    console.log(response);
     return true;
 };
 
@@ -272,7 +264,7 @@ export const addUpvote = async (
 ): Promise<IQuestion> => {
     await getUserOrCreate(aadObjectId, name);
 
-    const question: IQuestion = await retryWrapper<IQuestion>(
+    return await retryWrapper<IQuestion>(
         () =>
             Question.findByIdAndUpdate(
                 questionId,
@@ -285,8 +277,6 @@ export const addUpvote = async (
             ),
         new ExponentialBackOff()
     );
-
-    return question;
 };
 
 /*

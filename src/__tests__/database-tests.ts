@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/tslint/config */
 import mongoose from 'mongoose';
-import { QnASession } from '../Data/Schemas/QnASession';
+import { QnASession, IQnASession } from 'src/Data/Schemas/QnASession';
 import {
     getQuestionData,
     createQuestion,
@@ -13,9 +14,10 @@ import {
     isHost,
     isActiveQnA,
     isExistingQnASession,
-} from '../Data/Database';
-import { Question, IQuestion } from '../Data/Schemas/Question';
-import { User } from '../Data/Schemas/User';
+} from 'src/Data/Database';
+import { Question, IQuestion } from 'src/Data/Schemas/Question';
+import { User } from 'src/Data/Schemas/User';
+import crypto from 'crypto';
 
 let testHost, testQnASession, testUser, testUserUpvoting;
 
@@ -37,7 +39,7 @@ const sampleScopeId = '12311';
 const sampleQnASessionID = '5f160b862655575054393a0e';
 
 beforeAll(async () => {
-    await mongoose.connect(process.env.MONGO_URL as string, {
+    await mongoose.connect(<string>process.env.MONGO_URL, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
         useFindAndModify: false,
@@ -117,7 +119,7 @@ test('can create qna session', async () => {
     const qnaSessionDoc = await QnASession.findById(result.qnaSessionId);
 
     expect(qnaSessionDoc).not.toBeNull();
-    const doc = (qnaSessionDoc as any).toObject();
+    const doc = (<IQnASession>qnaSessionDoc).toObject();
 
     const expectedData = {
         title: doc.title,
@@ -205,7 +207,8 @@ test('retrieve most recent/top questions with three questions', async () => {
         },
     ];
 
-    const _sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+    const _sleep = (ms) =>
+        new Promise((resolve) => setTimeout(() => resolve(), ms));
     questions[1] = await new Question(questions[1]).save();
     await _sleep(50);
     questions[0] = await new Question(questions[0]).save();
@@ -288,7 +291,7 @@ test('create new user', async () => {
 });
 
 test('update existing user', async () => {
-    const randomString = Math.random().toString(36);
+    const randomString = crypto.randomBytes(36).toString('hex');
     const data = await getUserOrCreate(sampleUserAADObjId1, randomString);
     expect(data).toBe(true);
 });
@@ -427,8 +430,7 @@ test('ending existing qna with no questions', async () => {
     // get data
     const qnaSessionData: any = await QnASession.findById(testQnASession._id)
         .exec()
-        .catch((error) => {
-            console.error(error);
+        .catch(() => {
             throw new Error('Retrieving QnA Session details');
         });
 
@@ -452,8 +454,7 @@ test('ending existing qna with a few questions', async () => {
     // get data
     const qnaSessionData: any = await QnASession.findById(testQnASession._id)
         .exec()
-        .catch((error) => {
-            console.error(error);
+        .catch(() => {
             throw new Error('Retrieving QnA Session details');
         });
 

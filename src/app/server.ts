@@ -10,7 +10,7 @@ import { join } from 'path';
 import * as jimp from 'jimp';
 import * as jwt from 'jsonwebtoken';
 
-import { generateInitialsImage } from './../Controller';
+import { generateInitialsImage } from 'src/Controller';
 import { ConnectorClient } from 'botframework-connector';
 
 // Initialize debug logging module
@@ -19,7 +19,6 @@ const log = debug('msteams');
 log(`Initializing Microsoft Teams Express hosted App...`);
 
 // Initialize dotenv, to use .env file settings if existing
-// tslint:disable-next-line:no-var-requires
 dotenvConfig();
 
 // Set up app insights
@@ -36,18 +35,20 @@ appInsights
     .setDistributedTracingMode(appInsights.DistributedTracingModes.AI);
 appInsights.start();
 
+// tslint:export-name
+// eslint-disable-next-line @typescript-eslint/tslint/config
 export const aiClient = appInsights.defaultClient;
 
 // The import of components has to be done AFTER the dotenv config
-import { initLocalization } from '../localization/locale';
+import { initLocalization } from 'src/localization/locale';
 import { BotFrameworkAdapter, ActivityHandler } from 'botbuilder';
-import createRequestPolicyFactories from './RequestPolicyHelper';
+import { requestPolicyHelper } from 'src/app/RequestPolicyHelper';
 import { USER_AGENT } from 'botbuilder/lib/botFrameworkAdapter';
-import { AskAway } from './askAwayBot/AskAway';
-import { ifNumber } from '../util/RetryPolicies';
+import { AskAway } from 'src/app/askAwayBot/AskAway';
+import { ifNumber } from 'src/util/RetryPolicies';
 
 // initialize localization
-initLocalization();
+if (initLocalization) initLocalization();
 
 // Create the Express webserver
 const express = Express();
@@ -57,7 +58,7 @@ const port = process.env.port || process.env.PORT || 3007;
 express.use(
     Express.json({
         verify: (req, res, buf: Buffer): void => {
-            (req as any).rawBody = buf.toString();
+            (<any>req).rawBody = buf.toString();
         },
     })
 );
@@ -76,9 +77,11 @@ express.get('/avatar/:token', (req, res) => {
     const token = req.params.token;
     // if (token == null) return res.sendStatus(401);
 
+    if (!process.env.AvatarKey)
+        return res.sendFile(join(__dirname, 'public/images/anon_avatar.png'));
     jwt.verify(
         token,
-        Buffer.from(process.env.AvatarKey as string, 'utf8').toString('hex'),
+        Buffer.from(process.env.AvatarKey, 'utf8').toString('hex'),
         (err, data: AvatarRequest) => {
             if (err)
                 return res.sendFile(
@@ -101,23 +104,22 @@ express.use(morgan('tiny'));
 express.use(compression());
 
 // Override ConnecterClient to update ExponentialRetryPolicy configuration
-(BotFrameworkAdapter.prototype as any).createConnectorClientInternal = function (
+(<any>BotFrameworkAdapter.prototype).createConnectorClientInternal = (
     serviceUrl,
     credentials
-) {
+) => {
     const retryAfterMs = ifNumber(process.env.ExponentialRetryAfterMs, 500);
-    const factories = createRequestPolicyFactories(credentials, {
+    const factories = requestPolicyHelper(credentials, {
         retryCount: ifNumber(process.env.DefaultMaxRetryCount, 5),
         retryInterval: retryAfterMs,
         minRetryInterval: retryAfterMs * 0.5,
         maxRetryInterval: retryAfterMs * 10,
     });
-    const client = new ConnectorClient(credentials, {
+    return new ConnectorClient(credentials, {
         baseUri: serviceUrl,
         userAgent: USER_AGENT,
-        requestPolicyFactories: factories as any,
+        requestPolicyFactories: <any>factories,
     });
-    return client;
 };
 
 // Set up bot and routing

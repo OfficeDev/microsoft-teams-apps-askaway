@@ -1,4 +1,4 @@
-import * as strings from './testLocale.json';
+import * as strings from 'src/localization/testLocale.json';
 
 import {
     Strings,
@@ -17,7 +17,7 @@ import {
     startQnAStrings,
     mainCardStrings,
     genericStrings,
-} from '../localization/locale';
+} from 'src/localization/locale';
 import i18next from 'i18next';
 
 const _stringFunctionsTest = (
@@ -43,34 +43,36 @@ describe('generic tests', () => {
     beforeAll(async () => {
         _testStrings = strings;
         // init localization
-        await initLocalization(_testStrings);
+        await initLocalization(true, _testStrings);
+
+        return;
     });
 
-    test('error strings', () => {
+    it('error strings', () => {
         _stringFunctionsTest(_testStrings.errors, errorStrings);
     });
 
-    test('generic strings', () => {
+    it('generic strings', () => {
         _stringFunctionsTest(_testStrings.generic, genericStrings);
     });
 
-    test('mainCard strings', () => {
+    it('mainCard strings', () => {
         _stringFunctionsTest(_testStrings.mainCard, mainCardStrings);
     });
 
-    test('startQnA strings', () => {
+    it('startQnA strings', () => {
         _stringFunctionsTest(_testStrings.startQnA, startQnAStrings);
     });
 
-    test('endQnA strings', () => {
+    it('endQnA strings', () => {
         _stringFunctionsTest(_testStrings.endQnA, endQnAStrings);
     });
 
-    test('leaderboard strings', () => {
+    it('leaderboard strings', () => {
         _stringFunctionsTest(_testStrings.leaderboard, leaderboardStrings);
     });
 
-    test('askQuestion strings', () => {
+    it('askQuestion strings', () => {
         _stringFunctionsTest(_testStrings.askQuestion, askQuestionStrings);
     });
 });
@@ -89,31 +91,31 @@ describe('importing new language', () => {
         expect(i18next.language).toBe('testLocale');
     });
 
-    test('error strings', () => {
+    it('error strings', () => {
         _stringFunctionsTest(_testStrings.errors, errorStrings);
     });
 
-    test('generic strings', () => {
+    it('generic strings', () => {
         _stringFunctionsTest(_testStrings.generic, genericStrings);
     });
 
-    test('mainCard strings', () => {
+    it('mainCard strings', () => {
         _stringFunctionsTest(_testStrings.mainCard, mainCardStrings);
     });
 
-    test('startQnA strings', () => {
+    it('startQnA strings', () => {
         _stringFunctionsTest(_testStrings.startQnA, startQnAStrings);
     });
 
-    test('endQnA strings', () => {
+    it('endQnA strings', () => {
         _stringFunctionsTest(_testStrings.endQnA, endQnAStrings);
     });
 
-    test('leaderboard strings', () => {
+    it('leaderboard strings', () => {
         _stringFunctionsTest(_testStrings.leaderboard, leaderboardStrings);
     });
 
-    test('askQuestion strings', () => {
+    it('askQuestion strings', () => {
         _stringFunctionsTest(_testStrings.askQuestion, askQuestionStrings);
     });
 });

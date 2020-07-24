@@ -38,7 +38,7 @@ var config = [{
         devtool: 'source-map',
         resolve: {
             extensions: [".ts", ".tsx", ".js"],
-            alias: {}
+            modules: [path.resolve(__dirname, '.'), 'node_modules']
         },
         target: 'node',
         node: {
