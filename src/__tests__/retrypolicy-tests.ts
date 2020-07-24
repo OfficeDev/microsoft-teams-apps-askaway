@@ -3,7 +3,7 @@ import {
     retryWrapper,
     DefaultRetryPolicy,
     ExponentialBackOff,
-} from '../util/RetryPolicies';
+} from 'src/util/RetryPolicies';
 
 test('default retry policy should retry 2 times', async () => {
     let triesRemaining = 2;
@@ -40,7 +40,8 @@ test('default retry policy should exceed max retry count', async () => {
 
 test('default retry policy should exceed max wait time', async () => {
     let triesRemaining = 2;
-    const _sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+    const _sleep = (ms) =>
+        new Promise((resolve) => setTimeout(() => resolve(), ms));
     const func = async () => {
         await _sleep(1000);
         return new Promise((resolve) => {

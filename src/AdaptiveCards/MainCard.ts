@@ -1,7 +1,7 @@
 import { IAdaptiveCard } from 'adaptivecards';
-import { err, ok, Result } from '../util/ResultWrapper';
+import { err, ok, Result } from 'src/util/ResultWrapper';
 import { ISubmitAction } from 'adaptivecards/lib/schema';
-import { mainCardStrings } from '../localization/locale';
+import { mainCardStrings } from 'src/localization/locale';
 
 /**
  * Adaptive Card template for view leaderboard submit action (i.e, the `View Leaderboard` button).
@@ -36,9 +36,9 @@ export type MainCardData = {
 /**
  * Master Adaptive Card for the AskAway Bot
  */
-export default () =>
+export const MainCard = () =>
     <IAdaptiveCard>{
-        $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
+        $schema: 'https://adaptivecards.io/schemas/adaptive-card.json',
         type: 'AdaptiveCard',
         version: '1.2',
         body: [
@@ -113,188 +113,11 @@ export default () =>
                         color: 'accent',
                         $when: '${count($root.topQuestions) < 1}',
                     },
-                    {
-                        type: 'Container',
-                        separator: true,
-                        items: [
-                            {
-                                type: 'ColumnSet',
-                                columns: [
-                                    {
-                                        type: 'Column',
-                                        width: 'auto',
-                                        items: [
-                                            {
-                                                type: 'Image',
-                                                style: 'Person',
-                                                size: 'Small',
-                                                url: '${userId.picture}',
-                                            },
-                                        ],
-                                    },
-                                    {
-                                        type: 'Column',
-                                        width: 'stretch',
-                                        items: [
-                                            {
-                                                type: 'TextBlock',
-                                                text: '${userId.userName}',
-                                                weight: 'Bolder',
-                                            },
-                                            {
-                                                type: 'TextBlock',
-                                                text: '${content}',
-                                                spacing: 'None',
-                                                wrap: true,
-                                                maxLines: 3,
-                                            },
-                                        ],
-                                    },
-                                    {
-                                        type: 'Column',
-                                        width: '30px',
-                                        spacing: 'extraLarge',
-                                        items: [
-                                            {
-                                                type: 'TextBlock',
-                                                text: '${string(upvotes)}',
-                                            },
-                                        ],
-                                        verticalContentAlignment: 'Center',
-                                    },
-                                ],
-                            },
-                        ],
-                        $data: '${$root.topQuestions}',
-                    },
+                    questionsList('${$root.topQuestions}'),
                 ],
                 wrap: true,
             },
-            {
-                type: 'ActionSet',
-                separator: true,
-                spacing: 'Large',
-                horizontalAlignment: 'Center',
-                actions: [
-                    {
-                        type: 'Action.ShowCard',
-                        title: mainCardStrings('showRecentQuestions'),
-                        card: {
-                            $schema:
-                                'http://adaptivecards.io/schemas/adaptive-card.json',
-                            type: 'AdaptiveCard',
-                            version: '1.2',
-                            body: [
-                                {
-                                    type: 'Container',
-                                    spacing: 'Large',
-                                    id: 'recentQuestions',
-                                    items: [
-                                        {
-                                            type: 'ColumnSet',
-                                            columns: [
-                                                {
-                                                    type: 'Column',
-                                                    width: 'stretch',
-                                                    items: [
-                                                        {
-                                                            type: 'TextBlock',
-                                                            text: mainCardStrings(
-                                                                'recentQuestions'
-                                                            ),
-                                                            wrap: true,
-                                                            weight: 'Bolder',
-                                                            size: 'Medium',
-                                                        },
-                                                    ],
-                                                },
-                                            ],
-                                        },
-                                        {
-                                            type: 'TextBlock',
-                                            text: mainCardStrings(
-                                                'noQuestions'
-                                            ),
-                                            color: 'accent',
-                                            $when:
-                                                '${count($root.recentQuestions) < 1}',
-                                        },
-                                        {
-                                            type: 'Container',
-                                            separator: true,
-                                            items: [
-                                                {
-                                                    type: 'ColumnSet',
-                                                    columns: [
-                                                        {
-                                                            type: 'Column',
-                                                            width: 'auto',
-                                                            items: [
-                                                                {
-                                                                    type:
-                                                                        'Image',
-                                                                    style:
-                                                                        'Person',
-                                                                    size:
-                                                                        'Small',
-                                                                    url:
-                                                                        '${userId.picture}',
-                                                                },
-                                                            ],
-                                                        },
-                                                        {
-                                                            type: 'Column',
-                                                            width: 'stretch',
-                                                            items: [
-                                                                {
-                                                                    type:
-                                                                        'TextBlock',
-                                                                    text:
-                                                                        '${userId.userName}',
-                                                                    weight:
-                                                                        'Bolder',
-                                                                },
-                                                                {
-                                                                    type:
-                                                                        'TextBlock',
-                                                                    text:
-                                                                        '${content}',
-                                                                    spacing:
-                                                                        'None',
-                                                                    wrap: true,
-                                                                    maxLines: 3,
-                                                                },
-                                                            ],
-                                                        },
-                                                        {
-                                                            type: 'Column',
-                                                            width: '30px',
-                                                            spacing:
-                                                                'extraLarge',
-                                                            items: [
-                                                                {
-                                                                    type:
-                                                                        'TextBlock',
-                                                                    text:
-                                                                        '${string(upvotes)}',
-                                                                },
-                                                            ],
-                                                            verticalContentAlignment:
-                                                                'Center',
-                                                        },
-                                                    ],
-                                                },
-                                            ],
-                                            $data: '${$root.recentQuestions}',
-                                        },
-                                    ],
-                                    wrap: true,
-                                },
-                            ],
-                        },
-                    },
-                ],
-            },
+            recentQuestionActionSet(),
             {
                 type: 'TextBlock',
                 text: '${sessionDetails}',
@@ -309,22 +132,134 @@ export default () =>
                 },
             ],
         },
-        actions: [
-            {
-                id: 'askQuestion',
-                type: 'Action.Submit',
-                title: mainCardStrings('askQuestion'),
-                data: {
-                    msteams: {
-                        type: 'task/fetch',
-                    },
-                    id: 'askQuestion',
-                    qnaSessionId: '${qnaId}',
-                },
-            },
-            viewLeaderboardButton(),
-        ],
+        actions: actions(),
     };
+
+const questionsList = (dataKey: string) => ({
+    type: 'Container',
+    separator: true,
+    items: [
+        {
+            type: 'ColumnSet',
+            columns: [
+                {
+                    type: 'Column',
+                    width: 'auto',
+                    items: [
+                        {
+                            type: 'Image',
+                            style: 'Person',
+                            size: 'Small',
+                            url: '${userId.picture}',
+                        },
+                    ],
+                },
+                {
+                    type: 'Column',
+                    width: 'stretch',
+                    items: [
+                        {
+                            type: 'TextBlock',
+                            text: '${userId.userName}',
+                            weight: 'Bolder',
+                        },
+                        {
+                            type: 'TextBlock',
+                            text: '${content}',
+                            spacing: 'None',
+                            wrap: true,
+                            maxLines: 3,
+                        },
+                    ],
+                },
+                {
+                    type: 'Column',
+                    width: '30px',
+                    spacing: 'extraLarge',
+                    items: [
+                        {
+                            type: 'TextBlock',
+                            text: '${string(upvotes)}',
+                        },
+                    ],
+                    verticalContentAlignment: 'Center',
+                },
+            ],
+        },
+    ],
+    $data: dataKey,
+});
+
+const recentQuestionActionSet = () => ({
+    type: 'ActionSet',
+    separator: true,
+    spacing: 'Large',
+    horizontalAlignment: 'Center',
+    actions: [
+        {
+            type: 'Action.ShowCard',
+            title: mainCardStrings('showRecentQuestions'),
+            card: {
+                $schema: 'https://adaptivecards.io/schemas/adaptive-card.json',
+                type: 'AdaptiveCard',
+                version: '1.2',
+                body: [
+                    {
+                        type: 'Container',
+                        spacing: 'Large',
+                        id: 'recentQuestions',
+                        items: [
+                            {
+                                type: 'ColumnSet',
+                                columns: [
+                                    {
+                                        type: 'Column',
+                                        width: 'stretch',
+                                        items: [
+                                            {
+                                                type: 'TextBlock',
+                                                text: mainCardStrings(
+                                                    'recentQuestions'
+                                                ),
+                                                wrap: true,
+                                                weight: 'Bolder',
+                                                size: 'Medium',
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            {
+                                type: 'TextBlock',
+                                text: mainCardStrings('noQuestions'),
+                                color: 'accent',
+                                $when: '${count($root.recentQuestions) < 1}',
+                            },
+                            questionsList('${$root.recentQuestions}'),
+                        ],
+                        wrap: true,
+                    },
+                ],
+            },
+        },
+    ],
+});
+
+const actions = () => [
+    {
+        id: 'askQuestion',
+        type: 'Action.Submit',
+        title: mainCardStrings('askQuestion'),
+        data: {
+            msteams: {
+                type: 'task/fetch',
+            },
+            id: 'askQuestion',
+            qnaSessionId: '${qnaId}',
+        },
+    },
+    viewLeaderboardButton(),
+];
 
 /**
  * Extracts injected data from the master card

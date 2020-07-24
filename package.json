@@ -44,7 +44,7 @@
         "jsonwebtoken": "^8.5.1",
         "lodash": "^4.17.15",
         "moment": "^2.27.0",
-        "mongoose": "^5.9.18",
+        "mongoose": "^5.9.25",
         "morgan": "1.9.1",
         "pretty-quick": "^2.0.1",
         "random": "^2.2.0",
@@ -92,7 +92,7 @@
         "gulp-zip": "4.2.0",
         "husky": "^4.2.5",
         "i18next": "^19.6.0",
-        "jest": "^24.9.0",
+        "jest": "^26.0.0",
         "ngrok": "^3.1.1",
         "nodemon": "1.19.0",
         "plugin-error": "1.0.1",
@@ -113,12 +113,6 @@
         "last 2 versions",
         "Firefox ESR"
     ],
-    "jest": {
-        "preset": "ts-jest",
-        "globalSetup": "./node_modules/@shelf/jest-mongodb/setup.js",
-        "globalTeardown": "./node_modules/@shelf/jest-mongodb/teardown.js",
-        "testEnvironment": "node"
-    },
     "husky": {
         "hooks": {
             "pre-commit": "npm run pretty && npm run lint-and-fix"

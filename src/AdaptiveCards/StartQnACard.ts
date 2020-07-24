@@ -1,12 +1,12 @@
 import { IAdaptiveCard } from 'adaptivecards';
-import { startQnAStrings, genericStrings } from '../localization/locale';
+import { startQnAStrings, genericStrings } from 'src/localization/locale';
 
 /**
  * Adaptive Card form used to collect information to start the QnA.
  */
-export default () =>
+export const StartQnACard = () =>
     <IAdaptiveCard>{
-        $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
+        $schema: 'https://adaptivecards.io/schemas/adaptive-card.json',
         type: 'AdaptiveCard',
         version: '1.2',
         body: [

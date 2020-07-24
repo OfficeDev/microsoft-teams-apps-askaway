@@ -1,5 +1,6 @@
 import i18next from 'i18next';
-import * as enStrings from './en.json';
+import * as enStrings from 'src/localization/en.json';
+import * as appInsights from 'applicationinsights';
 
 export interface Strings {
     mainCard: MainCard;
@@ -72,7 +73,10 @@ export interface StartQnA {
     taskModuleTitleEdit: string;
 }
 
-export const initLocalization = async (testStrings?: Strings) => {
+export const initLocalization = async (
+    testing = false,
+    testStrings?: Strings
+) => {
     const config = {
         language: process.env.Language ? process.env.Language : 'en',
         fallbackLanguage: process.env.FallbackLanguage
@@ -82,13 +86,20 @@ export const initLocalization = async (testStrings?: Strings) => {
         debug: false,
     };
 
-    const languageStrings = process.env.Language
-        ? require(`./${process.env.Language}.json`)
-        : require(`./en.json`);
+    let languageStrings = config.defaultStrings,
+        fallbackLanguageStrings = config.defaultStrings;
+    try {
+        if (process.env.Language)
+            // eslint-disable-next-line @typescript-eslint/tslint/config
+            languageStrings = require(`./${process.env.Language}.json`);
 
-    const fallbackLanguageStrings = process.env.FallbackLanguage
-        ? require(`./${process.env.FallbackLanguage}.json`)
-        : require(`./en.json`);
+        if (process.env.FallbackLanguage)
+            // eslint-disable-next-line @typescript-eslint/tslint/config
+            fallbackLanguageStrings = require(`./${process.env.FallbackLanguage}.json`);
+    } catch (error) {
+        if (!testing)
+            appInsights.defaultClient.trackException({ exception: error });
+    }
 
     const resources = {
         [config.language]: {

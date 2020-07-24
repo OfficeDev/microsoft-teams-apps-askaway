@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/tslint/config */
 import {
     getNewQuestionCard,
     _adaptiveCard,
@@ -6,7 +7,7 @@ import {
     getErrorCard,
     getStartQnACard,
     generateLeaderboard,
-} from '../AdaptiveCards/AdaptiveCardBuilder';
+} from 'src/AdaptiveCards/AdaptiveCardBuilder';
 import {
     initLocalization,
     errorStrings,
@@ -15,7 +16,7 @@ import {
     endQnAStrings,
     startQnAStrings,
     genericStrings,
-} from '../localization/locale';
+} from 'src/localization/locale';
 import { IAdaptiveCard } from 'adaptivecards/lib/schema';
 
 const sampleUserAADObjId1 = 'be36140g-9729-3024-8yg1-147bbi67g2c9';

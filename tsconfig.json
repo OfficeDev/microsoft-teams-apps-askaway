@@ -5,12 +5,15 @@
         "moduleResolution": "node",
         "noImplicitAny": false,
         "strictNullChecks": true,
-        "jsx": "react",
         "sourceMap": true,
         "experimentalDecorators": true,
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
-        "resolveJsonModule": true
+        "resolveJsonModule": true,
+        "baseUrl": ".",
+        "paths": {
+            "src/*": ["src/*"]
+        }
     },
     "exclude": ["node_modules"]
 }

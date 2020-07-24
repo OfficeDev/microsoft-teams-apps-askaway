@@ -88,7 +88,7 @@ export const retryWrapper = async <T>(
     try {
         return await fn();
     } catch (error) {
-        const mongoError = error as MongoError;
+        const mongoError = <MongoError>error;
         if (mongoError.code === 16500) {
             // 16500 is code for Too Many Requests
             if (retryPolicy.shouldRetry()) {
@@ -103,13 +103,13 @@ export const retryWrapper = async <T>(
 };
 
 const _delay = (ms: number): Promise<void> => {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(() => resolve(), ms));
 };
 
 /**
  * Returns `value` if it's a Number, otherwise `otherwise` will be returned
- * @param value expression that will be returned truthy
- * @param otherwise expression that will be return if `value` is falsy
+ * @param value - expression that will be returned truthy
+ * @param otherwise - expression that will be return if `value` is falsy
  */
 export const ifNumber = (value, otherwise) => {
     try {

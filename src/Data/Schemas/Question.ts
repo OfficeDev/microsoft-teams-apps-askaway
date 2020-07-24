@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
-import { IQnASession } from './QnASession';
-import { IUser } from './User';
+import { IQnASession } from 'src/Data/Schemas/QnASession';
+import { IUser } from 'src/Data/Schemas/User';
 
 const QuestionSchema = new mongoose.Schema({
     qnaSessionId: {
@@ -37,7 +37,7 @@ interface IQuestionBase extends mongoose.Document {
 export interface IQuestion extends IQuestionBase {
     qnaSessionId: IQnASession['_id'];
     userId: IUser['_id'];
-    voters: Array<IUser['_id']>;
+    voters: IUser['_id'][];
 }
 
 /**
@@ -46,7 +46,7 @@ export interface IQuestion extends IQuestionBase {
 export interface IQuestionPopulatedUser extends IQuestionBase {
     qnaSessionId: IQnASession['_id'];
     userId: IUser;
-    voters: Array<IUser['_id']>;
+    voters: IUser['_id'][];
 }
 
 /**
