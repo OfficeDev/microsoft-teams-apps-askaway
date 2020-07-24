@@ -57,14 +57,6 @@
                 "description": "The ID of the tenant to which the app will be deployed."
             }
         },
-        "defaultCulture": {
-            "type": "string",
-            "allowedValues": ["en-US"],
-            "defaultValue": "en-US",
-            "metadata": {
-                "description": "Default localization for app."
-            }
-        },
         "sku": {
             "type": "string",
             "allowedValues": ["Basic", "Standard", "Premium"],
@@ -120,10 +112,10 @@
         "cosmosDbName": "[toLower(parameters('accountName'))]",
         "botAppInsightsName": "[parameters('baseResourceName')]",
         "sharedSkus": ["Free", "Shared"],
+        "manifestAppId": "[parameters('botClientId')]",
         "isSharedPlan": "[contains(variables('sharedSkus'), parameters('sku'))]",
         "skuFamily": "[if(equals(parameters('sku'), 'Shared'), 'D', take(parameters('sku'), 1))]",
         "botMessagingUrl": "[concat(variables('botAppUrl'), '/api/messages')]",
-        "manifestAppId": "[parameters('botClientId')]",
         "accountName": "[toLower(parameters('accountName'))]"
     },
     "outputs": {
@@ -260,10 +252,6 @@
                             "value": "[parameters('botClientSecret')]"
                         },
                         {
-                            "name": "Bot:AppBaseUri",
-                            "value": "[concat('https://', variables('botAppDomain'))]"
-                        },
-                        {
                             "name": "HostName",
                             "value": "[variables('botAppDomain')]"
                         },
@@ -276,24 +264,24 @@
                             "value": "TBD"
                         },
                         {
-                            "name": "MongoDbUri",
-                            "value": "[listConnectionStrings(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('accountName')), '2019-12-12').connectionStrings[0].connectionString]"
+                            "name": "TenantId",
+                            "value": "[parameters('tenantId')]"
                         },
                         {
-                            "name": "Bot:TenantId",
-                            "value": "[parameters('tenantId')]"
+                            "name": "MongoDbUri",
+                            "value": "[listConnectionStrings(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('accountName')), '2019-12-12').connectionStrings[0].connectionString]"
                         },
                         {
                             "name": "AvatarKey",
                             "value": "[uniqueString(parameters('botClientSecret'))]"
                         },
                         {
-                            "name": "CosmosDBDatabaseName",
-                            "value": "[parameters('accountName')]"
-                        },
-                        {
                             "name": "BotDisplayName",
                             "value": "[variables('botName')]"
+                        },
+                        {
+                            "name": "ManifestAppId",
+                            "value": "[variables('manifestAppId')]"
                         },
                         {
                             "name": "UpdateMainCardDebounceTimeInterval",
@@ -311,6 +299,7 @@
                             "name": "Language",
                             "value": "en"
                         },
+
                         {
                             "name": "FallbackLanguage",
                             "value": "en"
@@ -334,14 +323,6 @@
                         {
                             "name": "ExponentialRetryAfterMs",
                             "value": "100"
-                        },
-                        {
-                            "name": "ActiveDirectoryTenant",
-                            "value": "[parameters('tenantId')]"
-                        },
-                        {
-                            "name": "i18n:DefaultCulture",
-                            "value": "[parameters('defaultCulture')]"
                         },
                         {
                             "name": "WEBSITE_NODE_DEFAULT_VERSION",
