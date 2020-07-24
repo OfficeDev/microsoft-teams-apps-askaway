@@ -122,8 +122,8 @@ express.use(compression());
 
 // Set up bot and routing
 const adapter = new BotFrameworkAdapter({
-    appId: process.env.MICROSOFT_APP_ID,
-    appPassword: process.env.MICROSOFT_APP_PASSWORD,
+    appId: process.env.MicrosoftAppId,
+    appPassword: process.env.MicrosoftAppPassword,
 });
 
 adapter.onTurnError = async (context, error) => {
