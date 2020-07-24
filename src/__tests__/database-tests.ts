@@ -31,6 +31,7 @@ const sampleQuestionContent = 'Sample Question?';
 const sampleTitle = 'Weekly QnA Test';
 const sampleDescription = 'Weekly QnA Test description';
 const sampleActivityId = '1234';
+const sampleConversationId = '8293';
 const sampleTenantId = '11121';
 const sampleScopeId = '12311';
 const sampleQnASessionID = '5f160b862655575054393a0e';
@@ -55,6 +56,7 @@ beforeEach(async () => {
         isActive: true,
         hostId: sampleUserAADObjId1,
         activityId: sampleActivityId,
+        conversationId: sampleConversationId,
         tenantId: sampleTenantId,
         scope: {
             scopeId: sampleScopeId,
@@ -91,6 +93,7 @@ test('can create qna session', async () => {
         userName: sampleUserName1,
         userAadObjId: sampleUserAADObjId1,
         activityId: sampleActivityId,
+        conversationId: sampleConversationId,
         tenantId: sampleTenantId,
         scopeId: sampleScopeId,
         isChannel: true,
@@ -102,6 +105,7 @@ test('can create qna session', async () => {
         data.userName,
         data.userAadObjId,
         data.activityId,
+        data.conversationId,
         data.tenantId,
         data.scopeId,
         data.isChannel
@@ -120,6 +124,7 @@ test('can create qna session', async () => {
         description: doc.description,
         userAadObjId: doc.hostId,
         activityId: doc.activityId,
+        conversationId: doc.conversationId,
         tenantId: doc.tenantId,
         scopeId: doc.scope.scopeId,
         isChannel: doc.scope.isChannel,
@@ -478,6 +483,7 @@ test('checking if inactive QnA is currently active', async () => {
         userName: sampleUserName4,
         userAadObjId: sampleUserAADObjId4,
         activityId: sampleActivityId,
+        conversationId: sampleConversationId,
         tenantId: sampleTenantId,
         scopeId: sampleScopeId,
         isChannel: true,
@@ -489,6 +495,7 @@ test('checking if inactive QnA is currently active', async () => {
         data.userName,
         data.userAadObjId,
         data.activityId,
+        data.conversationId,
         data.tenantId,
         data.scopeId,
         data.isChannel

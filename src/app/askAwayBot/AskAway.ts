@@ -93,6 +93,27 @@ export class AskAway extends TeamsActivityHandler {
         context: TurnContext,
         taskModuleRequest: TaskModuleRequest
     ): Promise<TaskModuleResponse> {
+        // The following function call assumes the task/fetch request is interacting with an existing QnA session and thus the data property of
+        // the taskModuleRequest has a qnaSessionId property which stores the DBID of the QnA session the request is interacting with.
+        // This is to prevent spoofing of data from users who don't belong to a conversation that a particular QnA is taking place in.
+        // If you wish to add different task/fetch handlers which do not interact with an existing QnA session, do so and return before the
+        // following if statement.
+        const conversationIdValid = await controller.validateConversationId(
+            taskModuleRequest.data.qnaSessionId,
+            context.activity.conversation.id
+        );
+
+        if (conversationIdValid.isOk()) {
+            if (!conversationIdValid.value)
+                return this._buildTaskModuleContinueResponse(
+                    controller.getErrorCard(errorStrings('conversationInvalid'))
+                );
+        } else {
+            return this._buildTaskModuleContinueResponse(
+                controller.getErrorCard(errorStrings('taskSubmit'))
+            );
+        }
+
         if (taskModuleRequest.data.id === 'viewLeaderboard')
             return await this._handleTeamsTaskModuleFetchViewLeaderboard(
                 context,
@@ -100,6 +121,7 @@ export class AskAway extends TeamsActivityHandler {
             );
         else if (taskModuleRequest.data.id == 'askQuestion')
             return this._handleTeamsTaskModuleFetchAskQuestion(
+                context,
                 taskModuleRequest
             );
 
@@ -111,6 +133,27 @@ export class AskAway extends TeamsActivityHandler {
         context: TurnContext,
         taskModuleRequest: TaskModuleRequest
     ): Promise<TaskModuleResponse> {
+        // The following function call assumes the task/submit request is interacting with an existing QnA session and thus the data property of
+        // the taskModuleRequest has a qnaSessionId property which stores the DBID of the QnA session the request is interacting with.
+        // This is to prevent spoofing of data from users who don't belong to a conversation that a particular QnA is taking place in.
+        // If you wish to add different task/submit handlers which do not interact with an existing QnA session, do so and return before the
+        // following if statement.
+        const conversationIdValid = await controller.validateConversationId(
+            taskModuleRequest.data.qnaSessionId,
+            context.activity.conversation.id
+        );
+
+        if (conversationIdValid.isOk()) {
+            if (!conversationIdValid.value)
+                return this._buildTaskModuleContinueResponse(
+                    controller.getErrorCard(errorStrings('conversationInvalid'))
+                );
+        } else {
+            return this._buildTaskModuleContinueResponse(
+                controller.getErrorCard(errorStrings('taskSubmit'))
+            );
+        }
+
         const user = context.activity.from;
         const endQnAIds = ['submitEndQnA', 'cancelEndQnA'];
 
@@ -127,6 +170,7 @@ export class AskAway extends TeamsActivityHandler {
             );
         else if (taskModuleRequest.data.id == 'confirmEndQnA')
             return this._handleTeamsTaskModuleSubmitConfirmEndQnA(
+                context,
                 taskModuleRequest
             );
         else if (endQnAIds.includes(taskModuleRequest.data.id))
@@ -142,14 +186,62 @@ export class AskAway extends TeamsActivityHandler {
         return this._handleTeamsTaskModuleSubmitError();
     }
 
-    private _handleTeamsTaskModuleFetchAskQuestion(
+    /* -------------------------------------------------------------------------- */
+    /*                         ANCHOR task/fetch handlers                         */
+    /* -------------------------------------------------------------------------- */
+
+    private _handleTeamsTaskModuleFetchViewLeaderboard = async (
+        context: TurnContext,
         taskModuleRequest: TaskModuleRequest
-    ): TaskModuleResponse {
+    ): Promise<TaskModuleResponse> => {
+        /*================================================================================================================================
+        A payload of the following format should be in the 'data' field of the 'View Leaderboard' Action.Submit button in the master card.
+        {
+            msteams: {
+                type: 'task/fetch',
+            },
+            id: 'viewLeaderboard',
+            qnaSessionId:
+                <put the qnaSessionId here>
+        }
+        ================================================================================================================================*/
+
+        const leaderboard = await controller.generateLeaderboard(
+            taskModuleRequest.data.qnaSessionId,
+            context.activity.from.aadObjectId as string
+        );
+
+        const response: TaskModuleResponse = leaderboard.isOk()
+            ? this._buildTaskModuleContinueResponse(
+                  leaderboard.value,
+                  leaderboardStrings('taskModuleTitle')
+              )
+            : this._buildTaskModuleContinueResponse(
+                  controller.getErrorCard(errorStrings('leaderboard'))
+              );
+
+        return response;
+    };
+
+    private async _handleTeamsTaskModuleFetchAskQuestion(
+        context: TurnContext,
+        taskModuleRequest: TaskModuleRequest
+    ): Promise<TaskModuleResponse> {
         return this._buildTaskModuleContinueResponse(
             controller.getNewQuestionCard(taskModuleRequest.data.qnaSessionId),
             askQuestionStrings('taskModuleTitle')
         );
     }
+
+    private _handleTeamsTaskModuleFetchError(): TaskModuleResponse {
+        return this._buildTaskModuleContinueResponse(
+            controller.getErrorCard(errorStrings('taskFetch'))
+        );
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /*                         ANCHOR task/submit handlers                        */
+    /* -------------------------------------------------------------------------- */
 
     private async _handleTeamsTaskModuleSubmitQuestion(
         context,
@@ -185,7 +277,27 @@ export class AskAway extends TeamsActivityHandler {
         return null as any;
     }
 
+    private _handleTeamsTaskModuleSubmitUpvote = async (
+        context: TurnContext,
+        taskModuleRequest: TaskModuleRequest
+    ): Promise<TaskModuleResponse> => {
+        const updatedLeaderboard = await controller.addUpvote(
+            taskModuleRequest.data.questionId,
+            context.activity.from.aadObjectId as string,
+            context.activity.from.name
+        );
+
+        this._updateMainCard(taskModuleRequest.data.qnaSessionId, context);
+
+        return updatedLeaderboard.isOk()
+            ? this._buildTaskModuleContinueResponse(updatedLeaderboard.value)
+            : this._buildTaskModuleContinueResponse(
+                  controller.getErrorCard(errorStrings('upvoting'))
+              );
+    };
+
     private async _handleTeamsTaskModuleSubmitConfirmEndQnA(
+        context: TurnContext,
         taskModuleRequest: TaskModuleRequest
     ): Promise<TaskModuleResponse> {
         return this._buildTaskModuleContinueResponse(
@@ -203,7 +315,10 @@ export class AskAway extends TeamsActivityHandler {
         const qnaSessionId = taskModuleRequest.data.qnaSessionId;
 
         if (taskModuleRequest.data.id == 'submitEndQnA') {
-            const result = await controller.endQnASession(qnaSessionId);
+            const result = await controller.endQnASession(
+                qnaSessionId,
+                context.activity.from.aadObjectId as string
+            );
 
             if (result.isErr()) return this._handleTeamsTaskModuleSubmitError();
 
@@ -215,12 +330,6 @@ export class AskAway extends TeamsActivityHandler {
         }
 
         return null as any;
-    }
-
-    private _handleTeamsTaskModuleFetchError(): TaskModuleResponse {
-        return this._buildTaskModuleContinueResponse(
-            controller.getErrorCard(errorStrings('taskFetch'))
-        );
     }
 
     private _handleTeamsTaskModuleSubmitError(): TaskModuleResponse {
@@ -239,92 +348,9 @@ export class AskAway extends TeamsActivityHandler {
         );
     }
 
-    private _handleTeamsTaskModuleFetchViewLeaderboard = async (
-        context: TurnContext,
-        taskModuleRequest: TaskModuleRequest
-    ): Promise<TaskModuleResponse> => {
-        /*================================================================================================================================
-        A payload of the following format should be in the 'data' field of the 'View Leaderboard' Action.Submit button in the master card.
-        {
-            msteams: {
-                type: 'task/fetch',
-            },
-            id: 'viewLeaderboard',
-            qnaSessionId:
-                <put the qnaSessionId here>
-        }
-        ================================================================================================================================*/
-
-        const isHostAndActive = await this._isHostAndActive(
-            taskModuleRequest,
-            context
-        );
-
-        const isHost = isHostAndActive[0];
-        const isActiveQnA = isHostAndActive[1];
-
-        if (isHost.isOk() && isActiveQnA.isOk()) {
-            const leaderboard = await controller.generateLeaderboard(
-                taskModuleRequest.data.qnaSessionId,
-                context.activity.from.aadObjectId as string,
-                isHost.value,
-                isActiveQnA.value
-            );
-
-            const response: TaskModuleResponse = leaderboard.isOk()
-                ? this._buildTaskModuleContinueResponse(
-                      leaderboard.value,
-                      leaderboardStrings('taskModuleTitle')
-                  )
-                : this._buildTaskModuleContinueResponse(
-                      controller.getErrorCard(leaderboard.value.message),
-                      leaderboardStrings('taskModuleTitle')
-                  );
-
-            return response;
-        }
-
-        return this._buildTaskModuleContinueResponse(
-            controller.getErrorCard(errorStrings('leaderboard'))
-        );
-    };
-
-    private _handleTeamsTaskModuleSubmitUpvote = async (
-        context: TurnContext,
-        taskModuleRequest: TaskModuleRequest
-    ): Promise<TaskModuleResponse> => {
-        const isHostAndActive = await this._isHostAndActive(
-            taskModuleRequest,
-            context
-        );
-
-        const isHost = isHostAndActive[0];
-        const isActiveQnA = isHostAndActive[1];
-
-        if (isHost.isOk() && isActiveQnA.isOk()) {
-            const updatedLeaderboard = await controller.addUpvote(
-                taskModuleRequest.data.questionId,
-                context.activity.from.aadObjectId as string,
-                context.activity.from.name,
-                isHost.value,
-                isActiveQnA.value
-            );
-
-            this._updateMainCard(taskModuleRequest.data.qnaSessionId, context);
-
-            return updatedLeaderboard.isOk()
-                ? this._buildTaskModuleContinueResponse(
-                      updatedLeaderboard.value
-                  )
-                : this._buildTaskModuleContinueResponse(
-                      controller.getErrorCard(errorStrings('upvoting'))
-                  );
-        }
-
-        return this._buildTaskModuleContinueResponse(
-            controller.getErrorCard(errorStrings('upvoting'))
-        );
-    };
+    /* -------------------------------------------------------------------------- */
+    /*          ANCHOR Bot Framework messaging extension method overrides         */
+    /* -------------------------------------------------------------------------- */
 
     async handleTeamsMessagingExtensionFetchTask(): Promise<
         MessagingExtensionActionResponse
@@ -340,7 +366,7 @@ export class AskAway extends TeamsActivityHandler {
         context: TurnContext,
         action: MessagingExtensionAction
     ): Promise<MessagingExtensionActionResponse> {
-        const cardDataResponse = this._extractMainCardFromActivityPreveiw(
+        const cardDataResponse = this._extractMainCardFromActivityPreview(
             action
         );
         let cardData: Partial<MainCardData>;
@@ -365,7 +391,7 @@ export class AskAway extends TeamsActivityHandler {
         context: TurnContext,
         action: MessagingExtensionAction
     ): Promise<MessagingExtensionActionResponse> {
-        const cardDataResponse = this._extractMainCardFromActivityPreveiw(
+        const cardDataResponse = this._extractMainCardFromActivityPreview(
             action
         );
         let cardData: MainCardData | { title: string; description: string };
@@ -406,6 +432,7 @@ export class AskAway extends TeamsActivityHandler {
             userName,
             userAadObjId,
             activityId,
+            context.activity.conversation.id,
             tenantId,
             scopeId,
             isChannel
@@ -477,6 +504,10 @@ export class AskAway extends TeamsActivityHandler {
         };
     }
 
+    /* -------------------------------------------------------------------------- */
+    /*                         ANCHOR Other helper methods                        */
+    /* -------------------------------------------------------------------------- */
+
     /**
      * Handles proactively updating the master card with the top questions.
      * @param context - Current bot turn context.
@@ -544,7 +575,7 @@ export class AskAway extends TeamsActivityHandler {
         else map.func(_context, qnaSessionId);
     };
 
-    private _extractMainCardFromActivityPreveiw = (
+    private _extractMainCardFromActivityPreview = (
         action: MessagingExtensionAction
     ): Result<MainCardData, null> => {
         if (
@@ -554,20 +585,5 @@ export class AskAway extends TeamsActivityHandler {
             return err(null);
         const attachments = action.botActivityPreview[0].attachments;
         return extractMainCardData(attachments[0].content);
-    };
-
-    private _isHostAndActive = async (
-        taskModuleRequest: TaskModuleRequest,
-        context: TurnContext
-    ): Promise<Array<Result<any, Error>>> => {
-        const qnaSessionId = taskModuleRequest.data.qnaSessionId;
-        const userAadObjId = context.activity.from.aadObjectId as string;
-
-        const isHost = await controller.isHost(qnaSessionId, userAadObjId);
-        const isActiveQnA = await controller.isActiveQnA(
-            taskModuleRequest.data.qnaSessionId
-        );
-
-        return [isHost, isActiveQnA];
     };
 }

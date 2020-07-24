@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 // Middleman file to allow for communication between the bot, database, and adaptive card builder.
 import * as db from './Data/Database'; // For database calls
 import * as adaptiveCardBuilder from './AdaptiveCards/AdaptiveCardBuilder'; // To populate adaptive cards
@@ -52,6 +51,7 @@ export const startQnASession = async (
     userName: string,
     userAadObjId: string,
     activityId: string,
+    conversationId: string,
     tenantId: string,
     scopeId: string,
     isChannel: boolean
@@ -64,6 +64,7 @@ export const startQnASession = async (
             userName,
             userAadObjId,
             activityId,
+            conversationId,
             tenantId,
             scopeId,
             isChannel
@@ -90,20 +91,18 @@ export const startQnASession = async (
  * Returns the populated leaderboard adaptive card for the QnA session attached to the id provided.
  * @param qnaSessionId - ID of the QnA session for which the leaderboard shouold be retrieived.
  * @param aadObjectId - aadObjectId of the user who is trying view the leaderboard. This is to used to control certain factors such as not letting the user upvote their own questions.
- * @param isHost - boolean value indicating if user is the host of this current QnA session
- * @param isActiveQnA - boolean value indicating if current QnA session is active
  * @returns - A promise containing a result object which, on success, contains the populated leaderboard adaptive card, and on failure, contains an error card.
  */
 export const generateLeaderboard = async (
     qnaSessionId: string,
-    aadObjectId: string,
-    isHost?: boolean,
-    isActiveQnA?: boolean
+    aadObjectId: string
 ): Promise<Result<AdaptiveCard, Error>> => {
     try {
         const questionData: IQuestionPopulatedUser[] = await db.getQuestionData(
             qnaSessionId
         );
+        const isHost = await db.isHost(qnaSessionId, aadObjectId);
+        const isActiveQnA = await db.isActiveQnA(qnaSessionId);
         return ok(
             adaptiveCardBuilder.generateLeaderboard(
                 questionData,
@@ -212,15 +211,11 @@ export const getUpdatedMainCard = async (
  * @param questionId - DBID of the question being upvoted
  * @param aadObjectId - aadObjectId of the user upvoting the question
  * @param name - Name of the user upvoting the question
- * @param isHost - boolean value indicating if user is the host of this current QnA session
- * @param isActiveQnA - boolean value indicating if current QnA session is active
  */
 export const addUpvote = async (
     questionId: string,
     aadObjectId: string,
-    name: string,
-    isHost?: boolean,
-    isActiveQnA?: boolean
+    name: string
 ): Promise<Result<AdaptiveCard, Error>> => {
     try {
         const question: IQuestion = await db.addUpvote(
@@ -228,12 +223,7 @@ export const addUpvote = async (
             aadObjectId,
             name
         );
-        return generateLeaderboard(
-            question.qnaSessionId,
-            aadObjectId,
-            isHost,
-            isActiveQnA
-        );
+        return generateLeaderboard(question.qnaSessionId, aadObjectId);
     } catch (error) {
         aiClient.trackException({ exception: error });
         return err(Error('Failed to upvote question.'));
@@ -254,12 +244,20 @@ export const getEndQnAConfirmationCard = (
 /**
  * Communicates with database to end the QnA and retrieves details
  * @param qnaSessionId - id of the current QnA session
+ * @param aadObjectId - aadObjectId of the user attempting to end the QnA session
  * @returns Ok object with updated Master Card
  */
 export const endQnASession = async (
-    qnaSessionId: string
+    qnaSessionId: string,
+    aadObjectId: string
 ): Promise<Result<{ card: AdaptiveCard; activityId: string }, Error>> => {
     try {
+        const isActive = await db.isActiveQnA(qnaSessionId);
+        const isHost = await db.isHost(qnaSessionId, aadObjectId);
+
+        if (!isActive) return err(Error('The QnA session has already ended'));
+        if (!isHost)
+            return err(Error('Insufficient permissions to end QnA session'));
         await db.endQnASession(qnaSessionId);
 
         const updatedMainCard = await getUpdatedMainCard(qnaSessionId, true);
@@ -333,6 +331,30 @@ export const generateInitialsImage = async (
         128,
         128
     );
+};
+
+/**
+ * Function to validate that the request coming from a client is from the same conversation as the QnA session the request is pertaining to.
+ * @param qnaSessionId - qnaSessionId of the QnA session that the request pertains to
+ * @param conversationId - conversationId of the conversation the incoming request is coming from
+ * @returns - boolean indicating whether the request is coming from the same conversation as the QnA session the request is pertaining to.
+ */
+export const validateConversationId = async (
+    qnaSessionId: string,
+    conversationId: string
+): Promise<Result<boolean, Error>> => {
+    try {
+        const qnaSessionData = await db.getQnASessionData(qnaSessionId);
+        return ok(
+            qnaSessionData.conversationId.split(';')[0] ===
+                conversationId.split(';')[0]
+        );
+    } catch (error) {
+        aiClient.trackException({ exception: error });
+        return err(
+            new Error('Unable to validate conversationId of incoming request')
+        );
+    }
 };
 
 /**

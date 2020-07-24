@@ -42,7 +42,8 @@
         "missingFields": "Fields cannot be empty",
         "taskFetch": "Something went wrong. Please try opening again.",
         "taskSubmit": "Your submission encountered an error. Please try submitting again!",
-        "leaderboard": "Could not retrieve leaderboard. Please try again"
+        "leaderboard": "Could not retrieve leaderboard. Please try again",
+        "conversationInvalid": "Requests pertaining to a QnA must be made in the same conversation the QnA is in."
     },
     "generic": {
         "submit": "Submit",
