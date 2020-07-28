@@ -1,6 +1,6 @@
 import i18next from 'i18next';
 import * as enStrings from 'src/localization/en.json';
-import * as appInsights from 'applicationinsights';
+import { exceptionLogger } from 'src/util/ExceptionTracking';
 
 export interface Strings {
     mainCard: MainCard;
@@ -97,8 +97,7 @@ export const initLocalization = async (
             // eslint-disable-next-line @typescript-eslint/tslint/config
             fallbackLanguageStrings = require(`./${process.env.FallbackLanguage}.json`);
     } catch (error) {
-        if (!testing)
-            appInsights.defaultClient.trackException({ exception: error });
+        if (!testing) exceptionLogger(error);
     }
 
     const resources = {
