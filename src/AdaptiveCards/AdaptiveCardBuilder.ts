@@ -3,7 +3,7 @@
 import { AdaptiveCard, IAdaptiveCard } from 'adaptivecards';
 import * as ACData from 'adaptivecards-templating';
 import moment from 'moment';
-import * as random from 'random';
+import random from 'random';
 import seedrandom from 'seedrandom';
 import * as jwt from 'jsonwebtoken';
 
@@ -55,7 +55,7 @@ export const getMainCard = async (
     const _processQuestions = (questions: IQuestionPopulatedUser[]) =>
         questions.map((question: IQuestionPopulatedUser) => {
             const questionObject = question.toObject();
-            questionObject.userId.picture = _getPersonImage(
+            questionObject.userId.picture = getPersonImage(
                 questionObject.userId.userName,
                 question.userId._id
             );
@@ -144,26 +144,35 @@ export const getErrorCard = (errorMessage: string): AdaptiveCard => {
  * @param qnaSessionId - Database document id of the QnA session.
  * @param isHost - boolean value indicating if user is the host of this current QnA session
  * @param isActiveQnA - boolean value indicating if current QnA session is active
+ * @param theme - Teams theme the user opening the leaderboard is using. Options are: 'default', 'dark', and 'high-contrast'
  * @returns - Adaptive Card for the leaderboard populated with the questions provided.
  */
 export const generateLeaderboard = (
     questionData: IQuestionPopulatedUser[],
     aadObjectId: string,
     qnaSessionId: string,
-    isHost?: boolean,
-    isActiveQnA?: boolean
+    isHost: boolean,
+    isActiveQnA: boolean,
+    theme: string
 ): AdaptiveCard => {
     if (!questionData.length)
         return generateEmptyLeaderboard(qnaSessionId, isHost, isActiveQnA);
 
     const leaderboardTemplate = Leaderboard();
 
+    questionData = questionData
+        .sort(
+            (a: IQuestionPopulatedUser, b: IQuestionPopulatedUser) =>
+                a.voters.length - b.voters.length
+        )
+        .reverse();
+
     questionData = questionData.map((question) => {
         const questionObject = question.toObject();
         questionObject.upvotes = questionObject.voters.length;
         questionObject.upvotable = aadObjectId !== questionObject.userId._id;
         questionObject.upvoted = questionObject.voters.includes(aadObjectId);
-        questionObject.userId.picture = _getPersonImage(
+        questionObject.userId.picture = getPersonImage(
             questionObject.userId.userName,
             question.userId._id
         );
@@ -184,6 +193,10 @@ export const generateLeaderboard = (
             qnaId: qnaSessionId,
             isUserHost: isHost,
             isActive: isActiveQnA,
+            upvoteArrow:
+                theme === 'default'
+                    ? `https://${process.env.HostName}/images/upvote_arrow_default.png`
+                    : `https://${process.env.HostName}/images/upvote_arrow_dark_or_high_contrast.png`,
         },
     };
 
@@ -282,8 +295,13 @@ export const getResubmitQuestionErrorCard = (
     return _adaptiveCard(template);
 };
 
-const _getPersonImage = (name: string, aadObjectId: string): string => {
-    if (!name) return '';
+/**
+ * Returns the url for the initlas avatar of the user provided.
+ * @param name - Name of the user who's initials avatar url is being retrieved
+ * @param aadObjectId - aadObjectId of user who's initials avatar url is being retrieved
+ */
+export const getPersonImage = (name: string, aadObjectId: string): string => {
+    if (!name) return `https://${process.env.HostName}/images/anon_avatar.png`;
 
     let initials = '';
     let space = true;

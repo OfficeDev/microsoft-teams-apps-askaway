@@ -5,7 +5,7 @@ import {
     getQuestionData,
     createQuestion,
     getUserOrCreate,
-    addUpvote,
+    updateUpvote,
     endQnASession,
     createQnASession,
     updateActivityId,
@@ -348,7 +348,7 @@ test('upvote question that has not been upvoted yet with existing user', async (
 
     await newQuestion.save();
 
-    const questionUpvoted = await addUpvote(
+    const questionUpvoted = await updateUpvote(
         newQuestion._id,
         testUserUpvoting._id,
         testUserUpvoting.userName
@@ -370,7 +370,7 @@ test('upvote question that has already been upvoted with existing user', async (
 
     await newQuestion.save();
 
-    let questionUpvoted = await addUpvote(
+    let questionUpvoted = await updateUpvote(
         newQuestion._id,
         testUserUpvoting._id,
         testUserUpvoting.userName
@@ -378,19 +378,19 @@ test('upvote question that has already been upvoted with existing user', async (
 
     expect(questionUpvoted.voters).toContain(testUserUpvoting._id);
 
-    questionUpvoted = await addUpvote(
+    questionUpvoted = await updateUpvote(
         newQuestion._id,
         testUserUpvoting._id,
         testUserUpvoting.userName
     );
 
-    expect(questionUpvoted.voters).toContain(testUserUpvoting._id);
+    expect(questionUpvoted.voters).not.toContain(testUserUpvoting._id);
 
     expect(
         questionUpvoted.voters.filter(
             (userId) => userId === testUserUpvoting._id
         ).length
-    ).toEqual(1);
+    ).toEqual(0);
 
     await Question.remove(questionUpvoted);
     await User.remove(testUserUpvoting);
@@ -406,7 +406,7 @@ test('upvote question with new user not in database', async () => {
 
     await newQuestion.save();
 
-    const questionUpvoted = await addUpvote(
+    const questionUpvoted = await updateUpvote(
         newQuestion._id,
         '134679',
         'New User Junior'

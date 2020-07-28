@@ -7,7 +7,7 @@ import {
     getNewQuestionCard,
     submitNewQuestion,
     getUpdatedMainCard,
-    addUpvote,
+    updateUpvote,
     getErrorCard,
     endQnASession,
     getResubmitQuestionCard,
@@ -126,7 +126,11 @@ test('start qna session in group chat', async () => {
 });
 
 test('generate leaderboard', async () => {
-    await generateLeaderboard(sampleQnASessionID, sampleUserAADObjId1);
+    await generateLeaderboard(
+        sampleQnASessionID,
+        sampleUserAADObjId1,
+        'default'
+    );
     expect(db.getQuestionData).toBeCalledTimes(1);
     expect(db.getQuestionData).toBeCalledWith(sampleQnASessionID);
     expect(db.isHost).toBeCalledTimes(1);
@@ -176,9 +180,14 @@ test('get updated main card', async () => {
 });
 
 test('add upvote', async () => {
-    await addUpvote(sampleQuestionId, sampleUserAADObjId1, sampleUserName);
-    expect(db.addUpvote).toBeCalledTimes(1);
-    expect(db.addUpvote).toBeCalledWith(
+    await updateUpvote(
+        sampleQuestionId,
+        sampleUserAADObjId1,
+        sampleUserName,
+        'default'
+    );
+    expect(db.updateUpvote).toBeCalledTimes(1);
+    expect(db.updateUpvote).toBeCalledWith(
         sampleQuestionId,
         sampleUserAADObjId1,
         sampleUserName

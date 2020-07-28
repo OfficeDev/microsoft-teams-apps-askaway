@@ -14,7 +14,7 @@
     },
     "leaderboard": {
         "taskModuleTitle": "taskModuleTitle",
-        "myQuestions": "myQuestions",
+        "yourQuestions": "yourQuestions",
         "allQuestions": "allQuestions",
         "noQuestions": "noQuestions"
     },
