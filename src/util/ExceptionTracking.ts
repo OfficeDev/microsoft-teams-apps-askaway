@@ -1,4 +1,4 @@
-import appInsights from 'applicationinsights';
+import * as appInsights from 'applicationinsights';
 
 export let aiClient;
 
