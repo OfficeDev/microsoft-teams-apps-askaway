@@ -17,7 +17,7 @@ import { clone, debounce, delay } from 'lodash';
 import * as controller from 'src/Controller';
 import { AdaptiveCard } from 'adaptivecards';
 import { extractMainCardData, MainCardData } from 'src/AdaptiveCards/MainCard';
-import { Result, err } from 'src/util/ResultWrapper';
+import { Result, err, ok } from 'src/util/ResultWrapper';
 import {
     endQnAStrings,
     askQuestionStrings,
@@ -95,20 +95,19 @@ export class AskAway extends TeamsActivityHandler {
         // This is to prevent spoofing of data from users who don't belong to a conversation that a particular QnA is taking place in.
         // If you wish to add different task/fetch handlers which do not interact with an existing QnA session, do so and return before the
         // following if statement.
-        const conversationIdValid = await controller.validateConversationId(
-            taskModuleRequest.data.qnaSessionId,
-            context.activity.conversation.id
-        );
-
-        if (conversationIdValid.isOk()) {
-            if (!conversationIdValid.value)
-                return this._buildTaskModuleContinueResponse(
-                    controller.getErrorCard(errorStrings('conversationInvalid'))
+        try {
+            if (process.env.debugMode !== 'true') {
+                const result = await this._checkConversationValid(
+                    taskModuleRequest.data.qnaSessionId,
+                    context.activity.conversation.id
                 );
-        } else {
-            return this._buildTaskModuleContinueResponse(
-                controller.getErrorCard(errorStrings('taskSubmit'))
+                if (result.isErr()) return result.value;
+            }
+        } catch (error) {
+            exceptionLogger(
+                new Error(`Check Conversation Validation Failed: ${error}`)
             );
+            return this.handleTeamsTaskModuleFetchError();
         }
 
         if (taskModuleRequest.data.id === 'viewLeaderboard')
@@ -135,20 +134,21 @@ export class AskAway extends TeamsActivityHandler {
         // This is to prevent spoofing of data from users who don't belong to a conversation that a particular QnA is taking place in.
         // If you wish to add different task/submit handlers which do not interact with an existing QnA session, do so and return before the
         // following if statement.
-        const conversationIdValid = await controller.validateConversationId(
-            taskModuleRequest.data.qnaSessionId,
-            context.activity.conversation.id
-        );
-
-        if (conversationIdValid.isOk()) {
-            if (!conversationIdValid.value)
-                return this._buildTaskModuleContinueResponse(
-                    controller.getErrorCard(errorStrings('conversationInvalid'))
+        try {
+            if (process.env.debugMode !== 'true') {
+                const result = await this._checkConversationValid(
+                    taskModuleRequest.data.qnaSessionId,
+                    context.activity.conversation.id
                 );
-        } else {
-            return this._buildTaskModuleContinueResponse(
-                controller.getErrorCard(errorStrings('taskSubmit'))
+                if (result.isErr()) {
+                    return result.value;
+                }
+            }
+        } catch (error) {
+            exceptionLogger(
+                new Error(`Check Conversation Validation Failed: ${error}`)
             );
+            return this.handleTeamsTaskModuleFetchError();
         }
 
         const user = context.activity.from;
@@ -269,13 +269,13 @@ export class AskAway extends TeamsActivityHandler {
             questionContent
         );
 
-        this._updateMainCard(taskModuleRequest.data.qnaSessionId, context);
-
         if (!status.isOk())
             return this.handleTeamsTaskModuleResubmitQuestion(
                 qnaSessionId,
                 questionContent
             );
+
+        this._updateMainCard(taskModuleRequest.data.qnaSessionId, context);
 
         return NULL_RESPONSE;
     }
@@ -614,5 +614,35 @@ export class AskAway extends TeamsActivityHandler {
             return err(null);
         const attachments = action.botActivityPreview[0].attachments;
         return extractMainCardData(attachments[0].content);
+    };
+
+    private _checkConversationValid = async (
+        qnaSessionId: string,
+        conversationId: string
+    ): Promise<Result<boolean, TaskModuleResponse>> => {
+        const conversationIdValid = await controller.validateConversationId(
+            qnaSessionId,
+            conversationId
+        );
+
+        if (conversationIdValid.isOk()) {
+            if (!conversationIdValid.value)
+                return err(
+                    this._buildTaskModuleContinueResponse(
+                        controller.getErrorCard(
+                            errorStrings('conversationInvalid')
+                        )
+                    )
+                );
+        } else {
+            return err(
+                this._buildTaskModuleContinueResponse(
+                    controller.getErrorCard(errorStrings('taskSubmit'))
+                )
+            );
+        }
+
+        // conversation id valid
+        return ok(true);
     };
 }

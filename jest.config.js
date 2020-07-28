@@ -2,6 +2,8 @@ const { pathsToModuleNameMapper } = require('ts-jest/utils');
 const tsconfig = require('./tsconfig.json');
 const path = require('path');
 
+process.env.debugMode = 'true';
+
 module.exports = {
     "preset": "ts-jest",
     "globalSetup": "./node_modules/@shelf/jest-mongodb/setup.js",

@@ -7,6 +7,7 @@ import {
     getErrorCard,
     getStartQnACard,
     generateLeaderboard,
+    getMainCard,
     getPersonImage,
 } from 'src/AdaptiveCards/AdaptiveCardBuilder';
 import {
@@ -17,9 +18,12 @@ import {
     endQnAStrings,
     startQnAStrings,
     genericStrings,
+    mainCardStrings,
 } from 'src/localization/locale';
 import { IAdaptiveCard } from 'adaptivecards/lib/schema';
 import { IQuestionPopulatedUser } from 'src/Data/Schemas/Question';
+import { IUser } from 'src/Data/Schemas/User';
+import { extractMainCardData } from 'src/AdaptiveCards/MainCard';
 import random from 'random';
 import seedrandom from 'seedrandom';
 import * as jwt from 'jsonwebtoken';
@@ -430,6 +434,554 @@ describe('empty leaderboard tests', () => {
             ],
         };
         expect(result).toEqual(_adaptiveCard(expected));
+    });
+});
+
+describe('main card', () => {
+    beforeAll(async () => {
+        await initLocalization();
+    });
+
+    const sampleTitle = 'title';
+    const sampleDescription = 'desc';
+    const sampleUserName = 'username';
+    const sampleSessionId = 'sessionid';
+    const sampleUserAADObjId = 'useraadobjid';
+
+    test('get title and description', async () => {
+        const result: any = getMainCard(
+            sampleTitle,
+            sampleDescription,
+            sampleUserName,
+            sampleSessionId,
+            sampleUserAADObjId
+        );
+        const expected = [
+            {
+                type: 'Container',
+                backgroundImage: `https://${undefined}/images/title_bg.png`, // process.env.HostName won't be set
+                bleed: true,
+                items: [
+                    {
+                        type: 'TextBlock',
+                        text: sampleTitle,
+                        wrap: true,
+                        weight: 'bolder',
+                        size: 'large',
+                        color: 'light',
+                        horizontalAlignment: 'left',
+                    },
+                ],
+                wrap: true,
+            },
+            {
+                type: 'TextBlock',
+                text: sampleDescription,
+                wrap: true,
+                size: 'medium',
+            },
+        ];
+
+        const _result = [result.body[0], result.body[1]];
+        expect(_result).toEqual(expected);
+        return;
+    });
+
+    test('date update shows', async () => {
+        const result: any = getMainCard(
+            sampleTitle,
+            sampleDescription,
+            sampleUserName,
+            sampleSessionId,
+            sampleUserAADObjId,
+            undefined,
+            undefined,
+            undefined,
+            true
+        );
+
+        // const expected = {
+        //     type: 'TextBlock',
+        //     text: `${mainCardStrings('updated')} \${dateLastUpdated}`,
+        //     wrap: true,
+        //     size: 'Small',
+        //     isSubtle: true,
+        //     $when: '${count($root.dateLastUpdated) > 0}',
+        // };
+
+        const _result = result.body[2];
+        expect(_result.text.includes(mainCardStrings('updated'))).toBe(true);
+        expect(_result.text.includes('GMT')).toBe(true);
+        expect(_result.$when).toBe(true);
+        return;
+    });
+
+    test('get top question container empty', async () => {
+        const result: any = getMainCard(
+            sampleTitle,
+            sampleDescription,
+            sampleUserName,
+            sampleSessionId,
+            sampleUserAADObjId
+        );
+        const expected = {
+            type: 'Container',
+            spacing: 'Large',
+            items: [
+                {
+                    type: 'ColumnSet',
+                    columns: [
+                        {
+                            type: 'Column',
+                            width: 'stretch',
+                            items: [
+                                {
+                                    type: 'TextBlock',
+                                    text: mainCardStrings('topQuestions'),
+                                    wrap: true,
+                                    size: 'Medium',
+                                    weight: 'Bolder',
+                                },
+                            ],
+                        },
+                        {
+                            type: 'Column',
+                            width: 'auto',
+                            items: [
+                                {
+                                    type: 'TextBlock',
+                                    text: mainCardStrings('upvotes'),
+                                    wrap: true,
+                                    weight: 'Lighter',
+                                },
+                            ],
+                        },
+                    ],
+                },
+                {
+                    type: 'TextBlock',
+                    text: mainCardStrings('noQuestions'),
+                    color: 'accent',
+                    $when: true,
+                },
+            ],
+            wrap: true,
+        };
+
+        const _result = result.body[2];
+        expect(_result).toEqual(expected);
+        return;
+    });
+
+    test('get top question container poulated', async () => {
+        const sampleContent = 'randomQuestion';
+        const topQuestionsData: IQuestionPopulatedUser[] = [
+            <IQuestionPopulatedUser>{
+                qnaSessionId: 'sessionId',
+                userId: <IUser>{ _id: 'userId', userName: sampleUserName },
+                voters: ['userId1', 'userId2'],
+                content: sampleContent,
+                dateTimeCreated: new Date(),
+            },
+        ];
+
+        const result: any = getMainCard(
+            sampleTitle,
+            sampleDescription,
+            sampleUserName,
+            sampleSessionId,
+            sampleUserAADObjId,
+            undefined,
+            topQuestionsData
+        );
+
+        const resultMainCardEnded: any = getMainCard(
+            sampleTitle,
+            sampleDescription,
+            sampleUserName,
+            sampleSessionId,
+            sampleUserAADObjId,
+            true,
+            topQuestionsData
+        );
+
+        const expected = [
+            {
+                type: 'Column',
+                width: 'auto',
+                items: [
+                    {
+                        type: 'Image',
+                        style: 'Person',
+                        size: 'Small',
+                        url: '${userId.picture}',
+                    },
+                ],
+            },
+            {
+                type: 'Column',
+                width: 'stretch',
+                items: [
+                    {
+                        type: 'TextBlock',
+                        text: sampleUserName,
+                        weight: 'Bolder',
+                    },
+                    {
+                        type: 'TextBlock',
+                        text: sampleContent,
+                        spacing: 'None',
+                        wrap: true,
+                        maxLines: 3,
+                    },
+                ],
+            },
+            {
+                type: 'Column',
+                width: '30px',
+                spacing: 'extraLarge',
+                items: [
+                    {
+                        type: 'TextBlock',
+                        text: '2',
+                    },
+                ],
+                verticalContentAlignment: 'Center',
+            },
+        ];
+
+        const _result = result.body[2].items[1].items[0].columns;
+        expect(_result[1].items).toEqual(expected[1].items);
+        expect(_result[2].items).toEqual(expected[2].items);
+        expect(_result[0].items[0].url).toBeTruthy();
+
+        const _resultMainCardEnded =
+            resultMainCardEnded.body[2].items[1].items[0].columns;
+        expect(_resultMainCardEnded[1].items).toEqual(expected[1].items);
+        expect(_resultMainCardEnded[2].items).toEqual(expected[2].items);
+        expect(_resultMainCardEnded[0].items[0].url).toBeTruthy();
+        return;
+    });
+
+    test('get recent question container empty', async () => {
+        const result: any = getMainCard(
+            sampleTitle,
+            sampleDescription,
+            sampleUserName,
+            sampleSessionId,
+            sampleUserAADObjId
+        );
+        const expected = {
+            type: 'ActionSet',
+            separator: true,
+            spacing: 'Large',
+            horizontalAlignment: 'Center',
+            actions: [
+                {
+                    type: 'Action.ShowCard',
+                    title: mainCardStrings('showRecentQuestions'),
+                    card: {
+                        $schema:
+                            'https://adaptivecards.io/schemas/adaptive-card.json',
+                        type: 'AdaptiveCard',
+                        version: '1.2',
+                        body: [
+                            {
+                                type: 'Container',
+                                spacing: 'Large',
+                                id: 'recentQuestions',
+                                items: [
+                                    {
+                                        type: 'ColumnSet',
+                                        columns: [
+                                            {
+                                                type: 'Column',
+                                                width: 'stretch',
+                                                items: [
+                                                    {
+                                                        type: 'TextBlock',
+                                                        text: mainCardStrings(
+                                                            'recentQuestions'
+                                                        ),
+                                                        wrap: true,
+                                                        weight: 'Bolder',
+                                                        size: 'Medium',
+                                                    },
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                    {
+                                        type: 'TextBlock',
+                                        text: mainCardStrings('noQuestions'),
+                                        color: 'accent',
+                                        $when: true,
+                                    },
+                                ],
+                                wrap: true,
+                            },
+                        ],
+                    },
+                },
+            ],
+        };
+
+        const _result = result.body[3];
+        expect(_result).toEqual(expected);
+        return;
+    });
+
+    test('get recent question container poulated', async () => {
+        const sampleContent = 'randomQuestion';
+        const recentQuestionsData: IQuestionPopulatedUser[] = [
+            <IQuestionPopulatedUser>{
+                qnaSessionId: 'sessionId',
+                userId: <IUser>{ _id: 'userId', userName: sampleUserName },
+                voters: <string[]>[],
+                content: sampleContent,
+                dateTimeCreated: new Date(),
+            },
+        ];
+
+        const result: any = getMainCard(
+            sampleTitle,
+            sampleDescription,
+            sampleUserName,
+            sampleSessionId,
+            sampleUserAADObjId,
+            undefined,
+            undefined,
+            recentQuestionsData
+        );
+
+        const resultMainCardEnded: any = getMainCard(
+            sampleTitle,
+            sampleDescription,
+            sampleUserName,
+            sampleSessionId,
+            sampleUserAADObjId,
+            true,
+            undefined,
+            recentQuestionsData
+        );
+
+        const expected = [
+            {
+                type: 'Column',
+                width: 'auto',
+                items: [
+                    {
+                        type: 'Image',
+                        style: 'Person',
+                        size: 'Small',
+                        url: '${userId.picture}',
+                    },
+                ],
+            },
+            {
+                type: 'Column',
+                width: 'stretch',
+                items: [
+                    {
+                        type: 'TextBlock',
+                        text: sampleUserName,
+                        weight: 'Bolder',
+                    },
+                    {
+                        type: 'TextBlock',
+                        text: sampleContent,
+                        spacing: 'None',
+                        wrap: true,
+                        maxLines: 3,
+                    },
+                ],
+            },
+            {
+                type: 'Column',
+                width: '30px',
+                spacing: 'extraLarge',
+                items: [
+                    {
+                        type: 'TextBlock',
+                        text: '0',
+                    },
+                ],
+                verticalContentAlignment: 'Center',
+            },
+        ];
+
+        const _result =
+            result.body[3].actions[0].card.body[0].items[1].items[0].columns;
+        expect(_result[1].items).toEqual(expected[1].items);
+        expect(_result[2].items).toEqual(expected[2].items);
+        expect(_result[0].items[0].url).toBeTruthy();
+
+        const _resultMainCardEnded =
+            resultMainCardEnded.body[3].actions[0].card.body[0].items[1]
+                .items[0].columns;
+
+        expect(_resultMainCardEnded[1].items).toEqual(expected[1].items);
+        expect(_resultMainCardEnded[2].items).toEqual(expected[2].items);
+        expect(_resultMainCardEnded[0].items[0].url).toBeTruthy();
+        return;
+    });
+
+    test('initiated by user', async () => {
+        const result: any = getMainCard(
+            sampleTitle,
+            sampleDescription,
+            sampleUserName,
+            sampleSessionId,
+            sampleUserAADObjId
+        );
+        const expected = {
+            type: 'TextBlock',
+            text: `${mainCardStrings('initiatedBy')} ${sampleUserName}`,
+            wrap: true,
+            spacing: 'Large',
+        };
+
+        const _result = result.body[4];
+        expect(_result).toEqual(expected);
+        return;
+    });
+
+    test('ended by user', async () => {
+        const result: any = getMainCard(
+            sampleTitle,
+            sampleDescription,
+            sampleUserName,
+            sampleSessionId,
+            sampleUserAADObjId,
+            true
+        );
+        const expected = {
+            type: 'TextBlock',
+            text: `${mainCardStrings(
+                'endedBy'
+            )} ${sampleUserName}. ${mainCardStrings('noMoreQuestions')}`,
+            wrap: true,
+            spacing: 'Large',
+        };
+
+        const _result = result.body[4];
+        expect(_result).toEqual(expected);
+        return;
+    });
+
+    test('data store', async () => {
+        const result: any = getMainCard(
+            sampleTitle,
+            sampleDescription,
+            sampleUserName,
+            sampleSessionId,
+            sampleUserAADObjId,
+            true
+        );
+        const expected = {
+            entities: [
+                {
+                    data: {
+                        title: sampleTitle,
+                        description: sampleDescription,
+                        userName: sampleUserName,
+                        qnaSessionId: sampleSessionId,
+                        aadObjectId: sampleUserAADObjId,
+                        ended: true,
+                    },
+                },
+            ],
+        };
+
+        const _result = result.msTeams;
+        expect(_result).toEqual(expected);
+        return;
+    });
+
+    test('action set', async () => {
+        const result: any = getMainCard(
+            sampleTitle,
+            sampleDescription,
+            sampleUserName,
+            sampleSessionId,
+            sampleUserAADObjId
+        );
+        const expected = [
+            {
+                id: 'askQuestion',
+                type: 'Action.Submit',
+                title: mainCardStrings('askQuestion'),
+                data: {
+                    msteams: {
+                        type: 'task/fetch',
+                    },
+                    id: 'askQuestion',
+                    qnaSessionId: sampleSessionId,
+                },
+            },
+            {
+                id: 'viewLeaderboard',
+                type: 'Action.Submit',
+                title: mainCardStrings('upvoteQuestions'),
+                data: {
+                    msteams: {
+                        type: 'task/fetch',
+                    },
+                    id: 'viewLeaderboard',
+                    qnaSessionId: sampleSessionId,
+                    aadObjectId: sampleUserAADObjId,
+                },
+            },
+        ];
+
+        const _result = result.actions;
+        expect(_result).toEqual(expected);
+        return;
+    });
+
+    test('ended action set', async () => {
+        const result: any = getMainCard(
+            sampleTitle,
+            sampleDescription,
+            sampleUserName,
+            sampleSessionId,
+            sampleUserAADObjId,
+            true
+        );
+        const expected = [
+            {
+                id: 'viewLeaderboard',
+                type: 'Action.Submit',
+                title: mainCardStrings('upvoteQuestions'),
+                data: {
+                    msteams: {
+                        type: 'task/fetch',
+                    },
+                    id: 'viewLeaderboard',
+                    qnaSessionId: sampleSessionId,
+                    aadObjectId: sampleUserAADObjId,
+                },
+            },
+        ];
+
+        const _result = result.actions;
+        expect(_result).toEqual(expected);
+        return;
+    });
+
+    test('extract maincard data', () => {
+        const result: any = getMainCard(
+            sampleTitle,
+            sampleDescription,
+            sampleUserName,
+            sampleSessionId,
+            sampleUserAADObjId,
+            true
+        );
+        const mainCardData = extractMainCardData(result);
+
+        expect(mainCardData.isOk()).toBe(true);
+        expect(mainCardData.value).toEqual(result.msTeams.entities[0].data);
     });
 });
 

@@ -74,6 +74,10 @@ test('get error card', async () => {
 });
 
 test('start qna session in channel', async () => {
+    (<any>db.createQnASession).mockImplementationOnce(() => ({
+        qnaSessionId: sampleQnASessionID,
+        hostId: sampleUserAADObjId1,
+    }));
     await startQnASession(
         sampleTitle,
         sampleDescription,
@@ -100,6 +104,10 @@ test('start qna session in channel', async () => {
 });
 
 test('start qna session in group chat', async () => {
+    (<any>db.createQnASession).mockImplementationOnce(() => ({
+        qnaSessionId: sampleQnASessionID,
+        hostId: sampleUserAADObjId1,
+    }));
     await startQnASession(
         sampleTitle,
         sampleDescription,
@@ -172,6 +180,19 @@ test('submit new question', async () => {
 });
 
 test('get updated main card', async () => {
+    (<any>db.getQnASessionData).mockImplementationOnce(() => ({
+        // arbitrary
+        title: [],
+        description: [],
+        userName: 1,
+        userAADObject: null,
+    }));
+    (<any>db.getQuestions).mockImplementationOnce(() => ({
+        // arbitrary
+        topQuestions: [],
+        recentQuestions: [],
+        numQuestions: 1,
+    }));
     await getUpdatedMainCard(sampleQnASessionID, false);
     expect(db.getQnASessionData).toBeCalledTimes(1);
     expect(db.getQnASessionData).toBeCalledWith(sampleQnASessionID);
@@ -180,6 +201,9 @@ test('get updated main card', async () => {
 });
 
 test('add upvote', async () => {
+    (<any>db.updateUpvote).mockImplementationOnce(() => ({
+        qnaSessionId: sampleQnASessionID,
+    }));
     await updateUpvote(
         sampleQuestionId,
         sampleUserAADObjId1,
@@ -224,6 +248,10 @@ test('is host', async () => {
 });
 
 test('validate conversation id', async () => {
+    (<any>db.getQnASessionData).mockImplementationOnce(() => ({
+        // arbitrary
+        conversationId: 'string',
+    }));
     validateConversationId(sampleQnASessionID, sampleConversationId);
     expect(db.getQnASessionData).toBeCalledTimes(1);
     expect(db.getQnASessionData).toBeCalledWith(sampleQnASessionID);
