@@ -45,7 +45,7 @@ export interface Generic {
 
 export interface Leaderboard {
     taskModuleTitle: string;
-    myQuestions: string;
+    yourQuestions: string;
     allQuestions: string;
     noQuestions: string;
 }

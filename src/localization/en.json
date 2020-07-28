@@ -14,7 +14,7 @@
     },
     "leaderboard": {
         "taskModuleTitle": "View questions and upvote",
-        "myQuestions": "My questions",
+        "yourQuestions": "Your questions",
         "allQuestions": "All questions",
         "noQuestions": "There are no questions to show."
     },

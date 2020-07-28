@@ -28,7 +28,7 @@ export const Leaderboard = () =>
         body: [
             {
                 type: 'TextBlock',
-                text: leaderboardStrings('myQuestions'),
+                text: leaderboardStrings('yourQuestions'),
                 weight: 'bolder',
                 $when: '${$root.userHasQuestions}',
             },
@@ -179,28 +179,38 @@ const allQuestions = {
                                     type: 'Container',
                                     items: [
                                         {
-                                            type: 'TextBlock',
-                                            text: '⭡',
-                                            size: 'Large',
+                                            type: 'Image',
+                                            url: '${$root.upvoteArrow}',
+                                            width: '12px',
+                                            selectAction: {
+                                                type: 'Action.Submit',
+                                                id: 'upvote',
+                                                data: {
+                                                    id: 'upvote',
+                                                    questionId: '${_id}',
+                                                    qnaSessionId:
+                                                        '${qnaSessionId}',
+                                                },
+                                            },
                                             $when: '${!upvoted}',
                                         },
                                         {
-                                            type: 'TextBlock',
-                                            text: '⭡',
-                                            size: 'Large',
-                                            color: 'Accent',
+                                            type: 'Image',
+                                            url: `https://${process.env.HostName}/images/upvote_arrow_purple.png`,
+                                            width: '12px',
+                                            selectAction: {
+                                                type: 'Action.Submit',
+                                                id: 'upvote',
+                                                data: {
+                                                    id: 'upvote',
+                                                    questionId: '${_id}',
+                                                    qnaSessionId:
+                                                        '${qnaSessionId}',
+                                                },
+                                            },
                                             $when: '${upvoted}',
                                         },
                                     ],
-                                    selectAction: {
-                                        type: 'Action.Submit',
-                                        id: 'upvote',
-                                        data: {
-                                            id: 'upvote',
-                                            questionId: '${_id}',
-                                            qnaSessionId: '${qnaSessionId}',
-                                        },
-                                    },
                                     $when: '${upvotable && isActive}',
                                 },
                                 {
@@ -235,6 +245,36 @@ const allQuestions = {
                                     $when: '${upvoted}',
                                 },
                             ],
+                            $when: '${!upvotable || !isActive}',
+                        },
+                        {
+                            type: 'Container',
+                            items: [
+                                {
+                                    type: 'TextBlock',
+                                    text: '${upvotes} ',
+                                    size: 'Medium',
+                                    $when: '${!upvoted}',
+                                },
+                                {
+                                    type: 'TextBlock',
+                                    text: '${upvotes} ',
+                                    size: 'Medium',
+                                    color: 'Accent',
+                                    weight: 'Bolder',
+                                    $when: '${upvoted}',
+                                },
+                            ],
+                            selectAction: {
+                                type: 'Action.Submit',
+                                id: 'upvote',
+                                data: {
+                                    id: 'upvote',
+                                    questionId: '${_id}',
+                                    qnaSessionId: '${qnaSessionId}',
+                                },
+                            },
+                            $when: '${upvotable && isActive}',
                         },
                     ],
                     verticalContentAlignment: 'Center',

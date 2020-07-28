@@ -91,7 +91,8 @@ export const startQnASession = async (
  */
 export const generateLeaderboard = async (
     qnaSessionId: string,
-    aadObjectId: string
+    aadObjectId: string,
+    theme: string
 ): Promise<Result<AdaptiveCard, Error>> => {
     try {
         const questionData: IQuestionPopulatedUser[] = await db.getQuestionData(
@@ -105,7 +106,8 @@ export const generateLeaderboard = async (
                 aadObjectId,
                 qnaSessionId,
                 isHost,
-                isActiveQnA
+                isActiveQnA,
+                theme
             )
         );
     } catch (error) {
@@ -207,19 +209,21 @@ export const getUpdatedMainCard = async (
  * @param questionId - DBID of the question being upvoted
  * @param aadObjectId - aadObjectId of the user upvoting the question
  * @param name - Name of the user upvoting the question
+ * @param theme - Teams theme of the user upvoting. Options are 'default', 'dark', or 'high-contrast'
  */
-export const addUpvote = async (
+export const updateUpvote = async (
     questionId: string,
     aadObjectId: string,
-    name: string
+    name: string,
+    theme: string
 ): Promise<Result<AdaptiveCard, Error>> => {
     try {
-        const question: IQuestion = await db.addUpvote(
+        const question: IQuestion = await db.updateUpvote(
             questionId,
             aadObjectId,
             name
         );
-        return generateLeaderboard(question.qnaSessionId, aadObjectId);
+        return generateLeaderboard(question.qnaSessionId, aadObjectId, theme);
     } catch (error) {
         exceptionLogger(error);
         return err(Error('Failed to upvote question.'));

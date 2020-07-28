@@ -203,7 +203,10 @@ export class AskAway extends TeamsActivityHandler {
 
         const leaderboard = await controller.generateLeaderboard(
             taskModuleRequest.data.qnaSessionId,
-            <string>context.activity.from.aadObjectId
+            <string>context.activity.from.aadObjectId,
+            taskModuleRequest.context
+                ? <string>taskModuleRequest.context.theme
+                : 'default'
         );
 
         return leaderboard.isOk()
@@ -241,6 +244,16 @@ export class AskAway extends TeamsActivityHandler {
         user: ChannelAccount,
         taskModuleRequest: TaskModuleRequest
     ): Promise<TaskModuleResponse> {
+        if (
+            !(await controller.validateConversationId(
+                taskModuleRequest.data.qnaSessionId,
+                context.activity.conversation.id
+            ))
+        )
+            return this._buildTaskModuleContinueResponse(
+                controller.getErrorCard(errorStrings('conversationInvalid'))
+            );
+
         const qnaSessionId = taskModuleRequest.data.qnaSessionId;
         const userAADObjId = <string>user.aadObjectId;
         const userName = user.name;
@@ -271,10 +284,13 @@ export class AskAway extends TeamsActivityHandler {
         context: TurnContext,
         taskModuleRequest: TaskModuleRequest
     ): Promise<TaskModuleResponse> => {
-        const updatedLeaderboard = await controller.addUpvote(
+        const updatedLeaderboard = await controller.updateUpvote(
             taskModuleRequest.data.questionId,
             <string>context.activity.from.aadObjectId,
-            context.activity.from.name
+            context.activity.from.name,
+            taskModuleRequest.context
+                ? <string>taskModuleRequest.context.theme
+                : 'default'
         );
 
         this._updateMainCard(taskModuleRequest.data.qnaSessionId, context);
@@ -290,6 +306,16 @@ export class AskAway extends TeamsActivityHandler {
         context: TurnContext,
         taskModuleRequest: TaskModuleRequest
     ): Promise<TaskModuleResponse> {
+        if (
+            !(await controller.validateConversationId(
+                taskModuleRequest.data.qnaSessionId,
+                context.activity.conversation.id
+            ))
+        )
+            return this._buildTaskModuleContinueResponse(
+                controller.getErrorCard(errorStrings('conversationInvalid'))
+            );
+
         return this._buildTaskModuleContinueResponse(
             controller.getEndQnAConfirmationCard(
                 taskModuleRequest.data.qnaSessionId
@@ -302,6 +328,16 @@ export class AskAway extends TeamsActivityHandler {
         taskModuleRequest: TaskModuleRequest,
         context: TurnContext
     ): Promise<TaskModuleResponse> {
+        if (
+            !(await controller.validateConversationId(
+                taskModuleRequest.data.qnaSessionId,
+                context.activity.conversation.id
+            ))
+        )
+            return this._buildTaskModuleContinueResponse(
+                controller.getErrorCard(errorStrings('conversationInvalid'))
+            );
+
         const qnaSessionId = taskModuleRequest.data.qnaSessionId;
 
         if (taskModuleRequest.data.id == 'submitEndQnA') {

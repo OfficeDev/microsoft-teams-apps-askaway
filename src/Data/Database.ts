@@ -252,31 +252,40 @@ export const getUserOrCreate = async (
 };
 
 /**
- * Adds the aadObjectId of the user upvoting the question to the 'voters' array of that question document.
+ * Adds the aadObjectId of the user upvoting the question to the 'voters' array of that question document if the user has not already upvoted the question.
+ * Otherwise, removes their aadObjectId from the voters list to reflect taking back their upvote.
  * @param questionId - The DBID of the question document for the question being upvoted.
  * @param aadObjectId - The aadObjectId of the user upvoting the question.
  * @param name - The name of the user upvoting the question, used for creating a new User document if one doesn't exist.
  */
-export const addUpvote = async (
+export const updateUpvote = async (
     questionId: string,
     aadObjectId: string,
     name: string
 ): Promise<IQuestion> => {
     await getUserOrCreate(aadObjectId, name);
 
-    return await retryWrapper<IQuestion>(
-        () =>
-            Question.findByIdAndUpdate(
-                questionId,
-                {
-                    $addToSet: { voters: aadObjectId },
-                },
-                {
-                    new: true,
-                }
-            ),
-        new ExponentialBackOff()
-    );
+    return await retryWrapper<IQuestion>(async () => {
+        const question: IQuestion = <IQuestion>(
+            await Question.findById(questionId)
+        );
+
+        const qnaSession: IQnASession = <IQnASession>(
+            await QnASession.findById(question.qnaSessionId)
+        );
+
+        if (qnaSession.isActive) {
+            if (question.voters.includes(aadObjectId))
+                question.voters.splice(question.voters.indexOf(aadObjectId), 1);
+            else {
+                question.voters.push(aadObjectId);
+            }
+
+            await question.save();
+        }
+
+        return question;
+    }, new ExponentialBackOff());
 };
 
 /*
