@@ -25,7 +25,7 @@ import {
     startQnAStrings,
     leaderboardStrings,
 } from 'src/localization/locale';
-import { aiClient } from 'src/app/server';
+import { exceptionLogger } from 'src/util/ExceptionTracking';
 import { ifNumber } from 'src/util/RetryPolicies';
 
 const NULL_RESPONSE: any = null;
@@ -122,7 +122,7 @@ export class AskAway extends TeamsActivityHandler {
                 taskModuleRequest
             );
 
-        aiClient.trackException({ exception: new Error('Invalid Task Fetch') });
+        exceptionLogger(new Error('Invalid Task Fetch'));
         return this.handleTeamsTaskModuleFetchError();
     }
 
@@ -176,9 +176,7 @@ export class AskAway extends TeamsActivityHandler {
                 context
             );
 
-        aiClient.trackException({
-            exception: new Error('Invalid Task Submit'),
-        });
+        exceptionLogger(new Error('Invalid Task Submit'));
 
         return this.handleTeamsTaskModuleSubmitError();
     }
@@ -365,11 +363,11 @@ export class AskAway extends TeamsActivityHandler {
 
         if (cardDataResponse.isOk()) cardData = cardDataResponse.value;
         else {
-            aiClient.trackException({
-                exception: new Error(
+            exceptionLogger(
+                new Error(
                     'Unable to extract maincard data' + cardDataResponse.value
-                ),
-            });
+                )
+            );
             cardData = { title: '', description: '' };
         }
 
@@ -398,11 +396,11 @@ export class AskAway extends TeamsActivityHandler {
         else {
             // this error will create a broken experience for the user and so
             // the QnA session will not be created.
-            aiClient.trackException({
-                exception: new Error(
+            exceptionLogger(
+                new Error(
                     'Unable to extract maincard data' + cardDataResponse.value
-                ),
-            });
+                )
+            );
             return NULL_RESPONSE;
         }
 
@@ -533,7 +531,7 @@ export class AskAway extends TeamsActivityHandler {
                         type: 'message',
                     });
                 } catch (error) {
-                    aiClient.trackException({ exception: error });
+                    exceptionLogger(error);
                 }
             }
         };

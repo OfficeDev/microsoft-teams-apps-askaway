@@ -1,6 +1,7 @@
 import { IAdaptiveCard } from 'adaptivecards';
 import { err, ok, Result } from 'src/util/ResultWrapper';
 import { ISubmitAction } from 'adaptivecards/lib/schema';
+import { exceptionLogger } from 'src/util/ExceptionTracking';
 import { mainCardStrings } from 'src/localization/locale';
 
 /**
@@ -272,6 +273,7 @@ export const extractMainCardData = (
         if (!card.body) throw Error('Non-existent card body');
         return ok(card.msTeams.entities[0].data);
     } catch (error) {
+        exceptionLogger(error);
         return err(error);
     }
 };

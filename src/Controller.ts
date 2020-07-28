@@ -4,12 +4,8 @@ import * as adaptiveCardBuilder from 'src/AdaptiveCards/AdaptiveCardBuilder'; //
 import { ok, err, Result } from 'src/util/ResultWrapper';
 import { AdaptiveCard } from 'adaptivecards';
 import { IQuestion, IQuestionPopulatedUser } from 'src/Data/Schemas/Question';
-import { aiClient } from 'src/app/server';
+import { exceptionLogger } from 'src/util/ExceptionTracking';
 import jimp from 'jimp';
-
-db.initiateConnection(<string>process.env.MongoDbUri).catch((error) => {
-    aiClient.trackException({ exception: error });
-});
 
 export const getMainCard = adaptiveCardBuilder.getMainCard;
 export const getStartQnACard = adaptiveCardBuilder.getStartQnACard;
@@ -82,7 +78,7 @@ export const startQnASession = async (
             qnaSessionId: response.qnaSessionId,
         });
     } catch (error) {
-        aiClient.trackException({ exception: error });
+        exceptionLogger(error);
         return err(Error('Failed to start QnA'));
     }
 };
@@ -113,7 +109,7 @@ export const generateLeaderboard = async (
             )
         );
     } catch (error) {
-        aiClient.trackException({ exception: error });
+        exceptionLogger(error);
         return err(new Error('Retrieving Leaderboard Failed.'));
     }
 };
@@ -130,7 +126,7 @@ export const setActivityId = async (
     try {
         return ok(await db.updateActivityId(qnaSessionId, activityId));
     } catch (error) {
-        aiClient.trackException({ exception: error });
+        exceptionLogger(error);
         return err(error);
     }
 };
@@ -167,7 +163,7 @@ export const submitNewQuestion = async (
 
         return ok(true);
     } catch (error) {
-        aiClient.trackException({ exception: error });
+        exceptionLogger(error);
         return err(Error('Failed to submit new question'));
     }
 };
@@ -202,7 +198,7 @@ export const getUpdatedMainCard = async (
             numQuestions,
         });
     } catch (error) {
-        aiClient.trackException({ exception: error });
+        exceptionLogger(error);
         return err(Error('Failed to get top questions'));
     }
 };
@@ -225,7 +221,7 @@ export const addUpvote = async (
         );
         return generateLeaderboard(question.qnaSessionId, aadObjectId);
     } catch (error) {
-        aiClient.trackException({ exception: error });
+        exceptionLogger(error);
         return err(Error('Failed to upvote question.'));
     }
 };
@@ -266,7 +262,7 @@ export const endQnASession = async (
 
         return updatedMainCard;
     } catch (error) {
-        aiClient.trackException({ exception: error });
+        exceptionLogger(error);
         return err(Error('Failed to end QnA session'));
     }
 };
@@ -300,7 +296,7 @@ export const isHost = async (
         const result = await db.isHost(qnaSessionId, userAadObjId);
         return ok(result);
     } catch (error) {
-        aiClient.trackException({ exception: error });
+        exceptionLogger(error);
         return err(
             Error('Failed to check if user is host for this QnA session')
         );
@@ -350,7 +346,7 @@ export const validateConversationId = async (
                 conversationId.split(';')[0]
         );
     } catch (error) {
-        aiClient.trackException({ exception: error });
+        exceptionLogger(error);
         return err(
             new Error('Unable to validate conversationId of incoming request')
         );
@@ -368,7 +364,7 @@ export const isActiveQnA = async (
         const result = await db.isActiveQnA(qnaSessionId);
         return ok(result);
     } catch (error) {
-        aiClient.trackException({ exception: error });
+        exceptionLogger(error);
         return err(Error('Failed to check if QnA session is active'));
     }
 };

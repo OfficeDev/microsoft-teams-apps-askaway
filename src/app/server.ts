@@ -3,9 +3,13 @@ import * as http from 'http';
 import morgan from 'morgan';
 import debug from 'debug';
 import compression from 'compression';
-import * as appInsights from 'applicationinsights';
+import {
+    initiateAppInsights,
+    exceptionLogger,
+} from 'src/util/ExceptionTracking';
 import { config as dotenvConfig } from 'dotenv';
 import { join } from 'path';
+import { initiateConnection } from 'src/Data/Database';
 
 import * as jimp from 'jimp';
 import * as jwt from 'jsonwebtoken';
@@ -22,22 +26,7 @@ log(`Initializing Microsoft Teams Express hosted App...`);
 dotenvConfig();
 
 // Set up app insights
-appInsights
-    .setup(process.env.ApplicationInsightsInstrumentationKey)
-    .setAutoDependencyCorrelation(true)
-    .setAutoCollectRequests(true)
-    .setAutoCollectPerformance(true, true)
-    .setAutoCollectExceptions(true)
-    .setAutoCollectDependencies(true)
-    .setAutoCollectConsole(true, true)
-    .setUseDiskRetryCaching(true)
-    .setSendLiveMetrics(true)
-    .setDistributedTracingMode(appInsights.DistributedTracingModes.AI);
-appInsights.start();
-
-// tslint:export-name
-// eslint-disable-next-line @typescript-eslint/tslint/config
-export const aiClient = appInsights.defaultClient;
+initiateAppInsights();
 
 // The import of components has to be done AFTER the dotenv config
 import { initLocalization } from 'src/localization/locale';
@@ -103,6 +92,11 @@ express.use(morgan('tiny'));
 // Add compression - uncomment to remove compression
 express.use(compression());
 
+// initiate database
+initiateConnection(<string>process.env.MongoDbUri).catch((error) => {
+    exceptionLogger(error);
+});
+
 // Override ConnecterClient to update ExponentialRetryPolicy configuration
 (<any>BotFrameworkAdapter.prototype).createConnectorClientInternal = (
     serviceUrl,
@@ -129,7 +123,7 @@ const adapter = new BotFrameworkAdapter({
 });
 
 adapter.onTurnError = async (context, error) => {
-    aiClient.trackException({ exception: error });
+    exceptionLogger(error);
 };
 
 const bot: ActivityHandler = new AskAway();
