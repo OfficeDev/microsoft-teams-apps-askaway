@@ -150,6 +150,7 @@ export const getQuestions = async (
     if (recentN)
         // most recent question comes first at index 0
         recentSorted = questionData
+            .map((value) => value.toObject())
             .sort(
                 (a: any, b: any) =>
                     new Date(b.dateTimeCreated).getTime() -
@@ -160,8 +161,10 @@ export const getQuestions = async (
     if (topN)
         // descending order, so [0, 1, 2] => [2, 1, 0]
         voteSorted = questionData
+            .map((value) => value.toObject())
             .sort((a: any, b: any) => b.voters.length - a.voters.length)
             .slice(0, topN);
+
     return {
         topQuestions: topN ? voteSorted : null,
         recentQuestions: recentN ? recentSorted : null,

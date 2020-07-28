@@ -21,7 +21,8 @@ export const initiateAppInsights = () => {
 };
 
 export const exceptionLogger = (error: Error) => {
-    if (process.env.debugMode == 'true') {
+    if (process.env.debugMode === 'true') {
+        // eslint-disable-next-line no-console
         console.error(error);
     } else {
         aiClient.trackException({ exception: error });

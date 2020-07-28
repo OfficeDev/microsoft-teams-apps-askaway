@@ -19,6 +19,7 @@ import { NewQuestion } from 'src/AdaptiveCards/NewQuestion';
 
 import { ErrorCard } from 'src/AdaptiveCards/ErrorCard';
 import { mainCardStrings } from 'src/localization/locale';
+import { clone } from 'lodash';
 
 /**
  * Creates the QnA Master Card
@@ -33,7 +34,7 @@ import { mainCardStrings } from 'src/localization/locale';
  * @param showDateUpdated - whether to show last updated date or not
  * @returns The QnA Master Card
  */
-export const getMainCard = async (
+export const getMainCard = (
     title: string,
     description: string,
     userName: string,
@@ -43,7 +44,7 @@ export const getMainCard = async (
     topQuestionsData?: IQuestionPopulatedUser[],
     recentQuestionsData?: IQuestionPopulatedUser[],
     showDateUpdated = false
-): Promise<AdaptiveCard> => {
+): IAdaptiveCard => {
     const data = {
         title,
         description,
@@ -54,7 +55,7 @@ export const getMainCard = async (
     };
     const _processQuestions = (questions: IQuestionPopulatedUser[]) =>
         questions.map((question: IQuestionPopulatedUser) => {
-            const questionObject = question.toObject();
+            const questionObject = <any>clone(question);
             questionObject.userId.picture = getPersonImage(
                 questionObject.userId.userName,
                 question.userId._id
