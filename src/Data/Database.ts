@@ -17,7 +17,10 @@ import { retryWrapper, ExponentialBackOff } from 'src/util/RetryPolicies';
  * @param mongoURI - The mongoDB connection string for the CosmosDB database.
  */
 export const initiateConnection = async (mongoURI: string) => {
-    await mongoose.connect(mongoURI, { useFindAndModify: false });
+    await mongoose.connect(mongoURI, {
+        useFindAndModify: false,
+        useNewUrlParser: true,
+    });
 };
 
 /**
