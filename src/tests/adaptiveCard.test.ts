@@ -626,6 +626,7 @@ describe('main card', () => {
                         type: 'TextBlock',
                         text: sampleUserName,
                         weight: 'Bolder',
+                        size: 'Small',
                     },
                     {
                         type: 'TextBlock',
@@ -786,6 +787,7 @@ describe('main card', () => {
                         type: 'TextBlock',
                         text: sampleUserName,
                         weight: 'Bolder',
+                        size: 'Small',
                     },
                     {
                         type: 'TextBlock',
@@ -952,7 +954,7 @@ describe('main card', () => {
             {
                 id: 'viewLeaderboard',
                 type: 'Action.Submit',
-                title: mainCardStrings('upvoteQuestions'),
+                title: mainCardStrings('viewQuestions'),
                 data: {
                     msteams: {
                         type: 'task/fetch',

@@ -11,7 +11,7 @@ export const viewLeaderboardButton = () =>
     <ISubmitAction>{
         id: 'viewLeaderboard',
         type: 'Action.Submit',
-        title: mainCardStrings('upvoteQuestions'),
+        title: '${leaderboardTitle}',
         data: {
             msteams: {
                 type: 'task/fetch',
@@ -163,6 +163,7 @@ const questionsList = (dataKey: string) => ({
                             type: 'TextBlock',
                             text: '${userId.userName}',
                             weight: 'Bolder',
+                            size: 'Small',
                         },
                         {
                             type: 'TextBlock',

@@ -9,6 +9,7 @@
         "upvotes": "upvotes",
         "askQuestion": "askQuestion",
         "upvoteQuestions": "upvoteQuestions",
+        "viewQuestions": "viewQuestions",
         "noMoreQuestions": "noMoreQuestions",
         "noQuestions": "noQuestions"
     },

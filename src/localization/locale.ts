@@ -60,6 +60,7 @@ export interface MainCard {
     upvotes: string;
     askQuestion: string;
     upvoteQuestions: string;
+    viewQuestions: string;
     noMoreQuestions: string;
     noQuestions: string;
 }
