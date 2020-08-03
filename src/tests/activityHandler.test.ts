@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/tslint/config */
-import { AskAway } from 'src/app/askAwayBot/AskAway';
+import { AskAway } from 'src/askAway';
 import { TaskModuleRequest } from 'botframework-connector/lib/connectorApi/models';
 import {
     submitNewQuestion,
@@ -14,7 +14,7 @@ import {
 import { ok, err } from 'src/util/ResultWrapper';
 import { errorStrings, initLocalization } from 'src/localization/locale';
 
-jest.mock('src/Controller');
+jest.mock('src/controller');
 
 beforeAll(async () => {
     await initLocalization();

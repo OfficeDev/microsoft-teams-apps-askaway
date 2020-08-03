@@ -8,7 +8,7 @@ import {
 /**
  * Defines the template for the adaptive card used when creating a new question.
  */
-export const NewQuestion = () =>
+export const newQuestionCard = () =>
     <IAdaptiveCard>{
         version: '1.0.0',
         $schema: 'https://adaptivecards.io/schemas/adaptive-card.json',

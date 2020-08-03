@@ -37,7 +37,7 @@ export type MainCardData = {
 /**
  * Master Adaptive Card for the AskAway Bot
  */
-export const MainCard = () =>
+export const mainCard = () =>
     <IAdaptiveCard>{
         $schema: 'https://adaptivecards.io/schemas/adaptive-card.json',
         type: 'AdaptiveCard',

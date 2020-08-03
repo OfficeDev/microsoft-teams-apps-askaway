@@ -16,7 +16,7 @@ import {
 import { clone, debounce, delay } from 'lodash';
 import * as controller from 'src/Controller';
 import { AdaptiveCard } from 'adaptivecards';
-import { extractMainCardData, MainCardData } from 'src/AdaptiveCards/MainCard';
+import { extractMainCardData, MainCardData } from 'src/adaptive-cards/mainCard';
 import { Result, err, ok } from 'src/util/ResultWrapper';
 import {
     endQnAStrings,

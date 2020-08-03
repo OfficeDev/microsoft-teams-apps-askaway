@@ -3,7 +3,7 @@ import { IAdaptiveCard } from 'adaptivecards';
 /**
  * Adaptive card for when a task/fetch fails.
  */
-export const ErrorCard = () =>
+export const errorCard = () =>
     <IAdaptiveCard>{
         $schema: 'https://adaptivecards.io/schemas/adaptive-card.json',
         type: 'AdaptiveCard',

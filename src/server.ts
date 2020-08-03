@@ -31,13 +31,13 @@ initiateAppInsights();
 // The import of components has to be done AFTER the dotenv config
 import { initLocalization } from 'src/localization/locale';
 import { BotFrameworkAdapter, ActivityHandler } from 'botbuilder';
-import { requestPolicyHelper } from 'src/app/RequestPolicyHelper';
+import { requestPolicyHelper } from 'src/util/requestPolicyHelper';
 import { USER_AGENT } from 'botbuilder/lib/botFrameworkAdapter';
-import { AskAway } from 'src/app/askAwayBot/AskAway';
+import { AskAway } from 'src/askAway';
 import { ifNumber } from 'src/util/RetryPolicies';
 
 // initialize localization
-if (initLocalization) initLocalization();
+initLocalization();
 
 // Create the Express webserver
 const express = Express();

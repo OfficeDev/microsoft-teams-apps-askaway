@@ -16,7 +16,7 @@ import {
     isExistingQnASession,
 } from 'src/Data/Database';
 import { Question, IQuestion } from 'src/Data/Schemas/Question';
-import { User } from 'src/Data/Schemas/User';
+import { User } from 'src/Data/Schemas/user';
 import crypto from 'crypto';
 
 let testHost, testQnASession, testUser, testUserUpvoting;

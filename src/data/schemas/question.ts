@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { IQnASession } from 'src/Data/Schemas/QnASession';
-import { IUser } from 'src/Data/Schemas/User';
+import { IUser } from 'src/Data/Schemas/user';
 
 const QuestionSchema = new mongoose.Schema({
     qnaSessionId: {

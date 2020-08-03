@@ -8,7 +8,6 @@ const config = {
     ],
     watches: [
         "./src/**/*.*",
-        "!./src/app/askAwayBot/dialogs/**"
     ],
     // Supported Schemas
     SCHEMAS: [{

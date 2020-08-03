@@ -25,7 +25,7 @@ fs.readdirSync('node_modules')
 var config = [{
         entry: {
             server: [
-                __dirname + '/src/app/server.ts'
+                __dirname + '/src/server.ts'
             ],
         },
         mode: debug ? 'development' : 'production',

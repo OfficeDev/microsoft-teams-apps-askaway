@@ -1,6 +1,6 @@
 // Middleman file to allow for communication between the bot, database, and adaptive card builder.
 import * as db from 'src/Data/Database'; // For database calls
-import * as adaptiveCardBuilder from 'src/AdaptiveCards/AdaptiveCardBuilder'; // To populate adaptive cards
+import * as adaptiveCardBuilder from 'src/adaptive-cards/adaptiveCardBuilder'; // To populate adaptive cards
 import { ok, err, Result } from 'src/util/ResultWrapper';
 import { AdaptiveCard } from 'adaptivecards';
 import { IQuestion, IQuestionPopulatedUser } from 'src/Data/Schemas/Question';

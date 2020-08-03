@@ -9,15 +9,18 @@ import * as jwt from 'jsonwebtoken';
 
 import { IQuestionPopulatedUser } from 'src/Data/Schemas/Question';
 
-import { MainCard, viewLeaderboardButton } from 'src/AdaptiveCards/MainCard';
-import { StartQnACard } from 'src/AdaptiveCards/StartQnACard';
-import { EndQnaConfirmation } from 'src/AdaptiveCards/EndQnAConfirmation';
+import { mainCard, viewLeaderboardButton } from 'src/adaptive-cards/mainCard';
+import { startQnACard } from 'src/adaptive-cards/startQnACard';
+import { endQnAConfirmationCard } from 'src/adaptive-cards/endQnAConfirmationCard';
 
-import { Leaderboard, LeaderboardEmpty } from 'src/AdaptiveCards/Leaderboard';
+import {
+    leaderboardCard,
+    leaderboardEmptyCard,
+} from 'src/adaptive-cards/leaderboardCard';
 
-import { NewQuestion } from 'src/AdaptiveCards/NewQuestion';
+import { newQuestionCard } from 'src/adaptive-cards/newQuestionCard';
 
-import { ErrorCard } from 'src/AdaptiveCards/ErrorCard';
+import { errorCard } from 'src/adaptive-cards/errorCard';
 import { mainCardStrings } from 'src/localization/locale';
 import { clone } from 'lodash';
 
@@ -78,14 +81,14 @@ export const getMainCard = (
         ? moment().format('ddd, MMM D, YYYY, h:mm A [GMT] Z')
         : '';
 
-    const mainCard = MainCard();
+    const _mainCard = mainCard();
     if (ended)
         // remove `Ask a Question` and `End QnA` buttons
-        mainCard.actions = [viewLeaderboardButton()];
+        _mainCard.actions = [viewLeaderboardButton()];
 
     // it is not wrapped around by _adaptiveCard() because it will remove
     // the `msTeams` property from the master card.
-    return new ACData.Template(mainCard).expand({
+    return new ACData.Template(_mainCard).expand({
         $root: {
             title: title,
             description: description,
@@ -114,7 +117,7 @@ export const getStartQnACard = (
     description = '',
     errorMessage = ''
 ): AdaptiveCard => {
-    const template = new ACData.Template(StartQnACard()).expand({
+    const template = new ACData.Template(startQnACard()).expand({
         $root: {
             title,
             description,
@@ -128,7 +131,7 @@ export const getStartQnACard = (
  * @returns The adaptive card displayed when a task/submit error occurs.
  */
 export const getErrorCard = (errorMessage: string): AdaptiveCard => {
-    const template = new ACData.Template(ErrorCard()).expand({
+    const template = new ACData.Template(errorCard()).expand({
         $root: {
             // 'Your submission encountered an error. Please try submitting again!',
             errorMessage,
@@ -159,7 +162,7 @@ export const generateLeaderboard = (
     if (!questionData.length)
         return generateEmptyLeaderboard(qnaSessionId, isHost, isActiveQnA);
 
-    const leaderboardTemplate = Leaderboard();
+    const leaderboardTemplate = leaderboardCard();
 
     questionData = questionData
         .sort(
@@ -219,7 +222,7 @@ const generateEmptyLeaderboard = (
     isHost?: boolean,
     isActiveQnA?: boolean
 ): AdaptiveCard => {
-    const leaderboardTemplate = LeaderboardEmpty();
+    const leaderboardTemplate = leaderboardEmptyCard();
 
     const data = {
         $root: {
@@ -242,7 +245,7 @@ const generateEmptyLeaderboard = (
  * @returns Adaptive Card associated with creating a new question
  */
 export const getNewQuestionCard = (qnaSessionId: string): AdaptiveCard => {
-    const template = new ACData.Template(NewQuestion()).expand({
+    const template = new ACData.Template(newQuestionCard()).expand({
         $root: {
             qnaId: qnaSessionId,
         },
@@ -269,7 +272,7 @@ export const _adaptiveCard = (template: IAdaptiveCard): AdaptiveCard => {
 export const getEndQnAConfirmationCard = (
     qnaSessionId: string
 ): AdaptiveCard => {
-    const template = new ACData.Template(EndQnaConfirmation()).expand({
+    const template = new ACData.Template(endQnAConfirmationCard()).expand({
         $root: {
             qnaId: qnaSessionId,
         },
@@ -287,7 +290,7 @@ export const getResubmitQuestionErrorCard = (
     qnaSessionId: string,
     questionContent: string
 ): AdaptiveCard => {
-    const template = new ACData.Template(NewQuestion()).expand({
+    const template = new ACData.Template(newQuestionCard()).expand({
         $root: {
             qnaId: qnaSessionId,
             question: questionContent,
