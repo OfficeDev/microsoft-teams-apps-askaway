@@ -99,6 +99,9 @@ export const getMainCard = (
             userId: aadObjectId,
             image: `https://${process.env.HostName}/images/title_bg.png`,
             data: data,
+            leaderboardTitle: ended
+                ? mainCardStrings('viewQuestions')
+                : mainCardStrings('upvoteQuestions'),
             sessionDetails: ended
                 ? `${mainCardStrings('endedBy')} ${userName}. ${mainCardStrings(
                       'noMoreQuestions'
