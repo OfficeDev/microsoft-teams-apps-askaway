@@ -1,4 +1,4 @@
-import * as strings from 'src/localization/testLocale.json';
+import * as strings from 'src/localization/resources/testLocale.json';
 
 import {
     Strings,

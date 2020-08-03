@@ -1,5 +1,5 @@
 import i18next from 'i18next';
-import * as enStrings from 'src/localization/en.json';
+import * as enStrings from 'src/localization/resources/en.json';
 import { exceptionLogger } from 'src/util/ExceptionTracking';
 
 export interface Strings {
@@ -91,11 +91,11 @@ export const initLocalization = async (
     try {
         if (process.env.Language)
             // eslint-disable-next-line @typescript-eslint/tslint/config
-            languageStrings = require(`./${process.env.Language}.json`);
+            languageStrings = require(`./resources/${process.env.Language}.json`);
 
         if (process.env.FallbackLanguage)
             // eslint-disable-next-line @typescript-eslint/tslint/config
-            fallbackLanguageStrings = require(`./${process.env.FallbackLanguage}.json`);
+            fallbackLanguageStrings = require(`./resources/${process.env.FallbackLanguage}.json`);
     } catch (error) {
         if (!testing) exceptionLogger(error);
     }

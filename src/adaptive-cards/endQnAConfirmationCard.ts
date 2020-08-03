@@ -6,7 +6,7 @@ import { endQnAStrings, genericStrings } from 'src/localization/locale';
 /**
  * Defines the template for the adaptive card used when confirming the ending of the QnA.
  */
-export const EndQnaConfirmation = () =>
+export const endQnAConfirmationCard = () =>
     <IAdaptiveCard>{
         $schema: 'https://adaptivecards.io/schemas/adaptive-card.json',
         type: 'AdaptiveCard',

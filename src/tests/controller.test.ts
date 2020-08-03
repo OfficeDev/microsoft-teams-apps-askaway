@@ -15,7 +15,7 @@ import {
     validateConversationId,
     isActiveQnA,
 } from 'src/Controller';
-import * as acb from 'src/AdaptiveCards/AdaptiveCardBuilder';
+import * as acb from 'src/adaptive-cards/adaptiveCardBuilder';
 import * as db from 'src/Data/Database';
 
 const sampleUserAADObjId1 = 'be36140g-9729-3024-8yg1-147bbi67g2c9';
@@ -31,8 +31,8 @@ const sampleScopeId = '12311';
 const sampleQuestionContent = 'Sample Question?';
 const sampleQuestionId = '2321232';
 
-jest.mock('../AdaptiveCards/AdaptiveCardBuilder');
-jest.mock('../Data/Database');
+jest.mock('../adaptive-cards/adaptiveCardBuilder');
+jest.mock('../data/database');
 
 beforeEach(() => {
     process.env.debugMode = 'true';

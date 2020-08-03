@@ -4,7 +4,7 @@ import {
     IQnASession_populated,
     IQnASession,
 } from 'src/Data/Schemas/QnASession';
-import { User } from 'src/Data/Schemas/User';
+import { User } from 'src/Data/Schemas/user';
 import {
     Question,
     IQuestion,

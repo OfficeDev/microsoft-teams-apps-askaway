@@ -19,7 +19,7 @@ export const endQnAButton: () => ISubmitAction = () =>
 /**
  * Leaderboard adaptive card template. Fields must be filled in using a data payload with the templating sdk.
  */
-export const Leaderboard = () =>
+export const leaderboardCard = () =>
     <IAdaptiveCard>{
         type: 'AdaptiveCard',
         // eslint-disable-next-line @typescript-eslint/tslint/config
@@ -50,7 +50,7 @@ export const Leaderboard = () =>
 /**
  * Adaptive card for an empty leaderboard when there are no questions in an QnA.
  */
-export const LeaderboardEmpty = () =>
+export const leaderboardEmptyCard = () =>
     <IAdaptiveCard>{
         $schema: 'https://adaptivecards.io/schemas/adaptive-card.json',
         type: 'AdaptiveCard',
