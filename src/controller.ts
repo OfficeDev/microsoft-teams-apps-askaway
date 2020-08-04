@@ -317,8 +317,8 @@ export const generateInitialsImage = async (
     initials: string,
     index: number
 ): Promise<jimp> => {
-    const image = new jimp(128, 128, avatarColors[index]);
-    const font = await jimp.loadFont(jimp.FONT_SANS_64_WHITE);
+    const image = new jimp(52, 52, avatarColors[index]);
+    const font = await jimp.loadFont('src/public/segoeUiSemiboldWhite.fnt');
     return image.print(
         font,
         0,
@@ -328,8 +328,8 @@ export const generateInitialsImage = async (
             alignmentX: jimp.HORIZONTAL_ALIGN_CENTER,
             alignmentY: jimp.VERTICAL_ALIGN_MIDDLE,
         },
-        128,
-        128
+        52,
+        52
     );
 };
 

@@ -201,9 +201,9 @@ export const generateLeaderboard = (
             isUserHost: isHost,
             isActive: isActiveQnA,
             upvoteArrow:
-                theme === 'default'
-                    ? `https://${process.env.HostName}/images/upvote_arrow_default.png`
-                    : `https://${process.env.HostName}/images/upvote_arrow_dark_or_high_contrast.png`,
+                theme === 'default' || theme === 'undefined'
+                    ? `https://${process.env.HostName}/images/thumbs_up_default.png`
+                    : `https://${process.env.HostName}/images/thumbs_up_dark_and_high_contrast.png`,
         },
     };
 
@@ -346,7 +346,10 @@ export const getPersonImage = (name: string, aadObjectId: string): string => {
 
     const token = jwt.sign(
         data,
-        Buffer.from(avatarKey, 'utf8').toString('hex')
+        Buffer.from(avatarKey, 'utf8').toString('hex'),
+        {
+            noTimestamp: true,
+        }
     );
     return `https://${process.env.HostName}/avatar/${token}`;
 };
