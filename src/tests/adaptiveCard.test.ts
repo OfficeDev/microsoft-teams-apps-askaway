@@ -1007,7 +1007,10 @@ describe('initials avatar generation tests', () => {
                 initials: 'JD',
                 index: colorIndex,
             },
-            Buffer.from(process.env.AvatarKey, 'utf8').toString('hex')
+            Buffer.from(process.env.AvatarKey, 'utf8').toString('hex'),
+            {
+                noTimestamp: true,
+            }
         );
 
         const expected = `https://${process.env.HostName}/avatar/${token}`;
@@ -1049,7 +1052,10 @@ describe('initials avatar generation tests', () => {
                 initials: 'JS',
                 index: colorIndex,
             },
-            Buffer.from(process.env.AvatarKey, 'utf8').toString('hex')
+            Buffer.from(process.env.AvatarKey, 'utf8').toString('hex'),
+            {
+                noTimestamp: true,
+            }
         );
 
         const expected = `https://${process.env.HostName}/avatar/${token}`;
@@ -1071,7 +1077,10 @@ describe('initials avatar generation tests', () => {
                 initials: 'JD',
                 index: colorIndex,
             },
-            Buffer.from(process.env.AvatarKey, 'utf8').toString('hex')
+            Buffer.from(process.env.AvatarKey, 'utf8').toString('hex'),
+            {
+                noTimestamp: true,
+            }
         );
 
         const expected = `https://${process.env.HostName}/avatar/${token}`;
@@ -1093,7 +1102,10 @@ describe('initials avatar generation tests', () => {
                 initials: 'JD',
                 index: colorIndex,
             },
-            Buffer.from(process.env.AvatarKey, 'utf8').toString('hex')
+            Buffer.from(process.env.AvatarKey, 'utf8').toString('hex'),
+            {
+                noTimestamp: true,
+            }
         );
 
         const expected = `https://${process.env.HostName}/avatar/${token}`;
@@ -1115,7 +1127,10 @@ describe('initials avatar generation tests', () => {
                 initials: 'JT',
                 index: colorIndex,
             },
-            Buffer.from(process.env.AvatarKey, 'utf8').toString('hex')
+            Buffer.from(process.env.AvatarKey, 'utf8').toString('hex'),
+            {
+                noTimestamp: true,
+            }
         );
 
         const expected = `https://${process.env.HostName}/avatar/${token}`;
@@ -1200,6 +1215,7 @@ describe('non-empty leaderboard tests', () => {
                                                         question.userId
                                                             .userName,
                                                     weight: 'Bolder',
+                                                    size: 'Small',
                                                 },
                                                 {
                                                     type: 'TextBlock',
@@ -1266,6 +1282,7 @@ describe('non-empty leaderboard tests', () => {
                                                         question.userId
                                                             .userName,
                                                     weight: 'Bolder',
+                                                    size: 'Small',
                                                 },
                                                 {
                                                     type: 'TextBlock',
@@ -1390,6 +1407,7 @@ describe('non-empty leaderboard tests', () => {
                                                         question.userId
                                                             .userName,
                                                     weight: 'Bolder',
+                                                    size: 'Small',
                                                 },
                                                 {
                                                     type: 'TextBlock',
@@ -1413,8 +1431,8 @@ describe('non-empty leaderboard tests', () => {
                                                     items: [
                                                         {
                                                             type: 'Image',
-                                                            url: `https://${process.env.HostName}/images/upvote_arrow_default.png`,
-                                                            width: '12px',
+                                                            url: `https://${process.env.HostName}/images/thumbs_up_default.png`,
+                                                            width: '20px',
                                                             selectAction: {
                                                                 type:
                                                                     'Action.Submit',
@@ -1542,6 +1560,7 @@ describe('non-empty leaderboard tests', () => {
                                                         question.userId
                                                             .userName,
                                                     weight: 'Bolder',
+                                                    size: 'Small',
                                                 },
                                                 {
                                                     type: 'TextBlock',
@@ -1565,8 +1584,8 @@ describe('non-empty leaderboard tests', () => {
                                                     items: [
                                                         {
                                                             type: 'Image',
-                                                            url: `https://${process.env.HostName}/images/upvote_arrow_purple.png`,
-                                                            width: '12px',
+                                                            url: `https://${process.env.HostName}/images/thumbs_up_filled.png`,
+                                                            width: '20px',
                                                             selectAction: {
                                                                 type:
                                                                     'Action.Submit',
@@ -1696,6 +1715,7 @@ describe('non-empty leaderboard tests', () => {
                                                         question.userId
                                                             .userName,
                                                     weight: 'Bolder',
+                                                    size: 'Small',
                                                 },
                                                 {
                                                     type: 'TextBlock',
@@ -1820,6 +1840,7 @@ describe('non-empty leaderboard tests', () => {
                                                         question.userId
                                                             .userName,
                                                     weight: 'Bolder',
+                                                    size: 'Small',
                                                 },
                                                 {
                                                     type: 'TextBlock',

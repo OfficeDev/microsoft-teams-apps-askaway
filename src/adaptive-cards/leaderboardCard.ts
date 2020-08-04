@@ -98,6 +98,7 @@ const myQuestions = {
                                     type: 'TextBlock',
                                     text: '${userId.userName}',
                                     weight: 'Bolder',
+                                    size: 'Small',
                                 },
                                 {
                                     type: 'TextBlock',
@@ -157,6 +158,7 @@ const allQuestions = {
                                     type: 'TextBlock',
                                     text: '${userId.userName}',
                                     weight: 'Bolder',
+                                    size: 'Small',
                                 },
                                 {
                                     type: 'TextBlock',
@@ -181,7 +183,7 @@ const allQuestions = {
                                         {
                                             type: 'Image',
                                             url: '${$root.upvoteArrow}',
-                                            width: '12px',
+                                            width: '20px',
                                             selectAction: {
                                                 type: 'Action.Submit',
                                                 id: 'upvote',
@@ -196,8 +198,8 @@ const allQuestions = {
                                         },
                                         {
                                             type: 'Image',
-                                            url: `https://${process.env.HostName}/images/upvote_arrow_purple.png`,
-                                            width: '12px',
+                                            url: `https://${process.env.HostName}/images/thumbs_up_filled.png`,
+                                            width: '20px',
                                             selectAction: {
                                                 type: 'Action.Submit',
                                                 id: 'upvote',
