@@ -1,17 +1,19 @@
 {
     "mainCard": {
-        "updated": "Updated",
-        "initiatedBy": "Initiated by",
-        "endedBy": "Ended by",
+        "updated": "Last updated",
+        "initiatedBy": "started an Ask Away session",
+        "endedBy": "ended the Ask Away session",
         "topQuestions": "Top questions",
-        "showRecentQuestions": "Show recent questions",
-        "recentQuestions": "Recent questions",
         "upvotes": "Upvotes",
         "askQuestion": "Ask a question",
         "upvoteQuestions": "Upvote questions",
         "viewQuestions": "View questions",
         "noMoreQuestions": "No longer accepting questions.",
-        "noQuestions": "Be the first to ask a question."
+        "noQuestions": "Be the first to ask a question.",
+        "recentlyAskedAQuestion": "recently asked a question",
+        "recentlyAskedQuestions": "recently asked questions",
+        "and": ", and",
+        "totalQuestions": "questions total"
     },
     "leaderboard": {
         "taskModuleTitle": "View questions and upvote",

@@ -30,6 +30,7 @@ const sampleTenantId = '11121';
 const sampleScopeId = '12311';
 const sampleQuestionContent = 'Sample Question?';
 const sampleQuestionId = '2321232';
+const sampleHostUserId = '5f160b862655575054393a0e';
 
 jest.mock('../adaptive-cards/adaptiveCardBuilder');
 jest.mock('../data/database');
@@ -45,7 +46,8 @@ test('get main card', async () => {
         sampleDescription,
         sampleUserName,
         sampleQnASessionID,
-        sampleUserAADObjId1
+        sampleUserAADObjId1,
+        sampleHostUserId
     );
     expect(acb.getMainCard).toBeCalledTimes(1);
     expect(acb.getMainCard).toBeCalledWith(
@@ -53,7 +55,8 @@ test('get main card', async () => {
         sampleDescription,
         sampleUserName,
         sampleQnASessionID,
-        sampleUserAADObjId1
+        sampleUserAADObjId1,
+        sampleHostUserId
     );
 });
 
@@ -87,6 +90,7 @@ test('start qna session in channel', async () => {
         sampleConversationId,
         sampleTenantId,
         sampleScopeId,
+        sampleHostUserId,
         true
     );
     expect(db.createQnASession).toBeCalledTimes(1);
@@ -99,6 +103,7 @@ test('start qna session in channel', async () => {
         sampleConversationId,
         sampleTenantId,
         sampleScopeId,
+        sampleHostUserId,
         true
     );
 });
@@ -117,6 +122,7 @@ test('start qna session in group chat', async () => {
         sampleConversationId,
         sampleTenantId,
         sampleScopeId,
+        sampleHostUserId,
         false
     );
     expect(db.createQnASession).toBeCalledTimes(1);
@@ -129,6 +135,7 @@ test('start qna session in group chat', async () => {
         sampleConversationId,
         sampleTenantId,
         sampleScopeId,
+        sampleHostUserId,
         false
     );
 });
@@ -197,7 +204,7 @@ test('get updated main card', async () => {
     expect(db.getQnASessionData).toBeCalledTimes(1);
     expect(db.getQnASessionData).toBeCalledWith(sampleQnASessionID);
     expect(db.getQuestions).toBeCalledTimes(1);
-    expect(db.getQuestions).toBeCalledWith(sampleQnASessionID, 3, 3);
+    expect(db.getQuestions).toBeCalledWith(sampleQnASessionID, 3);
 });
 
 test('add upvote', async () => {

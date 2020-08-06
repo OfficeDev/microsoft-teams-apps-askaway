@@ -2,7 +2,6 @@
 
 import { AdaptiveCard, IAdaptiveCard } from 'adaptivecards';
 import * as ACData from 'adaptivecards-templating';
-import moment from 'moment';
 import random from 'random';
 import seedrandom from 'seedrandom';
 import * as jwt from 'jsonwebtoken';
@@ -30,11 +29,12 @@ import { clone } from 'lodash';
  * @param description - description of QnA
  * @param userName - name of the user who created the QnA session
  * @param qnaSessionId - document database id of the QnA session
- * @param userId - Id of the user who created the QnA session
+ * @param aadObjectId - Id of the user who created the QnA session
+ * @param hostUserId - MS Teams Id of user who created the QnA (used for at-mentions)
  * @param ended - whether the QnA session has ended or not
  * @param topQuestionsData - array of questions to display under `Top Questions`
- * @param recentQuestionsData - array of questions to display under `Recent Questions`
- * @param showDateUpdated - whether to show last updated date or not
+ * @param recentQuestionsData - array of questions sorted by most recently asked first
+ * @param totalQuestions - number of questions asked so far in session
  * @returns The QnA Master Card
  */
 export const getMainCard = (
@@ -43,10 +43,11 @@ export const getMainCard = (
     userName: string,
     qnaSessionId: string,
     aadObjectId: string,
+    hostUserId: string,
     ended?: boolean,
     topQuestionsData?: IQuestionPopulatedUser[],
     recentQuestionsData?: IQuestionPopulatedUser[],
-    showDateUpdated = false
+    totalQuestions?: number
 ): IAdaptiveCard => {
     const data = {
         title,
@@ -73,18 +74,41 @@ export const getMainCard = (
         ? _processQuestions(topQuestionsData)
         : [];
 
-    recentQuestionsData = recentQuestionsData
-        ? _processQuestions(recentQuestionsData)
-        : [];
-
-    const dateUpdated = showDateUpdated
-        ? moment().format('ddd, MMM D, YYYY, h:mm A [GMT] Z')
-        : '';
-
     const _mainCard = mainCard();
     if (ended)
         // remove `Ask a Question` and `End QnA` buttons
-        _mainCard.actions = [viewLeaderboardButton()];
+        (<any>_mainCard.body)[5].actions = [viewLeaderboardButton()]; // is an ActionSet
+
+    // add at-mention data
+    _mainCard.msTeams.entities.push({
+        type: 'mention',
+        text: `<at>${userName}</at>`,
+        mentioned: {
+            id: hostUserId,
+            name: userName,
+        },
+    });
+
+    const _numQuestions = totalQuestions ? totalQuestions : 0;
+    let mostRecentUser = '',
+        nextMostRecentUser = '',
+        recentlyAskedString = '';
+
+    if (recentQuestionsData && _numQuestions > 3) {
+        mostRecentUser = recentQuestionsData[0].userId.userName;
+        for (const item of recentQuestionsData) {
+            if (item.userId.userName === mostRecentUser) continue;
+            nextMostRecentUser = item.userId.userName;
+            break;
+        }
+        recentlyAskedString = `${mostRecentUser} ${mainCardStrings(
+            'recentlyAskedAQuestion'
+        )}`;
+        if (nextMostRecentUser)
+            recentlyAskedString = `${mostRecentUser}, and ${nextMostRecentUser} ${mainCardStrings(
+                'recentlyAskedQuestions'
+            )}`;
+    }
 
     // it is not wrapped around by _adaptiveCard() because it will remove
     // the `msTeams` property from the master card.
@@ -95,19 +119,21 @@ export const getMainCard = (
             user: userName,
             qnaId: qnaSessionId,
             topQuestions: topQuestionsData,
-            recentQuestions: recentQuestionsData,
             userId: aadObjectId,
-            image: `https://${process.env.HostName}/images/title_bg.png`,
             data: data,
             leaderboardTitle: ended
                 ? mainCardStrings('viewQuestions')
                 : mainCardStrings('upvoteQuestions'),
             sessionDetails: ended
-                ? `${mainCardStrings('endedBy')} ${userName}. ${mainCardStrings(
-                      'noMoreQuestions'
-                  )}`
-                : `${mainCardStrings('initiatedBy')} ${userName}`,
-            dateLastUpdated: dateUpdated,
+                ? `**<at>${userName}</at>** ${mainCardStrings(
+                      'endedBy'
+                  )}. ${mainCardStrings('noMoreQuestions')}`
+                : `**<at>${userName}</at>** ${mainCardStrings('initiatedBy')}`,
+            recentlyAsked: recentlyAskedString
+                ? `${recentlyAskedString} (${_numQuestions} ${mainCardStrings(
+                      'totalQuestions'
+                  )})`
+                : '',
         },
     });
 };

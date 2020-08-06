@@ -38,6 +38,7 @@ const avatarColors: string[] = [
  * @param activityId - id of the master card message used for proactive updating
  * @param tenantId - id of tenant the bot is running on.
  * @param scopeId - channel id or group chat id
+ * @param hostUserId - MS Teams Id of user who created the QnA (used for at-mentions)
  * @param isChannel - whether the QnA session was started in a channel or group chat
  * @returns the master adaptive card
  */
@@ -50,6 +51,7 @@ export const startQnASession = async (
     conversationId: string,
     tenantId: string,
     scopeId: string,
+    hostUserId: string,
     isChannel: boolean
 ): Promise<Result<{ card: AdaptiveCard; qnaSessionId: string }, Error>> => {
     try {
@@ -63,6 +65,7 @@ export const startQnASession = async (
             conversationId,
             tenantId,
             scopeId,
+            hostUserId,
             isChannel
         );
 
@@ -73,7 +76,8 @@ export const startQnASession = async (
                 description,
                 userName,
                 response.qnaSessionId,
-                response.hostId
+                response.hostId,
+                hostUserId
             ),
             qnaSessionId: response.qnaSessionId,
         });
@@ -181,20 +185,21 @@ export const getUpdatedMainCard = async (
             topQuestions,
             recentQuestions,
             numQuestions,
-        } = await db.getQuestions(qnaSessionId, 3, 3);
+        } = await db.getQuestions(qnaSessionId, 3);
 
         // generate and return maincard
         return ok({
-            card: await getMainCard(
+            card: getMainCard(
                 qnaSessionData.title,
                 qnaSessionData.description,
                 qnaSessionData.userName,
                 qnaSessionId,
                 qnaSessionData.userAadObjId,
+                qnaSessionData.hostUserId,
                 ended || !qnaSessionData.isActive,
                 topQuestions,
                 recentQuestions,
-                true
+                numQuestions
             ),
             activityId: qnaSessionData.activityId,
             numQuestions,

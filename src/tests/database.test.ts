@@ -37,6 +37,7 @@ const sampleConversationId = '8293';
 const sampleTenantId = '11121';
 const sampleScopeId = '12311';
 const sampleQnASessionID = '5f160b862655575054393a0e';
+const sampleHostUserId = '5f160b862655575054393a0e';
 
 beforeAll(async () => {
     await mongoose.connect(<string>process.env.MONGO_URL, {
@@ -60,6 +61,7 @@ beforeEach(async () => {
         activityId: sampleActivityId,
         conversationId: sampleConversationId,
         tenantId: sampleTenantId,
+        hostUserId: sampleHostUserId,
         scope: {
             scopeId: sampleScopeId,
             isChannel: true,
@@ -97,6 +99,7 @@ test('can create qna session', async () => {
         activityId: sampleActivityId,
         conversationId: sampleConversationId,
         tenantId: sampleTenantId,
+        hostUserId: sampleHostUserId,
         scopeId: sampleScopeId,
         isChannel: true,
     };
@@ -110,6 +113,7 @@ test('can create qna session', async () => {
         data.conversationId,
         data.tenantId,
         data.scopeId,
+        data.hostUserId,
         data.isChannel
     );
 
@@ -129,6 +133,7 @@ test('can create qna session', async () => {
         conversationId: doc.conversationId,
         tenantId: doc.tenantId,
         scopeId: doc.scope.scopeId,
+        hostUserId: doc.hostUserId,
         isChannel: doc.scope.isChannel,
         userName: data.userName,
     };
@@ -215,7 +220,7 @@ test('retrieve most recent/top questions with three questions', async () => {
     await _sleep(1000);
     questions[2] = await new Question(questions[2]).save();
 
-    const results = await getQuestions(testQnASession._id, 3, 3);
+    const results = await getQuestions(testQnASession._id, 3);
     const topQuestions: any = results.topQuestions;
     const recentQuestions: any = results.recentQuestions;
     const numQuestions = results.numQuestions;
@@ -236,11 +241,114 @@ test('retrieve most recent/top questions with three questions', async () => {
     await Question.remove({ qnaSessionId: testQnASession._id });
 });
 
+test('retrieve most top questions with no votes should be most recent questions', async () => {
+    const doc: any = await QnASession.findById(testQnASession._id);
+    expect(doc).not.toBeNull();
+
+    // create a new questions
+    const questions: any = [
+        {
+            qnaSessionId: testQnASession._id,
+            userId: testUser._id,
+            content: 'This is test question 1',
+            voters: [],
+        },
+        {
+            qnaSessionId: testQnASession._id,
+            userId: testUser._id,
+            content: 'This is test question 2',
+            voters: [],
+        },
+        {
+            qnaSessionId: testQnASession._id,
+            userId: testUser._id,
+            content: 'This is test question 3',
+            voters: [],
+        },
+    ];
+
+    const _sleep = (ms) =>
+        new Promise((resolve) => setTimeout(() => resolve(), ms));
+    questions[1] = await new Question(questions[1]).save();
+    await _sleep(50);
+    questions[0] = await new Question(questions[0]).save();
+    await _sleep(1000);
+    questions[2] = await new Question(questions[2]).save();
+
+    const results = await getQuestions(testQnASession._id, 3);
+    const topQuestions: any = results.topQuestions;
+    const numQuestions = results.numQuestions;
+
+    expect(topQuestions).not.toBe(null);
+    expect(numQuestions).toEqual(3);
+
+    expect(topQuestions[0]._id).toEqual(questions[2]._id);
+    expect(topQuestions[1]._id).toEqual(questions[0]._id);
+    expect(topQuestions[2]._id).toEqual(questions[1]._id);
+
+    // cleanup
+    await Question.remove({ qnaSessionId: testQnASession._id });
+});
+
+test('retrieve most top questions with some votes should be most recent questions', async () => {
+    const doc: any = await QnASession.findById(testQnASession._id);
+    expect(doc).not.toBeNull();
+
+    // create a new questions
+    const questions: any = [
+        {
+            qnaSessionId: testQnASession._id,
+            userId: testUser._id,
+            content: 'This is test question 1',
+            voters: [
+                {
+                    _id: '456',
+                    userName: 'Khayan Shalili',
+                },
+            ],
+        },
+        {
+            qnaSessionId: testQnASession._id,
+            userId: testUser._id,
+            content: 'This is test question 2',
+            voters: [],
+        },
+        {
+            qnaSessionId: testQnASession._id,
+            userId: testUser._id,
+            content: 'This is test question 3',
+            voters: [],
+        },
+    ];
+
+    const _sleep = (ms) =>
+        new Promise((resolve) => setTimeout(() => resolve(), ms));
+    questions[1] = await new Question(questions[1]).save();
+    await _sleep(50);
+    questions[0] = await new Question(questions[0]).save();
+    await _sleep(1000);
+    questions[2] = await new Question(questions[2]).save();
+
+    const results = await getQuestions(testQnASession._id, 3);
+    const topQuestions: any = results.topQuestions;
+    const numQuestions = results.numQuestions;
+
+    expect(topQuestions).not.toBe(null);
+    expect(numQuestions).toEqual(3);
+
+    expect(topQuestions[0]._id).toEqual(questions[0]._id);
+    expect(topQuestions[1]._id).toEqual(questions[2]._id);
+    expect(topQuestions[2]._id).toEqual(questions[1]._id);
+
+    // cleanup
+    await Question.remove({ qnaSessionId: testQnASession._id });
+});
+
 test('retrieve most recent/top questions with no questions', async () => {
     const doc: any = await QnASession.findById(testQnASession._id);
     expect(doc).not.toBeNull();
 
-    const results = await getQuestions(testQnASession._id, 3, 3);
+    const results = await getQuestions(testQnASession._id, 3);
     const topQuestions: any = results.topQuestions;
     const recentQuestions: any = results.recentQuestions;
     const numQuestions: any = results.numQuestions;
@@ -487,6 +595,7 @@ test('checking if inactive QnA is currently active', async () => {
         conversationId: sampleConversationId,
         tenantId: sampleTenantId,
         scopeId: sampleScopeId,
+        hostUserId: sampleHostUserId,
         isChannel: true,
     };
 
@@ -499,6 +608,7 @@ test('checking if inactive QnA is currently active', async () => {
         data.conversationId,
         data.tenantId,
         data.scopeId,
+        data.hostUserId,
         data.isChannel
     );
 

@@ -436,6 +436,7 @@ test('bot message preview send', async () => {
             from: {
                 name: 'name',
                 aadObjectId: 'objId',
+                id: 'host scope id',
             },
             conversation: {
                 id: 'randomConvoId',
@@ -473,6 +474,7 @@ test('bot message preview send', async () => {
         context.activity.conversation.id,
         context.activity.conversation.tenantId,
         context.activity.conversation.id,
+        context.activity.from.id,
         false
     );
     expect(context.sendActivity).toBeCalledTimes(1);
@@ -488,6 +490,7 @@ describe('messaging extension submit', () => {
                 from: {
                     name: 'name',
                     aadObjectId: 'objId',
+                    id: 'host scope id',
                 },
             },
         };
@@ -513,7 +516,8 @@ describe('messaging extension submit', () => {
             action.data.description,
             context.activity.from.name,
             '',
-            context.activity.from.aadObjectId
+            context.activity.from.aadObjectId,
+            context.activity.from.id
         );
         expect(result.composeExtension.type).toBe('botMessagePreview');
     });
