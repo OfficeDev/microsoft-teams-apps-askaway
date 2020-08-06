@@ -23,6 +23,10 @@ const QnASessionSchema = new mongoose.Schema({
         ref: 'User',
         required: true,
     },
+    hostUserId: {
+        type: String,
+        required: true,
+    },
     activityId: {
         type: String,
         required: false,
@@ -67,6 +71,7 @@ interface IQnASessionBase extends mongoose.Document {
         scopeId: string;
         isChannel: boolean;
     };
+    hostUserId: string;
     dateTimeCreated: Date;
     dateTimeEnded?: Date;
 }

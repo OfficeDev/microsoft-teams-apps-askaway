@@ -56,13 +56,16 @@ export interface MainCard {
     endedBy: string;
     topQuestions: string;
     showRecentQuestions: string;
-    recentQuestions: string;
     upvotes: string;
     askQuestion: string;
     upvoteQuestions: string;
     viewQuestions: string;
     noMoreQuestions: string;
     noQuestions: string;
+    recentlyAskedAQuestion: string;
+    recentlyAskedQuestions: string;
+    and: string;
+    totalQuestions: string;
 }
 
 export interface StartQnA {

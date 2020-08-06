@@ -448,6 +448,7 @@ export class AskAway extends TeamsActivityHandler {
             activityId = '',
             tenantId = conversation.tenantId,
             isChannel = conversation.conversationType === 'channel',
+            hostUserId = context.activity.from.id,
             scopeId = isChannel
                 ? teamsGetChannelId(context.activity)
                 : conversation.id;
@@ -461,6 +462,7 @@ export class AskAway extends TeamsActivityHandler {
             context.activity.conversation.id,
             tenantId,
             scopeId,
+            hostUserId,
             isChannel
         );
 
@@ -497,7 +499,8 @@ export class AskAway extends TeamsActivityHandler {
             description = value.data.description.trim(),
             username = context.activity.from.name,
             qnaSessionId = '',
-            userId = <string>context.activity.from.aadObjectId;
+            userId = <string>context.activity.from.aadObjectId,
+            hostUserId = <string>context.activity.from.id;
 
         if (!(title && description))
             return this._buildTaskModuleContinueResponse(
@@ -514,7 +517,8 @@ export class AskAway extends TeamsActivityHandler {
                 description,
                 username,
                 qnaSessionId,
-                userId
+                userId,
+                hostUserId
             )
         );
 

@@ -34,6 +34,7 @@ const sampleQnASessionID = '5f160b862655575054393a0e';
 const sampleTitle = 'Weekly QnA Test';
 const sampleDescription = 'Weekly QnA Test description';
 const sampleErrorMessage = 'Sample error message';
+const sampleHostUserId = '5f160b862655575054393a0e';
 
 beforeAll(async () => {
     await initLocalization();
@@ -445,6 +446,7 @@ describe('main card', () => {
     const sampleTitle = 'title';
     const sampleDescription = 'desc';
     const sampleUserName = 'username';
+    const sampleUserName2 = 'username2';
     const sampleSessionId = 'sessionid';
     const sampleUserAADObjId = 'useraadobjid';
 
@@ -454,12 +456,12 @@ describe('main card', () => {
             sampleDescription,
             sampleUserName,
             sampleSessionId,
-            sampleUserAADObjId
+            sampleUserAADObjId,
+            sampleHostUserId
         );
         const expected = [
             {
                 type: 'Container',
-                backgroundImage: `https://${undefined}/images/title_bg.png`, // process.env.HostName won't be set
                 bleed: true,
                 items: [
                     {
@@ -468,7 +470,6 @@ describe('main card', () => {
                         wrap: true,
                         weight: 'bolder',
                         size: 'large',
-                        color: 'light',
                         horizontalAlignment: 'left',
                     },
                 ],
@@ -478,41 +479,13 @@ describe('main card', () => {
                 type: 'TextBlock',
                 text: sampleDescription,
                 wrap: true,
+                spacing: 'small',
                 size: 'medium',
             },
         ];
 
-        const _result = [result.body[0], result.body[1]];
+        const _result = [result.body[1], result.body[2]];
         expect(_result).toEqual(expected);
-        return;
-    });
-
-    test('date update shows', async () => {
-        const result: any = getMainCard(
-            sampleTitle,
-            sampleDescription,
-            sampleUserName,
-            sampleSessionId,
-            sampleUserAADObjId,
-            undefined,
-            undefined,
-            undefined,
-            true
-        );
-
-        // const expected = {
-        //     type: 'TextBlock',
-        //     text: `${mainCardStrings('updated')} \${dateLastUpdated}`,
-        //     wrap: true,
-        //     size: 'Small',
-        //     isSubtle: true,
-        //     $when: '${count($root.dateLastUpdated) > 0}',
-        // };
-
-        const _result = result.body[2];
-        expect(_result.text.includes(mainCardStrings('updated'))).toBe(true);
-        expect(_result.text.includes('GMT')).toBe(true);
-        expect(_result.$when).toBe(true);
         return;
     });
 
@@ -522,7 +495,8 @@ describe('main card', () => {
             sampleDescription,
             sampleUserName,
             sampleSessionId,
-            sampleUserAADObjId
+            sampleUserAADObjId,
+            sampleHostUserId
         );
         const expected = {
             type: 'Container',
@@ -568,7 +542,7 @@ describe('main card', () => {
             wrap: true,
         };
 
-        const _result = result.body[2];
+        const _result = result.body[3];
         expect(_result).toEqual(expected);
         return;
     });
@@ -591,6 +565,7 @@ describe('main card', () => {
             sampleUserName,
             sampleSessionId,
             sampleUserAADObjId,
+            sampleHostUserId,
             undefined,
             topQuestionsData
         );
@@ -601,6 +576,7 @@ describe('main card', () => {
             sampleUserName,
             sampleSessionId,
             sampleUserAADObjId,
+            sampleHostUserId,
             true,
             topQuestionsData
         );
@@ -651,177 +627,13 @@ describe('main card', () => {
             },
         ];
 
-        const _result = result.body[2].items[1].items[0].columns;
+        const _result = result.body[3].items[1].items[0].columns;
         expect(_result[1].items).toEqual(expected[1].items);
         expect(_result[2].items).toEqual(expected[2].items);
         expect(_result[0].items[0].url).toBeTruthy();
 
         const _resultMainCardEnded =
-            resultMainCardEnded.body[2].items[1].items[0].columns;
-        expect(_resultMainCardEnded[1].items).toEqual(expected[1].items);
-        expect(_resultMainCardEnded[2].items).toEqual(expected[2].items);
-        expect(_resultMainCardEnded[0].items[0].url).toBeTruthy();
-        return;
-    });
-
-    test('get recent question container empty', async () => {
-        const result: any = getMainCard(
-            sampleTitle,
-            sampleDescription,
-            sampleUserName,
-            sampleSessionId,
-            sampleUserAADObjId
-        );
-        const expected = {
-            type: 'ActionSet',
-            separator: true,
-            spacing: 'Large',
-            horizontalAlignment: 'Center',
-            actions: [
-                {
-                    type: 'Action.ShowCard',
-                    title: mainCardStrings('showRecentQuestions'),
-                    card: {
-                        $schema:
-                            'https://adaptivecards.io/schemas/adaptive-card.json',
-                        type: 'AdaptiveCard',
-                        version: '1.2',
-                        body: [
-                            {
-                                type: 'Container',
-                                spacing: 'Large',
-                                id: 'recentQuestions',
-                                items: [
-                                    {
-                                        type: 'ColumnSet',
-                                        columns: [
-                                            {
-                                                type: 'Column',
-                                                width: 'stretch',
-                                                items: [
-                                                    {
-                                                        type: 'TextBlock',
-                                                        text: mainCardStrings(
-                                                            'recentQuestions'
-                                                        ),
-                                                        wrap: true,
-                                                        weight: 'Bolder',
-                                                        size: 'Medium',
-                                                    },
-                                                ],
-                                            },
-                                        ],
-                                    },
-                                    {
-                                        type: 'TextBlock',
-                                        text: mainCardStrings('noQuestions'),
-                                        color: 'accent',
-                                        $when: true,
-                                    },
-                                ],
-                                wrap: true,
-                            },
-                        ],
-                    },
-                },
-            ],
-        };
-
-        const _result = result.body[3];
-        expect(_result).toEqual(expected);
-        return;
-    });
-
-    test('get recent question container poulated', async () => {
-        const sampleContent = 'randomQuestion';
-        const recentQuestionsData: IQuestionPopulatedUser[] = [
-            <IQuestionPopulatedUser>{
-                qnaSessionId: 'sessionId',
-                userId: <IUser>{ _id: 'userId', userName: sampleUserName },
-                voters: <string[]>[],
-                content: sampleContent,
-                dateTimeCreated: new Date(),
-            },
-        ];
-
-        const result: any = getMainCard(
-            sampleTitle,
-            sampleDescription,
-            sampleUserName,
-            sampleSessionId,
-            sampleUserAADObjId,
-            undefined,
-            undefined,
-            recentQuestionsData
-        );
-
-        const resultMainCardEnded: any = getMainCard(
-            sampleTitle,
-            sampleDescription,
-            sampleUserName,
-            sampleSessionId,
-            sampleUserAADObjId,
-            true,
-            undefined,
-            recentQuestionsData
-        );
-
-        const expected = [
-            {
-                type: 'Column',
-                width: 'auto',
-                items: [
-                    {
-                        type: 'Image',
-                        style: 'Person',
-                        size: 'Small',
-                        url: '${userId.picture}',
-                    },
-                ],
-            },
-            {
-                type: 'Column',
-                width: 'stretch',
-                items: [
-                    {
-                        type: 'TextBlock',
-                        text: sampleUserName,
-                        weight: 'Bolder',
-                        size: 'Small',
-                    },
-                    {
-                        type: 'TextBlock',
-                        text: sampleContent,
-                        spacing: 'None',
-                        wrap: true,
-                        maxLines: 3,
-                    },
-                ],
-            },
-            {
-                type: 'Column',
-                width: '30px',
-                spacing: 'extraLarge',
-                items: [
-                    {
-                        type: 'TextBlock',
-                        text: '0',
-                    },
-                ],
-                verticalContentAlignment: 'Center',
-            },
-        ];
-
-        const _result =
-            result.body[3].actions[0].card.body[0].items[1].items[0].columns;
-        expect(_result[1].items).toEqual(expected[1].items);
-        expect(_result[2].items).toEqual(expected[2].items);
-        expect(_result[0].items[0].url).toBeTruthy();
-
-        const _resultMainCardEnded =
-            resultMainCardEnded.body[3].actions[0].card.body[0].items[1]
-                .items[0].columns;
-
+            resultMainCardEnded.body[3].items[1].items[0].columns;
         expect(_resultMainCardEnded[1].items).toEqual(expected[1].items);
         expect(_resultMainCardEnded[2].items).toEqual(expected[2].items);
         expect(_resultMainCardEnded[0].items[0].url).toBeTruthy();
@@ -834,16 +646,23 @@ describe('main card', () => {
             sampleDescription,
             sampleUserName,
             sampleSessionId,
-            sampleUserAADObjId
+            sampleUserAADObjId,
+            sampleHostUserId
         );
         const expected = {
-            type: 'TextBlock',
-            text: `${mainCardStrings('initiatedBy')} ${sampleUserName}`,
-            wrap: true,
-            spacing: 'Large',
+            type: 'Container',
+            items: [
+                {
+                    type: 'TextBlock',
+                    text: `**<at>${sampleUserName}</at>** ${mainCardStrings(
+                        'initiatedBy'
+                    )}`,
+                    wrap: true,
+                },
+            ],
         };
 
-        const _result = result.body[4];
+        const _result = result.body[0];
         expect(_result).toEqual(expected);
         return;
     });
@@ -855,18 +674,23 @@ describe('main card', () => {
             sampleUserName,
             sampleSessionId,
             sampleUserAADObjId,
+            sampleHostUserId,
             true
         );
         const expected = {
-            type: 'TextBlock',
-            text: `${mainCardStrings(
-                'endedBy'
-            )} ${sampleUserName}. ${mainCardStrings('noMoreQuestions')}`,
-            wrap: true,
-            spacing: 'Large',
+            type: 'Container',
+            items: [
+                {
+                    type: 'TextBlock',
+                    text: `**<at>${sampleUserName}</at>** ${mainCardStrings(
+                        'endedBy'
+                    )}. ${mainCardStrings('noMoreQuestions')}`,
+                    wrap: true,
+                },
+            ],
         };
 
-        const _result = result.body[4];
+        const _result = result.body[0];
         expect(_result).toEqual(expected);
         return;
     });
@@ -878,24 +702,21 @@ describe('main card', () => {
             sampleUserName,
             sampleSessionId,
             sampleUserAADObjId,
+            sampleHostUserId,
             true
         );
         const expected = {
-            entities: [
-                {
-                    data: {
-                        title: sampleTitle,
-                        description: sampleDescription,
-                        userName: sampleUserName,
-                        qnaSessionId: sampleSessionId,
-                        aadObjectId: sampleUserAADObjId,
-                        ended: true,
-                    },
-                },
-            ],
+            data: {
+                title: sampleTitle,
+                description: sampleDescription,
+                userName: sampleUserName,
+                qnaSessionId: sampleSessionId,
+                aadObjectId: sampleUserAADObjId,
+                ended: true,
+            },
         };
 
-        const _result = result.msTeams;
+        const _result = result.msTeams.entities[0];
         expect(_result).toEqual(expected);
         return;
     });
@@ -906,7 +727,8 @@ describe('main card', () => {
             sampleDescription,
             sampleUserName,
             sampleSessionId,
-            sampleUserAADObjId
+            sampleUserAADObjId,
+            sampleHostUserId
         );
         const expected = [
             {
@@ -936,7 +758,7 @@ describe('main card', () => {
             },
         ];
 
-        const _result = result.actions;
+        const _result = result.body[result.body.length - 1].actions;
         expect(_result).toEqual(expected);
         return;
     });
@@ -948,6 +770,7 @@ describe('main card', () => {
             sampleUserName,
             sampleSessionId,
             sampleUserAADObjId,
+            sampleHostUserId,
             true
         );
         const expected = [
@@ -966,7 +789,7 @@ describe('main card', () => {
             },
         ];
 
-        const _result = result.actions;
+        const _result = result.body[result.body.length - 1].actions;
         expect(_result).toEqual(expected);
         return;
     });
@@ -978,12 +801,226 @@ describe('main card', () => {
             sampleUserName,
             sampleSessionId,
             sampleUserAADObjId,
+            sampleHostUserId,
             true
         );
         const mainCardData = extractMainCardData(result);
 
         expect(mainCardData.isOk()).toBe(true);
         expect(mainCardData.value).toEqual(result.msTeams.entities[0].data);
+    });
+
+    describe('recently asked questions string', () => {
+        test('no questions asked', () => {
+            const result: any = getMainCard(
+                sampleTitle,
+                sampleDescription,
+                sampleUserName,
+                sampleSessionId,
+                sampleUserAADObjId,
+                sampleHostUserId,
+                undefined,
+                undefined,
+                undefined
+            );
+
+            const expected = {
+                type: 'TextBlock',
+                text: '',
+                wrap: true,
+                size: 'small',
+                separator: true,
+                spacing: 'large',
+            };
+
+            const _result = result.body[result.body.length - 2];
+            expect(_result).toEqual(expected);
+        });
+
+        test('less than 4 questions asked', () => {
+            const sampleContent = 'randomQuestion';
+            const recentQuestionsData: IQuestionPopulatedUser[] = [
+                <IQuestionPopulatedUser>{
+                    qnaSessionId: 'sessionId',
+                    userId: <IUser>{ _id: 'userId', userName: sampleUserName },
+                    voters: ['userId1', 'userId2'],
+                    content: sampleContent,
+                    dateTimeCreated: new Date(),
+                },
+            ];
+
+            const result: any = getMainCard(
+                sampleTitle,
+                sampleDescription,
+                sampleUserName,
+                sampleSessionId,
+                sampleUserAADObjId,
+                sampleHostUserId,
+                undefined,
+                undefined,
+                recentQuestionsData,
+                1
+            );
+
+            const expected = {
+                type: 'TextBlock',
+                text: '',
+                wrap: true,
+                size: 'small',
+                separator: true,
+                spacing: 'large',
+            };
+
+            const _result = result.body[result.body.length - 2];
+            expect(_result).toEqual(expected);
+        });
+
+        test('multiple questions asked same user', () => {
+            const sampleContent = 'randomQuestion';
+            const recentQuestionsData: IQuestionPopulatedUser[] = [
+                <IQuestionPopulatedUser>{
+                    qnaSessionId: 'sessionId',
+                    userId: <IUser>{ _id: 'userId', userName: sampleUserName },
+                    voters: ['userId1', 'userId2'],
+                    content: sampleContent,
+                    dateTimeCreated: new Date(),
+                },
+                <IQuestionPopulatedUser>{
+                    qnaSessionId: 'sessionId',
+                    userId: <IUser>{ _id: 'userId', userName: sampleUserName },
+                    voters: ['userId1', 'userId2'],
+                    content: sampleContent,
+                    dateTimeCreated: new Date(),
+                },
+                <IQuestionPopulatedUser>{
+                    qnaSessionId: 'sessionId',
+                    userId: <IUser>{ _id: 'userId', userName: sampleUserName },
+                    voters: ['userId1', 'userId2'],
+                    content: sampleContent,
+                    dateTimeCreated: new Date(),
+                },
+                <IQuestionPopulatedUser>{
+                    qnaSessionId: 'sessionId',
+                    userId: <IUser>{ _id: 'userId', userName: sampleUserName },
+                    voters: ['userId1', 'userId2'],
+                    content: sampleContent,
+                    dateTimeCreated: new Date(),
+                },
+            ];
+
+            const result: any = getMainCard(
+                sampleTitle,
+                sampleDescription,
+                sampleUserName,
+                sampleSessionId,
+                sampleUserAADObjId,
+                sampleHostUserId,
+                undefined,
+                undefined,
+                recentQuestionsData,
+                4
+            );
+
+            const expected = {
+                type: 'TextBlock',
+                text: `${sampleUserName} recently asked a question (4 questions total)`,
+                wrap: true,
+                size: 'small',
+                separator: true,
+                spacing: 'large',
+            };
+
+            const _result = result.body[result.body.length - 2];
+            expect(_result).toEqual(expected);
+        });
+
+        test('multiple questions asked different user', () => {
+            const sampleContent = 'randomQuestion';
+            const recentQuestionsData: IQuestionPopulatedUser[] = [
+                <IQuestionPopulatedUser>{
+                    qnaSessionId: 'sessionId',
+                    userId: <IUser>{ _id: 'userId', userName: sampleUserName2 },
+                    voters: ['userId1', 'userId2'],
+                    content: sampleContent,
+                    dateTimeCreated: new Date(),
+                },
+                <IQuestionPopulatedUser>{
+                    qnaSessionId: 'sessionId',
+                    userId: <IUser>{ _id: 'userId', userName: sampleUserName },
+                    voters: ['userId1', 'userId2'],
+                    content: sampleContent,
+                    dateTimeCreated: new Date(),
+                },
+                <IQuestionPopulatedUser>{
+                    qnaSessionId: 'sessionId',
+                    userId: <IUser>{ _id: 'userId', userName: sampleUserName },
+                    voters: ['userId1', 'userId2'],
+                    content: sampleContent,
+                    dateTimeCreated: new Date(),
+                },
+                <IQuestionPopulatedUser>{
+                    qnaSessionId: 'sessionId',
+                    userId: <IUser>{ _id: 'userId', userName: sampleUserName2 },
+                    voters: ['userId1', 'userId2'],
+                    content: sampleContent,
+                    dateTimeCreated: new Date(),
+                },
+            ];
+
+            const result: any = getMainCard(
+                sampleTitle,
+                sampleDescription,
+                sampleUserName,
+                sampleSessionId,
+                sampleUserAADObjId,
+                sampleHostUserId,
+                undefined,
+                undefined,
+                recentQuestionsData,
+                4
+            );
+
+            const expected = {
+                type: 'TextBlock',
+                text: `${sampleUserName2}, and ${sampleUserName} recently asked questions (4 questions total)`,
+                wrap: true,
+                size: 'small',
+                separator: true,
+                spacing: 'large',
+            };
+
+            const _result = result.body[result.body.length - 2];
+            expect(_result).toEqual(expected);
+        });
+
+        test('total questions', () => {
+            const sampleContent = 'randomQuestion';
+            const recentQuestionsData: IQuestionPopulatedUser[] = [
+                <IQuestionPopulatedUser>{
+                    qnaSessionId: 'sessionId',
+                    userId: <IUser>{ _id: 'userId', userName: sampleUserName },
+                    voters: ['userId1', 'userId2'],
+                    content: sampleContent,
+                    dateTimeCreated: new Date(),
+                },
+            ];
+
+            const result: any = getMainCard(
+                sampleTitle,
+                sampleDescription,
+                sampleUserName,
+                sampleSessionId,
+                sampleUserAADObjId,
+                sampleHostUserId,
+                undefined,
+                undefined,
+                recentQuestionsData,
+                200
+            );
+
+            const _result = result.body[result.body.length - 2];
+            expect(_result.text.includes('(200 questions total)')).toBe(true);
+        });
     });
 });
 

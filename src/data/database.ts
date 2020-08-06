@@ -28,10 +28,11 @@ export const initiateConnection = async (mongoURI: string) => {
  * @param title - title of QnA
  * @param description - description of QnA
  * @param userName - name of the user who created the QnA
- * @param userAadObjId - AAD Object Id of the suer who created the QnA
+ * @param userAadObjId - AAD Object Id of the user who created the QnA
  * @param activityId - id of the master card message used for proactive updating
  * @param tenantId - id of tenant the bot is running on.
  * @param scopeId - channel id or group chat id
+ * @param hostUserId - MS Teams Id of user who created the QnA (used for at-mentions)
  * @param isChannel - whether the QnA session was started in a channel or group chat
  */
 export const createQnASession = async (
@@ -43,6 +44,7 @@ export const createQnASession = async (
     conversationId: string,
     tenantId: string,
     scopeId: string,
+    hostUserId: string,
     isChannel: boolean
 ): Promise<{ qnaSessionId: string; hostId: string }> => {
     await getUserOrCreate(userAadObjId, userName);
@@ -55,6 +57,7 @@ export const createQnASession = async (
         conversationId: conversationId,
         tenantId: tenantId,
         isActive: true,
+        hostUserId: hostUserId,
         scope: {
             scopeId: scopeId,
             isChannel: isChannel,
@@ -135,42 +138,47 @@ const isIQuestion_populatedUserArray = (
 /**
  * Retrives top N questions with the highest number of votes.
  * @param qnaSessionId - the DBID of the QnA session from which to retrieve the questions.
- * @param n - number of questions to retrieve. Must be positive.
+ * @param topN - number of questions to retrieve. Must be positive.
  * @returns - Array of Question documents in the QnA and total questions in QnA.
  */
 export const getQuestions = async (
     qnaSessionId: string,
-    topN?: number,
-    recentN?: number
+    topN?: number
 ): Promise<{
     topQuestions?: IQuestionPopulatedUser[];
     recentQuestions?: IQuestionPopulatedUser[];
     numQuestions: number;
 }> => {
     const questionData = await getQuestionData(qnaSessionId);
-    let voteSorted, recentSorted;
+    let voteSorted;
 
-    if (recentN)
-        // most recent question comes first at index 0
-        recentSorted = questionData
-            .map((value) => value.toObject())
-            .sort(
-                (a: any, b: any) =>
-                    new Date(b.dateTimeCreated).getTime() -
-                    new Date(a.dateTimeCreated).getTime()
-            )
-            .slice(0, recentN);
+    // most recent question comes first at index 0
+    const recentSorted = questionData
+        .map((value) => value.toObject())
+        .sort(
+            (a: any, b: any) =>
+                new Date(b.dateTimeCreated).getTime() -
+                new Date(a.dateTimeCreated).getTime()
+        );
 
     if (topN)
         // descending order, so [0, 1, 2] => [2, 1, 0]
         voteSorted = questionData
             .map((value) => value.toObject())
-            .sort((a: any, b: any) => b.voters.length - a.voters.length)
+            .sort((a: any, b: any) => {
+                // sort by votes first then most recent
+                const diff = b.voters.length - a.voters.length;
+                if (diff !== 0) return diff;
+                return (
+                    new Date(b.dateTimeCreated).getTime() -
+                    new Date(a.dateTimeCreated).getTime()
+                );
+            })
             .slice(0, topN);
 
     return {
         topQuestions: topN ? voteSorted : null,
-        recentQuestions: recentN ? recentSorted : null,
+        recentQuestions: recentSorted,
         numQuestions: questionData.length,
     };
 };
@@ -201,6 +209,8 @@ export const getQnASessionData = async (qnaSessionId: string) => {
         conversationId: _qnaSessionData.conversationId,
         userAadObjId: _qnaSessionData.hostId._id,
         description: _qnaSessionData.description,
+        dateCreated: _qnaSessionData.dateTimeCreated,
+        hostUserId: _qnaSessionData.hostUserId,
         isActive: _qnaSessionData.isActive,
     };
 };

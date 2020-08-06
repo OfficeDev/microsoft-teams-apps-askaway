@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/tslint/config */
 import { IAdaptiveCard } from 'adaptivecards';
 import { err, ok, Result } from 'src/util/ResultWrapper';
 import { ISubmitAction } from 'adaptivecards/lib/schema';
@@ -45,7 +46,16 @@ export const mainCard = () =>
         body: [
             {
                 type: 'Container',
-                backgroundImage: '${image}',
+                items: [
+                    {
+                        type: 'TextBlock',
+                        text: '${sessionDetails}',
+                        wrap: true,
+                    },
+                ],
+            },
+            {
+                type: 'Container',
                 bleed: true,
                 items: [
                     {
@@ -54,7 +64,6 @@ export const mainCard = () =>
                         wrap: true,
                         weight: 'bolder',
                         size: 'large',
-                        color: 'light',
                         horizontalAlignment: 'left',
                     },
                 ],
@@ -64,15 +73,8 @@ export const mainCard = () =>
                 type: 'TextBlock',
                 text: '${description}',
                 wrap: true,
+                spacing: 'small',
                 size: 'medium',
-            },
-            {
-                type: 'TextBlock',
-                text: `${mainCardStrings('updated')} \${dateLastUpdated}`,
-                wrap: true,
-                size: 'Small',
-                isSubtle: true,
-                $when: '${count($root.dateLastUpdated) > 0}',
             },
             {
                 type: 'Container',
@@ -118,12 +120,18 @@ export const mainCard = () =>
                 ],
                 wrap: true,
             },
-            recentQuestionActionSet(),
             {
                 type: 'TextBlock',
-                text: '${sessionDetails}',
+                text: '${recentlyAsked}',
                 wrap: true,
-                spacing: 'Large',
+                size: 'small',
+                separator: true,
+                spacing: 'large',
+            },
+            {
+                type: 'ActionSet',
+                actions: actions(),
+                spacing: 'large',
             },
         ],
         msTeams: {
@@ -133,7 +141,6 @@ export const mainCard = () =>
                 },
             ],
         },
-        actions: actions(),
     };
 
 const questionsList = (dataKey: string) => ({
@@ -190,61 +197,6 @@ const questionsList = (dataKey: string) => ({
         },
     ],
     $data: dataKey,
-});
-
-const recentQuestionActionSet = () => ({
-    type: 'ActionSet',
-    separator: true,
-    spacing: 'Large',
-    horizontalAlignment: 'Center',
-    actions: [
-        {
-            type: 'Action.ShowCard',
-            title: mainCardStrings('showRecentQuestions'),
-            card: {
-                $schema: 'https://adaptivecards.io/schemas/adaptive-card.json',
-                type: 'AdaptiveCard',
-                version: '1.2',
-                body: [
-                    {
-                        type: 'Container',
-                        spacing: 'Large',
-                        id: 'recentQuestions',
-                        items: [
-                            {
-                                type: 'ColumnSet',
-                                columns: [
-                                    {
-                                        type: 'Column',
-                                        width: 'stretch',
-                                        items: [
-                                            {
-                                                type: 'TextBlock',
-                                                text: mainCardStrings(
-                                                    'recentQuestions'
-                                                ),
-                                                wrap: true,
-                                                weight: 'Bolder',
-                                                size: 'Medium',
-                                            },
-                                        ],
-                                    },
-                                ],
-                            },
-                            {
-                                type: 'TextBlock',
-                                text: mainCardStrings('noQuestions'),
-                                color: 'accent',
-                                $when: '${count($root.recentQuestions) < 1}',
-                            },
-                            questionsList('${$root.recentQuestions}'),
-                        ],
-                        wrap: true,
-                    },
-                ],
-            },
-        },
-    ],
 });
 
 const actions = () => [
