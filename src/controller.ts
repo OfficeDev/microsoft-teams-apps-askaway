@@ -6,6 +6,7 @@ import { AdaptiveCard } from 'adaptivecards';
 import { IQuestion, IQuestionPopulatedUser } from 'src/Data/Schemas/Question';
 import { exceptionLogger } from 'src/util/ExceptionTracking';
 import jimp from 'jimp';
+import { join } from 'path';
 
 export const getMainCard = adaptiveCardBuilder.getMainCard;
 export const getStartQnACard = adaptiveCardBuilder.getStartQnACard;
@@ -323,7 +324,9 @@ export const generateInitialsImage = async (
     index: number
 ): Promise<jimp> => {
     const image = new jimp(52, 52, avatarColors[index]);
-    const font = await jimp.loadFont('src/public/segoeUiSemiboldWhite.fnt');
+    const font = await jimp.loadFont(
+        join(__dirname, 'public/segoeUiSemiboldWhite.fnt')
+    );
     return image.print(
         font,
         0,
