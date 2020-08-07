@@ -121,6 +121,7 @@ describe('teams task module submit', () => {
         handler.handleTeamsTaskModuleSubmitConfirmEndQnA = jest.fn();
         handler.handleTeamsTaskModuleSubmitEndQnA = jest.fn();
         handler.handleTeamsTaskModuleSubmitError = jest.fn();
+        handler.handleTeamsTaskModuleSubmitRefreshLeaderboard = jest.fn();
 
         context = {
             activity: {
@@ -143,6 +144,9 @@ describe('teams task module submit', () => {
         expect(handler.handleTeamsTaskModuleSubmitQuestion).toBeCalledTimes(1);
         expect(handler.handleTeamsTaskModuleSubmitUpvote).toBeCalledTimes(0);
         expect(
+            handler.handleTeamsTaskModuleSubmitRefreshLeaderboard
+        ).toBeCalledTimes(0);
+        expect(
             handler.handleTeamsTaskModuleSubmitConfirmEndQnA
         ).toBeCalledTimes(0);
         expect(handler.handleTeamsTaskModuleSubmitEndQnA).toBeCalledTimes(0);
@@ -158,6 +162,28 @@ describe('teams task module submit', () => {
 
         expect(handler.handleTeamsTaskModuleSubmitQuestion).toBeCalledTimes(0);
         expect(handler.handleTeamsTaskModuleSubmitUpvote).toBeCalledTimes(1);
+        expect(
+            handler.handleTeamsTaskModuleSubmitRefreshLeaderboard
+        ).toBeCalledTimes(0);
+        expect(
+            handler.handleTeamsTaskModuleSubmitConfirmEndQnA
+        ).toBeCalledTimes(0);
+        expect(handler.handleTeamsTaskModuleSubmitEndQnA).toBeCalledTimes(0);
+    });
+
+    it('refresh leaderboard', async () => {
+        const taskModuleRequest: TaskModuleRequest = {
+            data: {
+                id: 'refreshLeaderboard',
+            },
+        };
+        await handler.handleTeamsTaskModuleSubmit(context, taskModuleRequest);
+
+        expect(handler.handleTeamsTaskModuleSubmitQuestion).toBeCalledTimes(0);
+        expect(handler.handleTeamsTaskModuleSubmitUpvote).toBeCalledTimes(0);
+        expect(
+            handler.handleTeamsTaskModuleSubmitRefreshLeaderboard
+        ).toBeCalledTimes(1);
         expect(
             handler.handleTeamsTaskModuleSubmitConfirmEndQnA
         ).toBeCalledTimes(0);
@@ -175,6 +201,9 @@ describe('teams task module submit', () => {
         expect(handler.handleTeamsTaskModuleSubmitQuestion).toBeCalledTimes(0);
         expect(handler.handleTeamsTaskModuleSubmitUpvote).toBeCalledTimes(0);
         expect(
+            handler.handleTeamsTaskModuleSubmitRefreshLeaderboard
+        ).toBeCalledTimes(0);
+        expect(
             handler.handleTeamsTaskModuleSubmitConfirmEndQnA
         ).toBeCalledTimes(1);
         expect(handler.handleTeamsTaskModuleSubmitEndQnA).toBeCalledTimes(0);
@@ -190,6 +219,9 @@ describe('teams task module submit', () => {
 
         expect(handler.handleTeamsTaskModuleSubmitQuestion).toBeCalledTimes(0);
         expect(handler.handleTeamsTaskModuleSubmitUpvote).toBeCalledTimes(0);
+        expect(
+            handler.handleTeamsTaskModuleSubmitRefreshLeaderboard
+        ).toBeCalledTimes(0);
         expect(
             handler.handleTeamsTaskModuleSubmitConfirmEndQnA
         ).toBeCalledTimes(0);
@@ -207,6 +239,9 @@ describe('teams task module submit', () => {
         expect(handler.handleTeamsTaskModuleSubmitQuestion).toBeCalledTimes(0);
         expect(handler.handleTeamsTaskModuleSubmitUpvote).toBeCalledTimes(0);
         expect(
+            handler.handleTeamsTaskModuleSubmitRefreshLeaderboard
+        ).toBeCalledTimes(0);
+        expect(
             handler.handleTeamsTaskModuleSubmitConfirmEndQnA
         ).toBeCalledTimes(0);
         expect(handler.handleTeamsTaskModuleSubmitEndQnA).toBeCalledTimes(1);
@@ -223,6 +258,9 @@ describe('teams task module submit', () => {
 
         expect(handler.handleTeamsTaskModuleSubmitQuestion).toBeCalledTimes(0);
         expect(handler.handleTeamsTaskModuleSubmitUpvote).toBeCalledTimes(0);
+        expect(
+            handler.handleTeamsTaskModuleSubmitRefreshLeaderboard
+        ).toBeCalledTimes(0);
         expect(
             handler.handleTeamsTaskModuleSubmitConfirmEndQnA
         ).toBeCalledTimes(0);

@@ -348,6 +348,21 @@ describe('empty leaderboard tests', () => {
                     type: 'TextBlock',
                     text: leaderboardStrings('noQuestions'),
                 },
+                {
+                    type: 'ActionSet',
+                    style: 'destructive',
+                    actions: [
+                        {
+                            id: 'refreshLeaderboard',
+                            type: 'Action.Submit',
+                            title: leaderboardStrings('refresh'),
+                            data: {
+                                id: 'refreshLeaderboard',
+                                qnaSessionId: sampleQnASessionID,
+                            },
+                        },
+                    ],
+                },
             ],
         };
         expect(result).toEqual(_adaptiveCard(expected));
@@ -375,6 +390,15 @@ describe('empty leaderboard tests', () => {
                     type: 'ActionSet',
                     style: 'destructive',
                     actions: [
+                        {
+                            id: 'refreshLeaderboard',
+                            type: 'Action.Submit',
+                            title: leaderboardStrings('refresh'),
+                            data: {
+                                id: 'refreshLeaderboard',
+                                qnaSessionId: sampleQnASessionID,
+                            },
+                        },
                         {
                             id: 'confirmEndQnA',
                             type: 'Action.Submit',
@@ -1368,6 +1392,21 @@ describe('non-empty leaderboard tests', () => {
                         },
                     ],
                 },
+                {
+                    type: 'ActionSet',
+                    style: 'destructive',
+                    actions: [
+                        {
+                            id: 'refreshLeaderboard',
+                            type: 'Action.Submit',
+                            title: leaderboardStrings('refresh'),
+                            data: {
+                                id: 'refreshLeaderboard',
+                                qnaSessionId: '456',
+                            },
+                        },
+                    ],
+                },
             ],
         };
         expect(result).toEqual(_adaptiveCard(expected));
@@ -1518,6 +1557,21 @@ describe('non-empty leaderboard tests', () => {
                                     verticalContentAlignment: 'Center',
                                 },
                             ],
+                        },
+                    ],
+                },
+                {
+                    type: 'ActionSet',
+                    style: 'destructive',
+                    actions: [
+                        {
+                            id: 'refreshLeaderboard',
+                            type: 'Action.Submit',
+                            title: leaderboardStrings('refresh'),
+                            data: {
+                                id: 'refreshLeaderboard',
+                                qnaSessionId: '456',
+                            },
                         },
                     ],
                 },
@@ -1673,6 +1727,21 @@ describe('non-empty leaderboard tests', () => {
                                     verticalContentAlignment: 'Center',
                                 },
                             ],
+                        },
+                    ],
+                },
+                {
+                    type: 'ActionSet',
+                    style: 'destructive',
+                    actions: [
+                        {
+                            id: 'refreshLeaderboard',
+                            type: 'Action.Submit',
+                            title: leaderboardStrings('refresh'),
+                            data: {
+                                id: 'refreshLeaderboard',
+                                qnaSessionId: '456',
+                            },
                         },
                     ],
                 },

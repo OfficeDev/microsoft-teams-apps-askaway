@@ -19,7 +19,8 @@
         "taskModuleTitle": "View questions and upvote",
         "yourQuestions": "Your questions",
         "allQuestions": "All questions",
-        "noQuestions": "There are no questions to show."
+        "noQuestions": "There are no questions to show.",
+        "refresh": "Refresh"
     },
     "startQnA": {
         "titleFieldLabel": "Title of Q & A",

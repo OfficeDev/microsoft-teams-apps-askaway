@@ -22,7 +22,8 @@
         "taskModuleTitle": "taskModuleTitle",
         "yourQuestions": "yourQuestions",
         "allQuestions": "allQuestions",
-        "noQuestions": "noQuestions"
+        "noQuestions": "noQuestions",
+        "refresh": "refresh"
     },
     "startQnA": {
         "titleFieldLabel": "titleFieldLabel",

@@ -48,6 +48,7 @@ export interface Leaderboard {
     yourQuestions: string;
     allQuestions: string;
     noQuestions: string;
+    refresh: string;
 }
 
 export interface MainCard {
