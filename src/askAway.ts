@@ -165,6 +165,11 @@ export class AskAway extends TeamsActivityHandler {
                 context,
                 taskModuleRequest
             );
+        else if (taskModuleRequest.data.id == 'refreshLeaderboard')
+            return await this.handleTeamsTaskModuleSubmitRefreshLeaderboard(
+                context,
+                taskModuleRequest
+            );
         else if (taskModuleRequest.data.id == 'confirmEndQnA')
             return this.handleTeamsTaskModuleSubmitConfirmEndQnA(
                 context,
@@ -371,6 +376,16 @@ export class AskAway extends TeamsActivityHandler {
         return this._buildTaskModuleContinueResponse(
             controller.getResubmitQuestionCard(qnaSessionId, questionContent),
             askQuestionStrings('resubmitTaskModuleTitle')
+        );
+    }
+
+    private async handleTeamsTaskModuleSubmitRefreshLeaderboard(
+        context: TurnContext,
+        taskModuleRequest: TaskModuleRequest
+    ): Promise<TaskModuleResponse> {
+        return await this.handleTeamsTaskModuleFetchViewLeaderboard(
+            context,
+            taskModuleRequest
         );
     }
 

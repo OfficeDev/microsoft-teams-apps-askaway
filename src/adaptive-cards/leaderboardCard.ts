@@ -14,6 +14,18 @@ export const endQnAButton: () => ISubmitAction = () =>
             id: 'confirmEndQnA',
             qnaSessionId: '${qnaId}',
         },
+        $when: '${isUserHost}',
+    };
+
+export const refreshButton: () => ISubmitAction = () =>
+    <ISubmitAction>{
+        id: 'refreshLeaderboard',
+        type: 'Action.Submit',
+        title: leaderboardStrings('refresh'),
+        data: {
+            id: 'refreshLeaderboard',
+            qnaSessionId: '${qnaId}',
+        },
     };
 
 /**
@@ -41,8 +53,8 @@ export const leaderboardCard = () =>
             allQuestions,
             {
                 type: 'ActionSet',
-                $when: '${isUserHost && isActive}',
-                actions: [endQnAButton()],
+                actions: [refreshButton(), endQnAButton()],
+                $when: '${isActive}',
             },
         ],
     };
@@ -62,9 +74,9 @@ export const leaderboardEmptyCard = () =>
             },
             {
                 type: 'ActionSet',
-                $when: '${isUserHost && isActive}',
                 style: 'destructive',
-                actions: [endQnAButton()],
+                actions: [refreshButton(), endQnAButton()],
+                $when: '${isActive}',
             },
         ],
     };
