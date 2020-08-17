@@ -1,0 +1,56 @@
+{
+    "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.6/MicrosoftTeams.schema.json",
+    "manifestVersion": "1.6",
+    "id": "{{MicrosoftAppId}}",
+    "version": "{{Version}}",
+    "packageName": "{{BotDisplayName}}",
+    "developer": {
+        "name": "{{Company}}",
+        "websiteUrl": "https://{{HostName}}",
+        "privacyUrl": "https://{{HostName}}/privacy.html",
+        "termsOfUseUrl": "https://{{HostName}}/tou.html"
+    },
+    "name": {
+        "short": "Ask Away",
+        "full": "Ask Away"
+    },
+    "description": {
+        "short": "Ask Away helps crowdsource questions for your next Q & A",
+        "full": "Planning a Q & A event? Ask Away helps you easily gather questions from within a Teams channel or chat. Team members can submit questions and upvote others shared by colleagues, resulting in a list of top-of-mind questions to give to your Q & A host."
+    },
+    "icons": {
+        "outline": "icon-outline.png",
+        "color": "icon-color.png"
+    },
+    "accentColor": "#F9F9FA",
+    "configurableTabs": [],
+    "staticTabs": [],
+    "bots": [
+        {
+            "botId": "{{MicrosoftAppId}}",
+            "needsChannelSelector": true,
+            "isNotificationOnly": false,
+            "scopes": ["team", "groupchat"]
+        }
+    ],
+    "connectors": [],
+    "composeExtensions": [
+        {
+            "botId": "{{MicrosoftAppId}}",
+            "canUpdateConfiguration": true,
+            "commands": [
+                {
+                    "id": "startQnA",
+                    "type": "action",
+                    "title": "Start session",
+                    "description": "Start gathering questions",
+                    "fetchTask": true,
+                    "context": ["compose", "message"]
+                }
+            ]
+        }
+    ],
+    "permissions": ["identity", "messageTeamMembers"],
+    "validDomains": ["{{HostName}}"],
+    "showLoadingIndicator": false
+}
