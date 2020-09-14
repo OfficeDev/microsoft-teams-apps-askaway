@@ -330,8 +330,8 @@ describe('empty leaderboard tests', () => {
         await initLocalization();
     });
 
-    test('get empty leaderboard as active and not host', () => {
-        const result = generateLeaderboard(
+    test('get empty leaderboard as active and not host', async () => {
+        const result = await generateLeaderboard(
             [],
             sampleUserAADObjId1,
             sampleQnASessionID,
@@ -368,8 +368,8 @@ describe('empty leaderboard tests', () => {
         expect(result).toEqual(_adaptiveCard(expected));
     });
 
-    test('get empty leaderboard as active and host', () => {
-        const result = generateLeaderboard(
+    test('get empty leaderboard as active and host', async () => {
+        const result = await generateLeaderboard(
             [],
             sampleUserAADObjId1,
             sampleQnASessionID,
@@ -415,8 +415,8 @@ describe('empty leaderboard tests', () => {
         expect(result).toEqual(_adaptiveCard(expected));
     });
 
-    test('get empty leaderboard as inactive and not host', () => {
-        const result = generateLeaderboard(
+    test('get empty leaderboard as inactive and not host', async () => {
+        const result = await generateLeaderboard(
             [],
             sampleUserAADObjId1,
             sampleQnASessionID,
@@ -438,8 +438,8 @@ describe('empty leaderboard tests', () => {
         expect(result).toEqual(_adaptiveCard(expected));
     });
 
-    test('get empty leaderboard as inactive and host', () => {
-        const result = generateLeaderboard(
+    test('get empty leaderboard as inactive and host', async () => {
+        const result = await generateLeaderboard(
             [],
             sampleUserAADObjId1,
             sampleQnASessionID,
@@ -475,7 +475,7 @@ describe('main card', () => {
     const sampleUserAADObjId = 'useraadobjid';
 
     test('get title and description', async () => {
-        const result: any = getMainCard(
+        const result: any = await getMainCard(
             sampleTitle,
             sampleDescription,
             sampleUserName,
@@ -514,7 +514,7 @@ describe('main card', () => {
     });
 
     test('get top question container empty', async () => {
-        const result: any = getMainCard(
+        const result: any = await getMainCard(
             sampleTitle,
             sampleDescription,
             sampleUserName,
@@ -583,7 +583,7 @@ describe('main card', () => {
             },
         ];
 
-        const result: any = getMainCard(
+        const result: any = await getMainCard(
             sampleTitle,
             sampleDescription,
             sampleUserName,
@@ -594,7 +594,7 @@ describe('main card', () => {
             topQuestionsData
         );
 
-        const resultMainCardEnded: any = getMainCard(
+        const resultMainCardEnded: any = await getMainCard(
             sampleTitle,
             sampleDescription,
             sampleUserName,
@@ -662,10 +662,10 @@ describe('main card', () => {
         expect(_resultMainCardEnded[2].items).toEqual(expected[2].items);
         expect(_resultMainCardEnded[0].items[0].url).toBeTruthy();
         return;
-    });
+    }, 20000);
 
     test('initiated by user', async () => {
-        const result: any = getMainCard(
+        const result: any = await getMainCard(
             sampleTitle,
             sampleDescription,
             sampleUserName,
@@ -692,7 +692,7 @@ describe('main card', () => {
     });
 
     test('ended by user', async () => {
-        const result: any = getMainCard(
+        const result: any = await getMainCard(
             sampleTitle,
             sampleDescription,
             sampleUserName,
@@ -720,7 +720,7 @@ describe('main card', () => {
     });
 
     test('data store', async () => {
-        const result: any = getMainCard(
+        const result: any = await getMainCard(
             sampleTitle,
             sampleDescription,
             sampleUserName,
@@ -746,7 +746,7 @@ describe('main card', () => {
     });
 
     test('action set', async () => {
-        const result: any = getMainCard(
+        const result: any = await getMainCard(
             sampleTitle,
             sampleDescription,
             sampleUserName,
@@ -788,7 +788,7 @@ describe('main card', () => {
     });
 
     test('ended action set', async () => {
-        const result: any = getMainCard(
+        const result: any = await getMainCard(
             sampleTitle,
             sampleDescription,
             sampleUserName,
@@ -818,8 +818,8 @@ describe('main card', () => {
         return;
     });
 
-    test('extract maincard data', () => {
-        const result: any = getMainCard(
+    test('extract maincard data', async () => {
+        const result: any = await getMainCard(
             sampleTitle,
             sampleDescription,
             sampleUserName,
@@ -835,8 +835,8 @@ describe('main card', () => {
     });
 
     describe('recently asked questions string', () => {
-        test('no questions asked', () => {
-            const result: any = getMainCard(
+        test('no questions asked', async () => {
+            const result: any = await getMainCard(
                 sampleTitle,
                 sampleDescription,
                 sampleUserName,
@@ -861,7 +861,7 @@ describe('main card', () => {
             expect(_result).toEqual(expected);
         });
 
-        test('less than 4 questions asked', () => {
+        test('less than 4 questions asked', async () => {
             const sampleContent = 'randomQuestion';
             const recentQuestionsData: IQuestionPopulatedUser[] = [
                 <IQuestionPopulatedUser>{
@@ -873,7 +873,7 @@ describe('main card', () => {
                 },
             ];
 
-            const result: any = getMainCard(
+            const result: any = await getMainCard(
                 sampleTitle,
                 sampleDescription,
                 sampleUserName,
@@ -899,7 +899,7 @@ describe('main card', () => {
             expect(_result).toEqual(expected);
         });
 
-        test('multiple questions asked same user', () => {
+        test('multiple questions asked same user', async () => {
             const sampleContent = 'randomQuestion';
             const recentQuestionsData: IQuestionPopulatedUser[] = [
                 <IQuestionPopulatedUser>{
@@ -932,7 +932,7 @@ describe('main card', () => {
                 },
             ];
 
-            const result: any = getMainCard(
+            const result: any = await getMainCard(
                 sampleTitle,
                 sampleDescription,
                 sampleUserName,
@@ -958,7 +958,7 @@ describe('main card', () => {
             expect(_result).toEqual(expected);
         });
 
-        test('multiple questions asked different user', () => {
+        test('multiple questions asked different user', async () => {
             const sampleContent = 'randomQuestion';
             const recentQuestionsData: IQuestionPopulatedUser[] = [
                 <IQuestionPopulatedUser>{
@@ -991,7 +991,7 @@ describe('main card', () => {
                 },
             ];
 
-            const result: any = getMainCard(
+            const result: any = await getMainCard(
                 sampleTitle,
                 sampleDescription,
                 sampleUserName,
@@ -1017,7 +1017,7 @@ describe('main card', () => {
             expect(_result).toEqual(expected);
         });
 
-        test('total questions', () => {
+        test('total questions', async () => {
             const sampleContent = 'randomQuestion';
             const recentQuestionsData: IQuestionPopulatedUser[] = [
                 <IQuestionPopulatedUser>{
@@ -1029,7 +1029,7 @@ describe('main card', () => {
                 },
             ];
 
-            const result: any = getMainCard(
+            const result: any = await getMainCard(
                 sampleTitle,
                 sampleDescription,
                 sampleUserName,
@@ -1050,12 +1050,13 @@ describe('main card', () => {
 
 describe('initials avatar generation tests', () => {
     beforeAll(() => {
+        process.env.debugMode = 'true';
         process.env.AvatarKey = crypto.randomBytes(13).toString();
     });
 
-    test('initials avatar image', () => {
+    test('initials avatar image', async () => {
         const name = 'John Doe';
-        const result = getPersonImage(name, sampleUserAADObjId1);
+        const result = await getPersonImage(name, sampleUserAADObjId1);
 
         random.use(seedrandom(sampleUserAADObjId1));
         const colorIndex = random.int(0, 13);
@@ -1078,9 +1079,9 @@ describe('initials avatar generation tests', () => {
         expect(result).toEqual(expected);
     });
 
-    test('initials avatar image with empty name', () => {
+    test('initials avatar image with empty name', async () => {
         const name = '';
-        const result = getPersonImage(name, sampleUserAADObjId1);
+        const result = await getPersonImage(name, sampleUserAADObjId1);
 
         random.use(seedrandom(sampleUserAADObjId1));
 
@@ -1088,9 +1089,9 @@ describe('initials avatar generation tests', () => {
         expect(result).toEqual(expected);
     });
 
-    test('initials avatar image with name only in parentheses', () => {
+    test('initials avatar image with name only in parentheses', async () => {
         const name = '(John Doe)';
-        const result = getPersonImage(name, sampleUserAADObjId1);
+        const result = await getPersonImage(name, sampleUserAADObjId1);
 
         random.use(seedrandom(sampleUserAADObjId1));
 
@@ -1098,9 +1099,9 @@ describe('initials avatar generation tests', () => {
         expect(result).toEqual(expected);
     });
 
-    test('initials avatar image 3 part name', () => {
+    test('initials avatar image 3 part name', async () => {
         const name = 'John Doe Shakespeare';
-        const result = getPersonImage(name, sampleUserAADObjId1);
+        const result = await getPersonImage(name, sampleUserAADObjId1);
 
         random.use(seedrandom(sampleUserAADObjId1));
         const colorIndex = random.int(0, 13);
@@ -1123,9 +1124,9 @@ describe('initials avatar generation tests', () => {
         expect(result).toEqual(expected);
     });
 
-    test('initials avatar image with name with parentheses', () => {
+    test('initials avatar image with name with parentheses', async () => {
         const name = 'John (Berry) Doe (Contoso Inc)';
-        const result = getPersonImage(name, sampleUserAADObjId1);
+        const result = await getPersonImage(name, sampleUserAADObjId1);
 
         random.use(seedrandom(sampleUserAADObjId1));
         const colorIndex = random.int(0, 13);
@@ -1148,9 +1149,9 @@ describe('initials avatar generation tests', () => {
         expect(result).toEqual(expected);
     });
 
-    test('initials avatar image with name with nested parentheses', () => {
+    test('initials avatar image with name with nested parentheses', async () => {
         const name = 'John (Tyler (Alderson)) Doe';
-        const result = getPersonImage(name, sampleUserAADObjId1);
+        const result = await getPersonImage(name, sampleUserAADObjId1);
 
         random.use(seedrandom(sampleUserAADObjId1));
         const colorIndex = random.int(0, 13);
@@ -1173,9 +1174,9 @@ describe('initials avatar generation tests', () => {
         expect(result).toEqual(expected);
     });
 
-    test('initials avatar image with multi-part name and parentheses', () => {
+    test('initials avatar image with multi-part name and parentheses', async () => {
         const name = 'John (Elliot (Durden)) Doe Larry Terry (Contoso Inc)';
-        const result = getPersonImage(name, sampleUserAADObjId1);
+        const result = await getPersonImage(name, sampleUserAADObjId1);
 
         random.use(seedrandom(sampleUserAADObjId1));
         const colorIndex = random.int(0, 13);
@@ -1202,10 +1203,11 @@ describe('initials avatar generation tests', () => {
 describe('non-empty leaderboard tests', () => {
     beforeAll(async () => {
         await initLocalization();
+        process.env.debugMode = 'true';
         process.env.AvatarKey = crypto.randomBytes(13).toString();
     });
 
-    test('only questions from user opening leaderboard', () => {
+    test('only questions from user opening leaderboard', async () => {
         const question = <IQuestionPopulatedUser>(<unknown>{
             _id: '123',
             content: 'my only question?',
@@ -1223,7 +1225,7 @@ describe('non-empty leaderboard tests', () => {
 
         const questions: IQuestionPopulatedUser[] = [question];
 
-        const result = generateLeaderboard(
+        const result = await generateLeaderboard(
             questions,
             sampleUserAADObjId1,
             '456',
@@ -1254,7 +1256,7 @@ describe('non-empty leaderboard tests', () => {
                                     items: [
                                         {
                                             type: 'Image',
-                                            url: getPersonImage(
+                                            url: await getPersonImage(
                                                 question.userId.userName,
                                                 question.userId._id
                                             ),
@@ -1323,7 +1325,7 @@ describe('non-empty leaderboard tests', () => {
                                             type: 'Image',
                                             style: 'Person',
                                             size: 'Small',
-                                            url: getPersonImage(
+                                            url: await getPersonImage(
                                                 question.userId.userName,
                                                 question.userId._id
                                             ),
@@ -1412,7 +1414,7 @@ describe('non-empty leaderboard tests', () => {
         expect(result).toEqual(_adaptiveCard(expected));
     });
 
-    test('only questions from other users', () => {
+    test('only questions from other users', async () => {
         const question = <IQuestionPopulatedUser>(<unknown>{
             _id: '123',
             content: "another user's question?",
@@ -1430,7 +1432,7 @@ describe('non-empty leaderboard tests', () => {
 
         const questions: IQuestionPopulatedUser[] = [question];
 
-        const result = generateLeaderboard(
+        const result = await generateLeaderboard(
             questions,
             sampleUserAADObjId1,
             '456',
@@ -1463,7 +1465,7 @@ describe('non-empty leaderboard tests', () => {
                                             type: 'Image',
                                             style: 'Person',
                                             size: 'Small',
-                                            url: getPersonImage(
+                                            url: await getPersonImage(
                                                 question.userId.userName,
                                                 question.userId._id
                                             ),
@@ -1580,7 +1582,7 @@ describe('non-empty leaderboard tests', () => {
         expect(result).toEqual(_adaptiveCard(expected));
     });
 
-    test('upvoted question while QnA active', () => {
+    test('upvoted question while QnA active', async () => {
         const question = <IQuestionPopulatedUser>(<unknown>{
             _id: '123',
             content: "another user's question?",
@@ -1598,7 +1600,7 @@ describe('non-empty leaderboard tests', () => {
 
         const questions: IQuestionPopulatedUser[] = [question];
 
-        const result = generateLeaderboard(
+        const result = await generateLeaderboard(
             questions,
             sampleUserAADObjId1,
             '456',
@@ -1631,7 +1633,7 @@ describe('non-empty leaderboard tests', () => {
                                             type: 'Image',
                                             style: 'Person',
                                             size: 'Small',
-                                            url: getPersonImage(
+                                            url: await getPersonImage(
                                                 question.userId.userName,
                                                 question.userId._id
                                             ),
@@ -1750,7 +1752,7 @@ describe('non-empty leaderboard tests', () => {
         expect(result).toEqual(_adaptiveCard(expected));
     });
 
-    test('only questions from other users while QnA inactive', () => {
+    test('only questions from other users while QnA inactive', async () => {
         const question = <IQuestionPopulatedUser>(<unknown>{
             _id: '123',
             content: "another user's question?",
@@ -1768,7 +1770,7 @@ describe('non-empty leaderboard tests', () => {
 
         const questions: IQuestionPopulatedUser[] = [question];
 
-        const result = generateLeaderboard(
+        const result = await generateLeaderboard(
             questions,
             sampleUserAADObjId1,
             '456',
@@ -1801,7 +1803,7 @@ describe('non-empty leaderboard tests', () => {
                                             type: 'Image',
                                             style: 'Person',
                                             size: 'Small',
-                                            url: getPersonImage(
+                                            url: await getPersonImage(
                                                 question.userId.userName,
                                                 question.userId._id
                                             ),
@@ -1875,7 +1877,7 @@ describe('non-empty leaderboard tests', () => {
         expect(result).toEqual(_adaptiveCard(expected));
     });
 
-    test('upvoted question while QnA inactive', () => {
+    test('upvoted question while QnA inactive', async () => {
         const question = <IQuestionPopulatedUser>(<unknown>{
             _id: '123',
             content: "another user's question?",
@@ -1893,7 +1895,7 @@ describe('non-empty leaderboard tests', () => {
 
         const questions: IQuestionPopulatedUser[] = [question];
 
-        const result = generateLeaderboard(
+        const result = await generateLeaderboard(
             questions,
             sampleUserAADObjId1,
             '456',
@@ -1926,7 +1928,7 @@ describe('non-empty leaderboard tests', () => {
                                             type: 'Image',
                                             style: 'Person',
                                             size: 'Small',
-                                            url: getPersonImage(
+                                            url: await getPersonImage(
                                                 question.userId.userName,
                                                 question.userId._id
                                             ),
