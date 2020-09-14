@@ -12,11 +12,14 @@ import {
 } from 'src/Data/Schemas/Question';
 import { retryWrapper, ExponentialBackOff } from 'src/util/RetryPolicies';
 
+import { getMongoURI } from 'src/util/keyvault';
+
 /**
  * Initiates the connection to the CosmosDB database.
- * @param mongoURI - The mongoDB connection string for the CosmosDB database.
  */
-export const initiateConnection = async (mongoURI: string) => {
+export const initiateConnection = async () => {
+    const mongoURI: string = await getMongoURI();
+
     await mongoose.connect(mongoURI, {
         useFindAndModify: false,
         useNewUrlParser: true,

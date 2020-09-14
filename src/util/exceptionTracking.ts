@@ -1,11 +1,14 @@
 import * as appInsights from 'applicationinsights';
+import { getApplicationInsightsInstrumentationKeyURI } from 'src/util/keyvault';
 
 export let aiClient;
 
-export const initiateAppInsights = () => {
+export const initiateAppInsights = async () => {
+    const applicationInsightsInstrumentationKey = await getApplicationInsightsInstrumentationKeyURI();
+
     // Set up app insights
     appInsights
-        .setup(process.env.ApplicationInsightsInstrumentationKey)
+        .setup(applicationInsightsInstrumentationKey)
         .setAutoDependencyCorrelation(true)
         .setAutoCollectRequests(true)
         .setAutoCollectPerformance(true, true)

@@ -42,7 +42,7 @@
         },
         "appIconUrl": {
             "type": "string",
-            "minLength": 1, //NEED TO CHANGE THIS VALUE ONCE DESIGNER IS DONE
+            "minLength": 1,
             "defaultValue": "https://raw.githubusercontent.com/OfficeDev/microsoft-teams-apps-askaway/master/Manifest/color.png",
             "metadata": {
                 "description": "The link to the icon for the app. It must resolve to a PNG file."
@@ -100,6 +100,13 @@
             "defaultValue": "[concat('mongodb-', uniqueString(resourceGroup().id))]",
             "metadata": {
                 "description": "Cosmos DB account name"
+            }
+        },
+        "keyvaultName": {
+            "defaultValue": "[concat('keyvault-', uniqueString(resourceGroup().id))]",
+            "type": "string",
+            "metadata": {
+                "description": "Key vault name"
             }
         }
     },
@@ -225,6 +232,9 @@
             "name": "[variables('botAppName')]",
             "apiVersion": "2016-08-01",
             "location": "[parameters('location')]",
+            "identity": {
+                "type": "SystemAssigned"
+            },
             "properties": {
                 "name": "[variables('botAppName')]",
                 "enabled": true,
@@ -240,16 +250,8 @@
                     "alwaysOn": true,
                     "appSettings": [
                         {
-                            "name": "ApplicationInsightsInstrumentationKey",
-                            "value": "[reference(resourceId('Microsoft.Insights/components/', variables('botAppInsightsName')), '2015-05-01').InstrumentationKey]"
-                        },
-                        {
                             "name": "MicrosoftAppId",
                             "value": "[parameters('botClientId')]"
-                        },
-                        {
-                            "name": "MicrosoftAppPassword",
-                            "value": "[parameters('botClientSecret')]"
                         },
                         {
                             "name": "HostName",
@@ -266,14 +268,6 @@
                         {
                             "name": "TenantId",
                             "value": "[parameters('tenantId')]"
-                        },
-                        {
-                            "name": "MongoDbUri",
-                            "value": "[listConnectionStrings(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('accountName')), '2019-12-12').connectionStrings[0].connectionString]"
-                        },
-                        {
-                            "name": "AvatarKey",
-                            "value": "[uniqueString(parameters('botClientSecret'))]"
                         },
                         {
                             "name": "BotDisplayName",
@@ -327,6 +321,14 @@
                         {
                             "name": "WEBSITE_NODE_DEFAULT_VERSION",
                             "value": "10.15.2"
+                        },
+                        {
+                            "name": "KeyVaultName",
+                            "value": "[parameters('keyvaultName')]"
+                        },
+                        {
+                            "name": "ExpireInMemorySecretsAfterMs",
+                            "value": "86400000"
                         }
                     ]
                 }
@@ -364,6 +366,99 @@
             },
             "properties": {
                 "Application_Type": "other"
+            }
+        },
+        {
+            "type": "Microsoft.KeyVault/vaults",
+            "apiVersion": "2016-10-01",
+            "name": "[parameters('keyvaultName')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "sku": {
+                    "family": "A",
+                    "name": "standard"
+                },
+                "tenantId": "[parameters('tenantId')]",
+                "accessPolicies": [
+                    {
+                        "tenantId": "[parameters('tenantId')]",
+                        "objectId": "[reference(resourceId('Microsoft.Web/sites', variables('botAppName')), '2016-08-01', 'Full').identity.principalId]",
+                        "permissions": {
+                            "keys": [],
+                            "secrets": ["get"],
+                            "certificates": []
+                        }
+                    }
+                ],
+                "enabledForDeployment": false,
+                "enabledForDiskEncryption": false,
+                "enabledForTemplateDeployment": false,
+                "enableSoftDelete": true
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', variables('botAppName'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.KeyVault/vaults/secrets",
+            "apiVersion": "2016-10-01",
+            "name": "[concat(parameters('keyvaultName'), '/MongoDbUri')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyvaultName'))]",
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', variables('accountName'))]"
+            ],
+            "properties": {
+                "value": "[listConnectionStrings(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('accountName')), '2019-12-12').connectionStrings[0].connectionString]",
+                "attributes": {
+                    "enabled": true
+                }
+            }
+        },
+        {
+            "type": "Microsoft.KeyVault/vaults/secrets",
+            "apiVersion": "2016-10-01",
+            "name": "[concat(parameters('keyvaultName'), '/ApplicationInsightsInstrumentationKey')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyvaultName'))]",
+                "[resourceId('Microsoft.Insights/components/', variables('botAppInsightsName'))]"
+            ],
+            "properties": {
+                "value": "[reference(resourceId('Microsoft.Insights/components/', variables('botAppInsightsName')), '2015-05-01').InstrumentationKey]",
+                "attributes": {
+                    "enabled": true
+                }
+            }
+        },
+        {
+            "type": "Microsoft.KeyVault/vaults/secrets",
+            "apiVersion": "2016-10-01",
+            "name": "[concat(parameters('keyvaultName'), '/MicrosoftAppPassword')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyvaultName'))]"
+            ],
+            "properties": {
+                "value": "[parameters('botClientSecret')]",
+                "attributes": {
+                    "enabled": true
+                }
+            }
+        },
+        {
+            "type": "Microsoft.KeyVault/vaults/secrets",
+            "apiVersion": "2016-10-01",
+            "name": "[concat(parameters('keyvaultName'), '/AvatarKey')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyvaultName'))]"
+            ],
+            "properties": {
+                "value": "[parameters('botClientSecret')]",
+                "attributes": {
+                    "enabled": true
+                }
             }
         }
     ]

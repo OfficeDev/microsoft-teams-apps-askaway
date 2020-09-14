@@ -17,8 +17,19 @@ import * as jwt from 'jsonwebtoken';
 import { generateInitialsImage } from 'src/Controller';
 import { ConnectorClient } from 'botframework-connector';
 
+import {
+    initKeyVault,
+    getMicrosoftAppPassword,
+    getAvatarKey,
+} from 'src/util/keyvault';
+
 // Initialize debug logging module
 const log = debug('msteams');
+
+// Initialize key vault
+initKeyVault().catch((error) => {
+    exceptionLogger(error);
+});
 
 log(`Initializing Microsoft Teams Express hosted App...`);
 
@@ -26,7 +37,9 @@ log(`Initializing Microsoft Teams Express hosted App...`);
 dotenvConfig();
 
 // Set up app insights
-initiateAppInsights();
+initiateAppInsights().catch((error) => {
+    exceptionLogger(error);
+});
 
 // The import of components has to be done AFTER the dotenv config
 import { initLocalization } from 'src/localization/locale';
@@ -62,15 +75,17 @@ interface AvatarRequest {
     index: number;
 }
 
-express.get('/avatar/:token', (req, res) => {
+express.get('/avatar/:token', async (req, res) => {
     const token = req.params.token;
     // if (token == null) return res.sendStatus(401);
 
-    if (!process.env.AvatarKey)
+    const avatarKey = await getAvatarKey();
+
+    if (!avatarKey)
         return res.sendFile(join(__dirname, 'public/images/anon_avatar.png'));
     jwt.verify(
         token,
-        Buffer.from(process.env.AvatarKey, 'utf8').toString('hex'),
+        Buffer.from(avatarKey, 'utf8').toString('hex'),
         (err, data: AvatarRequest) => {
             if (err)
                 return res.sendFile(
@@ -93,7 +108,7 @@ express.use(morgan('tiny'));
 express.use(compression());
 
 // initiate database
-initiateConnection(<string>process.env.MongoDbUri).catch((error) => {
+initiateConnection().catch((error) => {
     exceptionLogger(error);
 });
 
@@ -116,30 +131,36 @@ initiateConnection(<string>process.env.MongoDbUri).catch((error) => {
     });
 };
 
-// Set up bot and routing
-const adapter = new BotFrameworkAdapter({
-    appId: process.env.MicrosoftAppId,
-    appPassword: process.env.MicrosoftAppPassword,
-});
-
-adapter.onTurnError = async (context, error) => {
-    exceptionLogger(error);
-};
-
 const bot: ActivityHandler = new AskAway();
 
-express.post('/api/messages', (req: any, res: any) => {
-    adapter.processActivity(
-        req,
-        res,
-        async (turnContext): Promise<any> => {
-            try {
-                await bot.run(turnContext);
-            } catch (err) {
-                adapter.onTurnError(turnContext, err);
+async function setupBotAdapterAndRouting() {
+    const adapter = new BotFrameworkAdapter({
+        appId: process.env.MicrosoftAppId,
+        appPassword: await getMicrosoftAppPassword(),
+    });
+
+    adapter.onTurnError = async (context, error) => {
+        exceptionLogger(error);
+    };
+
+    express.post('/api/messages', (req: any, res: any) => {
+        adapter.processActivity(
+            req,
+            res,
+            async (turnContext): Promise<any> => {
+                try {
+                    await bot.run(turnContext);
+                } catch (err) {
+                    adapter.onTurnError(turnContext, err);
+                }
             }
-        }
-    );
+        );
+    });
+}
+
+// Set up bot and routing
+setupBotAdapterAndRouting().catch((error) => {
+    exceptionLogger(error);
 });
 
 // Set the port

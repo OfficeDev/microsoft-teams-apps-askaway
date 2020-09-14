@@ -23,6 +23,8 @@ import { errorCard } from 'src/adaptive-cards/errorCard';
 import { mainCardStrings } from 'src/localization/locale';
 import { clone } from 'lodash';
 
+import { getAvatarKey } from 'src/util/keyvault';
+
 /**
  * Creates the QnA Master Card
  * @param title - title of QnA
@@ -37,7 +39,7 @@ import { clone } from 'lodash';
  * @param totalQuestions - number of questions asked so far in session
  * @returns The QnA Master Card
  */
-export const getMainCard = (
+export const getMainCard = async (
     title: string,
     description: string,
     userName: string,
@@ -48,7 +50,7 @@ export const getMainCard = (
     topQuestionsData?: IQuestionPopulatedUser[],
     recentQuestionsData?: IQuestionPopulatedUser[],
     totalQuestions?: number
-): IAdaptiveCard => {
+): Promise<IAdaptiveCard> => {
     const data = {
         title,
         description,
@@ -57,21 +59,24 @@ export const getMainCard = (
         aadObjectId,
         ended,
     };
-    const _processQuestions = (questions: IQuestionPopulatedUser[]) =>
-        questions.map((question: IQuestionPopulatedUser) => {
-            const questionObject = <any>clone(question);
-            questionObject.userId.picture = getPersonImage(
-                questionObject.userId.userName,
-                question.userId._id
-            );
-            questionObject.upvotes = questionObject.voters.length;
-            questionObject.upvotable =
-                aadObjectId !== questionObject.userId._id;
-            return questionObject;
-        });
+
+    const _processQuestions = async (questions: IQuestionPopulatedUser[]) =>
+        await Promise.all(
+            questions.map(async (question: IQuestionPopulatedUser) => {
+                const questionObject = <any>clone(question);
+                questionObject.userId.picture = await getPersonImage(
+                    questionObject.userId.userName,
+                    question.userId._id
+                );
+                questionObject.upvotes = questionObject.voters.length;
+                questionObject.upvotable =
+                    aadObjectId !== questionObject.userId._id;
+                return questionObject;
+            })
+        );
 
     topQuestionsData = topQuestionsData
-        ? _processQuestions(topQuestionsData)
+        ? await _processQuestions(topQuestionsData)
         : [];
 
     const _mainCard = mainCard();
@@ -180,14 +185,14 @@ export const getErrorCard = (errorMessage: string): AdaptiveCard => {
  * @param theme - Teams theme the user opening the leaderboard is using. Options are: 'default', 'dark', and 'high-contrast'
  * @returns - Adaptive Card for the leaderboard populated with the questions provided.
  */
-export const generateLeaderboard = (
+export const generateLeaderboard = async (
     questionData: IQuestionPopulatedUser[],
     aadObjectId: string,
     qnaSessionId: string,
     isHost: boolean,
     isActiveQnA: boolean,
     theme: string
-): AdaptiveCard => {
+): Promise<AdaptiveCard> => {
     if (!questionData.length)
         return generateEmptyLeaderboard(qnaSessionId, isHost, isActiveQnA);
 
@@ -200,19 +205,24 @@ export const generateLeaderboard = (
         )
         .reverse();
 
-    questionData = questionData.map((question) => {
-        const questionObject = question.toObject();
-        questionObject.upvotes = questionObject.voters.length;
-        questionObject.upvotable = aadObjectId !== questionObject.userId._id;
-        questionObject.upvoted = questionObject.voters.includes(aadObjectId);
-        questionObject.userId.picture = getPersonImage(
-            questionObject.userId.userName,
-            question.userId._id
-        );
-        questionObject.isActive = isActiveQnA;
+    questionData = await Promise.all(
+        questionData.map(async (question) => {
+            const questionObject = question.toObject();
+            questionObject.upvotes = questionObject.voters.length;
+            questionObject.upvotable =
+                aadObjectId !== questionObject.userId._id;
+            questionObject.upvoted = questionObject.voters.includes(
+                aadObjectId
+            );
+            questionObject.userId.picture = await getPersonImage(
+                questionObject.userId.userName,
+                question.userId._id
+            );
+            questionObject.isActive = isActiveQnA;
 
-        return questionObject;
-    });
+            return questionObject;
+        })
+    );
     const userQuestions = questionData.filter(
         (question) => question.userId._id === aadObjectId
     );
@@ -333,7 +343,10 @@ export const getResubmitQuestionErrorCard = (
  * @param name - Name of the user who's initials avatar url is being retrieved
  * @param aadObjectId - aadObjectId of user who's initials avatar url is being retrieved
  */
-export const getPersonImage = (name: string, aadObjectId: string): string => {
+export const getPersonImage = async (
+    name: string,
+    aadObjectId: string
+): Promise<string> => {
     if (!name) return `https://${process.env.HostName}/images/anon_avatar.png`;
 
     let initials = '';
@@ -366,7 +379,15 @@ export const getPersonImage = (name: string, aadObjectId: string): string => {
         index: random.int(0, 13),
     };
 
-    const avatarKey = process.env.AvatarKey;
+    var avatarKey: string | undefined;
+
+    if (process.env.debugMode) {
+        // This flow is for unit test cases purpose only, for production we do not set avatar key in app settings.
+        avatarKey = process.env.AvatarKey;
+    } else {
+        avatarKey = await getAvatarKey();
+    }
+
     if (!avatarKey)
         return `https://${process.env.HostName}/images/anon_avatar.png`;
 

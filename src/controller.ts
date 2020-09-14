@@ -106,7 +106,7 @@ export const generateLeaderboard = async (
         const isHost = await db.isHost(qnaSessionId, aadObjectId);
         const isActiveQnA = await db.isActiveQnA(qnaSessionId);
         return ok(
-            adaptiveCardBuilder.generateLeaderboard(
+            await adaptiveCardBuilder.generateLeaderboard(
                 questionData,
                 aadObjectId,
                 qnaSessionId,
@@ -190,7 +190,7 @@ export const getUpdatedMainCard = async (
 
         // generate and return maincard
         return ok({
-            card: getMainCard(
+            card: await getMainCard(
                 qnaSessionData.title,
                 qnaSessionData.description,
                 qnaSessionData.userName,
