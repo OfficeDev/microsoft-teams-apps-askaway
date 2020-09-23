@@ -1,8 +1,8 @@
 {
     "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.6/MicrosoftTeams.schema.json",
     "manifestVersion": "1.6",
-    "id": "{{MicrosoftAppId}}",
-    "version": "{{Version}}",
+    "id": "ea317d49-8c69-4647-9f8d-85dfa8b6ba34",
+    "version": "1.0",
     "packageName": "{{BotDisplayName}}",
     "developer": {
         "name": "{{Company}}",
@@ -27,7 +27,7 @@
     "staticTabs": [],
     "bots": [
         {
-            "botId": "{{MicrosoftAppId}}",
+            "botId": "{{BotIDValue}}",
             "needsChannelSelector": true,
             "isNotificationOnly": false,
             "scopes": ["team", "groupchat"]
@@ -36,7 +36,7 @@
     "connectors": [],
     "composeExtensions": [
         {
-            "botId": "{{MicrosoftAppId}}",
+            "botId": "{{BotIDValue}}",
             "canUpdateConfiguration": true,
             "commands": [
                 {
