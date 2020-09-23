@@ -9,6 +9,8 @@ urlFragment: "microsoft-teams-app-askaway"
 ---
 
 # Ask Away - Teams App Template
+| [Documentation](https://github.com/OfficeDev/microsoft-teams-apps-askaway/wiki/Home) | [Deployment guide](https://github.com/OfficeDev/microsoft-teams-apps-askaway/wiki/Deployment-Guide) | [Architecture](https://github.com/OfficeDev/microsoft-teams-apps-askaway/wiki/Solution-Overview) |
+| ---- | ---- | ---- |
 
 As organizations rely more on Teams to collaborate and do work, there is a need to connect organization leaders and SMEs (Subject Matter Experts) with their team members to share organizational updates and knowledge. With the onset of COVID-19, even more teams are conducting Q&A (Question and Answer) sessions remotely using Teams. Orchestrating one of these sessions directly in a Teams channel or chat is messy because hosts do not have a way to track questions and attendees do not have a way to upvote questions. Making it easier to conduct one of these sessions will add value to Teams and make it easier for users to collaborate and share knowledge.
 
