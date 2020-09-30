@@ -379,14 +379,7 @@ export const getPersonImage = async (
         index: random.int(0, 13),
     };
 
-    var avatarKey: string | undefined;
-
-    if (process.env.debugMode) {
-        // This flow is for unit test cases purpose only, for production we do not set avatar key in app settings.
-        avatarKey = process.env.AvatarKey;
-    } else {
-        avatarKey = await getAvatarKey();
-    }
+    const avatarKey: string | undefined = await getAvatarKey();
 
     if (!avatarKey)
         return `https://${process.env.HostName}/images/anon_avatar.png`;
