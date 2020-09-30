@@ -17,6 +17,20 @@ All required source code are located in the `./src` folder - split into two part
 
 For further details se the [Yo Teams wiki for the project structure](https://github.com/PnP/generator-teams/wiki/Project-Structure)
 
+## Secret management for local setup
+
+For develoment ease, local deployment can be configured to read secrets from .env instead of key vault.
+
+Add following entries in .env file
+
+```
+MongoDbUri="{{MongoDB connection string}}"
+ApplicationInsightsInstrumentationKey="{{Application Insights Instrumentation Key}}"
+MicrosoftAppPassword="{{Bot client secret}}"
+AvatarKey="{{Avatar key}}"
+debugMode="true"
+```
+
 ## Building the app
 
 The application is built using the `build` Gulp task.

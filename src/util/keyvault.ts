@@ -11,13 +11,35 @@ const applicationInsightsInstrumentationKeySecretName =
 const microsoftAppPasswordSecretName = 'MicrosoftAppPassword';
 const avatarKeySecretName = 'AvatarKey';
 
-export let memCache: CacheClass<string, string>;
+let memCache: CacheClass<string, string>;
+let keyVaultSecretClient: SecretClient;
 
 /**
- * Initializes memory cache for key vault.
+ * Initialize memory cache and secret client for key vault.
  */
 export const initKeyVault = async () => {
     memCache = new memoryCache.Cache();
+
+    const credential = new DefaultAzureCredential();
+    const url = `https://${vaultName}.vault.azure.net`;
+
+    keyVaultSecretClient = new SecretClient(url, credential);
+};
+
+/**
+ * Read and return secret from app settings.
+ * @param secretName - Secret that needs to be read.
+ * @returns - Value of secret.
+ * @throws - Error that occurs while reading secret.
+ */
+const getSecretFromAppSettings = (secretName: string): string => {
+    const secretValue: string | undefined = process.env[secretName];
+
+    if (secretValue === undefined) {
+        throw new Error(`Secret not set in app settings: ${secretName}`);
+    }
+
+    return secretValue;
 };
 
 /**
@@ -27,11 +49,12 @@ export const initKeyVault = async () => {
  * @throws - Error that occurs while reading secret.
  */
 const getSecretFromVault = async (secretName: string): Promise<string> => {
-    const credential = new DefaultAzureCredential();
-    const url = `https://${vaultName}.vault.azure.net`;
+    // For local development, read values from app settings instead.
+    if (process.env.debugMode === 'true') {
+        return getSecretFromAppSettings(secretName);
+    }
 
-    const client = new SecretClient(url, credential);
-    const secret = await client.getSecret(secretName);
+    const secret = await keyVaultSecretClient.getSecret(secretName);
 
     if (secret.value === undefined) {
         exceptionLogger(
@@ -51,7 +74,7 @@ const getSecretFromVault = async (secretName: string): Promise<string> => {
  * @throws - Error that occurs while reading secret.
  */
 const getSecretFromCache = async (secretName: string): Promise<string> => {
-    let secretValueFromCache: string | null = memCache.get(secretName);
+    const secretValueFromCache: string | null = memCache.get(secretName);
 
     if (secretValueFromCache === null) {
         const secret: string = await getSecretFromVault(secretName);

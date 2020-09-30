@@ -17,4 +17,13 @@ In order to create a bot you need to first register it in the [Azure portal](htt
 
 ## How to configure the bot
 
-The App Id and App Secret, generated during the registration, for the bot are read from the `MicrosoftAppId` and `MicrosoftAppPassword` environment variables, specified in the `.env` file. These can be configured in the Azure Web App under _Application Settings > App Settings_.
+The App Id and App Secret, generated during the registration, for the bot are read from the `MicrosoftAppId` and `MicrosoftAppPassword` environment variables, specified in the `.env` file. Key vault resource name is read from `KeyVaultName` environment variable as well.
+These can be configured in the Azure Web App under _Application Settings > App Settings_.
+
+Key vault resource should contain following secrets:
+`MongoDbUri`,
+`ApplicationInsightsInstrumentationKey`,
+`MicrosoftAppPassword`,
+`AvatarKey`
+
+Read more on how to configure key vault [here](https://docs.microsoft.com/en-us/azure/key-vault/general/assign-access-policy-portal).

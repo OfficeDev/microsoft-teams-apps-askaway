@@ -28,6 +28,7 @@ import random from 'random';
 import seedrandom from 'seedrandom';
 import * as jwt from 'jsonwebtoken';
 import crypto from 'crypto';
+import { initKeyVault } from 'src/util/keyvault';
 
 const sampleUserAADObjId1 = 'be36140g-9729-3024-8yg1-147bbi67g2c9';
 const sampleQnASessionID = '5f160b862655575054393a0e';
@@ -1052,6 +1053,8 @@ describe('initials avatar generation tests', () => {
     beforeAll(() => {
         process.env.debugMode = 'true';
         process.env.AvatarKey = crypto.randomBytes(13).toString();
+        // Initialize key vault cache. Avatar key is first checked in cache.
+        initKeyVault();
     });
 
     test('initials avatar image', async () => {
@@ -1205,6 +1208,8 @@ describe('non-empty leaderboard tests', () => {
         await initLocalization();
         process.env.debugMode = 'true';
         process.env.AvatarKey = crypto.randomBytes(13).toString();
+        // Initialize key vault cache. Avatar key is first checked in cache.
+        initKeyVault();
     });
 
     test('only questions from user opening leaderboard', async () => {

@@ -26,20 +26,16 @@ import {
 // Initialize debug logging module
 const log = debug('msteams');
 
-// Initialize key vault
-initKeyVault().catch((error) => {
-    exceptionLogger(error);
-});
-
 log(`Initializing Microsoft Teams Express hosted App...`);
 
 // Initialize dotenv, to use .env file settings if existing
 dotenvConfig();
 
+// Initialize key vault
+initKeyVault();
+
 // Set up app insights
-initiateAppInsights().catch((error) => {
-    exceptionLogger(error);
-});
+initiateAppInsights();
 
 // The import of components has to be done AFTER the dotenv config
 import { initLocalization } from 'src/localization/locale';
