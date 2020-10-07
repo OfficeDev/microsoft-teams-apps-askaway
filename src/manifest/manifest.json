@@ -23,7 +23,13 @@
         "color": "icon-color.png"
     },
     "accentColor": "#F9F9FA",
-    "configurableTabs": [],
+    "configurableTabs": [
+        {
+            "configurationUrl": "https://{{HostName}}/askAwayTab/config.html",
+            "canUpdateConfiguration": true,
+            "scopes": ["team", "groupchat"]
+        }
+    ],
     "staticTabs": [],
     "bots": [
         {
@@ -50,6 +56,10 @@
             ]
         }
     ],
+    "webApplicationInfo": {
+        "id": "{{MicrosoftAppId}}",
+        "resource": "api://{{HostName}}/{{MicrosoftAppId}}"
+    },
     "permissions": ["identity", "messageTeamMembers"],
     "validDomains": ["{{HostName}}"],
     "showLoadingIndicator": false
