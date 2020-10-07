@@ -15,10 +15,11 @@ const fs = require('fs'),
     path = require('path');
 
 // Gulp Base
-const { src, dest, series, task, watch } = require('gulp');
+const { src, dest, series, task, watch, parallel } = require('gulp');
 
 // gulp plugins
-const zip = require('gulp-zip'),
+const inject = require('gulp-inject'), 
+    zip = require('gulp-zip'),
     replace = require('gulp-token-replace'),
     PluginError = require('plugin-error'),
     del = require('del');
@@ -88,9 +89,62 @@ const _webpack = (idx, callback) => {
     });
 };
 
-task('build', (callback) => {
+
+/**
+ * Webpack bundling
+ */
+task('webpack:client', (callback) => {
+    _webpack(1, callback);
+});
+
+task('webpack:server', (callback) => {
     _webpack(0, callback);
 });
+
+task('webpack', parallel("webpack:client", "webpack:server"));
+
+/**
+ * Copies static files
+ */
+task('static:copy', () => {
+    return src(config.staticFiles, {
+        base: "./src/app"
+    })
+        .pipe(
+            dest('./dist/')
+        );
+});
+
+const injectSources = () => {
+
+    var injectSrc = src(config.injectSources);
+
+    var injectOptions = {
+        relative: false,
+        ignorePath: 'dist/web',
+        addRootSlash: true
+    };
+    return src(config.htmlFiles)
+        .pipe(replace({
+            tokens: {
+                ...process.env
+            }
+            
+        }))
+        .pipe(
+            inject(injectSrc, injectOptions)
+        )
+        .pipe(
+            dest('./dist')
+        );
+};
+
+/**
+ * Injects script into pages
+ */
+task('static:inject', injectSources);
+
+task('build', series('webpack', 'static:copy', 'static:inject'));
 
 /**
  * Register watches
