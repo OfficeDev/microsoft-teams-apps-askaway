@@ -1,8 +1,16 @@
-import * as React from "react";
-import { Provider, Flex, Text, Button, Header } from "@fluentui/react-northstar";
-import TeamsBaseComponent, { ITeamsBaseComponentState } from "msteams-react-base-component";
-import * as microsoftTeams from "@microsoft/teams-js";
-import * as jwt from "jsonwebtoken";
+import * as React from 'react';
+import {
+    Provider,
+    Flex,
+    Text,
+    Button,
+    Header,
+} from '@fluentui/react-northstar';
+import TeamsBaseComponent, {
+    ITeamsBaseComponentState,
+} from 'msteams-react-base-component';
+import * as microsoftTeams from '@microsoft/teams-js';
+import * as jwt from 'jsonwebtoken';
 /**
  * State for the askAwayTabTab React component
  */
@@ -16,18 +24,17 @@ export interface IAskAwayTabState extends ITeamsBaseComponentState {
 /**
  * Properties for the askAwayTabTab React component
  */
-export interface IAskAwayTabProps {
-
-}
+export interface IAskAwayTabProps {}
 
 /**
  * Implementation of the askAway Tab content page
  */
-export class AskAwayTab extends TeamsBaseComponent<IAskAwayTabProps, IAskAwayTabState> {
-
+export class AskAwayTab extends TeamsBaseComponent<
+    IAskAwayTabProps,
+    IAskAwayTabState
+> {
     public async componentWillMount() {
-        this.updateTheme(this.getQueryVariable("theme"));
-
+        this.updateTheme(this.getQueryVariable('theme'));
 
         if (await this.inTeams()) {
             microsoftTeams.initialize();
@@ -35,12 +42,14 @@ export class AskAwayTab extends TeamsBaseComponent<IAskAwayTabProps, IAskAwayTab
             microsoftTeams.getContext((context) => {
                 microsoftTeams.appInitialization.notifySuccess();
                 this.setState({
-                    entityId: context.entityId
+                    entityId: context.entityId,
                 });
                 this.updateTheme(context.theme);
                 microsoftTeams.authentication.getAuthToken({
                     successCallback: (token: string) => {
-                        const decoded: { [key: string]: any; } = jwt.decode(token) as { [key: string]: any; };
+                        const decoded: { [key: string]: any } = jwt.decode(
+                            token
+                        ) as { [key: string]: any };
                         this.setState({ name: decoded!.name });
                         microsoftTeams.appInitialization.notifySuccess();
                         this.setState({ token: token });
@@ -48,16 +57,18 @@ export class AskAwayTab extends TeamsBaseComponent<IAskAwayTabProps, IAskAwayTab
                     failureCallback: (message: string) => {
                         this.setState({ error: message });
                         microsoftTeams.appInitialization.notifyFailure({
-                            reason: microsoftTeams.appInitialization.FailedReason.AuthFailed,
-                            message
+                            reason:
+                                microsoftTeams.appInitialization.FailedReason
+                                    .AuthFailed,
+                            message,
                         });
                     },
-                    resources: [process.env.ASKAWAYTAB_APP_URI as string]
+                    resources: [process.env.ASKAWAYTAB_APP_URI as string],
                 });
             });
         } else {
             this.setState({
-                entityId: "This is not hosted in Microsoft Teams"
+                entityId: 'This is not hosted in Microsoft Teams',
             });
         }
     }
@@ -70,7 +81,6 @@ export class AskAwayTab extends TeamsBaseComponent<IAskAwayTabProps, IAskAwayTab
             <div>
                 <h3>This is react tab!</h3>
             </div>
-            
         );
     }
 }

@@ -1,23 +1,24 @@
-import * as React from "react";
-import { Provider, Flex, Text, Header } from "@fluentui/react-northstar";
-import TeamsBaseComponent, { ITeamsBaseComponentState } from "msteams-react-base-component";
-import * as microsoftTeams from "@microsoft/teams-js";
-
+import * as React from 'react';
+import { Provider, Flex, Text, Header } from '@fluentui/react-northstar';
+import TeamsBaseComponent, {
+    ITeamsBaseComponentState,
+} from 'msteams-react-base-component';
+import * as microsoftTeams from '@microsoft/teams-js';
 
 export interface IAskAwayTabRemoveState extends ITeamsBaseComponentState {
     value: string;
 }
-export interface IAskAwayTabRemoveProps {
-
-}
+export interface IAskAwayTabRemoveProps {}
 
 /**
  * Implementation of askAway Tab remove page
  */
-export class AskAwayTabRemove  extends TeamsBaseComponent<IAskAwayTabRemoveProps, IAskAwayTabRemoveState> {
-
+export class AskAwayTabRemove extends TeamsBaseComponent<
+    IAskAwayTabRemoveProps,
+    IAskAwayTabRemoveState
+> {
     public async componentWillMount() {
-        this.updateTheme(this.getQueryVariable("theme"));
+        this.updateTheme(this.getQueryVariable('theme'));
 
         if (await this.inTeams()) {
             microsoftTeams.initialize();

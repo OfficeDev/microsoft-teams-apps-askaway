@@ -23,7 +23,7 @@ export const initiateAppInsights = async () => {
     aiClient = appInsights.defaultClient;
 };
 
-export const exceptionLogger = (error: Error) => {
+export const exceptionLogger = (error: Error | string) => {
     if (process.env.debugMode === 'true') {
         // eslint-disable-next-line no-console
         console.error(error);

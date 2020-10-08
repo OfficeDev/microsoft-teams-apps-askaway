@@ -18,6 +18,14 @@ In order to create a bot you need to first register it in the [Azure portal](htt
 ## How to configure the bot
 
 The App Id and App Secret, generated during the registration, for the bot are read from the `MicrosoftAppId` and `MicrosoftAppPassword` environment variables, specified in the `.env` file. Key vault resource name is read from `KeyVaultName` environment variable as well.
+
+To authenticate rest endpoints, following settings are read from `.env` file.
+`AzureAd_ClientId`
+`AzureAd_ApplicationIdUri`
+`AzureAd_Metadata_Endpoint`="https://login.microsoftonline.com/TENANT_ID/v2.0/.well-known/openid-configuration"
+`AzureAd_ValidIssuers`="https://login.microsoftonline.com/TENANT_ID/v2.0,https://sts.windows.net/TENANT_ID/"
+`TenantId`
+
 These can be configured in the Azure Web App under _Application Settings > App Settings_.
 
 Key vault resource should contain following secrets:
