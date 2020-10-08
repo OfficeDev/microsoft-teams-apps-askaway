@@ -9,6 +9,18 @@ const config = {
     watches: [
         "./src/**/*.*",
     ],
+    injectSources: [
+        "./dist/web/scripts/**/*.js",
+        "./dist/web/styles/**/*.css"
+    ],
+    staticFiles: [
+        "./src/app/**/*.html",
+        "./src/app/**/*.ejs",
+        "./src/app/web/assets/**/*"
+    ],
+    htmlFiles: [
+        "./src/app/**/*.html", "./src/app/**/*.ejs"
+    ],
     // Supported Schemas
     SCHEMAS: [{
         version: "1.3",

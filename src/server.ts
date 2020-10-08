@@ -23,6 +23,9 @@ import {
     getAvatarKey,
 } from 'src/util/keyvault';
 
+import { MsTeamsApiRouter, MsTeamsPageRouter } from "express-msteams-host";
+import * as allComponents from "./app/TeamsAppsComponents";
+
 // Initialize debug logging module
 const log = debug('msteams');
 
@@ -102,6 +105,27 @@ express.use(morgan('tiny'));
 
 // Add compression - uncomment to remove compression
 express.use(compression());
+
+// Add /scripts and /assets as static folders
+express.use("/app/scripts", Express.static(join(__dirname, "web/scripts")));
+express.use("/app/web/assets", Express.static(join(__dirname, "web/assets")));
+
+// routing for bots, connectors and incoming web hooks - based on the decorators
+// For more information see: https://www.npmjs.com/package/express-msteams-host
+express.use(MsTeamsApiRouter(allComponents));
+
+// routing for pages for tabs and connector configuration
+// For more information see: https://www.npmjs.com/package/express-msteams-host
+express.use(MsTeamsPageRouter({
+    root: join(__dirname, "web/"),
+    components: allComponents
+}));
+
+// Set default web page
+express.use("/", Express.static(join(__dirname, "web/"), {
+    index: "index.html"
+}));
+
 
 // initiate database
 initiateConnection().catch((error) => {
