@@ -23,8 +23,14 @@ import {
     getAvatarKey,
 } from 'src/util/keyvault';
 
-import { MsTeamsApiRouter, MsTeamsPageRouter } from "express-msteams-host";
-import * as allComponents from "./app/TeamsAppsComponents";
+import { router } from './routes/rest';
+import {
+    initializeAuthService,
+    ensureAuthenticated,
+} from './services/authService';
+
+import { MsTeamsApiRouter, MsTeamsPageRouter } from 'express-msteams-host';
+import * as allComponents from './app/TeamsAppsComponents';
 
 // Initialize debug logging module
 const log = debug('msteams');
@@ -54,6 +60,10 @@ initLocalization();
 // Create the Express webserver
 const express = Express();
 const port = process.env.port || process.env.PORT || 3007;
+initializeAuthService(express);
+
+// Rest endpoints
+express.use('/api/conversations', ensureAuthenticated(), router);
 
 // Inject the raw request body onto the request object
 express.use(
@@ -107,8 +117,8 @@ express.use(morgan('tiny'));
 express.use(compression());
 
 // Add /scripts and /assets as static folders
-express.use("/app/scripts", Express.static(join(__dirname, "web/scripts")));
-express.use("/app/web/assets", Express.static(join(__dirname, "web/assets")));
+express.use('/app/scripts', Express.static(join(__dirname, 'web/scripts')));
+express.use('/app/web/assets', Express.static(join(__dirname, 'web/assets')));
 
 // routing for bots, connectors and incoming web hooks - based on the decorators
 // For more information see: https://www.npmjs.com/package/express-msteams-host
@@ -116,16 +126,20 @@ express.use(MsTeamsApiRouter(allComponents));
 
 // routing for pages for tabs and connector configuration
 // For more information see: https://www.npmjs.com/package/express-msteams-host
-express.use(MsTeamsPageRouter({
-    root: join(__dirname, "web/"),
-    components: allComponents
-}));
+express.use(
+    MsTeamsPageRouter({
+        root: join(__dirname, 'web/'),
+        components: allComponents,
+    })
+);
 
 // Set default web page
-express.use("/", Express.static(join(__dirname, "web/"), {
-    index: "index.html"
-}));
-
+express.use(
+    '/',
+    Express.static(join(__dirname, 'web/'), {
+        index: 'index.html',
+    })
+);
 
 // initiate database
 initiateConnection().catch((error) => {

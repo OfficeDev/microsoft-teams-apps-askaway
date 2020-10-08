@@ -8,11 +8,6 @@
         "jsx": "react",
         "sourceMap": true
     },
-    "include": [
-        "src/app/scripts",
-        "src/*.d.ts"
-    ],
-    "exclude": [
-        "node_modules"
-    ]
+    "include": ["src/app/scripts", "src/*.d.ts"],
+    "exclude": ["node_modules"]
 }
