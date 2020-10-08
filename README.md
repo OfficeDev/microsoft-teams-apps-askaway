@@ -29,6 +29,9 @@ ApplicationInsightsInstrumentationKey="{{Application Insights Instrumentation Ke
 MicrosoftAppPassword="{{Bot client secret}}"
 AvatarKey="{{Avatar key}}"
 debugMode="true"
+HostName="{{Host name}}"
+MicrosoftAppId="{{ Bot client id}}"
+ASKAWAYTAB_APP_URI=api://{{HostName}}/{{MicrosoftAppId}}
 ```
 
 ## Building the app

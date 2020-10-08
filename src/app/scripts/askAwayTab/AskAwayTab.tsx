@@ -52,7 +52,7 @@ export class AskAwayTab extends TeamsBaseComponent<IAskAwayTabProps, IAskAwayTab
                             message
                         });
                     },
-                    resources: [process.env.TABAPPTAB_APP_URI as string]
+                    resources: [process.env.ASKAWAYTAB_APP_URI as string]
                 });
             });
         } else {

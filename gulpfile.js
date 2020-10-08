@@ -110,9 +110,9 @@ task('static:copy', () => {
     return src(config.staticFiles, {
         base: "./src/app"
     })
-        .pipe(
-            dest('./dist/')
-        );
+    .pipe(
+        dest('./dist/')
+    );
 });
 
 const injectSources = () => {
