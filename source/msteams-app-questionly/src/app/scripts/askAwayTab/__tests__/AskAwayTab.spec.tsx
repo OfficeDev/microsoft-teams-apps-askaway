@@ -1,9 +1,14 @@
-import * as React from 'react';
-import { shallow, mount } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import { Header } from '@fluentui/react-northstar';
+/**
+ * @jest-environment jsdom
+*/
 
+import * as React from 'react';
+import { shallow, configure } from 'enzyme';
+import toJson from 'enzyme-to-json';
 import { AskAwayTab } from '../AskAwayTab';
+import Adapter from 'enzyme-adapter-react-16';
+
+configure({adapter: new Adapter()});
 
 describe('AskAwayTab Component', () => {
     // Snapshot Test Sample
@@ -16,22 +21,9 @@ describe('AskAwayTab Component', () => {
     it('should render the tab', () => {
         const component = shallow(<AskAwayTab />);
         const divResult = component.containsMatchingElement(
-            <Header content="This is your tab" />
+            <h3>This is react tab!</h3>
         );
 
         expect(divResult).toBeTruthy();
-    });
-
-    // Mocking Sample
-    it('should show alert on button click', () => {
-        window.alert = jest.fn();
-
-        const component = mount(<AskAwayTab />);
-        const button = component.find('button');
-        button.simulate('click');
-
-        expect(window.alert).toHaveBeenCalledWith('It worked!');
-
-        component.unmount();
     });
 });

@@ -1,9 +1,15 @@
+/**
+ * @jest-environment jsdom
+*/
+
 import * as React from 'react';
-import { shallow } from 'enzyme';
+import { shallow, configure } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { Header } from '@fluentui/react-northstar';
-
 import { AskAwayTabRemove } from '../AskAwayTabRemove';
+import Adapter from 'enzyme-adapter-react-16';
+
+configure({adapter: new Adapter()});
 
 describe('AskAwayTabRemove Component', () => {
     // Snapshot Test Sample
