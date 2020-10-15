@@ -1,9 +1,14 @@
-import * as React from 'react';
-import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import { Header } from '@fluentui/react-northstar';
+/**
+ * @jest-environment jsdom
+*/
 
+import * as React from 'react';
+import { shallow, configure } from 'enzyme';
+import toJson from 'enzyme-to-json';
 import { AskAwayTabConfig } from '../AskAwayTabConfig';
+import Adapter from 'enzyme-adapter-react-16';
+
+configure({adapter: new Adapter()});
 
 describe('AskAwayTabConfig Component', () => {
     // Snapshot Test Sample
@@ -16,7 +21,7 @@ describe('AskAwayTabConfig Component', () => {
     it('should render the tab', () => {
         const component = shallow(<AskAwayTabConfig />);
         const divResult = component.containsMatchingElement(
-            <Header content="Configure your tab" />
+            <h3>Please click Save to get started!</h3>
         );
 
         expect(divResult).toBeTruthy();
