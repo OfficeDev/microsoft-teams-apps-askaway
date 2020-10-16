@@ -68,6 +68,8 @@ When you're ready to try out Ask Away, or to use it in your own organization, fo
 
 ## Contributing
 
+### This project was possible with the contributions of Microsoft Interns Lily Du, Shayan Khalili Moghaddam and Kavin Singh. Thank you to them and their mentors who helped convert a side project to a full Teams app template!
+
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
 Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
 the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
