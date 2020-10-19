@@ -93,7 +93,6 @@ export interface IQnASession_populated extends IQnASessionBase {
 /**
  * Exports the QnASession schema model for external use.
  */
-export const QnASession = mongoose.model<IQnASession>(
-    'QnASession',
-    QnASessionSchema
-);
+export const QnASession =
+    mongoose.models.QnASession ||
+    mongoose.model<IQnASession>('QnASession', QnASessionSchema);
