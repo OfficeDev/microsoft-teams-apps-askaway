@@ -24,4 +24,5 @@ export interface IUser extends mongoose.Document {
 /**
  * Exports the User schema model for external use.
  */
-export const User = mongoose.model<IUser>('User', UserSchema);
+export const User =
+    mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
