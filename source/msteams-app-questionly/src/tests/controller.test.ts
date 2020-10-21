@@ -16,9 +16,8 @@ import {
     isActiveQnA,
 } from 'src/Controller';
 import * as acb from 'src/adaptive-cards/adaptiveCardBuilder';
-import { Container } from 'typedi';
-import { QnASessionDataService } from 'src/data/services/qnaSessionDataService';
-import { QuestionDataService } from 'src/data/services/questionDataService';
+import { qnaSessionDataService } from 'src/data/services/qnaSessionDataService';
+import { questionDataService } from 'src/data/services/questionDataService';
 
 const sampleUserAADObjId1 = 'be36140g-9729-3024-8yg1-147bbi67g2c9';
 const sampleUserName = 'Sample Name';
@@ -36,9 +35,6 @@ const sampleHostUserId = '5f160b862655575054393a0e';
 
 jest.mock('../adaptive-cards/adaptiveCardBuilder');
 jest.mock('../data/database');
-
-const qnaSessionDataService = Container.get(QnASessionDataService);
-const questionDataService = Container.get(QuestionDataService);
 
 beforeEach(() => {
     process.env.debugMode = 'true';

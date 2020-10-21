@@ -1,6 +1,4 @@
 import { ExponentialBackOff, retryWrapper } from 'src/util/RetryPolicies';
-import { Inject } from 'typedi/decorators/Inject';
-import { Service } from 'typedi/decorators/Service';
 import { IQnASession, QnASession } from '../Schemas/QnASession';
 import {
     IQuestion,
@@ -8,19 +6,14 @@ import {
     Question,
 } from '../Schemas/Question';
 import { User } from '../Schemas/user';
-import { QnASessionDataService } from './qnaSessionDataService';
-import { UserDataService } from './userDataService';
+import { qnaSessionDataService } from './qnaSessionDataService';
+import { userDataService } from './userDataService';
 
-@Service()
 export class QuestionDataService {
-    private qnaSessionDataService: QnASessionDataService;
-    private userDataService: UserDataService;
+    private qnaSessionDataService;
+    private userDataService;
 
-    constructor(
-        @Inject(() => UserDataService) userDataService: UserDataService,
-        @Inject(() => QnASessionDataService)
-        qnaSessionDataService: QnASessionDataService
-    ) {
+    constructor(userDataService, qnaSessionDataService) {
         this.userDataService = userDataService;
         this.qnaSessionDataService = qnaSessionDataService;
     }
@@ -185,3 +178,8 @@ export class QuestionDataService {
         return true;
     }
 }
+
+export const questionDataService = new QuestionDataService(
+    userDataService,
+    qnaSessionDataService
+);

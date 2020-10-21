@@ -1,4 +1,3 @@
-import 'reflect-metadata';
 import Express from 'express';
 import * as http from 'http';
 import morgan from 'morgan';

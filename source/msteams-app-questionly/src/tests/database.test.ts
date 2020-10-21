@@ -4,14 +4,9 @@ import { QnASession, IQnASession } from 'src/Data/Schemas/QnASession';
 import { Question, IQuestion } from 'src/Data/Schemas/Question';
 import { User } from 'src/Data/Schemas/user';
 import crypto from 'crypto';
-import { Container } from 'typedi';
-import { QnASessionDataService } from 'src/data/services/qnaSessionDataService';
-import { QuestionDataService } from 'src/data/services/questionDataService';
-import { UserDataService } from 'src/data/services/userDataService';
-
-const qnaSessionDataService = Container.get(QnASessionDataService);
-const questionDataService = Container.get(QuestionDataService);
-const userDataService = Container.get(UserDataService);
+import { qnaSessionDataService } from 'src/data/services/qnaSessionDataService';
+import { questionDataService } from 'src/data/services/questionDataService';
+import { userDataService } from 'src/data/services/userDataService';
 
 let testHost, testQnASession, testUser, testUserUpvoting;
 

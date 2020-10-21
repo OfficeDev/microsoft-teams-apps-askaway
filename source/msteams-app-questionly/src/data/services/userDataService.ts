@@ -1,9 +1,7 @@
 import { retryWrapper } from 'src/util/RetryPolicies';
-import { Service } from 'typedi/decorators/Service';
 import { User } from '../Schemas/user';
 
-@Service()
-export class UserDataService {
+class UserDataService {
     /**
      * If user exists, finds the specified user and updates information.
      * Otherwise, if user doesn't exist, will create new user with provided parameters.
@@ -27,3 +25,5 @@ export class UserDataService {
         return true;
     }
 }
+
+export const userDataService = new UserDataService();
