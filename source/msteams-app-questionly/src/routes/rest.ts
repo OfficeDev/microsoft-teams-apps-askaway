@@ -1,10 +1,7 @@
 import Express from 'express';
-import { QnASessionDataService } from 'src/data/services/qnaSessionDataService';
-import { Container } from 'typedi';
+import { qnaSessionDataService } from 'src/data/services/qnaSessionDataService';
 
 export const router = Express.Router();
-
-const qnaSessionDataService = Container.get(QnASessionDataService);
 
 // Get session details
 router.get('/:conversationId/sessions/:sessionId', async (req, res) => {

@@ -1,22 +1,17 @@
 import * as mongoose from 'mongoose';
 import { ExponentialBackOff, retryWrapper } from 'src/util/RetryPolicies';
-import { Inject } from 'typedi';
-import { Service } from 'typedi/decorators/Service';
 import {
     IQnASession,
     IQnASession_populated,
     QnASession,
 } from '../Schemas/QnASession';
 import { User } from '../Schemas/user';
-import { UserDataService } from './userDataService';
+import { userDataService } from './userDataService';
 
-@Service()
-export class QnASessionDataService {
-    private userDataService: UserDataService;
+class QnASessionDataService {
+    private userDataService;
 
-    constructor(
-        @Inject((type) => UserDataService) userDataService: UserDataService
-    ) {
+    constructor(userDataService) {
         this.userDataService = userDataService;
     }
 
@@ -161,10 +156,10 @@ export class QnASessionDataService {
      * @param userAadjObjId - aadObjId of the current user
      * @throws Error when failed to find matching QnA session with the user ID
      */
-    isHost = async (
+    public async isHost(
         qnaSessionId: string,
         userAadjObjId: string
-    ): Promise<boolean> => {
+    ): Promise<boolean> {
         const result = await retryWrapper<IQnASession[]>(() =>
             QnASession.find({
                 _id: qnaSessionId,
@@ -175,7 +170,7 @@ export class QnASessionDataService {
         if (result.length == 0) return false;
 
         return true;
-    };
+    }
 
     /**
      * Checks the status of the QnA session, returns true if
@@ -191,3 +186,5 @@ export class QnASessionDataService {
         return result.isActive;
     }
 }
+
+export const qnaSessionDataService = new QnASessionDataService(userDataService);

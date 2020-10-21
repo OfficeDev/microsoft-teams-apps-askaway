@@ -1,5 +1,4 @@
 // Middleman file to allow for communication between the bot, database, and adaptive card builder.
-import * as db from 'src/Data/Database'; // For database calls
 import * as adaptiveCardBuilder from 'src/adaptive-cards/adaptiveCardBuilder'; // To populate adaptive cards
 import { ok, err, Result } from 'src/util/ResultWrapper';
 import { AdaptiveCard } from 'adaptivecards';
@@ -7,16 +6,12 @@ import { IQuestion, IQuestionPopulatedUser } from 'src/Data/Schemas/Question';
 import { exceptionLogger } from 'src/util/ExceptionTracking';
 import jimp from 'jimp';
 import { join } from 'path';
-import { Container } from 'typedi';
-import { QnASessionDataService } from './data/services/qnaSessionDataService';
-import { QuestionDataService } from './data/services/questionDataService';
+import { qnaSessionDataService } from './data/services/qnaSessionDataService';
+import { questionDataService } from './data/services/questionDataService';
 
 export const getMainCard = adaptiveCardBuilder.getMainCard;
 export const getStartQnACard = adaptiveCardBuilder.getStartQnACard;
 export const getErrorCard = adaptiveCardBuilder.getErrorCard;
-
-const qnaSessionDataService = Container.get(QnASessionDataService);
-const questionDataService = Container.get(QuestionDataService);
 
 // color pallete used for user avatars
 const avatarColors: string[] = [
