@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { IUser } from 'src/Data/Schemas/user';
+import { IUser } from 'src/data/schemas/user';
 
 const QnASessionSchema = new mongoose.Schema({
     title: {

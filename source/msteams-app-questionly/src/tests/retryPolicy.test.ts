@@ -3,7 +3,7 @@ import {
     retryWrapper,
     DefaultRetryPolicy,
     ExponentialBackOff,
-} from 'src/util/RetryPolicies';
+} from 'src/util/retryPolicies';
 
 test('default retry policy should retry 2 times', async () => {
     let triesRemaining = 2;

@@ -1,6 +1,6 @@
 import i18next from 'i18next';
 import * as enStrings from 'src/localization/resources/en.json';
-import { exceptionLogger } from 'src/util/ExceptionTracking';
+import { exceptionLogger } from 'src/util/exceptionTracking';
 
 export interface Strings {
     mainCard: MainCard;

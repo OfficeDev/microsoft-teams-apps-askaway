@@ -1,9 +1,9 @@
 // Middleman file to allow for communication between the bot, database, and adaptive card builder.
 import * as adaptiveCardBuilder from 'src/adaptive-cards/adaptiveCardBuilder'; // To populate adaptive cards
-import { ok, err, Result } from 'src/util/ResultWrapper';
+import { ok, err, Result } from 'src/util/resultWrapper';
 import { AdaptiveCard } from 'adaptivecards';
-import { IQuestion, IQuestionPopulatedUser } from 'src/Data/Schemas/Question';
-import { exceptionLogger } from 'src/util/ExceptionTracking';
+import { IQuestion, IQuestionPopulatedUser } from 'src/data/schemas/question';
+import { exceptionLogger } from 'src/util/exceptionTracking';
 import jimp from 'jimp';
 import { join } from 'path';
 import { qnaSessionDataService } from './data/services/qnaSessionDataService';

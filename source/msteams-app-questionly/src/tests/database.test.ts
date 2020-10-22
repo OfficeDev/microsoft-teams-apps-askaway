@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/tslint/config */
 import mongoose from 'mongoose';
-import { QnASession, IQnASession } from 'src/Data/Schemas/QnASession';
-import { Question, IQuestion } from 'src/Data/Schemas/Question';
-import { User } from 'src/Data/Schemas/user';
+import { QnASession, IQnASession } from 'src/data/schemas/qnASession';
+import { Question, IQuestion } from 'src/data/schemas/question';
+import { User } from 'src/data/schemas/user';
 import crypto from 'crypto';
 import { qnaSessionDataService } from 'src/data/services/qnaSessionDataService';
 import { questionDataService } from 'src/data/services/questionDataService';

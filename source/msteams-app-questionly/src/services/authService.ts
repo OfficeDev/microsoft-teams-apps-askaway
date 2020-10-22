@@ -1,7 +1,9 @@
 import * as passport from 'passport';
 import * as passportAzureAd from 'passport-azure-ad';
-import { User } from 'src/Data/Schemas/user';
-import { exceptionLogger } from 'src/util/ExceptionTracking';
+import { Express as ExpressType } from 'express-serve-static-core';
+
+import { User } from 'src/data/schemas/user';
+import { exceptionLogger } from 'src/util/exceptionTracking';
 
 /**
  * Fetches tenant id from app settings.
@@ -104,7 +106,7 @@ export const getBearerStrategy = (): passportAzureAd.BearerStrategy => {
     };
 
     // Bearer strategy.
-    const strategy: passportAzureAd.BearerStrategy = new passportAzureAd.BearerStrategy(
+    return new passportAzureAd.BearerStrategy(
         options,
         (
             token: passportAzureAd.ITokenPayload,
@@ -120,15 +122,13 @@ export const getBearerStrategy = (): passportAzureAd.BearerStrategy => {
             );
         }
     );
-
-    return strategy;
 };
 
 /**
  * Initialize auth service.
  * @param app - Express app
  */
-export const initializeAuthService = (app: any): void => {
+export const initializeAuthService = (app: ExpressType): void => {
     passport.use(getBearerStrategy());
     app.use(passport.initialize());
 };
