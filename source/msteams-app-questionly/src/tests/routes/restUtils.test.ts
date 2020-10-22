@@ -1,14 +1,9 @@
-import Express from 'express';
 import mongoose from 'mongoose';
-import request from 'supertest';
-import { Express as ExpressType } from 'express-serve-static-core';
-import { router } from 'src/routes/rest';
-import { IQnASession, QnASession } from 'src/data/schemas/qnaSession';
+import { IQnASession, QnASession } from 'src/data/schemas/qnASession';
+import { IQuestion, Question } from 'src/data/schemas/question';
 import { IUser, User } from 'src/data/schemas/user';
-import { IQuestion, Question } from 'src/Data/Schemas/Question';
-import { QuestionCircleIcon } from '@fluentui/react-northstar';
+import { getAllQnASesssionsDataForTab } from 'src/routes/restUtils';
 
-let app: ExpressType;
 let testQnASession: IQnASession;
 let testQuestion1: IQuestion;
 let testQuestion2: IQuestion;
@@ -75,45 +70,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId api', () => {
         });
 
         await createDummyQnAsession();
-        app = Express();
-
-        // Rest endpoints
-        app.use('/api/conversations', router);
-    });
-
-    afterAll(async () => {
-        await QnASession.remove({ _id: testQnASession._id });
-        await User.remove({ _id: testUserId });
-        await mongoose.connection.close();
-    });
-
-    it('validates get ama session api', async () => {
-        const result = await request(app).get(
-            `/api/conversations/1/sessions/${testQnASession._id.toString()}`
-        );
-
-        expect(result).toBeDefined();
-        expect(result.body.title).toEqual(sampleTitle);
-        expect(result.body.activityId).toEqual(sampleActivityId);
-        expect(result.body.description).toEqual(sampleDescription);
-        expect(result.body.conversationId).toEqual(sampleConversationId);
-    });
-});
-
-describe('test conversations/:conversationId/sessions api', () => {
-    beforeAll(async () => {
-        await mongoose.connect(<string>process.env.MONGO_URL, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-            useFindAndModify: false,
-        });
-
-        await createDummyQnAsession();
         await createQuestionData();
-        app = Express();
-
-        // Rest endpoints
-        app.use('/api/conversations', router);
     });
 
     afterAll(async () => {
@@ -124,20 +81,18 @@ describe('test conversations/:conversationId/sessions api', () => {
         await mongoose.connection.close();
     });
 
-    it('get all QnA sessions data', async () => {
-        const result = await request(app).get(
-            `/api/conversations/${sampleConversationId}/sessions`
-        );
-        const res = JSON.parse(result.text)[0];
-        expect(res.title).toEqual(sampleTitle);
-        expect(res.isActive).toEqual(true);
-        expect(res.hostUser.id).toEqual(testUserId);
-        expect(res.hostUser.name).toEqual(testUserName);
-        expect(res.numberOfQuestions).toEqual(2);
+    it('validates get all qna session data for tab', async () => {
+        const result = await getAllQnASesssionsDataForTab(sampleConversationId);
+        expect(result.length).toEqual(1);
+        expect(result[0].title).toEqual(sampleTitle);
+        expect(result[0].isActive).toEqual(true);
+        expect(result[0].hostUser.id).toEqual(testUserId);
+        expect(result[0].hostUser.name).toEqual(testUserName);
+        expect(result[0].numberOfQuestions).toEqual(2);
     });
 
-    it('get all QnA sessions data for invalid conversation id ', async () => {
-        const result = await request(app).get(`/api/conversations/1/sessions`);
-        expect(result.noContent).toBe(true);
+    it('validates get all qna session data for tab for invalid conversation id', async () => {
+        const result = await getAllQnASesssionsDataForTab('1');
+        expect(result.length).toEqual(0);
     });
 });

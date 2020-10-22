@@ -130,6 +130,8 @@ test('can create qna session', async () => {
     expect(doc.isActive).toBe(true);
     expect(expectedData).toEqual(data);
 
+    await QnASession.remove({ _id: result.qnaSessionId });
+
     return;
 });
 
@@ -646,4 +648,23 @@ test('checking if inactive QnA is currently active', async () => {
         result.qnaSessionId
     );
     expect(isActive).toEqual(false);
+
+    await QnASession.remove({ _id: result.qnaSessionId });
+});
+
+test('get all ama sessions', async () => {
+    const qnaSessions = await qnaSessionDataService.getAllQnASessionData(
+        sampleConversationId
+    );
+    const qnaSession = qnaSessions[0];
+    expect(qnaSessions.length).toEqual(1);
+    expect(qnaSession.conversationId).toEqual(sampleConversationId);
+    expect(qnaSession._id).toEqual(testQnASession._id);
+    expect(qnaSession.hostId).toEqual(testQnASession.hostId);
+});
+
+test('get all ama sessions with invalid conversation Id', async () => {
+    const qnaSessions = await qnaSessionDataService.getAllQnASessionData('1');
+    console.log(qnaSessions);
+    expect(qnaSessions.length).toEqual(0);
 });
