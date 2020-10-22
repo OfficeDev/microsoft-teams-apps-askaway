@@ -4,8 +4,8 @@ import {
     IQnASession,
     IQnASession_populated,
     QnASession,
-} from '../Schemas/QnASession';
-import { User } from '../Schemas/user';
+} from 'src/data/schemas/qnaSession';
+import { User } from 'src/data/schemas/user';
 import { userDataService } from './userDataService';
 
 class QnASessionDataService {

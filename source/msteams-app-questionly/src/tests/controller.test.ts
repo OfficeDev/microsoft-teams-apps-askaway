@@ -22,7 +22,7 @@ import { questionDataService } from 'src/data/services/questionDataService';
 const sampleUserAADObjId1 = 'be36140g-9729-3024-8yg1-147bbi67g2c9';
 const sampleUserName = 'Sample Name';
 const sampleErrorMessage = 'Sample Error Message';
-const sampleQnASessionID = '5f160b862655575054393a0e';
+const sampleQnASessionId = '5f160b862655575054393a0e';
 const sampleTitle = 'Weekly QnA Test';
 const sampleDescription = 'Weekly QnA Test description';
 const sampleActivityId = '1234';
@@ -46,7 +46,7 @@ test('get main card', async () => {
         sampleTitle,
         sampleDescription,
         sampleUserName,
-        sampleQnASessionID,
+        sampleQnASessionId,
         sampleUserAADObjId1,
         sampleHostUserId
     );
@@ -55,7 +55,7 @@ test('get main card', async () => {
         sampleTitle,
         sampleDescription,
         sampleUserName,
-        sampleQnASessionID,
+        sampleQnASessionId,
         sampleUserAADObjId1,
         sampleHostUserId
     );
@@ -80,7 +80,7 @@ test('get error card', async () => {
 test('start qna session in channel', async () => {
     (<any>qnaSessionDataService.createQnASession).mockImplementationOnce(
         () => ({
-            qnaSessionId: sampleQnASessionID,
+            qnaSessionId: sampleQnASessionId,
             hostId: sampleUserAADObjId1,
         })
     );
@@ -114,7 +114,7 @@ test('start qna session in channel', async () => {
 test('start qna session in group chat', async () => {
     (<any>qnaSessionDataService.createQnASession).mockImplementationOnce(
         () => ({
-            qnaSessionId: sampleQnASessionID,
+            qnaSessionId: sampleQnASessionId,
             hostId: sampleUserAADObjId1,
         })
     );
@@ -147,51 +147,51 @@ test('start qna session in group chat', async () => {
 
 test('generate leaderboard', async () => {
     await generateLeaderboard(
-        sampleQnASessionID,
+        sampleQnASessionId,
         sampleUserAADObjId1,
         'default'
     );
     expect(questionDataService.getQuestionData).toBeCalledTimes(1);
     expect(questionDataService.getQuestionData).toBeCalledWith(
-        sampleQnASessionID
+        sampleQnASessionId
     );
     expect(qnaSessionDataService.isHost).toBeCalledTimes(1);
     expect(qnaSessionDataService.isHost).toBeCalledWith(
-        sampleQnASessionID,
+        sampleQnASessionId,
         sampleUserAADObjId1
     );
     expect(qnaSessionDataService.isActiveQnA).toBeCalledTimes(1);
     expect(qnaSessionDataService.isActiveQnA).toBeCalledWith(
-        sampleQnASessionID
+        sampleQnASessionId
     );
     expect(acb.generateLeaderboard).toBeCalledTimes(1);
 });
 
 test('set activity id', async () => {
-    await setActivityId(sampleQnASessionID, sampleActivityId);
+    await setActivityId(sampleQnASessionId, sampleActivityId);
     expect(qnaSessionDataService.updateActivityId).toBeCalledTimes(1);
     expect(qnaSessionDataService.updateActivityId).toBeCalledWith(
-        sampleQnASessionID,
+        sampleQnASessionId,
         sampleActivityId
     );
 });
 
 test('get new question card', async () => {
-    await getNewQuestionCard(sampleQnASessionID);
+    await getNewQuestionCard(sampleQnASessionId);
     expect(acb.getNewQuestionCard).toBeCalledTimes(1);
-    expect(acb.getNewQuestionCard).toBeCalledWith(sampleQnASessionID);
+    expect(acb.getNewQuestionCard).toBeCalledWith(sampleQnASessionId);
 });
 
 test('submit new question', async () => {
     await submitNewQuestion(
-        sampleQnASessionID,
+        sampleQnASessionId,
         sampleUserAADObjId1,
         sampleUserName,
         sampleQuestionContent
     );
     expect(questionDataService.createQuestion).toBeCalledTimes(1);
     expect(questionDataService.createQuestion).toBeCalledWith(
-        sampleQnASessionID,
+        sampleQnASessionId,
         sampleUserAADObjId1,
         sampleUserName,
         sampleQuestionContent
@@ -214,21 +214,21 @@ test('get updated main card', async () => {
         recentQuestions: [],
         numQuestions: 1,
     }));
-    await getUpdatedMainCard(sampleQnASessionID, false);
+    await getUpdatedMainCard(sampleQnASessionId, false);
     expect(qnaSessionDataService.getQnASessionData).toBeCalledTimes(1);
     expect(qnaSessionDataService.getQnASessionData).toBeCalledWith(
-        sampleQnASessionID
+        sampleQnASessionId
     );
     expect(questionDataService.getQuestions).toBeCalledTimes(1);
     expect(questionDataService.getQuestions).toBeCalledWith(
-        sampleQnASessionID,
+        sampleQnASessionId,
         3
     );
 });
 
 test('add upvote', async () => {
     (<any>questionDataService.updateUpvote).mockImplementationOnce(() => ({
-        qnaSessionId: sampleQnASessionID,
+        qnaSessionId: sampleQnASessionId,
     }));
     await updateUpvote(
         sampleQuestionId,
@@ -245,38 +245,38 @@ test('add upvote', async () => {
 });
 
 test('get end qna confirmation card', async () => {
-    await acb.getEndQnAConfirmationCard(sampleQnASessionID);
+    await acb.getEndQnAConfirmationCard(sampleQnASessionId);
     expect(acb.getEndQnAConfirmationCard).toBeCalledTimes(1);
-    expect(acb.getEndQnAConfirmationCard).toBeCalledWith(sampleQnASessionID);
+    expect(acb.getEndQnAConfirmationCard).toBeCalledWith(sampleQnASessionId);
 });
 
 test('end ama session', async () => {
-    await endQnASession(sampleQnASessionID, sampleUserAADObjId1);
+    await endQnASession(sampleQnASessionId, sampleUserAADObjId1);
     expect(qnaSessionDataService.isActiveQnA).toBeCalledTimes(1);
     expect(qnaSessionDataService.isActiveQnA).toBeCalledWith(
-        sampleQnASessionID
+        sampleQnASessionId
     );
     expect(qnaSessionDataService.isHost).toBeCalledTimes(1);
     expect(qnaSessionDataService.isHost).toBeCalledWith(
-        sampleQnASessionID,
+        sampleQnASessionId,
         sampleUserAADObjId1
     );
 });
 
 test('get resubmit question card', async () => {
-    getResubmitQuestionCard(sampleQnASessionID, sampleQuestionContent);
+    getResubmitQuestionCard(sampleQnASessionId, sampleQuestionContent);
     expect(acb.getResubmitQuestionErrorCard).toBeCalledTimes(1);
     expect(acb.getResubmitQuestionErrorCard).toBeCalledWith(
-        sampleQnASessionID,
+        sampleQnASessionId,
         sampleQuestionContent
     );
 });
 
 test('is host', async () => {
-    isHost(sampleQnASessionID, sampleUserAADObjId1);
+    isHost(sampleQnASessionId, sampleUserAADObjId1);
     expect(qnaSessionDataService.isHost).toBeCalledTimes(1);
     expect(qnaSessionDataService.isHost).toBeCalledWith(
-        sampleQnASessionID,
+        sampleQnASessionId,
         sampleUserAADObjId1
     );
 });
@@ -288,17 +288,17 @@ test('validate conversation id', async () => {
             conversationId: 'string',
         })
     );
-    validateConversationId(sampleQnASessionID, sampleConversationId);
+    validateConversationId(sampleQnASessionId, sampleConversationId);
     expect(qnaSessionDataService.getQnASessionData).toBeCalledTimes(1);
     expect(qnaSessionDataService.getQnASessionData).toBeCalledWith(
-        sampleQnASessionID
+        sampleQnASessionId
     );
 });
 
 test('is active qna', async () => {
-    await isActiveQnA(sampleQnASessionID);
+    await isActiveQnA(sampleQnASessionId);
     expect(qnaSessionDataService.isActiveQnA).toBeCalledTimes(1);
     expect(qnaSessionDataService.isActiveQnA).toBeCalledWith(
-        sampleQnASessionID
+        sampleQnASessionId
     );
 });
