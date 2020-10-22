@@ -52,4 +52,6 @@ export interface IQuestionPopulatedUser extends IQuestionBase {
 /**
  * Exports the Question schema model for external use.
  */
-export const Question = mongoose.model<IQuestion>('Question', QuestionSchema);
+export const Question =
+    mongoose.models.Question ||
+    mongoose.model<IQuestion>('Question', QuestionSchema);

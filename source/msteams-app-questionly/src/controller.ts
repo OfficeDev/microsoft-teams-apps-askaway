@@ -1,5 +1,4 @@
 // Middleman file to allow for communication between the bot, database, and adaptive card builder.
-import * as db from 'src/Data/Database'; // For database calls
 import * as adaptiveCardBuilder from 'src/adaptive-cards/adaptiveCardBuilder'; // To populate adaptive cards
 import { ok, err, Result } from 'src/util/ResultWrapper';
 import { AdaptiveCard } from 'adaptivecards';
@@ -7,6 +6,8 @@ import { IQuestion, IQuestionPopulatedUser } from 'src/Data/Schemas/Question';
 import { exceptionLogger } from 'src/util/ExceptionTracking';
 import jimp from 'jimp';
 import { join } from 'path';
+import { qnaSessionDataService } from './data/services/qnaSessionDataService';
+import { questionDataService } from './data/services/questionDataService';
 
 export const getMainCard = adaptiveCardBuilder.getMainCard;
 export const getStartQnACard = adaptiveCardBuilder.getStartQnACard;
@@ -57,7 +58,7 @@ export const startQnASession = async (
 ): Promise<Result<{ card: AdaptiveCard; qnaSessionId: string }, Error>> => {
     try {
         // save data to db
-        const response = await db.createQnASession(
+        const response = await qnaSessionDataService.createQnASession(
             title,
             description,
             userName,
@@ -100,11 +101,16 @@ export const generateLeaderboard = async (
     theme: string
 ): Promise<Result<AdaptiveCard, Error>> => {
     try {
-        const questionData: IQuestionPopulatedUser[] = await db.getQuestionData(
+        const questionData: IQuestionPopulatedUser[] = await questionDataService.getQuestionData(
             qnaSessionId
         );
-        const isHost = await db.isHost(qnaSessionId, aadObjectId);
-        const isActiveQnA = await db.isActiveQnA(qnaSessionId);
+        const isHost = await qnaSessionDataService.isHost(
+            qnaSessionId,
+            aadObjectId
+        );
+        const isActiveQnA = await qnaSessionDataService.isActiveQnA(
+            qnaSessionId
+        );
         return ok(
             await adaptiveCardBuilder.generateLeaderboard(
                 questionData,
@@ -131,7 +137,12 @@ export const setActivityId = async (
     activityId: string
 ) => {
     try {
-        return ok(await db.updateActivityId(qnaSessionId, activityId));
+        return ok(
+            await qnaSessionDataService.updateActivityId(
+                qnaSessionId,
+                activityId
+            )
+        );
     } catch (error) {
         exceptionLogger(error);
         return err(error);
@@ -161,7 +172,7 @@ export const submitNewQuestion = async (
     questionContent: string
 ): Promise<Result<boolean, Error>> => {
     try {
-        await db.createQuestion(
+        await questionDataService.createQuestion(
             qnaSessionId,
             <string>userAadObjId,
             userName,
@@ -180,13 +191,15 @@ export const getUpdatedMainCard = async (
     ended = false
 ): Promise<Result<{ card: AdaptiveCard; activityId: string }, Error>> => {
     try {
-        const qnaSessionData = await db.getQnASessionData(qnaSessionId);
+        const qnaSessionData = await qnaSessionDataService.getQnASessionData(
+            qnaSessionId
+        );
         // eslint-disable-next-line prefer-const
         const {
             topQuestions,
             recentQuestions,
             numQuestions,
-        } = await db.getQuestions(qnaSessionId, 3);
+        } = await questionDataService.getQuestions(qnaSessionId, 3);
 
         // generate and return maincard
         return ok({
@@ -224,7 +237,7 @@ export const updateUpvote = async (
     theme: string
 ): Promise<Result<AdaptiveCard, Error>> => {
     try {
-        const question: IQuestion = await db.updateUpvote(
+        const question: IQuestion = await questionDataService.updateUpvote(
             questionId,
             aadObjectId,
             name
@@ -258,13 +271,16 @@ export const endQnASession = async (
     aadObjectId: string
 ): Promise<Result<{ card: AdaptiveCard; activityId: string }, Error>> => {
     try {
-        const isActive = await db.isActiveQnA(qnaSessionId);
-        const isHost = await db.isHost(qnaSessionId, aadObjectId);
+        const isActive = await qnaSessionDataService.isActiveQnA(qnaSessionId);
+        const isHost = await qnaSessionDataService.isHost(
+            qnaSessionId,
+            aadObjectId
+        );
 
         if (!isActive) return err(Error('The QnA session has already ended'));
         if (!isHost)
             return err(Error('Insufficient permissions to end QnA session'));
-        await db.endQnASession(qnaSessionId);
+        await qnaSessionDataService.endQnASession(qnaSessionId);
 
         const updatedMainCard = await getUpdatedMainCard(qnaSessionId, true);
 
@@ -303,7 +319,10 @@ export const isHost = async (
     userAadObjId: string
 ): Promise<Result<boolean, Error>> => {
     try {
-        const result = await db.isHost(qnaSessionId, userAadObjId);
+        const result = await qnaSessionDataService.isHost(
+            qnaSessionId,
+            userAadObjId
+        );
         return ok(result);
     } catch (error) {
         exceptionLogger(error);
@@ -352,7 +371,9 @@ export const validateConversationId = async (
     conversationId: string
 ): Promise<Result<boolean, Error>> => {
     try {
-        const qnaSessionData = await db.getQnASessionData(qnaSessionId);
+        const qnaSessionData = await qnaSessionDataService.getQnASessionData(
+            qnaSessionId
+        );
         return ok(
             qnaSessionData.conversationId.split(';')[0] ===
                 conversationId.split(';')[0]
@@ -373,7 +394,7 @@ export const isActiveQnA = async (
     qnaSessionId: string
 ): Promise<Result<boolean, Error>> => {
     try {
-        const result = await db.isActiveQnA(qnaSessionId);
+        const result = await qnaSessionDataService.isActiveQnA(qnaSessionId);
         return ok(result);
     } catch (error) {
         exceptionLogger(error);

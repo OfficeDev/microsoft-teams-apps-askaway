@@ -16,12 +16,13 @@ import {
     isActiveQnA,
 } from 'src/Controller';
 import * as acb from 'src/adaptive-cards/adaptiveCardBuilder';
-import * as db from 'src/Data/Database';
+import { qnaSessionDataService } from 'src/data/services/qnaSessionDataService';
+import { questionDataService } from 'src/data/services/questionDataService';
 
 const sampleUserAADObjId1 = 'be36140g-9729-3024-8yg1-147bbi67g2c9';
 const sampleUserName = 'Sample Name';
 const sampleErrorMessage = 'Sample Error Message';
-const sampleQnASessionID = '5f160b862655575054393a0e';
+const sampleQnASessionId = '5f160b862655575054393a0e';
 const sampleTitle = 'Weekly QnA Test';
 const sampleDescription = 'Weekly QnA Test description';
 const sampleActivityId = '1234';
@@ -45,7 +46,7 @@ test('get main card', async () => {
         sampleTitle,
         sampleDescription,
         sampleUserName,
-        sampleQnASessionID,
+        sampleQnASessionId,
         sampleUserAADObjId1,
         sampleHostUserId
     );
@@ -54,7 +55,7 @@ test('get main card', async () => {
         sampleTitle,
         sampleDescription,
         sampleUserName,
-        sampleQnASessionID,
+        sampleQnASessionId,
         sampleUserAADObjId1,
         sampleHostUserId
     );
@@ -77,10 +78,12 @@ test('get error card', async () => {
 });
 
 test('start qna session in channel', async () => {
-    (<any>db.createQnASession).mockImplementationOnce(() => ({
-        qnaSessionId: sampleQnASessionID,
-        hostId: sampleUserAADObjId1,
-    }));
+    (<any>qnaSessionDataService.createQnASession).mockImplementationOnce(
+        () => ({
+            qnaSessionId: sampleQnASessionId,
+            hostId: sampleUserAADObjId1,
+        })
+    );
     await startQnASession(
         sampleTitle,
         sampleDescription,
@@ -93,8 +96,8 @@ test('start qna session in channel', async () => {
         sampleHostUserId,
         true
     );
-    expect(db.createQnASession).toBeCalledTimes(1);
-    expect(db.createQnASession).toBeCalledWith(
+    expect(qnaSessionDataService.createQnASession).toBeCalledTimes(1);
+    expect(qnaSessionDataService.createQnASession).toBeCalledWith(
         sampleTitle,
         sampleDescription,
         sampleUserName,
@@ -109,10 +112,12 @@ test('start qna session in channel', async () => {
 });
 
 test('start qna session in group chat', async () => {
-    (<any>db.createQnASession).mockImplementationOnce(() => ({
-        qnaSessionId: sampleQnASessionID,
-        hostId: sampleUserAADObjId1,
-    }));
+    (<any>qnaSessionDataService.createQnASession).mockImplementationOnce(
+        () => ({
+            qnaSessionId: sampleQnASessionId,
+            hostId: sampleUserAADObjId1,
+        })
+    );
     await startQnASession(
         sampleTitle,
         sampleDescription,
@@ -125,8 +130,8 @@ test('start qna session in group chat', async () => {
         sampleHostUserId,
         false
     );
-    expect(db.createQnASession).toBeCalledTimes(1);
-    expect(db.createQnASession).toBeCalledWith(
+    expect(qnaSessionDataService.createQnASession).toBeCalledTimes(1);
+    expect(qnaSessionDataService.createQnASession).toBeCalledWith(
         sampleTitle,
         sampleDescription,
         sampleUserName,
@@ -142,44 +147,51 @@ test('start qna session in group chat', async () => {
 
 test('generate leaderboard', async () => {
     await generateLeaderboard(
-        sampleQnASessionID,
+        sampleQnASessionId,
         sampleUserAADObjId1,
         'default'
     );
-    expect(db.getQuestionData).toBeCalledTimes(1);
-    expect(db.getQuestionData).toBeCalledWith(sampleQnASessionID);
-    expect(db.isHost).toBeCalledTimes(1);
-    expect(db.isHost).toBeCalledWith(sampleQnASessionID, sampleUserAADObjId1);
-    expect(db.isActiveQnA).toBeCalledTimes(1);
-    expect(db.isActiveQnA).toBeCalledWith(sampleQnASessionID);
+    expect(questionDataService.getQuestionData).toBeCalledTimes(1);
+    expect(questionDataService.getQuestionData).toBeCalledWith(
+        sampleQnASessionId
+    );
+    expect(qnaSessionDataService.isHost).toBeCalledTimes(1);
+    expect(qnaSessionDataService.isHost).toBeCalledWith(
+        sampleQnASessionId,
+        sampleUserAADObjId1
+    );
+    expect(qnaSessionDataService.isActiveQnA).toBeCalledTimes(1);
+    expect(qnaSessionDataService.isActiveQnA).toBeCalledWith(
+        sampleQnASessionId
+    );
     expect(acb.generateLeaderboard).toBeCalledTimes(1);
 });
 
 test('set activity id', async () => {
-    await setActivityId(sampleQnASessionID, sampleActivityId);
-    expect(db.updateActivityId).toBeCalledTimes(1);
-    expect(db.updateActivityId).toBeCalledWith(
-        sampleQnASessionID,
+    await setActivityId(sampleQnASessionId, sampleActivityId);
+    expect(qnaSessionDataService.updateActivityId).toBeCalledTimes(1);
+    expect(qnaSessionDataService.updateActivityId).toBeCalledWith(
+        sampleQnASessionId,
         sampleActivityId
     );
 });
 
 test('get new question card', async () => {
-    await getNewQuestionCard(sampleQnASessionID);
+    await getNewQuestionCard(sampleQnASessionId);
     expect(acb.getNewQuestionCard).toBeCalledTimes(1);
-    expect(acb.getNewQuestionCard).toBeCalledWith(sampleQnASessionID);
+    expect(acb.getNewQuestionCard).toBeCalledWith(sampleQnASessionId);
 });
 
 test('submit new question', async () => {
     await submitNewQuestion(
-        sampleQnASessionID,
+        sampleQnASessionId,
         sampleUserAADObjId1,
         sampleUserName,
         sampleQuestionContent
     );
-    expect(db.createQuestion).toBeCalledTimes(1);
-    expect(db.createQuestion).toBeCalledWith(
-        sampleQnASessionID,
+    expect(questionDataService.createQuestion).toBeCalledTimes(1);
+    expect(questionDataService.createQuestion).toBeCalledWith(
+        sampleQnASessionId,
         sampleUserAADObjId1,
         sampleUserName,
         sampleQuestionContent
@@ -187,29 +199,36 @@ test('submit new question', async () => {
 });
 
 test('get updated main card', async () => {
-    (<any>db.getQnASessionData).mockImplementationOnce(() => ({
-        // arbitrary
-        title: [],
-        description: [],
-        userName: 1,
-        userAADObject: null,
-    }));
-    (<any>db.getQuestions).mockImplementationOnce(() => ({
+    (<any>qnaSessionDataService.getQnASessionData).mockImplementationOnce(
+        () => ({
+            // arbitrary
+            title: [],
+            description: [],
+            userName: 1,
+            userAADObject: null,
+        })
+    );
+    (<any>questionDataService.getQuestions).mockImplementationOnce(() => ({
         // arbitrary
         topQuestions: [],
         recentQuestions: [],
         numQuestions: 1,
     }));
-    await getUpdatedMainCard(sampleQnASessionID, false);
-    expect(db.getQnASessionData).toBeCalledTimes(1);
-    expect(db.getQnASessionData).toBeCalledWith(sampleQnASessionID);
-    expect(db.getQuestions).toBeCalledTimes(1);
-    expect(db.getQuestions).toBeCalledWith(sampleQnASessionID, 3);
+    await getUpdatedMainCard(sampleQnASessionId, false);
+    expect(qnaSessionDataService.getQnASessionData).toBeCalledTimes(1);
+    expect(qnaSessionDataService.getQnASessionData).toBeCalledWith(
+        sampleQnASessionId
+    );
+    expect(questionDataService.getQuestions).toBeCalledTimes(1);
+    expect(questionDataService.getQuestions).toBeCalledWith(
+        sampleQnASessionId,
+        3
+    );
 });
 
 test('add upvote', async () => {
-    (<any>db.updateUpvote).mockImplementationOnce(() => ({
-        qnaSessionId: sampleQnASessionID,
+    (<any>questionDataService.updateUpvote).mockImplementationOnce(() => ({
+        qnaSessionId: sampleQnASessionId,
     }));
     await updateUpvote(
         sampleQuestionId,
@@ -217,8 +236,8 @@ test('add upvote', async () => {
         sampleUserName,
         'default'
     );
-    expect(db.updateUpvote).toBeCalledTimes(1);
-    expect(db.updateUpvote).toBeCalledWith(
+    expect(questionDataService.updateUpvote).toBeCalledTimes(1);
+    expect(questionDataService.updateUpvote).toBeCalledWith(
         sampleQuestionId,
         sampleUserAADObjId1,
         sampleUserName
@@ -226,46 +245,60 @@ test('add upvote', async () => {
 });
 
 test('get end qna confirmation card', async () => {
-    await acb.getEndQnAConfirmationCard(sampleQnASessionID);
+    await acb.getEndQnAConfirmationCard(sampleQnASessionId);
     expect(acb.getEndQnAConfirmationCard).toBeCalledTimes(1);
-    expect(acb.getEndQnAConfirmationCard).toBeCalledWith(sampleQnASessionID);
+    expect(acb.getEndQnAConfirmationCard).toBeCalledWith(sampleQnASessionId);
 });
 
 test('end ama session', async () => {
-    await endQnASession(sampleQnASessionID, sampleUserAADObjId1);
-    expect(db.isActiveQnA).toBeCalledTimes(1);
-    expect(db.isActiveQnA).toBeCalledWith(sampleQnASessionID);
-    expect(db.isHost).toBeCalledTimes(1);
-    expect(db.isHost).toBeCalledWith(sampleQnASessionID, sampleUserAADObjId1);
+    await endQnASession(sampleQnASessionId, sampleUserAADObjId1);
+    expect(qnaSessionDataService.isActiveQnA).toBeCalledTimes(1);
+    expect(qnaSessionDataService.isActiveQnA).toBeCalledWith(
+        sampleQnASessionId
+    );
+    expect(qnaSessionDataService.isHost).toBeCalledTimes(1);
+    expect(qnaSessionDataService.isHost).toBeCalledWith(
+        sampleQnASessionId,
+        sampleUserAADObjId1
+    );
 });
 
 test('get resubmit question card', async () => {
-    getResubmitQuestionCard(sampleQnASessionID, sampleQuestionContent);
+    getResubmitQuestionCard(sampleQnASessionId, sampleQuestionContent);
     expect(acb.getResubmitQuestionErrorCard).toBeCalledTimes(1);
     expect(acb.getResubmitQuestionErrorCard).toBeCalledWith(
-        sampleQnASessionID,
+        sampleQnASessionId,
         sampleQuestionContent
     );
 });
 
 test('is host', async () => {
-    isHost(sampleQnASessionID, sampleUserAADObjId1);
-    expect(db.isHost).toBeCalledTimes(1);
-    expect(db.isHost).toBeCalledWith(sampleQnASessionID, sampleUserAADObjId1);
+    isHost(sampleQnASessionId, sampleUserAADObjId1);
+    expect(qnaSessionDataService.isHost).toBeCalledTimes(1);
+    expect(qnaSessionDataService.isHost).toBeCalledWith(
+        sampleQnASessionId,
+        sampleUserAADObjId1
+    );
 });
 
 test('validate conversation id', async () => {
-    (<any>db.getQnASessionData).mockImplementationOnce(() => ({
-        // arbitrary
-        conversationId: 'string',
-    }));
-    validateConversationId(sampleQnASessionID, sampleConversationId);
-    expect(db.getQnASessionData).toBeCalledTimes(1);
-    expect(db.getQnASessionData).toBeCalledWith(sampleQnASessionID);
+    (<any>qnaSessionDataService.getQnASessionData).mockImplementationOnce(
+        () => ({
+            // arbitrary
+            conversationId: 'string',
+        })
+    );
+    validateConversationId(sampleQnASessionId, sampleConversationId);
+    expect(qnaSessionDataService.getQnASessionData).toBeCalledTimes(1);
+    expect(qnaSessionDataService.getQnASessionData).toBeCalledWith(
+        sampleQnASessionId
+    );
 });
 
 test('is active qna', async () => {
-    await isActiveQnA(sampleQnASessionID);
-    expect(db.isActiveQnA).toBeCalledTimes(1);
-    expect(db.isActiveQnA).toBeCalledWith(sampleQnASessionID);
+    await isActiveQnA(sampleQnASessionId);
+    expect(qnaSessionDataService.isActiveQnA).toBeCalledTimes(1);
+    expect(qnaSessionDataService.isActiveQnA).toBeCalledWith(
+        sampleQnASessionId
+    );
 });

@@ -1,23 +1,12 @@
 /* eslint-disable @typescript-eslint/tslint/config */
 import mongoose from 'mongoose';
 import { QnASession, IQnASession } from 'src/Data/Schemas/QnASession';
-import {
-    getQuestionData,
-    createQuestion,
-    getUserOrCreate,
-    updateUpvote,
-    endQnASession,
-    createQnASession,
-    updateActivityId,
-    getQnASessionData,
-    getQuestions,
-    isHost,
-    isActiveQnA,
-    isExistingQnASession,
-} from 'src/Data/Database';
 import { Question, IQuestion } from 'src/Data/Schemas/Question';
 import { User } from 'src/Data/Schemas/user';
 import crypto from 'crypto';
+import { qnaSessionDataService } from 'src/data/services/qnaSessionDataService';
+import { questionDataService } from 'src/data/services/questionDataService';
+import { userDataService } from 'src/data/services/userDataService';
 
 let testHost, testQnASession, testUser, testUserUpvoting;
 
@@ -104,7 +93,7 @@ test('can create qna session', async () => {
         isChannel: true,
     };
 
-    const result = await createQnASession(
+    const result = await qnaSessionDataService.createQnASession(
         data.title,
         data.description,
         data.userName,
@@ -146,7 +135,10 @@ test('can create qna session', async () => {
 
 test('can update activity id', async () => {
     const activityId = '12345';
-    await updateActivityId(testQnASession._id, activityId);
+    await qnaSessionDataService.updateActivityId(
+        testQnASession._id,
+        activityId
+    );
 
     const doc: any = await QnASession.findById(testQnASession._id);
     expect(doc).not.toBeNull();
@@ -162,7 +154,7 @@ test('get QnA session data', async () => {
         userAadObjId,
         description,
         isActive,
-    } = await getQnASessionData(testQnASession._id);
+    } = await qnaSessionDataService.getQnASessionData(testQnASession._id);
 
     expect(title).toBe(sampleTitle);
     expect(userName).toBe(sampleUserName1);
@@ -220,7 +212,10 @@ test('retrieve most recent/top questions with three questions', async () => {
     await _sleep(1000);
     questions[2] = await new Question(questions[2]).save();
 
-    const results = await getQuestions(testQnASession._id, 3);
+    const results = await questionDataService.getQuestions(
+        testQnASession._id,
+        3
+    );
     const topQuestions: any = results.topQuestions;
     const recentQuestions: any = results.recentQuestions;
     const numQuestions = results.numQuestions;
@@ -275,7 +270,10 @@ test('retrieve most top questions with no votes should be most recent questions'
     await _sleep(1000);
     questions[2] = await new Question(questions[2]).save();
 
-    const results = await getQuestions(testQnASession._id, 3);
+    const results = await questionDataService.getQuestions(
+        testQnASession._id,
+        3
+    );
     const topQuestions: any = results.topQuestions;
     const numQuestions = results.numQuestions;
 
@@ -329,7 +327,10 @@ test('retrieve most top questions with some votes should be most recent question
     await _sleep(1000);
     questions[2] = await new Question(questions[2]).save();
 
-    const results = await getQuestions(testQnASession._id, 3);
+    const results = await questionDataService.getQuestions(
+        testQnASession._id,
+        3
+    );
     const topQuestions: any = results.topQuestions;
     const numQuestions = results.numQuestions;
 
@@ -348,7 +349,10 @@ test('retrieve most recent/top questions with no questions', async () => {
     const doc: any = await QnASession.findById(testQnASession._id);
     expect(doc).not.toBeNull();
 
-    const results = await getQuestions(testQnASession._id, 3);
+    const results = await questionDataService.getQuestions(
+        testQnASession._id,
+        3
+    );
     const topQuestions: any = results.topQuestions;
     const recentQuestions: any = results.recentQuestions;
     const numQuestions: any = results.numQuestions;
@@ -361,7 +365,9 @@ test('retrieve most recent/top questions with no questions', async () => {
 });
 
 test('retrieve question data in empty QnA', async () => {
-    const questionData = await getQuestionData(testQnASession._id);
+    const questionData = await questionDataService.getQuestionData(
+        testQnASession._id
+    );
     expect(questionData).toEqual([]);
 });
 
@@ -384,7 +390,9 @@ test('retrieve question data in non-empty QnA', async () => {
     await questions[0].save();
     await questions[1].save();
 
-    const questionData = await getQuestionData(testQnASession._id);
+    const questionData = await questionDataService.getQuestionData(
+        testQnASession._id
+    );
 
     expect(questionData[0]._id).toEqual(questions[0]._id);
     expect(questionData[1]._id).toEqual(questions[1]._id);
@@ -394,18 +402,24 @@ test('retrieve question data in non-empty QnA', async () => {
 });
 
 test('create new user', async () => {
-    const data = await getUserOrCreate(sampleUserAADObjId1, sampleUserName1);
+    const data = await userDataService.getUserOrCreate(
+        sampleUserAADObjId1,
+        sampleUserName1
+    );
     expect(data).toBe(true);
 });
 
 test('update existing user', async () => {
     const randomString = crypto.randomBytes(36).toString('hex');
-    const data = await getUserOrCreate(sampleUserAADObjId1, randomString);
+    const data = await userDataService.getUserOrCreate(
+        sampleUserAADObjId1,
+        randomString
+    );
     expect(data).toBe(true);
 });
 
 test('new question with existing user in existing QnA session', async () => {
-    const data = await createQuestion(
+    const data = await questionDataService.createQuestion(
         testQnASession._id,
         testUser._id,
         testUser.userName,
@@ -415,7 +429,7 @@ test('new question with existing user in existing QnA session', async () => {
 });
 
 test('new question with new user in existing QnA session', async () => {
-    const data = await createQuestion(
+    const data = await questionDataService.createQuestion(
         testQnASession._id,
         sampleUserAADObjId4,
         sampleUserName4,
@@ -425,24 +439,30 @@ test('new question with new user in existing QnA session', async () => {
 });
 
 test('new question with existing user in non-existing QnA session', async () => {
-    await createQuestion(
-        sampleQnASessionID,
-        sampleUserAADObjId4,
-        sampleUserName4,
-        sampleQuestionContent
-    ).catch((error) => {
-        expect(error).toEqual(new Error('QnA Session record not found'));
-    });
+    await questionDataService
+        .createQuestion(
+            sampleQnASessionID,
+            sampleUserAADObjId4,
+            sampleUserName4,
+            sampleQuestionContent
+        )
+        .catch((error) => {
+            expect(error).toEqual(new Error('QnA Session record not found'));
+        });
 });
 
 test('get non-existing QnA session', async () => {
-    await isExistingQnASession(sampleQnASessionID).catch((error) => {
-        expect(error).toEqual(new Error('QnA Session record not found'));
-    });
+    await qnaSessionDataService
+        .isExistingQnASession(sampleQnASessionID)
+        .catch((error) => {
+            expect(error).toEqual(new Error('QnA Session record not found'));
+        });
 });
 
 test('get existing QnA session', async () => {
-    const data = await isExistingQnASession(testQnASession._id);
+    const data = await qnaSessionDataService.isExistingQnASession(
+        testQnASession._id
+    );
     expect(data).toEqual(true);
 });
 
@@ -456,7 +476,7 @@ test('upvote question that has not been upvoted yet with existing user', async (
 
     await newQuestion.save();
 
-    const questionUpvoted = await updateUpvote(
+    const questionUpvoted = await questionDataService.updateUpvote(
         newQuestion._id,
         testUserUpvoting._id,
         testUserUpvoting.userName
@@ -478,7 +498,7 @@ test('upvote question that has already been upvoted with existing user', async (
 
     await newQuestion.save();
 
-    let questionUpvoted = await updateUpvote(
+    let questionUpvoted = await questionDataService.updateUpvote(
         newQuestion._id,
         testUserUpvoting._id,
         testUserUpvoting.userName
@@ -486,7 +506,7 @@ test('upvote question that has already been upvoted with existing user', async (
 
     expect(questionUpvoted.voters).toContain(testUserUpvoting._id);
 
-    questionUpvoted = await updateUpvote(
+    questionUpvoted = await questionDataService.updateUpvote(
         newQuestion._id,
         testUserUpvoting._id,
         testUserUpvoting.userName
@@ -514,7 +534,7 @@ test('upvote question with new user not in database', async () => {
 
     await newQuestion.save();
 
-    const questionUpvoted = await updateUpvote(
+    const questionUpvoted = await questionDataService.updateUpvote(
         newQuestion._id,
         '134679',
         'New User Junior'
@@ -527,13 +547,15 @@ test('upvote question with new user not in database', async () => {
 });
 
 test('ending non-existing qna', async () => {
-    await endQnASession(sampleQnASessionID).catch((error) => {
-        expect(error).toEqual(new Error('QnA Session record not found'));
-    });
+    await qnaSessionDataService
+        .endQnASession(sampleQnASessionID)
+        .catch((error) => {
+            expect(error).toEqual(new Error('QnA Session record not found'));
+        });
 });
 
 test('ending existing qna with no questions', async () => {
-    await endQnASession(testQnASession._id);
+    await qnaSessionDataService.endQnASession(testQnASession._id);
 
     // get data
     const qnaSessionData: any = await QnASession.findById(testQnASession._id)
@@ -549,7 +571,7 @@ test('ending existing qna with no questions', async () => {
 test('ending existing qna with a few questions', async () => {
     for (let i = 0; i < 5; i++) {
         const randomString = Math.random().toString(36);
-        await createQuestion(
+        await questionDataService.createQuestion(
             testQnASession._id,
             randomString,
             sampleUserName4,
@@ -557,7 +579,7 @@ test('ending existing qna with a few questions', async () => {
         );
     }
 
-    await endQnASession(testQnASession._id);
+    await qnaSessionDataService.endQnASession(testQnASession._id);
 
     // get data
     const qnaSessionData: any = await QnASession.findById(testQnASession._id)
@@ -571,17 +593,23 @@ test('ending existing qna with a few questions', async () => {
 });
 
 test('checking if current host is the host', async () => {
-    const data = await isHost(testQnASession._id, testQnASession.hostId);
+    const data = await qnaSessionDataService.isHost(
+        testQnASession._id,
+        testQnASession.hostId
+    );
     expect(data).toEqual(true);
 });
 
 test('checking if random attendee is the host', async () => {
-    const data = await isHost(testQnASession._id, sampleUserAADObjId3);
+    const data = await qnaSessionDataService.isHost(
+        testQnASession._id,
+        sampleUserAADObjId3
+    );
     expect(data).toEqual(false);
 });
 
 test('checking if active QnA is currently active', async () => {
-    const data = await isActiveQnA(testQnASession._id);
+    const data = await qnaSessionDataService.isActiveQnA(testQnASession._id);
     expect(data).toEqual(true);
 });
 
@@ -599,7 +627,7 @@ test('checking if inactive QnA is currently active', async () => {
         isChannel: true,
     };
 
-    const result = await createQnASession(
+    const result = await qnaSessionDataService.createQnASession(
         data.title,
         data.description,
         data.userName,
@@ -612,8 +640,10 @@ test('checking if inactive QnA is currently active', async () => {
         data.isChannel
     );
 
-    await endQnASession(result.qnaSessionId);
+    await qnaSessionDataService.endQnASession(result.qnaSessionId);
 
-    const isActive = await isActiveQnA(result.qnaSessionId);
+    const isActive = await qnaSessionDataService.isActiveQnA(
+        result.qnaSessionId
+    );
     expect(isActive).toEqual(false);
 });
