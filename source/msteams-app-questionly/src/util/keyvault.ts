@@ -1,8 +1,8 @@
 import { DefaultAzureCredential } from '@azure/identity';
 import { SecretClient } from '@azure/keyvault-secrets';
-import { exceptionLogger } from 'src/util/ExceptionTracking';
+import { exceptionLogger } from 'src/util/exceptionTracking';
 import memoryCache, { CacheClass } from 'memory-cache';
-import { ifNumber } from 'src/util/RetryPolicies';
+import { ifNumber } from 'src/util/retryPolicies';
 
 const vaultName = process.env.KeyVaultName;
 const mongoURISecretName = 'MongoDbUri';

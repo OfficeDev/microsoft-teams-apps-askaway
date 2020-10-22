@@ -22,7 +22,7 @@ import {
 } from 'src/localization/locale';
 import { IAdaptiveCard } from 'adaptivecards/lib/schema';
 import { IQuestionPopulatedUser } from 'src/Data/Schemas/Question';
-import { IUser } from 'src/Data/Schemas/user';
+import { IUser } from 'src/data/schemas/user';
 import { extractMainCardData } from 'src/adaptive-cards/mainCard';
 import random from 'random';
 import seedrandom from 'seedrandom';

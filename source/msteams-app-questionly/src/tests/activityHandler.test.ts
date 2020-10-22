@@ -11,7 +11,7 @@ import {
     getStartQnACard,
     validateConversationId,
 } from 'src/Controller';
-import { ok, err } from 'src/util/ResultWrapper';
+import { ok, err } from 'src/util/resultWrapper';
 import { errorStrings, initLocalization } from 'src/localization/locale';
 
 jest.mock('src/controller');

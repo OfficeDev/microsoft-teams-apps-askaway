@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/tslint/config */
 import { IAdaptiveCard } from 'adaptivecards';
-import { err, ok, Result } from 'src/util/ResultWrapper';
+import { err, ok, Result } from 'src/util/resultWrapper';
 import { ISubmitAction } from 'adaptivecards/lib/schema';
-import { exceptionLogger } from 'src/util/ExceptionTracking';
+import { exceptionLogger } from 'src/util/exceptionTracking';
 import { mainCardStrings } from 'src/localization/locale';
 
 /**

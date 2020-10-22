@@ -14,7 +14,7 @@ import {
     isHost,
     validateConversationId,
     isActiveQnA,
-} from 'src/Controller';
+} from 'src/controller';
 import * as acb from 'src/adaptive-cards/adaptiveCardBuilder';
 import { qnaSessionDataService } from 'src/data/services/qnaSessionDataService';
 import { questionDataService } from 'src/data/services/questionDataService';

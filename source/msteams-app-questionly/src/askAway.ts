@@ -14,10 +14,10 @@ import {
     BotMessagePreviewActionType,
 } from 'botbuilder';
 import { clone, debounce, delay } from 'lodash';
-import * as controller from 'src/Controller';
+import * as controller from 'src/controller';
 import { AdaptiveCard } from 'adaptivecards';
 import { extractMainCardData, MainCardData } from 'src/adaptive-cards/mainCard';
-import { Result, err, ok } from 'src/util/ResultWrapper';
+import { Result, err, ok } from 'src/util/resultWrapper';
 import {
     endQnAStrings,
     askQuestionStrings,
@@ -25,8 +25,8 @@ import {
     startQnAStrings,
     leaderboardStrings,
 } from 'src/localization/locale';
-import { exceptionLogger } from 'src/util/ExceptionTracking';
-import { ifNumber } from 'src/util/RetryPolicies';
+import { exceptionLogger } from 'src/util/exceptionTracking';
+import { ifNumber } from 'src/util/retryPolicies';
 
 const NULL_RESPONSE: any = null;
 /**
