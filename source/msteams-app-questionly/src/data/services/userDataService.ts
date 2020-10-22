@@ -1,5 +1,5 @@
 import { retryWrapper } from 'src/util/RetryPolicies';
-import { User } from '../Schemas/user';
+import { User } from 'src/data/schemas/user';
 
 class UserDataService {
     /**

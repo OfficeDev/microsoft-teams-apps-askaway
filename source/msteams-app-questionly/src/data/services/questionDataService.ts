@@ -1,11 +1,11 @@
 import { ExponentialBackOff, retryWrapper } from 'src/util/RetryPolicies';
-import { IQnASession, QnASession } from '../Schemas/QnASession';
+import { IQnASession, QnASession } from 'src/data/schemas/qnaSession';
 import {
     IQuestion,
     IQuestionPopulatedUser,
     Question,
-} from '../Schemas/Question';
-import { User } from '../Schemas/user';
+} from 'src/data/schemas/question';
+import { User } from 'src/data/schemas/user';
 import { qnaSessionDataService } from './qnaSessionDataService';
 import { userDataService } from './userDataService';
 
