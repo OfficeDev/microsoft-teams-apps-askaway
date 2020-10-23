@@ -1,5 +1,5 @@
-import { retryWrapper } from 'src/util/RetryPolicies';
-import { User } from 'src/data/schemas/user';
+import { retryWrapper } from 'src/util/retryPolicies';
+import { IUser, User } from 'src/data/schemas/user';
 
 class UserDataService {
     /**
@@ -23,6 +23,20 @@ class UserDataService {
         );
 
         return true;
+    }
+
+    /**
+     * Find user by id.
+     * @param userAadObjId - AAD Object Id of user
+     * @returns Returns true if user was successfully found
+     * @throws Error thrown when database fails to find and create or update the specified user
+     */
+    public async getUser(userAadObjId: IUser): Promise<IUser> {
+        const user: IUser = await retryWrapper<IUser>(() =>
+            User.findById(userAadObjId)
+        );
+        if (user === undefined) throw new Error('User not found');
+        return user;
     }
 }
 

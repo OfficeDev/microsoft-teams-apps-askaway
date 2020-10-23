@@ -1,19 +1,20 @@
-import { IQnASession_populated } from 'src/Data/Schemas/QnASession';
-import { IUser, User } from 'src/Data/Schemas/user';
+import { IQnASession_populated } from 'src/data/schemas/qnaSession';
 import { qnaSessionDataService } from 'src/data/services/qnaSessionDataService';
 import { questionDataService } from 'src/data/services/questionDataService';
+import { userDataService } from 'src/data/services/userDataService';
 import { exceptionLogger } from 'src/util/ExceptionTracking';
-import { retryWrapper } from 'src/util/RetryPolicies';
 
 export const getAllQnASesssionsDataForTab = async (conversationId: string) => {
     const qnaSessionDataArray: IQnASession_populated[] = await qnaSessionDataService.getAllQnASessionData(
         conversationId
     );
 
-    if (qnaSessionDataArray.length === 0) return [];
+    if (qnaSessionDataArray.length === 0) {
+        return qnaSessionDataArray;
+    }
 
     let qnaSessionData: IQnASession_populated;
-    const qnaSessionArrayForTab = new Array();
+    const qnaSessionArrayForTab: any[] = [];
     for (let i = 0; i < qnaSessionDataArray.length; i++) {
         qnaSessionData = qnaSessionDataArray[i];
         let questionsData;
@@ -22,12 +23,12 @@ export const getAllQnASesssionsDataForTab = async (conversationId: string) => {
                 qnaSessionData.id
             );
         } catch (err) {
-            exceptionLogger(err.message);
+            exceptionLogger(err);
             throw err;
         }
         const recentQuestions = questionsData.recentQuestions;
         const userSet = new Set();
-        const users = new Array();
+        const users: any[] = [];
         if (recentQuestions !== undefined) {
             for (let j = 0; j < recentQuestions.length; j++) {
                 if (!userSet.has(recentQuestions[j].userId._id)) {
@@ -40,9 +41,14 @@ export const getAllQnASesssionsDataForTab = async (conversationId: string) => {
             }
         }
 
-        const hostUser: IUser = await retryWrapper<IUser>(() =>
-            User.findById(qnaSessionData.hostId)
-        );
+        let hostUser;
+        try {
+            hostUser = await userDataService.getUser(qnaSessionData.hostId);
+        } catch (err) {
+            exceptionLogger(err);
+            throw err;
+        }
+
         const qnaSessionDataObject = {
             sessionId: qnaSessionData.id,
             title: qnaSessionData.title,

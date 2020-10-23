@@ -1,5 +1,6 @@
 import Express from 'express';
 import { qnaSessionDataService } from 'src/data/services/qnaSessionDataService';
+import { exceptionLogger } from 'src/util/exceptionTracking';
 import { getAllQnASesssionsDataForTab } from './restUtils';
 
 export const router = Express.Router();
@@ -19,8 +20,11 @@ router.get('/:conversationId/sessions', async (req, res) => {
         qnaSessionResponse = await getAllQnASesssionsDataForTab(
             req.params['conversationId']
         );
-        if (qnaSessionResponse.length === 0) res.statusCode = 204;
+        if (qnaSessionResponse.length === 0) {
+            res.statusCode = 204;
+        }
     } catch (err) {
+        exceptionLogger(err);
         res.statusCode = 500;
         qnaSessionResponse = err.message;
     }

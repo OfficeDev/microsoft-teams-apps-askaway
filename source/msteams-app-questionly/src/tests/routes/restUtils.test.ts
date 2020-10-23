@@ -2,6 +2,8 @@ import mongoose from 'mongoose';
 import { IQnASession, QnASession } from 'src/data/schemas/qnASession';
 import { IQuestion, Question } from 'src/data/schemas/question';
 import { IUser, User } from 'src/data/schemas/user';
+import { questionDataService } from 'src/data/services/questionDataService';
+import { userDataService } from 'src/data/services/userDataService';
 import { getAllQnASesssionsDataForTab } from 'src/routes/restUtils';
 
 let testQnASession: IQnASession;
@@ -17,10 +19,6 @@ const sampleDescription = 'Weekly QnA Test description';
 const sampleConversationId = '8293';
 const sampleTenantId = '11121';
 const sampleScopeId = '12311';
-const sampleTestUserId1 = 'f60faa2c-5340-4239-baf1-1276d75d1dba';
-const sampleTestUserName1 = 'Shayan Khalili';
-const sampleTestUserId2 = '84595f06-58d3-4b52-8b29-d0eceab46013';
-const sampleTestUserName2 = 'Lily Du';
 
 const createDummyQnAsession = async (): Promise<void> => {
     testUser = await new User({
@@ -73,6 +71,10 @@ describe('test /conversations/:conversationId/sessions/:sessionId api', () => {
         await createQuestionData();
     });
 
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
     afterAll(async () => {
         await QnASession.remove({ _id: testQnASession._id });
         await User.remove({ _id: testUserId });
@@ -94,5 +96,33 @@ describe('test /conversations/:conversationId/sessions/:sessionId api', () => {
     it('validates get all qna session data for tab for invalid conversation id', async () => {
         const result = await getAllQnASesssionsDataForTab('1');
         expect(result.length).toEqual(0);
+    });
+
+    it('validates get all qna session data for tab - error while getting user data', async () => {
+        (<any>userDataService.getUser) = jest.fn();
+        (<any>userDataService.getUser).mockImplementationOnce(() => {
+            throw new Error();
+        });
+
+        await getAllQnASesssionsDataForTab(sampleConversationId).catch(
+            (err) => {
+                expect(err).toEqual(new Error());
+            }
+        );
+    });
+
+    it('validates get all qna session data for tab - error while getting question data', async () => {
+        (<any>questionDataService.getQuestionData) = jest.fn();
+        (<any>questionDataService.getQuestionData).mockImplementationOnce(
+            () => {
+                throw new Error();
+            }
+        );
+
+        await getAllQnASesssionsDataForTab(sampleConversationId).catch(
+            (err) => {
+                expect(err).toEqual(new Error());
+            }
+        );
     });
 });

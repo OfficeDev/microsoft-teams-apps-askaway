@@ -5,8 +5,8 @@ import { Express as ExpressType } from 'express-serve-static-core';
 import { router } from 'src/routes/rest';
 import { IQnASession, QnASession } from 'src/data/schemas/qnaSession';
 import { IUser, User } from 'src/data/schemas/user';
-import { IQuestion, Question } from 'src/Data/Schemas/Question';
-import { QuestionCircleIcon } from '@fluentui/react-northstar';
+import { IQuestion, Question } from 'src/data/schemas/question';
+import { getAllQnASesssionsDataForTab } from 'src/routes/restUtils';
 
 let app: ExpressType;
 let testQnASession: IQnASession;
@@ -22,10 +22,6 @@ const sampleDescription = 'Weekly QnA Test description';
 const sampleConversationId = '8293';
 const sampleTenantId = '11121';
 const sampleScopeId = '12311';
-const sampleTestUserId1 = 'f60faa2c-5340-4239-baf1-1276d75d1dba';
-const sampleTestUserName1 = 'Shayan Khalili';
-const sampleTestUserId2 = '84595f06-58d3-4b52-8b29-d0eceab46013';
-const sampleTestUserName2 = 'Lily Du';
 
 const createDummyQnAsession = async (): Promise<void> => {
     testUser = await new User({
@@ -116,6 +112,10 @@ describe('test conversations/:conversationId/sessions api', () => {
         app.use('/api/conversations', router);
     });
 
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
     afterAll(async () => {
         await QnASession.remove({ _id: testQnASession._id });
         await User.remove({ _id: testUserId });
@@ -139,5 +139,16 @@ describe('test conversations/:conversationId/sessions api', () => {
     it('get all QnA sessions data for invalid conversation id ', async () => {
         const result = await request(app).get(`/api/conversations/1/sessions`);
         expect(result.noContent).toBe(true);
+    });
+
+    it('get all QnA sessions data for internal server error', async () => {
+        (<any>getAllQnASesssionsDataForTab) = jest.fn();
+        (<any>getAllQnASesssionsDataForTab).mockImplementationOnce(() => {
+            throw new Error();
+        });
+        const result = await request(app).get(
+            `/api/conversations/${sampleConversationId}/sessions`
+        );
+        expect(result.status).toBe(500);
     });
 });
