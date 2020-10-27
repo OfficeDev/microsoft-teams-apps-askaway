@@ -2,7 +2,7 @@ import { IQnASession_populated } from 'src/data/schemas/qnaSession';
 import { qnaSessionDataService } from 'src/data/services/qnaSessionDataService';
 import { questionDataService } from 'src/data/services/questionDataService';
 import { userDataService } from 'src/data/services/userDataService';
-import { exceptionLogger } from 'src/util/ExceptionTracking';
+import { exceptionLogger } from 'src/util/exceptionTracking';
 
 export const getAllQnASesssionsDataForTab = async (conversationId: string) => {
     const qnaSessionDataArray: IQnASession_populated[] = await qnaSessionDataService.getAllQnASessionData(

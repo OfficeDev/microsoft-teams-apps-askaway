@@ -138,6 +138,7 @@ describe('test conversations/:conversationId/sessions api', () => {
 
     it('get all QnA sessions data for invalid conversation id ', async () => {
         const result = await request(app).get(`/api/conversations/1/sessions`);
+        expect(result.status).toBe(204);
         expect(result.noContent).toBe(true);
     });
 
