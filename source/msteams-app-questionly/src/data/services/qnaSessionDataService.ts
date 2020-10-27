@@ -185,6 +185,23 @@ class QnASessionDataService {
 
         return result.isActive;
     }
+
+    /**
+     * Retrives all QnA sessions for a given conversation Id.
+     * @param conversationId - the conversation id for which QnA session data has to be retrived.
+     * @return - Array of QnA session data.
+     */
+    public async getAllQnASessionData(
+        conversationId: string
+    ): Promise<IQnASession_populated[]> {
+        return await retryWrapper<IQnASession_populated[]>(() =>
+            QnASession.find({
+                conversationId: conversationId,
+            })
+                .populate({ path: 'userId', model: User })
+                .exec()
+        );
+    }
 }
 
 export const qnaSessionDataService = new QnASessionDataService(userDataService);

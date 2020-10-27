@@ -28,6 +28,23 @@ const sampleScopeId = '12311';
 const sampleQnASessionID = '5f160b862655575054393a0e';
 const sampleHostUserId = '5f160b862655575054393a0e';
 
+const createDummyQnASession = async () => {
+    return await new QnASession({
+        title: sampleTitle,
+        description: sampleDescription,
+        isActive: true,
+        hostId: sampleUserAADObjId1,
+        activityId: sampleActivityId,
+        conversationId: sampleConversationId,
+        tenantId: sampleTenantId,
+        hostUserId: sampleHostUserId,
+        scope: {
+            scopeId: sampleScopeId,
+            isChannel: true,
+        },
+    }).save();
+};
+
 beforeAll(async () => {
     await mongoose.connect(<string>process.env.MONGO_URL, {
         useNewUrlParser: true,
@@ -42,20 +59,7 @@ beforeEach(async () => {
         userName: sampleUserName1,
     }).save();
 
-    testQnASession = await new QnASession({
-        title: sampleTitle,
-        description: sampleDescription,
-        isActive: true,
-        hostId: sampleUserAADObjId1,
-        activityId: sampleActivityId,
-        conversationId: sampleConversationId,
-        tenantId: sampleTenantId,
-        hostUserId: sampleHostUserId,
-        scope: {
-            scopeId: sampleScopeId,
-            isChannel: true,
-        },
-    }).save();
+    testQnASession = await createDummyQnASession();
 
     testUser = await new User({
         _id: sampleUserAADObjId2,
@@ -129,6 +133,8 @@ test('can create qna session', async () => {
 
     expect(doc.isActive).toBe(true);
     expect(expectedData).toEqual(data);
+
+    await QnASession.remove({ _id: result.qnaSessionId });
 
     return;
 });
@@ -646,4 +652,39 @@ test('checking if inactive QnA is currently active', async () => {
         result.qnaSessionId
     );
     expect(isActive).toEqual(false);
+
+    await QnASession.remove({ _id: result.qnaSessionId });
+});
+
+test('get all ama sessions', async () => {
+    const qnaSessions = await qnaSessionDataService.getAllQnASessionData(
+        sampleConversationId
+    );
+    expect(qnaSessions.length).toEqual(1);
+    const qnaSession = qnaSessions[0];
+    expect(qnaSession.conversationId).toEqual(sampleConversationId);
+    expect(qnaSession._id).toEqual(testQnASession._id);
+    expect(qnaSession.hostId).toEqual(testQnASession.hostId);
+});
+
+test('get all ama sessions with invalid conversation Id', async () => {
+    const qnaSessions = await qnaSessionDataService.getAllQnASessionData('1');
+    expect(qnaSessions.length).toEqual(0);
+});
+
+test('get all ama sessions', async () => {
+    const dummyQnASession = await createDummyQnASession();
+
+    const qnaSessions = await qnaSessionDataService.getAllQnASessionData(
+        sampleConversationId
+    );
+    expect(qnaSessions.length).toEqual(2);
+    expect(qnaSessions[0].conversationId).toEqual(sampleConversationId);
+    expect(qnaSessions[1].conversationId).toEqual(sampleConversationId);
+    expect(qnaSessions[0]._id).toEqual(testQnASession._id);
+    expect(qnaSessions[1]._id).toEqual(dummyQnASession._id);
+    expect(qnaSessions[0].hostId).toEqual(testQnASession.hostId);
+    expect(qnaSessions[1].hostId).toEqual(dummyQnASession.hostId);
+
+    await QnASession.remove({ _id: dummyQnASession._id });
 });
