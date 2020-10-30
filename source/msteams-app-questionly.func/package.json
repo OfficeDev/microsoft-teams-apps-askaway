@@ -10,7 +10,10 @@
     "test": "echo \"No tests yet...\""
   },
   "dependencies": {
-    "azure-ad-jwt-lite": "^1.1.0"
+    "axios": "^0.20.0",
+    "azure-ad-jwt-lite": "^1.1.0",
+    "botbuilder": "^4.10.4",
+    "moment": "^2.29.1"
   },
   "devDependencies": {
     "@azure/functions": "^1.0.2-beta2",

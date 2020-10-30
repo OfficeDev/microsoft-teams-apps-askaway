@@ -8,7 +8,9 @@
     "AzureAd_ApplicationIdUri": "{{AzureAd_ApplicationIdUri}}",
     "AzureAd_ValidIssuers": "https://login.microsoftonline.com/TENANT_ID/v2.0,https://sts.windows.net/TENANT_ID/",
     "TenantId": "{{TenantId}}",
-    "AzureSignalRConnectionString": "{{AzureSignalRConnectionString}}"
+    "AzureSignalRConnectionString": "{{AzureSignalRConnectionString}}",
+    "MicrosoftAppId": "{{MicrosoftAppId}}",
+    "MicrosoftAppPassword": "{{MicrosoftAppPassword}}"
   },
   "Host": {
     "LocalHttpPort": 7071,

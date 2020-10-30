@@ -1,5 +1,5 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
-import { isValidToken } from "../services/authService";
+import { authenticateRequest } from "../services/authService";
 
 const httpTrigger: AzureFunction = async function (
   context: Context,
@@ -7,11 +7,9 @@ const httpTrigger: AzureFunction = async function (
   connectionInfo: any
 ) {
   try {
-    var token = req.headers["authorization"];
+    const isAuthenticRequest: Boolean = await authenticateRequest(context, req);
 
-    const isTokenValid: Boolean = await isValidToken(context, token);
-
-    if (isTokenValid) {
+    if (isAuthenticRequest) {
       context.res.json(connectionInfo);
     } else {
       context.res = {

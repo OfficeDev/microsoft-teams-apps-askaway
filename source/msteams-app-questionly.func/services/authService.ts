@@ -1,6 +1,11 @@
-import { Context } from "@azure/functions";
+import { Context, HttpRequest } from "@azure/functions";
 import { verifyAzureToken } from "azure-ad-jwt-lite";
 import { VerifyOptions } from "jsonwebtoken";
+import {
+  aadObjectIdParameterConstant,
+  authorizationHeaderConstant,
+  userIdParameterConstant,
+} from "../constants/requestConstants";
 
 /**
  * Fetches tenant id from app settings.
@@ -55,16 +60,18 @@ const getVerifyOptions = (): VerifyOptions => {
 };
 
 /**
- * Verifies azure ad token.
+ * Verifies azure ad token from http request and append userId to the request.
  * @param context: azure function context.
- * @param token: azure Ad token.
+ * @param req: http request.
  * @returns - boolean value, true if token is valid.
  * @throws - error while forming verify options.
  */
-export const isValidToken = async (
+export const authenticateRequest = async (
   context: Context,
-  token: string
+  req: HttpRequest
 ): Promise<Boolean> => {
+  const token: string = req.headers[authorizationHeaderConstant];
+
   if (token === null || token === undefined) {
     return false;
   }
@@ -72,7 +79,8 @@ export const isValidToken = async (
   const options: VerifyOptions = getVerifyOptions();
 
   try {
-    await verifyAzureToken(token, options);
+    const decoded = await verifyAzureToken(token, options);
+    req[userIdParameterConstant] = decoded[aadObjectIdParameterConstant];
   } catch (error) {
     context.log.error(error);
 
