@@ -18,9 +18,10 @@ class SignalRUtility {
 
   /**
    * The constructor
+   * @param signalRConnectionString - only required for UTs, signalR connectionstring
    */
-  constructor() {
-    this._parseConnectionString();
+  constructor(signalRConnectionString?: string) {
+    this._parseConnectionString(signalRConnectionString);
   }
 
   /**
@@ -70,9 +71,12 @@ class SignalRUtility {
 
   /**
    * Parses signalR connection string to extract access token and endpoint.
+   * @param signalRConnectionString - only required for UTs, signalR connectionstring
    */
-  private _parseConnectionString = (): void => {
-    const signalRConnectionString: string = process.env.AzureSignalRConnectionString.toString();
+  private _parseConnectionString = (signalRConnectionString?: string): void => {
+    signalRConnectionString =
+      signalRConnectionString ??
+      process.env.AzureSignalRConnectionString.toString();
     const signalRConnectionStringProperties: string[] = signalRConnectionString.split(
       this._connectionStringPropertySeparator
     );
@@ -97,4 +101,15 @@ class SignalRUtility {
   };
 }
 
-export const signalRUtility = new SignalRUtility();
+// This function sets test signalR connection string for UTs.
+const getSignalRUtilityInstance = () => {
+  if (process.env.debugMode === "true") {
+    return new SignalRUtility(
+      "Endpoint=https://test.service.signalr.net;AccessKey=test=AccessKey=;Version=1.0;"
+    );
+  }
+
+  return new SignalRUtility();
+};
+
+export const signalRUtility = getSignalRUtilityInstance();

@@ -1,5 +1,5 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
-import { authenticateRequest } from "../services/authService";
+import { authenticateRequest } from "../src/services/authService";
 
 const httpTrigger: AzureFunction = async function (
   context: Context,
@@ -22,6 +22,7 @@ const httpTrigger: AzureFunction = async function (
 
     context.res = {
       status: 500,
+      body: null,
     };
   }
 };
