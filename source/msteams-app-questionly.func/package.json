@@ -14,6 +14,7 @@
     "axios": "^0.20.0",
     "azure-ad-jwt-lite": "^1.1.0",
     "botbuilder": "^4.10.4",
+    "durable-functions": "^1.4.4",
     "moment": "^2.29.1"
   },
   "devDependencies": {
