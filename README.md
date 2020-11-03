@@ -2,6 +2,7 @@
 
 Generate a Microsoft Teams application.
 
+
 TODO: Add your documentation here
 
 ## Getting started with Microsoft Teams Apps development
