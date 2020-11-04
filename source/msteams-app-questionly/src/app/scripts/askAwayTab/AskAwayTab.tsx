@@ -40,6 +40,7 @@ export class AskAwayTab extends TeamsBaseComponent<
             microsoftTeams.initialize();
             microsoftTeams.registerOnThemeChangeHandler(this.updateTheme);
             microsoftTeams.getContext((context) => {
+                console.log('getContext: ', context);
                 microsoftTeams.appInitialization.notifySuccess();
                 this.setState({
                     entityId: context.entityId,

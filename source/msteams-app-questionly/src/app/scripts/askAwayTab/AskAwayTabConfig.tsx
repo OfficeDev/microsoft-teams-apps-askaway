@@ -1,6 +1,15 @@
+import './index.scss';
 import * as React from 'react';
-import { Provider, Flex, Header, Input } from '@fluentui/react-northstar';
-import TeamsBaseComponent, {
+import {
+    Provider,
+    Flex,
+    Header,
+    Input,
+    Text,
+    RadioGroup,
+    Image,
+} from '@fluentui/react-northstar';
+import msteamsReactBaseComponent, {
     ITeamsBaseComponentState,
 } from 'msteams-react-base-component';
 import * as microsoftTeams from '@microsoft/teams-js';
@@ -14,7 +23,7 @@ export interface IAskAwayTabConfigProps {}
 /**
  * Implementation of askAway Tab configuration page
  */
-export class AskAwayTabConfig extends TeamsBaseComponent<
+export class AskAwayTabConfig extends msteamsReactBaseComponent<
     IAskAwayTabConfigProps,
     IAskAwayTabConfigState
 > {
@@ -56,11 +65,27 @@ export class AskAwayTabConfig extends TeamsBaseComponent<
         }
     }
 
+    constructor(props) {
+        super(props);
+    }
+
     public render() {
         return (
-            <div>
-                <h3>Please click Save to get started!</h3>
-            </div>
+            <Provider theme={this.state.theme}>
+                <Flex hAlign="center" vAlign="center" className="screen">
+                    <Image
+                        className="icon"
+                        alt="image"
+                        src={require('./../../web/assets/icon3.png')}
+                    />
+                    <Flex.Item align="center">
+                        <Text
+                            className="text-caption"
+                            content="Select save to finish adding ask away to the meeting"
+                        />
+                    </Flex.Item>
+                </Flex>
+            </Provider>
         );
     }
 }
