@@ -74,13 +74,13 @@ export class AskAwayTabConfig extends msteamsReactBaseComponent<
             <Provider theme={this.state.theme}>
                 <Flex hAlign="center" vAlign="center" className="screen">
                     <Image
-                        className="icon"
+                        className="icon3"
                         alt="image"
                         src={require('./../../web/assets/icon3.png')}
                     />
                     <Flex.Item align="center">
                         <Text
-                            className="text-caption"
+                            className="text-configtab-caption"
                             content="Select save to finish adding ask away to the meeting"
                         />
                     </Flex.Item>

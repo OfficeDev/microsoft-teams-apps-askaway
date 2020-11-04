@@ -1,9 +1,23 @@
 .screen {
     background-color: #f3f2f1;
-    .icon {
+    .icon3 {
         top: 30%;
         left: 50%;
         transform: translate(-50%, -50%);
+        position: absolute;
+    }
+    .icon2 {
+        top: 30%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        position: absolute;
+    }
+    .text-configtab-caption {
+        font-size: 18px;
+        line-height: 24px;
+        color: #252423;
+        font-weight: bold;
+        top: 55%;
         position: absolute;
     }
     .text-caption {
@@ -11,7 +25,7 @@
         line-height: 24px;
         color: #252423;
         font-weight: bold;
-        top: 55%;
+        top: 52%;
         position: absolute;
     }
     .text-subcaption {
