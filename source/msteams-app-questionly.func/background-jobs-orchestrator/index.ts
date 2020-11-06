@@ -20,7 +20,7 @@ const orchestrator = df.orchestrator(function* (context) {
   outputs.push(
     yield context.df.callActivity(
       "send-notification-bubble",
-      "send notification bubble"
+      context.bindingData.input
     )
   );
   outputs.push(
