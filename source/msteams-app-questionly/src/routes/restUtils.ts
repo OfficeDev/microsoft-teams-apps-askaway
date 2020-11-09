@@ -4,7 +4,10 @@ import {
     questionDataService,
     userDataService,
 } from 'msteams-app-questionly.data';
+import { MicrosoftAppCredentials } from 'botframework-connector';
 import { exceptionLogger } from 'src/util/exceptionTracking';
+import axios from 'axios';
+import { getMicrosoftAppPassword } from 'src/util/keyvault';
 
 export const getAllQnASesssionsDataForTab = async (conversationId: string) => {
     const qnaSessionDataArray: IQnASession_populated[] = await qnaSessionDataService.getAllQnASessionData(
@@ -65,4 +68,86 @@ export const getAllQnASesssionsDataForTab = async (conversationId: string) => {
     }
 
     return qnaSessionArrayForTab;
+};
+
+export const isPresenterOrOrganizer = async (
+    meetingId: string,
+    userId: string,
+    tenantId: string,
+    serviceUrl: string
+): Promise<boolean> => {
+    const role = await getParticipantRole(
+        meetingId,
+        userId,
+        tenantId,
+        serviceUrl
+    );
+    if (role === 'Organizer' || role === 'Presenter') {
+        return true;
+    }
+    return false;
+};
+
+export const getNumberOfActiveSessions = async (conversationId: string) => {
+    const qnaSessions: IQnASession_populated[] = await qnaSessionDataService.getAllQnASessionData(
+        conversationId
+    );
+    let activeSessions = 0;
+    for (let i = 0; i < qnaSessions.length; i++) {
+        const qnaSession: IQnASession_populated = qnaSessions[i];
+        if (qnaSession.isActive === true) {
+            activeSessions++;
+        }
+    }
+    return activeSessions;
+};
+
+const getToken = async () => {
+    let MicrosoftAppId;
+    if (process.env.MicrosoftAppId !== undefined) {
+        MicrosoftAppId = process.env.MicrosoftAppId;
+    } else {
+        exceptionLogger('MicrosoftAppId missing in local settings.');
+        throw new Error('MicrosoftAppId missing in local settings.');
+    }
+    const appPassword = await getMicrosoftAppPassword();
+    const appCredentials = new MicrosoftAppCredentials(
+        process.env.MicrosoftAppId,
+        appPassword
+    );
+    const token = await appCredentials.getToken();
+    return token;
+};
+
+const getParticipantRole = async (
+    meetingId: string,
+    userId: string,
+    tenantId: string,
+    serviceUrl: string
+) => {
+    let token;
+    let role;
+    try {
+        token = await getToken();
+    } catch (error) {
+        throw new Error('Error while getting participant role.');
+    }
+
+    axios
+        .get(
+            `${serviceUrl}v1/meetings/${meetingId}/participants/${userId}?tenantId=${tenantId}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        )
+        .then((res) => {
+            role = res.data.meeting.role;
+        })
+        .catch((error) => {
+            throw new Error('Error while getting participant role.');
+        });
+
+    return role;
 };
