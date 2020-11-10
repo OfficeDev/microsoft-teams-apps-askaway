@@ -11,7 +11,9 @@
     "AzureSignalRConnectionString": "{{AzureSignalRConnectionString}}",
     "MicrosoftAppId": "{{MicrosoftAppId}}",
     "MicrosoftAppPassword": "{{MicrosoftAppPassword}}",
-    "MongoDbUri": "{{MongoDbUri}}"
+    "MongoDbUri": "{{MongoDbUri}}",
+    "AppId": "{{ManifestAppId}}",
+    "NotificationBubblePageUrl": "{{NotificationBubblePageUrl}}"
   },
   "Host": {
     "LocalHttpPort": 7071,

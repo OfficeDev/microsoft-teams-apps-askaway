@@ -17,7 +17,6 @@ import {
   BotFrameworkAdapter,
   ConversationAccount,
   ConversationReference,
-  TurnContext,
 } from "botbuilder";
 
 const activityFunction: AzureFunction = async function (
@@ -32,7 +31,7 @@ const activityFunction: AzureFunction = async function (
 
   const activity = {
     type: ActivityTypes.Message,
-    text: "Hello",
+    text: "Ask Away",
     channelData: {
       notification: {
         alertInMeeting: true,
@@ -54,9 +53,17 @@ const activityFunction: AzureFunction = async function (
     appPassword: process.env.MicrosoftAppPassword.toString(),
   });
 
-  await adapter.continueConversation(conversationReference, async (context) => {
-    await context.sendActivity(activity);
-  });
+  try {
+    await adapter.continueConversation(
+      conversationReference,
+      async (context) => {
+        await context.sendActivity(activity);
+      }
+    );
+  } catch (error) {
+    context.log.error(error);
+    throw error;
+  }
 };
 
 export default activityFunction;
