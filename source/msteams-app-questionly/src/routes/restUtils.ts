@@ -9,6 +9,9 @@ import { exceptionLogger } from 'src/util/exceptionTracking';
 import axios from 'axios';
 import { getMicrosoftAppPassword } from 'src/util/keyvault';
 
+const organizer = 'Organizer';
+const presenter = 'Presenter';
+
 export const getAllQnASesssionsDataForTab = async (conversationId: string) => {
     const qnaSessionDataArray: IQnASession_populated[] = await qnaSessionDataService.getAllQnASessionData(
         conversationId
@@ -82,39 +85,22 @@ export const isPresenterOrOrganizer = async (
         tenantId,
         serviceUrl
     );
-    if (role === 'Organizer' || role === 'Presenter') {
+    if (role === organizer || role === presenter) {
         return true;
     }
     return false;
 };
 
-export const getNumberOfActiveSessions = async (conversationId: string) => {
-    const qnaSessions: IQnASession_populated[] = await qnaSessionDataService.getAllQnASessionData(
-        conversationId
-    );
-    let activeSessions = 0;
-    for (let i = 0; i < qnaSessions.length; i++) {
-        const qnaSession: IQnASession_populated = qnaSessions[i];
-        if (qnaSession.isActive === true) {
-            activeSessions++;
-        }
-    }
-    return activeSessions;
-};
-
 const getToken = async () => {
-    let MicrosoftAppId;
+    let appId;
     if (process.env.MicrosoftAppId !== undefined) {
-        MicrosoftAppId = process.env.MicrosoftAppId;
+        appId = process.env.MicrosoftAppId;
     } else {
-        exceptionLogger('MicrosoftAppId missing in local settings.');
-        throw new Error('MicrosoftAppId missing in local settings.');
+        exceptionLogger('MicrosoftAppId missing in app settings.');
+        throw new Error('MicrosoftAppId missing in app settings.');
     }
     const appPassword = await getMicrosoftAppPassword();
-    const appCredentials = new MicrosoftAppCredentials(
-        process.env.MicrosoftAppId,
-        appPassword
-    );
+    const appCredentials = new MicrosoftAppCredentials(appId, appPassword);
     const token = await appCredentials.getToken();
     return token;
 };
@@ -133,9 +119,9 @@ const getParticipantRole = async (
         throw new Error('Error while getting participant role.');
     }
 
-    axios
+    await axios
         .get(
-            `${serviceUrl}v1/meetings/${meetingId}/participants/${userId}?tenantId=${tenantId}`,
+            `${serviceUrl}/v1/meetings/${meetingId}/participants/${userId}?tenantId=${tenantId}`,
             {
                 headers: {
                     Authorization: `Bearer ${token}`,

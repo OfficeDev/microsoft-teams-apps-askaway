@@ -3,14 +3,11 @@ import { qnaSessionDataService } from 'msteams-app-questionly.data';
 import { exceptionLogger } from 'src/util/exceptionTracking';
 import {
     getAllQnASesssionsDataForTab,
-    getNumberOfActiveSessions,
     isPresenterOrOrganizer,
 } from 'src/routes/restUtils';
 import bodyParser from 'body-parser';
 
 export const router = Express.Router();
-router.use(bodyParser.json());
-router.use(bodyParser.urlencoded({ extended: true }));
 
 // Get session details
 router.get('/:conversationId/sessions/:sessionId', async (req, res) => {
@@ -58,6 +55,8 @@ router.post('/:conversationId/sessions', async (req, res) => {
     }
 
     const conversationId = req.params['conversationId'];
+
+    // Get meeting Id from Coversation document once the changes are merged.
     const meetingId = req.body.meetingId;
 
     // hard coded for now. once the Conversation document changes are merged, fetch service url from there.
@@ -66,14 +65,13 @@ router.post('/:conversationId/sessions', async (req, res) => {
     // check if the user/participant is either presenter or organizer.
     if (meetingId !== undefined) {
         try {
-            if (
-                !isPresenterOrOrganizer(
-                    meetingId,
-                    user._id,
-                    tenantId,
-                    serviceUrl
-                )
-            ) {
+            const canCreateQnASession = isPresenterOrOrganizer(
+                meetingId,
+                user._id,
+                tenantId,
+                serviceUrl
+            );
+            if (!canCreateQnASession) {
                 res.statusCode = 400;
                 exceptionLogger(
                     new Error(
@@ -92,7 +90,7 @@ router.post('/:conversationId/sessions', async (req, res) => {
     }
 
     // get all ama sessions and check if number of active sessions is less than 1.
-    const numberOfActiveSessions = await getNumberOfActiveSessions(
+    const numberOfActiveSessions = await qnaSessionDataService.getNumberOfActiveSessions(
         conversationId
     );
     if (numberOfActiveSessions > 1) {
@@ -107,17 +105,30 @@ router.post('/:conversationId/sessions', async (req, res) => {
         );
     }
 
-    const response = await qnaSessionDataService.createQnASession(
-        req.body.title,
-        req.body.description,
-        user.userName,
-        user._id,
-        req.body.activityId,
-        conversationId,
-        tenantId,
-        req.body.scopeId,
-        req.body.hostUserId,
-        req.body.isChannel
-    );
+    let response;
+    try {
+        response = await qnaSessionDataService.createQnASession(
+            req.body.title,
+            req.body.description,
+            user.userName,
+            user._id,
+            '',
+            conversationId,
+            tenantId,
+            req.body.scopeId,
+            req.body.hostUserId,
+            req.body.isChannel
+        );
+    } catch (error) {
+        res.statusCode = 500;
+        exceptionLogger(
+            new Error(
+                'Error while creating a new QnA session. Update to database failed.'
+            )
+        );
+        res.send(
+            'Error while creating a new QnA session. Update to database failed.'
+        );
+    }
     res.send(response.qnaSessionId);
 });
