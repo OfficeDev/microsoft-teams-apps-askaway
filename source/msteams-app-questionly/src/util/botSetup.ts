@@ -9,9 +9,9 @@ import { AskAway } from 'src/askAway';
 import { exceptionLogger } from 'src/util/exceptionTracking';
 import { generateInitialsImage } from 'src/controller';
 import { getAvatarKey, getMicrosoftAppPassword } from 'src/util/keyvault';
-import { ifNumber } from 'src/util/retryPolicies';
 import { requestPolicyHelper } from 'src/util/requestPolicyHelper';
 import { USER_AGENT } from 'botbuilder/lib/botFrameworkAdapter';
+import { ifNumber } from 'src/util/typeUtility';
 
 interface AvatarRequest {
     initials: string;

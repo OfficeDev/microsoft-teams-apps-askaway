@@ -6,8 +6,6 @@ import random from 'random';
 import seedrandom from 'seedrandom';
 import * as jwt from 'jsonwebtoken';
 
-import { IQuestionPopulatedUser } from 'src/data/schemas/question';
-
 import { mainCard, viewLeaderboardButton } from 'src/adaptive-cards/mainCard';
 import { startQnACard } from 'src/adaptive-cards/startQnACard';
 import { endQnAConfirmationCard } from 'src/adaptive-cards/endQnAConfirmationCard';
@@ -24,6 +22,7 @@ import { mainCardStrings } from 'src/localization/locale';
 import { clone } from 'lodash';
 
 import { getAvatarKey } from 'src/util/keyvault';
+import { IQuestionPopulatedUser } from 'msteams-app-questionly.data';
 
 /**
  * Creates the QnA Master Card

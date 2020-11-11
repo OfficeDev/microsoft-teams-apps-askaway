@@ -1,7 +1,7 @@
 import Express from 'express';
-import { qnaSessionDataService } from 'src/data/services/qnaSessionDataService';
+import { qnaSessionDataService } from 'msteams-app-questionly.data';
 import { exceptionLogger } from 'src/util/exceptionTracking';
-import { getAllQnASesssionsDataForTab } from './restUtils';
+import { getAllQnASesssionsDataForTab } from 'src/routes/restUtils';
 
 export const router = Express.Router();
 

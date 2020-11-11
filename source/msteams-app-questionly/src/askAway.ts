@@ -26,7 +26,7 @@ import {
     leaderboardStrings,
 } from 'src/localization/locale';
 import { exceptionLogger } from 'src/util/exceptionTracking';
-import { ifNumber } from 'src/util/retryPolicies';
+import { ifNumber } from 'src/util/typeUtility';
 
 const NULL_RESPONSE: any = null;
 /**

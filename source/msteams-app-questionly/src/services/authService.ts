@@ -2,7 +2,7 @@ import * as passport from 'passport';
 import * as passportAzureAd from 'passport-azure-ad';
 import { Express as ExpressType } from 'express-serve-static-core';
 
-import { User } from 'src/data/schemas/user';
+import { User } from 'msteams-app-questionly.data';
 import { exceptionLogger } from 'src/util/exceptionTracking';
 
 /**
