@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Provider, Flex, Text, Header } from '@fluentui/react-northstar';
-import TeamsBaseComponent, {
+import msteamsReactBaseComponent, {
     ITeamsBaseComponentState,
 } from 'msteams-react-base-component';
 import * as microsoftTeams from '@microsoft/teams-js';
@@ -13,7 +13,7 @@ export interface IAskAwayTabRemoveProps {}
 /**
  * Implementation of askAway Tab remove page
  */
-export class AskAwayTabRemove extends TeamsBaseComponent<
+export class AskAwayTabRemove extends msteamsReactBaseComponent<
     IAskAwayTabRemoveProps,
     IAskAwayTabRemoveState
 > {

@@ -4,18 +4,19 @@
 
 import * as React from 'react';
 import { shallow, configure } from 'enzyme';
-import toJson from 'enzyme-to-json';
+import enzymeToJson from 'enzyme-to-json';
 import { Header } from '@fluentui/react-northstar';
+// tslint:disable-next-line:no-relative-imports
 import { AskAwayTabRemove } from '../AskAwayTabRemove';
-import Adapter from 'enzyme-adapter-react-16';
+import enzymeAdapterReact16 from 'enzyme-adapter-react-16';
 
-configure({ adapter: new Adapter() });
+configure({ adapter: new enzymeAdapterReact16() });
 
 describe('AskAwayTabRemove Component', () => {
     // Snapshot Test Sample
     it('should match the snapshot', () => {
         const wrapper = shallow(<AskAwayTabRemove />);
-        expect(toJson(wrapper)).toMatchSnapshot();
+        expect(enzymeToJson(wrapper)).toMatchSnapshot();
     });
 
     // Component Test Sample

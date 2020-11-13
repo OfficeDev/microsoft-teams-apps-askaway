@@ -116,13 +116,14 @@ export class AskAwayTab extends msteamsReactBaseComponent<
             height: 510,
             width: 500,
             fallbackUrl: '',
-            completionBotId: '3760bd95-daa7-45e7-b7fa-ebc6fe2e9ec4',
+            appId: process.env.MicrosoftAppId,
             card: this.adaptiveCardTemplate(),
         };
 
         let submitHandler = (err: any, result: any) => {
             console.log(`Submit handler - err: ${err}`);
             console.log(`Submit handler - result: ${result}`);
+            this.showSuccessModel();
         };
 
         microsoftTeams.tasks.startTask(taskInfo, submitHandler);
@@ -165,6 +166,28 @@ export class AskAwayTab extends msteamsReactBaseComponent<
                 entityId: 'This is not hosted in Microsoft Teams',
             });
         }
+    }
+
+    /**
+     * Show success popup
+     */
+    public showSuccessModel() {
+        const host = 'https://' + window.location.host;
+        let taskInfo: any = {
+            title: 'Microsoft Corporation',
+            height: 510,
+            width: 500,
+            fallbackUrl: '',
+            appID: process.env.MicrosoftAppId,
+            url: host + '/askAwayTab/successmodel.html?theme={theme}',
+        };
+
+        let submitHandler = (err: any, result: any) => {
+            console.log(`Submit handler - err: ${err}`);
+            console.log(`Submit handler - result: ${result}`);
+        };
+
+        microsoftTeams.tasks.startTask(taskInfo, submitHandler);
     }
 
     /**
