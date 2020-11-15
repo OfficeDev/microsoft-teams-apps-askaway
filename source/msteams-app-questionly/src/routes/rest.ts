@@ -5,7 +5,6 @@ import {
     getAllQnASesssionsDataForTab,
     isPresenterOrOrganizer,
 } from 'src/routes/restUtils';
-import bodyParser from 'body-parser';
 
 export const router = Express.Router();
 
@@ -71,15 +70,16 @@ router.post('/:conversationId/sessions', async (req, res) => {
                 tenantId,
                 serviceUrl
             );
+
             if (!canCreateQnASession) {
                 res.statusCode = 400;
                 exceptionLogger(
                     new Error(
-                        'Either a Presenter or an Organizer can only create new QnA Session.'
+                        'Only a Presenter or an Organizer can create new QnA Session.'
                     )
                 );
                 return res.send(
-                    'Either a Presenter or an Organizer can only create new QnA Session.'
+                    'Only a Presenter or an Organizer can create new QnA Session.'
                 );
             }
         } catch (error) {
@@ -93,7 +93,7 @@ router.post('/:conversationId/sessions', async (req, res) => {
     const numberOfActiveSessions = await qnaSessionDataService.getNumberOfActiveSessions(
         conversationId
     );
-    if (numberOfActiveSessions > 1) {
+    if (numberOfActiveSessions >= 1) {
         res.statusCode = 500;
         exceptionLogger(
             new Error(
@@ -130,5 +130,5 @@ router.post('/:conversationId/sessions', async (req, res) => {
             'Error while creating a new QnA session. Update to database failed.'
         );
     }
-    res.send(response.qnaSessionId);
+    res.send(response);
 });

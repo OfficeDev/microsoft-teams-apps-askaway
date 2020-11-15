@@ -105,7 +105,7 @@ const getToken = async () => {
     return token;
 };
 
-const getParticipantRole = async (
+export const getParticipantRole = async (
     meetingId: string,
     userId: string,
     tenantId: string,
