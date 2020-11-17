@@ -2,12 +2,15 @@
 import * as adaptiveCardBuilder from 'src/adaptive-cards/adaptiveCardBuilder'; // To populate adaptive cards
 import { ok, err, Result } from 'src/util/resultWrapper';
 import { AdaptiveCard } from 'adaptivecards';
-import { IQuestion, IQuestionPopulatedUser } from 'src/data/schemas/question';
 import { exceptionLogger } from 'src/util/exceptionTracking';
 import jimp from 'jimp';
 import { join } from 'path';
-import { qnaSessionDataService } from './data/services/qnaSessionDataService';
-import { questionDataService } from './data/services/questionDataService';
+import {
+    IQuestion,
+    IQuestionPopulatedUser,
+    qnaSessionDataService,
+    questionDataService,
+} from 'msteams-app-questionly.data';
 
 export const getMainCard = adaptiveCardBuilder.getMainCard;
 export const getStartQnACard = adaptiveCardBuilder.getStartQnACard;

@@ -1,7 +1,9 @@
-import { IQnASession_populated } from 'src/data/schemas/qnaSession';
-import { qnaSessionDataService } from 'src/data/services/qnaSessionDataService';
-import { questionDataService } from 'src/data/services/questionDataService';
-import { userDataService } from 'src/data/services/userDataService';
+import {
+    IQnASession_populated,
+    qnaSessionDataService,
+    questionDataService,
+    userDataService,
+} from 'msteams-app-questionly.data';
 import { exceptionLogger } from 'src/util/exceptionTracking';
 
 export const getAllQnASesssionsDataForTab = async (conversationId: string) => {

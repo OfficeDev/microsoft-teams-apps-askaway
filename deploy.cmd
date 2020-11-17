@@ -26,6 +26,14 @@ IF NOT DEFINED DEPLOYMENT_SOURCE (
   SET DEPLOYMENT_SOURCE=%~dp0%.
 )
 
+IF NOT DEFINED DEPLOYMENT_SOURCE_WEB (
+  SET DEPLOYMENT_SOURCE_WEB=%~dp0%\source\msteams-app-questionly
+)
+
+IF NOT DEFINED DEPLOYMENT_SOURCE_DATA (
+  SET DEPLOYMENT_SOURCE_DATA=%~dp0%\source\msteams-app-questionly.data
+)
+
 IF NOT DEFINED DEPLOYMENT_TARGET (
   SET DEPLOYMENT_TARGET=%ARTIFACTS%\wwwroot
 )
@@ -93,30 +101,54 @@ echo Handling node.js deployment.
 :: 1. Select node version for build
 call :SelectNodeVersion
 
-:: 2. Install npm packages
-IF EXIST "%DEPLOYMENT_SOURCE%\package.json" (
-  pushd "%DEPLOYMENT_SOURCE%"
-  call :ExecuteCmd !NPM_CMD! install
+:: 2. Install npm packages for common project
+IF EXIST "%DEPLOYMENT_SOURCE_DATA%\package.json" (
+  pushd "%DEPLOYMENT_SOURCE_DATA%"
+  call :ExecuteCmd !NPM_CMD! install --no-audit
   IF !ERRORLEVEL! NEQ 0 goto error
   popd
 )
-:: 3. Build it
-IF EXIST "%DEPLOYMENT_SOURCE%\package.json" (
-  pushd "%DEPLOYMENT_SOURCE%"
+
+:: 3. Build common project
+IF EXIST "%DEPLOYMENT_SOURCE_DATA%\package.json" (
+  pushd "%DEPLOYMENT_SOURCE_DATA%"
   call :ExecuteCmd !NPM_CMD! run-script build
   IF !ERRORLEVEL! NEQ 0 goto error
   popd
 )
 
+:: 4 Install npm packages for main web project
+IF EXIST "%DEPLOYMENT_SOURCE_WEB%\package.json" (
+  pushd "%DEPLOYMENT_SOURCE_WEB%"
+  call :ExecuteCmd !NPM_CMD! install --no-audit
+  IF !ERRORLEVEL! NEQ 0 goto error
+  popd
+)
 
+:: 5. Copy common node modules
+IF DEFINED DEPLOYMENT_SOURCE_WEB (
+  pushd "%DEPLOYMENT_SOURCE_WEB%"
+  xcopy .\..\msteams-app-questionly.data\dist\* node_modules\msteams-app-questionly.data\dist\* /s /Y
+  xcopy .\..\msteams-app-questionly.data\package.json node_modules\msteams-app-questionly.data\  /Y
+  IF !ERRORLEVEL! NEQ 0 goto error
+  popd
+)
 
-:: 4. KuduSync
+:: 6. Build main web project
+IF EXIST "%DEPLOYMENT_SOURCE_WEB%\package.json" (
+  pushd "%DEPLOYMENT_SOURCE_WEB%"
+  call :ExecuteCmd !NPM_CMD! run-script build
+  IF !ERRORLEVEL! NEQ 0 goto error
+  popd
+)
+
+:: 7. KuduSync
 IF /I "%IN_PLACE_DEPLOYMENT%" NEQ "1" (
-  call :ExecuteCmd "%KUDU_SYNC_CMD%" -v 50 -f "%DEPLOYMENT_SOURCE%" -t "%DEPLOYMENT_TARGET%" -n "%NEXT_MANIFEST_PATH%" -p "%PREVIOUS_MANIFEST_PATH%" -i ".git;.hg;.deployment;deploy.cmd"
+  call :ExecuteCmd "%KUDU_SYNC_CMD%" -v 50 -f "%DEPLOYMENT_SOURCE_WEB%" -t "%DEPLOYMENT_TARGET%" -n "%NEXT_MANIFEST_PATH%" -p "%PREVIOUS_MANIFEST_PATH%" -i ".git;.hg;.deployment;deploy.cmd"
   IF !ERRORLEVEL! NEQ 0 goto error
 )
 
-:: 5. Select node version for run
+:: 8. Select node version for run
 call :SelectNodeVersion
 
 
