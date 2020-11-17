@@ -1,11 +1,4 @@
 import * as React from 'react';
-import {
-    Provider,
-    Flex,
-    Text,
-    Button,
-    Header,
-} from '@fluentui/react-northstar';
 import TeamsBaseComponent, {
     ITeamsBaseComponentState,
 } from 'msteams-react-base-component';
@@ -19,6 +12,10 @@ export interface IAskAwayTabState extends ITeamsBaseComponentState {
     name?: string;
     error?: string;
     token?: string;
+    channelId?: string;
+    chatId?: string;
+    userId?: string;
+    meetingId?: string;
 }
 
 /**
@@ -53,6 +50,10 @@ export class AskAwayTab extends TeamsBaseComponent<
                         this.setState({ name: decoded!.name });
                         microsoftTeams.appInitialization.notifySuccess();
                         this.setState({ token: token });
+                        this.setState({ channelId: context.channelId });
+                        this.setState({ chatId: context.chatId });
+                        this.setState({ userId: context.userObjectId });
+                        this.setState({ meetingId: context['meetingId'] });
                     },
                     failureCallback: (message: string) => {
                         this.setState({ error: message });

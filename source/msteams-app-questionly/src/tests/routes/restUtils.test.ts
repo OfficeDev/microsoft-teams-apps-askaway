@@ -4,9 +4,17 @@ import {
     questionDataService,
     userDataService,
 } from 'msteams-app-questionly.data';
-import { getAllQnASesssionsDataForTab } from 'src/routes/restUtils';
+import {
+    getAllQnASesssionsDataForTab,
+    getParticipantRole,
+    isPresenterOrOrganizer,
+} from 'src/routes/restUtils';
 
 const sampleConversationId = '1';
+const sampleMeetingId = 'sampleMeetingId';
+const sampleUserId = 'sampleUserId';
+const sampleTenantId = 'sampleTenantId';
+const sampleServiceUrl = 'sampleServiceUrl';
 let testQnAData1: any;
 let testQnAData2: any;
 let question1: any;
@@ -210,5 +218,57 @@ describe('test /conversations/:conversationId/sessions/:sessionId api', () => {
         );
         expect(questionDataService.getQuestions).toBeCalledTimes(1);
         expect(userDataService.getUser).toBeCalledTimes(0);
+    });
+});
+
+describe('validates isPreseterOrOrganizer', () => {
+    beforeAll(() => {
+        (<any>getParticipantRole) = jest.fn();
+    });
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
+    it('test isPreseterOrOrganizer - when the user is Organizer', async () => {
+        (<any>getParticipantRole).mockImplementationOnce(() => {
+            return 'Organizer';
+        });
+        const result = await isPresenterOrOrganizer(
+            sampleMeetingId,
+            sampleUserId,
+            sampleTenantId,
+            sampleServiceUrl
+        );
+        expect(result).toBeTruthy();
+        expect(getParticipantRole).toBeCalledTimes(1);
+    });
+
+    it('test isPreseterOrOrganizer - when the user is Presenter', async () => {
+        (<any>getParticipantRole).mockImplementationOnce(() => {
+            return 'Presenter';
+        });
+        const result = await isPresenterOrOrganizer(
+            sampleMeetingId,
+            sampleUserId,
+            sampleTenantId,
+            sampleServiceUrl
+        );
+        expect(result).toBeTruthy();
+        expect(getParticipantRole).toBeCalledTimes(1);
+    });
+
+    it('test isPreseterOrOrganizer - when the user is neither Organizer nor Presenter', async () => {
+        (<any>getParticipantRole).mockImplementationOnce(() => {
+            return 'test';
+        });
+        const result = await isPresenterOrOrganizer(
+            sampleMeetingId,
+            sampleUserId,
+            sampleTenantId,
+            sampleServiceUrl
+        );
+        expect(result).toBeFalsy();
+        expect(getParticipantRole).toBeCalledTimes(1);
     });
 });

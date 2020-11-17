@@ -22,10 +22,11 @@ interface AvatarRequest {
     index: number;
 }
 
-const conversationDataService: IConversationDataService = new ConversationDataService();
-const bot: ActivityHandler = new AskAway(conversationDataService);
-
-const setupBotAdapterAndRouting = async (app: ExpressType) => {
+const setupBotAdapterAndRouting = async (
+    app: ExpressType,
+    conversationDataService: IConversationDataService
+) => {
+    const bot: ActivityHandler = new AskAway(conversationDataService);
     const adapter = new BotFrameworkAdapter({
         appId: process.env.MicrosoftAppId,
         appPassword: await getMicrosoftAppPassword(),
@@ -103,8 +104,11 @@ const setupAvtarKeyEndpoint = (app: ExpressType) => {
     });
 };
 
-export const setupBot = async (app: ExpressType) => {
+export const setupBot = async (
+    app: ExpressType,
+    conversationDataService: IConversationDataService
+) => {
     setupConnectorClient();
-    await setupBotAdapterAndRouting(app);
+    await setupBotAdapterAndRouting(app, conversationDataService);
     setupAvtarKeyEndpoint(app);
 };
