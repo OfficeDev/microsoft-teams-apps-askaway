@@ -198,6 +198,23 @@ class QnASessionDataService {
         .exec()
     );
   }
+
+  /**
+   * Retrives all active QnA sessions for a given conversation Id.
+   * @param conversationId - the conversation id for which QnA session data has to be retrived.
+   * @return - Number of active QnA sessions.
+   */
+  public async getNumberOfActiveSessions(
+    conversationId: string
+  ): Promise<Number> {
+    const result = await retryWrapper<IQnASession_populated[]>(() =>
+      QnASession.find({
+        conversationId: conversationId,
+        isActive: true,
+      }).exec()
+    );
+    return result.length;
+  }
 }
 
 export const qnaSessionDataService = new QnASessionDataService(userDataService);
