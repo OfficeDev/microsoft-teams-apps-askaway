@@ -1,5 +1,4 @@
 import {
-    IConversationDataService,
     IQnASession_populated,
     qnaSessionDataService,
     questionDataService,
@@ -115,6 +114,7 @@ export const getParticipantRole = async (
     try {
         token = await getToken();
     } catch (error) {
+        exceptionLogger(error);
         throw new Error('Error while getting participant role.');
     }
 
@@ -131,6 +131,7 @@ export const getParticipantRole = async (
             role = res.data.meeting.role;
         })
         .catch((error) => {
+            exceptionLogger(error);
             throw new Error('Error while getting participant role.');
         });
 
