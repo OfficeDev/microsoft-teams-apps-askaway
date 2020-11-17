@@ -12,13 +12,18 @@ import { getAvatarKey, getMicrosoftAppPassword } from 'src/util/keyvault';
 import { requestPolicyHelper } from 'src/util/requestPolicyHelper';
 import { USER_AGENT } from 'botbuilder/lib/botFrameworkAdapter';
 import { ifNumber } from 'src/util/typeUtility';
+import {
+    ConversationDataService,
+    IConversationDataService,
+} from 'msteams-app-questionly.data';
 
 interface AvatarRequest {
     initials: string;
     index: number;
 }
 
-const bot: ActivityHandler = new AskAway();
+const conversationDataService: IConversationDataService = new ConversationDataService();
+const bot: ActivityHandler = new AskAway(conversationDataService);
 
 const setupBotAdapterAndRouting = async (app: ExpressType) => {
     const adapter = new BotFrameworkAdapter({
