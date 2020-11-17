@@ -18,30 +18,11 @@ In order to create a bot you need to first register it in the [Azure portal](htt
 ## How to configure the bot
 
 Configure common node projects:
-install dependencies in `msteams-app-questionly.data` project
+run init.bat from `msteams-app-questionly` root folder folder.
+It will build and install common dependencies for the main web project and function project
 
 ```
-cd msteams-app-questionly.data
-npm install
-```
-
-build
-
-```
-npm run build
-```
-
-install dependencies in `msteams-app-questionly` project
-
-```
-cd msteams-app-questionly
-npm install
-```
-
-install shared project separately
-
-```
-npm install ./../msteams-app-questionly.data
+init.bat
 ```
 
 The App Id and App Secret, generated during the registration, for the bot are read from the `MicrosoftAppId` and `MicrosoftAppPassword` environment variables, specified in the `.env` file. Key vault resource name is read from `KeyVaultName` environment variable as well.

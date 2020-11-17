@@ -1,8 +1,10 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 import { userIdParameterConstant } from "../src/constants/requestConstants";
-import { verifyUserFromConversationId } from "../src/utils/conversationUtility";
+import { verifyUserFromConversationId } from "msteams-app-questionly.conversation.utility";
 import { authenticateRequest } from "../src/services/authService";
 import { signalRUtility } from "../src/utils/signalRUtility";
+import { IConversation } from "msteams-app-questionly.data";
+import { getConversationData } from "../src/utils/dbUtility";
 
 /**
  * Forms 401 Unauthorized response.
@@ -62,8 +64,13 @@ const httpTrigger: AzureFunction = async function (
     }
 
     const userId: string = req[userIdParameterConstant];
+    const conversation: IConversation = await getConversationData(
+      conversationId
+    );
     const isValidUser: Boolean = await verifyUserFromConversationId(
       conversationId,
+      conversation.serviceUrl,
+      conversation.tenantId,
       userId
     );
 

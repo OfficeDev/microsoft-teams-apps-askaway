@@ -1,7 +1,6 @@
 import {
   BotFrameworkAdapter,
   ConversationAccount,
-  ConversationReference,
   TeamsInfo,
   TurnContext,
 } from "botbuilder";
@@ -12,35 +11,36 @@ const memberNotFoundInConversationError: string =
 /**
  * Verifies if the user is a member of conversation.
  * @param conversationId: conversationId.
- * @param userId: userId.
+ * @param serviceUrl: service url.
+ * @param tenantId: tenat id.
+ * @param userId: user id.
  * @returns - boolean value, true if user is a member of conversation.
- * @throws - logs and throws any excpetion occured during function flow.
+ * @throws - Throws any excpetion occured during function flow.
  */
 export const verifyUserFromConversationId = async (
   conversationId: string,
+  serviceUrl: string,
+  tenantId: string,
   userId: string
 ): Promise<Boolean> => {
   try {
     const conversation: ConversationAccount = {
       id: conversationId,
-      name: null,
-      isGroup: null,
-      tenantId: process.env.TenantId.toString(),
-      conversationType: null,
+      name: "",
+      isGroup: true,
+      tenantId: tenantId,
+      conversationType: "",
     };
 
-    // TODO: Fetch serviceUrl from DB document instead.
-    // Task1211784: https://domoreexp.visualstudio.com/MSTeams/_workitems/edit/1211784
-    const conversationReference: ConversationReference = {
-      serviceUrl: "https://smba.trafficmanager.net/amer/",
+    const conversationReference = {
+      serviceUrl: serviceUrl,
       channelId: "msteams",
       conversation: conversation,
-      bot: null,
     };
 
     const adapter: BotFrameworkAdapter = new BotFrameworkAdapter({
-      appId: process.env.MicrosoftAppId.toString(),
-      appPassword: process.env.MicrosoftAppPassword.toString(),
+      appId: process.env.MicrosoftAppId?.toString(),
+      appPassword: process.env.MicrosoftAppPassword?.toString(),
     });
 
     await adapter.continueConversation(
@@ -65,7 +65,6 @@ export const verifyUserFromConversationId = async (
       return false;
     }
 
-    // Thow other errors, azure function will return 500 internal server error.
     throw error;
   }
 

@@ -21,8 +21,10 @@
     "@azure/functions": "^1.0.2-beta2",
     "@types/jest": "^24.9.1",
     "@types/jsonwebtoken": "^8.5.0",
+    "@types/mongoose": "^5.7.37",
     "@types/node": "^14.11.8",
     "jest": "^26.6.0",
+    "mongoose": "^5.10.12",
     "typescript": "^3.9.7",
     "ts-jest": "^26.4.1"
   }

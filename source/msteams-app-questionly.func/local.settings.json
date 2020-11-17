@@ -10,7 +10,8 @@
     "TenantId": "{{TenantId}}",
     "AzureSignalRConnectionString": "{{AzureSignalRConnectionString}}",
     "MicrosoftAppId": "{{MicrosoftAppId}}",
-    "MicrosoftAppPassword": "{{MicrosoftAppPassword}}"
+    "MicrosoftAppPassword": "{{MicrosoftAppPassword}}",
+    "MongoDbUri": "{{MongoDbUri}}"
   },
   "Host": {
     "LocalHttpPort": 7071,

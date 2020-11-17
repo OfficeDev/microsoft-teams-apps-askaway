@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import * as mongoose from "mongoose";
 import { IQnASession } from "./qnASession";
 import { IUser } from "./user";
 

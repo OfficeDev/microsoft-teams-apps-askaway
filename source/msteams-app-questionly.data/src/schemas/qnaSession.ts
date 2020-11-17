@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import * as mongoose from "mongoose";
 import { IUser } from "./user";
 
 const QnASessionSchema = new mongoose.Schema({
