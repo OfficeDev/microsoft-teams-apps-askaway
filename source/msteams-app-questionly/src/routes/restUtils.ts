@@ -1,4 +1,5 @@
 import {
+    IConversationDataService,
     IQnASession_populated,
     qnaSessionDataService,
     questionDataService,
@@ -8,9 +9,7 @@ import { MicrosoftAppCredentials } from 'botframework-connector';
 import { exceptionLogger } from 'src/util/exceptionTracking';
 import axios from 'axios';
 import { getMicrosoftAppPassword } from 'src/util/keyvault';
-
-const organizer = 'Organizer';
-const presenter = 'Presenter';
+import { organizer, presenter } from 'src/constants/restConstants';
 
 export const getAllQnASesssionsDataForTab = async (conversationId: string) => {
     const qnaSessionDataArray: IQnASession_populated[] = await qnaSessionDataService.getAllQnASessionData(

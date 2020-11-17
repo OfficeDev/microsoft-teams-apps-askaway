@@ -10,7 +10,11 @@ import {
     initiateAppInsights,
     exceptionLogger,
 } from 'src/util/exceptionTracking';
-import { initiateConnection } from 'msteams-app-questionly.data';
+import {
+    ConversationDataService,
+    IConversationDataService,
+    initiateConnection,
+} from 'msteams-app-questionly.data';
 import { getMongoURI, initKeyVault } from 'src/util/keyvault';
 import { setupBot } from 'src/util/botSetup';
 import { setupClientApp } from 'src/util/clientAppSetup';
@@ -67,14 +71,15 @@ async function setupDBConection() {
 }
 
 async function setupApp() {
+    const conversationDataService: IConversationDataService = new ConversationDataService();
     // setup bot
-    await setupBot(express);
+    await setupBot(express, conversationDataService);
 
     // setup client app
     setupClientApp(express);
 
     // setup rest apis
-    setupRestApis(express);
+    setupRestApis(express, conversationDataService);
 }
 
 setupDBConection().catch((error) => {

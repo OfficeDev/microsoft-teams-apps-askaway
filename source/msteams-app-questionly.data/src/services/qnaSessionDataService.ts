@@ -211,9 +211,7 @@ class QnASessionDataService {
       QnASession.find({
         conversationId: conversationId,
         isActive: true,
-      })
-        .populate({ path: "userId", model: User })
-        .exec()
+      }).exec()
     );
     return result.length;
   }

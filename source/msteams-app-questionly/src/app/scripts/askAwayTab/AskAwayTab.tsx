@@ -1,11 +1,4 @@
 import * as React from 'react';
-import {
-    Provider,
-    Flex,
-    Text,
-    Button,
-    Header,
-} from '@fluentui/react-northstar';
 import TeamsBaseComponent, {
     ITeamsBaseComponentState,
 } from 'msteams-react-base-component';
