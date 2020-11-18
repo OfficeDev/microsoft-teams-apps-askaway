@@ -1,5 +1,5 @@
 import httpTrigger from "../../../negotiate/index";
-import { mockContext } from "./../mocks/testContext";
+import { triggerMockContext } from "./../mocks/testContext";
 import { authenticateRequest } from "../../services/authService";
 jest.mock("../../services/authService");
 
@@ -18,12 +18,12 @@ test("tests negotiate function", async () => {
     return true;
   });
 
-  await httpTrigger(mockContext, request, connectionInfo);
+  await httpTrigger(triggerMockContext, request, connectionInfo);
 
   expect(authenticateRequest).toBeCalledTimes(1);
-  expect(mockContext.res.status).toBe(200);
-  expect(mockContext.res.json).toBeCalledTimes(1);
-  expect(mockContext.res.json).toBeCalledWith(connectionInfo);
+  expect(triggerMockContext.res.status).toBe(200);
+  expect(triggerMockContext.res.json).toBeCalledTimes(1);
+  expect(triggerMockContext.res.json).toBeCalledWith(connectionInfo);
 });
 
 test("tests negotiate function for authorization error", async () => {
@@ -31,11 +31,11 @@ test("tests negotiate function for authorization error", async () => {
     return false;
   });
 
-  await httpTrigger(mockContext, request, connectionInfo);
+  await httpTrigger(triggerMockContext, request, connectionInfo);
 
   expect(authenticateRequest).toBeCalledTimes(1);
-  expect(mockContext.res.status).toBe(401);
-  expect(mockContext.res.body).toBe("Unauthorized");
+  expect(triggerMockContext.res.status).toBe(401);
+  expect(triggerMockContext.res.body).toBe("Unauthorized");
 });
 
 test("tests negotiate function for internal server error", async () => {
@@ -44,11 +44,11 @@ test("tests negotiate function for internal server error", async () => {
     throw testError;
   });
 
-  await httpTrigger(mockContext, request, connectionInfo);
+  await httpTrigger(triggerMockContext, request, connectionInfo);
 
   expect(authenticateRequest).toBeCalledTimes(1);
-  expect(mockContext.res.status).toBe(500);
-  expect(mockContext.res.body).toBe(null);
-  expect(mockContext.log.error).toBeCalledTimes(1);
-  expect(mockContext.log.error).toBeCalledWith(testError);
+  expect(triggerMockContext.res.status).toBe(500);
+  expect(triggerMockContext.res.body).toBe(null);
+  expect(triggerMockContext.log.error).toBeCalledTimes(1);
+  expect(triggerMockContext.log.error).toBeCalledWith(testError);
 });

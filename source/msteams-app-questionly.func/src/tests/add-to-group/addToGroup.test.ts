@@ -1,5 +1,5 @@
 import httpTrigger from "../../../add-to-group/index";
-import { mockContext } from "./../mocks/testContext";
+import { triggerMockContext } from "./../mocks/testContext";
 import { authenticateRequest } from "../../services/authService";
 import { userIdParameterConstant } from "../../constants/requestConstants";
 import { signalRUtility } from "../../utils/signalRUtility";
@@ -33,16 +33,20 @@ beforeEach(() => {
 
 test("tests add to group function for bad request: connectionId missing", async () => {
   delete request.body.connectionId;
-  await httpTrigger(mockContext, request);
-  expect(mockContext.res.status).toBe(400);
-  expect(mockContext.res.body).toBe("parameter connectionId is missing.");
+  await httpTrigger(triggerMockContext, request);
+  expect(triggerMockContext.res.status).toBe(400);
+  expect(triggerMockContext.res.body).toBe(
+    "parameter connectionId is missing."
+  );
 });
 
 test("tests add to group function for bad request: conversationId missing", async () => {
   delete request.body.conversationId;
-  await httpTrigger(mockContext, request);
-  expect(mockContext.res.status).toBe(400);
-  expect(mockContext.res.body).toBe("parameter conversationId is missing.");
+  await httpTrigger(triggerMockContext, request);
+  expect(triggerMockContext.res.status).toBe(400);
+  expect(triggerMockContext.res.body).toBe(
+    "parameter conversationId is missing."
+  );
 });
 
 test("tests add to group function for authorization error", async () => {
@@ -50,10 +54,10 @@ test("tests add to group function for authorization error", async () => {
     return false;
   });
 
-  await httpTrigger(mockContext, request);
+  await httpTrigger(triggerMockContext, request);
   expect(authenticateRequest).toBeCalledTimes(1);
-  expect(mockContext.res.status).toBe(401);
-  expect(mockContext.res.body).toBe("Unauthorized");
+  expect(triggerMockContext.res.status).toBe(401);
+  expect(triggerMockContext.res.body).toBe("Unauthorized");
 });
 
 test("tests add to group function for exception from from auth function", async () => {
@@ -61,13 +65,13 @@ test("tests add to group function for exception from from auth function", async 
     throw testError;
   });
 
-  await httpTrigger(mockContext, request);
+  await httpTrigger(triggerMockContext, request);
 
   expect(authenticateRequest).toBeCalledTimes(1);
-  expect(mockContext.res.status).toBe(500);
-  expect(mockContext.res.body).toBe(null);
-  expect(mockContext.log.error).toBeCalledTimes(1);
-  expect(mockContext.log.error).toBeCalledWith(testError);
+  expect(triggerMockContext.res.status).toBe(500);
+  expect(triggerMockContext.res.body).toBe(null);
+  expect(triggerMockContext.log.error).toBeCalledTimes(1);
+  expect(triggerMockContext.log.error).toBeCalledWith(testError);
 });
 
 test("tests add to group function: conversation document is not present", async () => {
@@ -82,13 +86,13 @@ test("tests add to group function: conversation document is not present", async 
     return true;
   });
 
-  await httpTrigger(mockContext, request);
+  await httpTrigger(triggerMockContext, request);
   expect(authenticateRequest).toBeCalledTimes(1);
 
-  expect(mockContext.res.status).toBe(500);
-  expect(mockContext.res.body).toBe(null);
-  expect(mockContext.log.error).toBeCalledTimes(1);
-  expect(mockContext.log.error).toBeCalledWith(testError);
+  expect(triggerMockContext.res.status).toBe(500);
+  expect(triggerMockContext.res.body).toBe(null);
+  expect(triggerMockContext.log.error).toBeCalledTimes(1);
+  expect(triggerMockContext.log.error).toBeCalledWith(testError);
 });
 
 test("tests add to group function: user not part of conversation", async () => {
@@ -107,7 +111,7 @@ test("tests add to group function: user not part of conversation", async () => {
     return false;
   });
 
-  await httpTrigger(mockContext, request);
+  await httpTrigger(triggerMockContext, request);
   expect(authenticateRequest).toBeCalledTimes(1);
   expect(verifyUserFromConversationId).toBeCalledTimes(1);
   expect(verifyUserFromConversationId).toBeCalledWith(
@@ -116,9 +120,8 @@ test("tests add to group function: user not part of conversation", async () => {
     testConversation.tenantId,
     testUserId
   );
-
-  expect(mockContext.res.status).toBe(401);
-  expect(mockContext.res.body).toBe("Unauthorized");
+  expect(triggerMockContext.res.status).toBe(401);
+  expect(triggerMockContext.res.body).toBe("Unauthorized");
 });
 
 test("tests add to group function: exception from verifyUserFromConversationId", async () => {
@@ -137,7 +140,7 @@ test("tests add to group function: exception from verifyUserFromConversationId",
     throw testError;
   });
 
-  await httpTrigger(mockContext, request);
+  await httpTrigger(triggerMockContext, request);
   expect(authenticateRequest).toBeCalledTimes(1);
   expect(verifyUserFromConversationId).toBeCalledTimes(1);
   expect(verifyUserFromConversationId).toBeCalledWith(
@@ -146,10 +149,10 @@ test("tests add to group function: exception from verifyUserFromConversationId",
     testConversation.tenantId,
     testUserId
   );
-  expect(mockContext.res.status).toBe(500);
-  expect(mockContext.res.body).toBe(null);
-  expect(mockContext.log.error).toBeCalledTimes(1);
-  expect(mockContext.log.error).toBeCalledWith(testError);
+  expect(triggerMockContext.res.status).toBe(500);
+  expect(triggerMockContext.res.body).toBe(null);
+  expect(triggerMockContext.log.error).toBeCalledTimes(1);
+  expect(triggerMockContext.log.error).toBeCalledWith(testError);
 });
 
 test("tests add to group function: exception from addConnectionToGroup", async () => {
@@ -172,7 +175,7 @@ test("tests add to group function: exception from addConnectionToGroup", async (
     throw testError;
   });
 
-  await httpTrigger(mockContext, request);
+  await httpTrigger(triggerMockContext, request);
   expect(authenticateRequest).toBeCalledTimes(1);
   expect(verifyUserFromConversationId).toBeCalledTimes(1);
   expect(verifyUserFromConversationId).toBeCalledWith(
@@ -181,10 +184,10 @@ test("tests add to group function: exception from addConnectionToGroup", async (
     testConversation.tenantId,
     testUserId
   );
-  expect(mockContext.res.status).toBe(500);
-  expect(mockContext.res.body).toBe(null);
-  expect(mockContext.log.error).toBeCalledTimes(1);
-  expect(mockContext.log.error).toBeCalledWith(testError);
+  expect(triggerMockContext.res.status).toBe(500);
+  expect(triggerMockContext.res.body).toBe(null);
+  expect(triggerMockContext.log.error).toBeCalledTimes(1);
+  expect(triggerMockContext.log.error).toBeCalledWith(testError);
 });
 
 test("tests add to group function: positive test case", async () => {
@@ -208,7 +211,7 @@ test("tests add to group function: positive test case", async () => {
     return;
   });
 
-  await httpTrigger(mockContext, request);
+  await httpTrigger(triggerMockContext, request);
   expect(authenticateRequest).toBeCalledTimes(1);
   expect(verifyUserFromConversationId).toBeCalledTimes(1);
   expect(verifyUserFromConversationId).toBeCalledWith(
@@ -217,6 +220,6 @@ test("tests add to group function: positive test case", async () => {
     testConversation.tenantId,
     testUserId
   );
-  expect(mockContext.res.status).toBe(200);
-  expect(mockContext.log.error).not.toBeCalled();
+  expect(triggerMockContext.res.status).toBe(200);
+  expect(triggerMockContext.log.error).not.toBeCalled();
 });

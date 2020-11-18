@@ -1,5 +1,5 @@
 import { authenticateRequest } from "../../services/authService";
-import { mockContext } from "./../mocks/testContext";
+import { triggerMockContext } from "./../mocks/testContext";
 import { HttpRequest } from "@azure/functions";
 import {
   authorizationHeaderConstant,
@@ -35,7 +35,7 @@ test("tests authenticateRequest", async () => {
     return decoded;
   });
 
-  var result = await authenticateRequest(mockContext, mockRequest);
+  var result = await authenticateRequest(triggerMockContext, mockRequest);
   expect(result).toBe(true);
   expect(mockRequest[userIdParameterConstant]).toBe(testUserId);
 });
@@ -46,35 +46,35 @@ test("tests authenticateRequest to throw error/ invalid token", async () => {
     throw testError;
   });
 
-  var result = await authenticateRequest(mockContext, mockRequest);
+  var result = await authenticateRequest(triggerMockContext, mockRequest);
   expect(result).toBe(false);
-  expect(mockContext.log.error).toBeCalledTimes(1);
-  expect(mockContext.log.error).toBeCalledWith(testError);
+  expect(triggerMockContext.log.error).toBeCalledTimes(1);
+  expect(triggerMockContext.log.error).toBeCalledWith(testError);
 });
 
 test("tests authenticateRequest for missing bearer token", async () => {
   mockRequest.headers = {};
-  var result = await authenticateRequest(mockContext, mockRequest);
+  var result = await authenticateRequest(triggerMockContext, mockRequest);
   expect(result).toBe(false);
 });
 
 test("tests authenticateRequest for missing tenant id", async () => {
   delete process.env.TenantId;
-  await expect(authenticateRequest(mockContext, mockRequest)).rejects.toThrow(
-    "Tenant id is missing in the settings."
-  );
+  await expect(
+    authenticateRequest(triggerMockContext, mockRequest)
+  ).rejects.toThrow("Tenant id is missing in the settings.");
 });
 
 test("tests authenticateRequest for missing AzureAd valid issuers", async () => {
   delete process.env.AzureAd_ValidIssuers;
-  await expect(authenticateRequest(mockContext, mockRequest)).rejects.toThrow(
-    "AzureAd ValidIssuers is missing in the settings."
-  );
+  await expect(
+    authenticateRequest(triggerMockContext, mockRequest)
+  ).rejects.toThrow("AzureAd ValidIssuers is missing in the settings.");
 });
 
 test("tests authenticateRequest for missing AzureAd applicationIdUri", async () => {
   delete process.env.AzureAd_ApplicationIdUri;
-  await expect(authenticateRequest(mockContext, mockRequest)).rejects.toThrow(
-    "AzureAd ApplicationIdUri is missing in the settings."
-  );
+  await expect(
+    authenticateRequest(triggerMockContext, mockRequest)
+  ).rejects.toThrow("AzureAd ApplicationIdUri is missing in the settings.");
 });
