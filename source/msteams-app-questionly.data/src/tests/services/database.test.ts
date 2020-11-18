@@ -51,6 +51,7 @@ beforeAll(async () => {
     useUnifiedTopology: true,
     useFindAndModify: false,
   });
+  process.env.NumberOfActiveAMASessions = "1";
 });
 
 beforeEach(async () => {
@@ -70,6 +71,8 @@ beforeEach(async () => {
     _id: sampleUserAADObjId3,
     userName: sampleUserName3,
   }).save();
+
+  jest.clearAllMocks();
 });
 
 afterEach(async () => {
@@ -84,6 +87,12 @@ afterAll(async () => {
 });
 
 test("can create qna session", async () => {
+  (<any>qnaSessionDataService.getNumberOfActiveSessions) = jest.fn();
+  (<any>qnaSessionDataService.getNumberOfActiveSessions).mockImplementationOnce(
+    () => {
+      return 0;
+    }
+  );
   const data = {
     title: sampleTitle,
     description: sampleDescription,

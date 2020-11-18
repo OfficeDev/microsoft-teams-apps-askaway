@@ -170,22 +170,6 @@ router.post('/:conversationId/sessions', async (req, res) => {
             );
         }
 
-        // get all ama sessions and check if number of active sessions is less than 1.
-        const numberOfActiveSessions = await qnaSessionDataService.getNumberOfActiveSessions(
-            conversationId
-        );
-        if (numberOfActiveSessions >= 1) {
-            res.statusCode = 500;
-            exceptionLogger(
-                new Error(
-                    `Could not create a new QnA session. There are ${numberOfActiveSessions} active session(s) already.`
-                )
-            );
-            return res.send(
-                `Could not create a new QnA session. There are ${numberOfActiveSessions} active session(s) already.`
-            );
-        }
-
         response = await qnaSessionDataService.createQnASession(
             req.body.title,
             req.body.description,

@@ -200,7 +200,6 @@ describe('test post conversations/:conversationId/sessions api', () => {
 
         (<any>isPresenterOrOrganizer) = jest.fn();
         (<any>qnaSessionDataService.createQnASession) = jest.fn();
-        (<any>qnaSessionDataService.getNumberOfActiveSessions) = jest.fn();
         (<any>conversationDataService.getConversationData) = jest.fn();
     });
 
@@ -220,11 +219,6 @@ describe('test post conversations/:conversationId/sessions api', () => {
         });
         (<any>isPresenterOrOrganizer).mockImplementationOnce(() => {
             return true;
-        });
-        (<any>(
-            qnaSessionDataService.getNumberOfActiveSessions
-        )).mockImplementationOnce(() => {
-            return 0;
         });
         (<any>qnaSessionDataService.createQnASession).mockImplementationOnce(
             () => {
@@ -248,9 +242,6 @@ describe('test post conversations/:conversationId/sessions api', () => {
         expect(result.status).toBe(200);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(isPresenterOrOrganizer).toBeCalledTimes(1);
-        expect(qnaSessionDataService.getNumberOfActiveSessions).toBeCalledTimes(
-            1
-        );
         expect(qnaSessionDataService.createQnASession).toBeCalledTimes(1);
     });
 
@@ -267,11 +258,6 @@ describe('test post conversations/:conversationId/sessions api', () => {
         });
         (<any>isPresenterOrOrganizer).mockImplementationOnce(() => {
             return true;
-        });
-        (<any>(
-            qnaSessionDataService.getNumberOfActiveSessions
-        )).mockImplementationOnce(() => {
-            return 0;
         });
         (<any>qnaSessionDataService.createQnASession).mockImplementationOnce(
             () => {
@@ -291,50 +277,7 @@ describe('test post conversations/:conversationId/sessions api', () => {
         expect(result.status).toBe(500);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(isPresenterOrOrganizer).toBeCalledTimes(1);
-        expect(qnaSessionDataService.getNumberOfActiveSessions).toBeCalledTimes(
-            1
-        );
         expect(qnaSessionDataService.createQnASession).toBeCalledTimes(1);
-    });
-
-    it('test post a qna session - getNumberOfActiveSessions returns more than one active sessions', async () => {
-        (<any>(
-            conversationDataService.getConversationData
-        )).mockImplementationOnce(() => {
-            return {
-                serviceUrl: sampleServiceUrl,
-                tenantId: sampleTenantId,
-                meetingId: sampleMeetingId,
-            };
-        });
-        (<any>isPresenterOrOrganizer).mockImplementationOnce(() => {
-            return true;
-        });
-        (<any>(
-            qnaSessionDataService.getNumberOfActiveSessions
-        )).mockImplementationOnce(() => {
-            return 1;
-        });
-
-        const result = await request(app)
-            .post(`/api/conversations/${sampleConversationId}/sessions`)
-            .send({
-                title: samplTtitle,
-                description: sampleDescription,
-                scopeId: sampleScopeId,
-                hostUserId: sampleHostUserId,
-                isChannel: true,
-            });
-        expect(result.status).toBe(500);
-        expect(conversationDataService.getConversationData).toBeCalledTimes(1);
-        expect(isPresenterOrOrganizer).toBeCalledTimes(1);
-        expect(qnaSessionDataService.getNumberOfActiveSessions).toBeCalledTimes(
-            1
-        );
-        expect(qnaSessionDataService.createQnASession).toBeCalledTimes(0);
-        expect(result.text).toBe(
-            'Could not create a new QnA session. There are 1 active session(s) already.'
-        );
     });
 
     it('test post a qna session - isPresenterOrOrganizer returns false', async () => {
@@ -363,11 +306,9 @@ describe('test post conversations/:conversationId/sessions api', () => {
         expect(result.status).toBe(400);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(isPresenterOrOrganizer).toBeCalledTimes(1);
-        expect(qnaSessionDataService.getNumberOfActiveSessions).toBeCalledTimes(
-            0
-        );
         expect(qnaSessionDataService.createQnASession).toBeCalledTimes(0);
     });
+
     it('test post a qna session - getConversationData fails', async () => {
         const testError = new Error();
         (<any>(
@@ -388,9 +329,6 @@ describe('test post conversations/:conversationId/sessions api', () => {
         expect(result.status).toBe(500);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(isPresenterOrOrganizer).toBeCalledTimes(0);
-        expect(qnaSessionDataService.getNumberOfActiveSessions).toBeCalledTimes(
-            0
-        );
         expect(qnaSessionDataService.createQnASession).toBeCalledTimes(0);
     });
 });

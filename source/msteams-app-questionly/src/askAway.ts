@@ -553,6 +553,13 @@ export class AskAway extends TeamsActivityHandler {
             if (resource !== undefined) {
                 await controller.setActivityId(data.qnaSessionId, resource.id);
             }
+        } else if (response.isErr()) {
+            const error = response.value;
+            if (error['code'] === 'QnASessionLimitExhausted') {
+                await context.sendActivity(
+                    MessageFactory.text(`${error.message}`)
+                );
+            }
         }
 
         return NULL_RESPONSE;
