@@ -10,8 +10,12 @@ import {
     initiateAppInsights,
     exceptionLogger,
 } from 'src/util/exceptionTracking';
-import { initiateConnection } from 'src/data/database';
-import { initKeyVault } from 'src/util/keyvault';
+import {
+    ConversationDataService,
+    IConversationDataService,
+    initiateConnection,
+} from 'msteams-app-questionly.data';
+import { getMongoURI, initKeyVault } from 'src/util/keyvault';
 import { setupBot } from 'src/util/botSetup';
 import { setupClientApp } from 'src/util/clientAppSetup';
 import { setupRestApis } from 'src/util/restApiSetup';
@@ -60,21 +64,27 @@ express.use(morgan('tiny'));
 // Add compression - uncomment to remove compression
 express.use(compression());
 
-// initiate database
-initiateConnection().catch((error) => {
-    exceptionLogger(error);
-});
+async function setupDBConection() {
+    const mongoDBConnectionString: string = await getMongoURI();
+    // initiate database
+    await initiateConnection(mongoDBConnectionString);
+}
 
 async function setupApp() {
+    const conversationDataService: IConversationDataService = new ConversationDataService();
     // setup bot
-    await setupBot(express);
+    await setupBot(express, conversationDataService);
 
     // setup client app
     setupClientApp(express);
 
     // setup rest apis
-    setupRestApis(express);
+    setupRestApis(express, conversationDataService);
 }
+
+setupDBConection().catch((error) => {
+    exceptionLogger(error);
+});
 
 setupApp().catch((error) => {
     exceptionLogger(error);

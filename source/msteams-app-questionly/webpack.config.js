@@ -53,6 +53,9 @@ var config = [{
                 loader: "ts-loader"
             },]
         },
+        optimization: {
+            minimize: false
+        },
         plugins: [
             new copyWebpackPlugin({
                 patterns: [

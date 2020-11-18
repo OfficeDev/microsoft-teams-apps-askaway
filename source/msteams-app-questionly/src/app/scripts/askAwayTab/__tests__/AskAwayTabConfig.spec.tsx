@@ -1,6 +1,6 @@
 /**
  * @jest-environment jsdom
-*/
+ */
 
 import * as React from 'react';
 import { shallow, configure } from 'enzyme';
@@ -8,7 +8,7 @@ import toJson from 'enzyme-to-json';
 import { AskAwayTabConfig } from '../AskAwayTabConfig';
 import Adapter from 'enzyme-adapter-react-16';
 
-configure({adapter: new Adapter()});
+configure({ adapter: new Adapter() });
 
 describe('AskAwayTabConfig Component', () => {
     // Snapshot Test Sample

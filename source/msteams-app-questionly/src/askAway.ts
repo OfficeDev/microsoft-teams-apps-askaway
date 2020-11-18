@@ -26,7 +26,8 @@ import {
     leaderboardStrings,
 } from 'src/localization/locale';
 import { exceptionLogger } from 'src/util/exceptionTracking';
-import { ifNumber } from 'src/util/retryPolicies';
+import { ifNumber } from 'src/util/typeUtility';
+import { IConversationDataService } from 'msteams-app-questionly.data';
 
 const NULL_RESPONSE: any = null;
 /**
@@ -46,10 +47,12 @@ export class AskAway extends TeamsActivityHandler {
         updateMainCardDebounceMaxWait: number;
         updateMainCardPostDebounceTimeInterval: number;
     };
+
     /**
      * The constructor
+     * @param conversationDataService - conversation data service
      */
-    public constructor() {
+    public constructor(conversationDataService: IConversationDataService) {
         super();
         this._updateMainCardFunctionMap = {};
 
@@ -65,6 +68,64 @@ export class AskAway extends TeamsActivityHandler {
                 5000
             ),
         };
+
+        this.onMembersAdded(async (context, next) => {
+            const activity = context.activity;
+            const membersAdded = activity.membersAdded;
+
+            if (membersAdded === undefined) {
+                exceptionLogger(
+                    `membersAdded undefined for activity id ${activity.id}`
+                );
+                await next();
+                return;
+            }
+
+            try {
+                for (const member of membersAdded) {
+                    if (member.id === context.activity.recipient.id) {
+                        await conversationDataService.createConversationData(
+                            activity.conversation.id,
+                            activity.serviceUrl,
+                            activity.conversation.tenantId
+                        );
+                    }
+                }
+            } catch (error) {
+                exceptionLogger(error);
+            }
+
+            // By calling next() you ensure that the next BotHandler is run.
+            await next();
+        });
+
+        this.onMembersRemoved(async (context, next) => {
+            const activity = context.activity;
+            const membersRemoved = activity.membersRemoved;
+
+            if (membersRemoved === undefined) {
+                exceptionLogger(
+                    `membersRemoved undefined for activity id ${activity.id}`
+                );
+                await next();
+                return;
+            }
+
+            try {
+                for (const member of membersRemoved) {
+                    if (member.id === context.activity.recipient.id) {
+                        await conversationDataService.deleteConversationData(
+                            activity.conversation.id
+                        );
+                    }
+                }
+            } catch (error) {
+                exceptionLogger(error);
+            }
+
+            // By calling next() you ensure that the next BotHandler is run.
+            await next();
+        });
     }
 
     private _buildTaskModuleContinueResponse = (
