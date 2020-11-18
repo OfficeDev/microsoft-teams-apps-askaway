@@ -6,6 +6,10 @@ const ConversationSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  meetingId: {
+    type: String,
+    required: false,
+  },
   serviceUrl: {
     type: String,
     required: true,
@@ -24,6 +28,7 @@ export interface IConversation extends mongoose.Document {
   _id: string;
   tenantId: string;
   serviceUrl: string;
+  meetingId?: string;
 }
 
 /**

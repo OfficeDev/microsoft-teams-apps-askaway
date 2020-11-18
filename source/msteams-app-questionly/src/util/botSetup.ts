@@ -12,10 +12,7 @@ import { getAvatarKey, getMicrosoftAppPassword } from 'src/util/keyvault';
 import { requestPolicyHelper } from 'src/util/requestPolicyHelper';
 import { USER_AGENT } from 'botbuilder/lib/botFrameworkAdapter';
 import { ifNumber } from 'src/util/typeUtility';
-import {
-    ConversationDataService,
-    IConversationDataService,
-} from 'msteams-app-questionly.data';
+import { IConversationDataService } from 'msteams-app-questionly.data';
 
 interface AvatarRequest {
     initials: string;

@@ -8,6 +8,7 @@ import {
 import { User } from "./../schemas/user";
 import { qnaSessionDataService } from "./qnaSessionDataService";
 import { userDataService } from "./userDataService";
+import * as mongoose from "mongoose";
 
 export class QuestionDataService {
   private qnaSessionDataService;
@@ -24,17 +25,22 @@ export class QuestionDataService {
    * @param userAadObjId - AAD Object ID of user
    * @param userTeamsName - Name of user on Teams
    * @param questionContent - Question asked by user
-   * @returns Returns true if question was successfully created
+   * @param conversationId - conversation id
+   * @returns Returns id of created document
    * @throws Error thrown when database fails to save the question
    */
   public async createQuestion(
     qnaTeamsSessionId: string,
     userAadObjId: string,
     userTeamsName: string,
-    questionContent: string
-  ): Promise<boolean> {
+    questionContent: string,
+    conversationId: string
+  ): Promise<string> {
     await this.userDataService.getUserOrCreate(userAadObjId, userTeamsName);
-    await this.qnaSessionDataService.isExistingQnASession(qnaTeamsSessionId);
+    await this.qnaSessionDataService.isExistingQnASession(
+      qnaTeamsSessionId,
+      conversationId
+    );
 
     const question = new Question({
       qnaSessionId: qnaTeamsSessionId,
@@ -42,9 +48,12 @@ export class QuestionDataService {
       content: questionContent,
     });
 
-    await retryWrapper(() => question.save(), new ExponentialBackOff());
+    const savedSession: mongoose.MongooseDocument = await retryWrapper(
+      () => question.save(),
+      new ExponentialBackOff()
+    );
 
-    return true;
+    return savedSession._id;
   }
 
   /**

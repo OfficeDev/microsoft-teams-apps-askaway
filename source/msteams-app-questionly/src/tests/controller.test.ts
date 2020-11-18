@@ -189,14 +189,16 @@ test('submit new question', async () => {
         sampleQnASessionId,
         sampleUserAADObjId1,
         sampleUserName,
-        sampleQuestionContent
+        sampleQuestionContent,
+        sampleConversationId
     );
     expect(questionDataService.createQuestion).toBeCalledTimes(1);
     expect(questionDataService.createQuestion).toBeCalledWith(
         sampleQnASessionId,
         sampleUserAADObjId1,
         sampleUserName,
-        sampleQuestionContent
+        sampleQuestionContent,
+        sampleConversationId
     );
 });
 
@@ -253,7 +255,11 @@ test('get end qna confirmation card', async () => {
 });
 
 test('end ama session', async () => {
-    await endQnASession(sampleQnASessionId, sampleUserAADObjId1);
+    await endQnASession(
+        sampleQnASessionId,
+        sampleUserAADObjId1,
+        sampleConversationId
+    );
     expect(qnaSessionDataService.isActiveQnA).toBeCalledTimes(1);
     expect(qnaSessionDataService.isActiveQnA).toBeCalledWith(
         sampleQnASessionId

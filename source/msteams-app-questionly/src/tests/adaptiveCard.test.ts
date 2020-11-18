@@ -560,7 +560,6 @@ describe('main card', () => {
                     type: 'TextBlock',
                     text: mainCardStrings('noQuestions'),
                     color: 'accent',
-                    $when: true,
                 },
             ],
             wrap: true,
