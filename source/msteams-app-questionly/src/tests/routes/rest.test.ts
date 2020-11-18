@@ -5,6 +5,7 @@ import { router, initializeRouter } from 'src/routes/rest';
 import {
     ConversationDataService,
     qnaSessionDataService,
+    questionDataService,
 } from 'msteams-app-questionly.data';
 import {
     getAllQnASesssionsDataForTab,
@@ -13,6 +14,9 @@ import {
 import { generateUniqueId } from 'adaptivecards';
 
 let app: ExpressType;
+
+const testUserId = 'testUserId';
+const testUserName = 'testUserName';
 const conversationDataService = new ConversationDataService();
 const sampleConversationId = 'sampleConversationId';
 const samplTtitle = 'sample title';
@@ -388,5 +392,136 @@ describe('test post conversations/:conversationId/sessions api', () => {
             0
         );
         expect(qnaSessionDataService.createQnASession).toBeCalledTimes(0);
+    });
+});
+
+describe('test /conversations/:conversationId/sessions/:sessionId/questions api', () => {
+    beforeAll(() => {
+        app = Express();
+
+        app.use(
+            Express.json({
+                verify: (req, res, buf: Buffer): void => {
+                    (<any>req).rawBody = buf.toString();
+                },
+            })
+        );
+
+        app.use(Express.urlencoded({ extended: true }));
+
+        const mockEnsureAuthenticated = (req, res, next) => {
+            req.user = {
+                _id: testUserId,
+                userName: testUserName,
+            };
+            next();
+        };
+
+        // Rest endpoints
+        app.use('/api/conversations', mockEnsureAuthenticated, router);
+    });
+
+    it('questionContent missing in request', async () => {
+        const testSessionId = 'testId';
+        const sampleConversationId = '1';
+
+        const result = await request(app).post(
+            `/api/conversations/${sampleConversationId}/sessions/${testSessionId}/questions`
+        );
+
+        expect(result.status).toBe(400);
+        expect(result.text).toEqual(
+            'questionContent is missing in the request'
+        );
+    });
+
+    it('questionContent as null in request', async () => {
+        const testSessionId = 'testId';
+        const sampleConversationId = '1';
+
+        const result = await request(app)
+            .post(
+                `/api/conversations/${sampleConversationId}/sessions/${testSessionId}/questions`
+            )
+            .send({ questionContent: null });
+
+        expect(result.status).toBe(400);
+        expect(result.text).toEqual(
+            'questionContent is missing in the request'
+        );
+    });
+
+    it('questionContent as empty string in request', async () => {
+        const testSessionId = 'testId';
+        const sampleConversationId = '1';
+
+        const result = await request(app)
+            .post(
+                `/api/conversations/${sampleConversationId}/sessions/${testSessionId}/questions`
+            )
+            .send({ questionContent: '' });
+
+        expect(result.status).toBe(400);
+        expect(result.text).toEqual(
+            'questionContent is missing in the request'
+        );
+    });
+
+    it('createQuestion throws error', async () => {
+        const testSessionId = 'testId';
+        const sampleConversationId = '1';
+        const testError: Error = new Error('test error');
+        const testQuestionContent = 'testQuestionContent';
+
+        (<any>questionDataService.createQuestion) = jest.fn();
+        (<any>questionDataService.createQuestion).mockImplementationOnce(() => {
+            throw testError;
+        });
+
+        const result = await request(app)
+            .post(
+                `/api/conversations/${sampleConversationId}/sessions/${testSessionId}/questions`
+            )
+            .send({ questionContent: testQuestionContent });
+
+        expect(result.status).toBe(500);
+        expect(result.text).toEqual(testError.message);
+        expect(questionDataService.createQuestion).toBeCalledTimes(1);
+        expect(questionDataService.createQuestion).toBeCalledWith(
+            testSessionId,
+            testUserId,
+            testUserName,
+            testQuestionContent,
+            sampleConversationId
+        );
+    });
+
+    it('create question successfully', async () => {
+        const testSessionId = 'testId';
+        const sampleConversationId = '1';
+        const questionId = 'testQuestionId';
+        const testQuestionContent = 'testQuestionContent';
+
+        (<any>questionDataService.createQuestion) = jest.fn();
+        (<any>questionDataService.createQuestion).mockImplementationOnce(() => {
+            return questionId;
+        });
+
+        const result = await request(app)
+            .post(
+                `/api/conversations/${sampleConversationId}/sessions/${testSessionId}/questions`
+            )
+            .send({ questionContent: testQuestionContent });
+
+        expect(result.status).toBe(201);
+        expect(result.text).toEqual(questionId);
+        expect(questionDataService.createQuestion).toBeCalledTimes(1);
+        expect(questionDataService.createQuestion).toBeCalledWith(
+            testSessionId,
+            testUserId,
+            testUserName,
+            testQuestionContent,
+            sampleConversationId
+        );
     });
 });

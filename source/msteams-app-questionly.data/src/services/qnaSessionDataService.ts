@@ -111,10 +111,11 @@ class QnASessionDataService {
   /**
    * Ends the QnA by changing fields: isActive to false and dateTimeEnded to current time
    * @param qnaSessionId - id of the current QnA session
+   * @param conversationId - conversation id
    * @throws Error thrown when database fails to execute changes
    * */
-  public async endQnASession(qnaSessionId: string) {
-    await this.isExistingQnASession(qnaSessionId);
+  public async endQnASession(qnaSessionId: string, conversationId: string) {
+    await this.isExistingQnASession(qnaSessionId, conversationId);
     const result = await retryWrapper(
       () =>
         QnASession.findByIdAndUpdate(qnaSessionId, {
@@ -127,20 +128,29 @@ class QnASessionDataService {
   }
 
   /**
-   * If QnA session exists, will return true
+   * If QnA session exists and belongs to given conversation id, will return true
    * Otherwise, if QnA session doesn't exist, will throw an error.
    * @param qnaTeamsSessionId - id of the current QnA session
+   * @param conversationId - conversation id
    * @returns true if qnaTeamsSessionId is in the database
-   * @throws Error thrown when database fails to find the qnaTeamsSessionId
+   * @throws Error thrown when database fails to find the qnaTeamsSessionId or qnaTeamsSessionId
+   * does not belong to conversationId.
    */
   public async isExistingQnASession(
-    qnaTeamsSessionId: string
+    qnaTeamsSessionId: string,
+    conversationId: string
   ): Promise<boolean> {
-    const result = await retryWrapper(() =>
+    const result: IQnASession = await retryWrapper(() =>
       QnASession.findById(qnaTeamsSessionId)
     );
 
     if (!result) throw new Error("QnA Session record not found");
+
+    if (result.conversationId !== conversationId) {
+      throw new Error(
+        `session ${qnaTeamsSessionId} does not belong to conversation ${conversationId}`
+      );
+    }
 
     return true;
   }

@@ -306,7 +306,7 @@ export class AskAway extends TeamsActivityHandler {
     // -------------------------------------------------------------------------- //
 
     private async handleTeamsTaskModuleSubmitQuestion(
-        context,
+        context: TurnContext,
         user: ChannelAccount,
         taskModuleRequest: TaskModuleRequest
     ): Promise<TaskModuleResponse> {
@@ -332,7 +332,8 @@ export class AskAway extends TeamsActivityHandler {
             qnaSessionId,
             userAADObjId,
             userName,
-            questionContent
+            questionContent,
+            context.activity.conversation.id
         );
 
         if (!status.isOk())
@@ -409,7 +410,8 @@ export class AskAway extends TeamsActivityHandler {
         if (taskModuleRequest.data.id == 'submitEndQnA') {
             const result = await controller.endQnASession(
                 qnaSessionId,
-                <string>context.activity.from.aadObjectId
+                <string>context.activity.from.aadObjectId,
+                context.activity.conversation.id
             );
 
             if (result.isErr()) return this.handleTeamsTaskModuleSubmitError();

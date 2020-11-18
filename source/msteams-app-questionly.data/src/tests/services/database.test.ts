@@ -410,23 +410,35 @@ test("update existing user", async () => {
 });
 
 test("new question with existing user in existing QnA session", async () => {
-  const data = await questionDataService.createQuestion(
+  const questionId = await questionDataService.createQuestion(
     testQnASession._id,
     testUser._id,
     testUser.userName,
-    sampleQuestionContent
+    sampleQuestionContent,
+    sampleConversationId
   );
-  expect(data).toEqual(true);
+
+  expect(questionId).toBeDefined();
+  const doc: any = await Question.findById(questionId);
+  expect(doc).not.toBeNull();
+  expect(doc._id).toEqual(questionId);
+  expect(doc.toObject().content).toEqual(sampleQuestionContent);
 });
 
 test("new question with new user in existing QnA session", async () => {
-  const data = await questionDataService.createQuestion(
+  const questionId = await questionDataService.createQuestion(
     testQnASession._id,
     sampleUserAADObjId4,
     sampleUserName4,
-    sampleQuestionContent
+    sampleQuestionContent,
+    sampleConversationId
   );
-  expect(data).toEqual(true);
+  expect(questionId).toBeDefined();
+
+  const doc: any = await Question.findById(questionId);
+  expect(doc).not.toBeNull();
+  expect(doc._id).toEqual(questionId);
+  expect(doc.toObject().content).toEqual(sampleQuestionContent);
 });
 
 test("new question with existing user in non-existing QnA session", async () => {
@@ -435,7 +447,8 @@ test("new question with existing user in non-existing QnA session", async () => 
       sampleQnASessionID,
       sampleUserAADObjId4,
       sampleUserName4,
-      sampleQuestionContent
+      sampleQuestionContent,
+      sampleConversationId
     )
     .catch((error) => {
       expect(error).toEqual(new Error("QnA Session record not found"));
@@ -444,7 +457,7 @@ test("new question with existing user in non-existing QnA session", async () => 
 
 test("get non-existing QnA session", async () => {
   await qnaSessionDataService
-    .isExistingQnASession(sampleQnASessionID)
+    .isExistingQnASession(sampleQnASessionID, sampleConversationId)
     .catch((error) => {
       expect(error).toEqual(new Error("QnA Session record not found"));
     });
@@ -452,9 +465,23 @@ test("get non-existing QnA session", async () => {
 
 test("get existing QnA session", async () => {
   const data = await qnaSessionDataService.isExistingQnASession(
-    testQnASession._id
+    testQnASession._id,
+    sampleConversationId
   );
   expect(data).toEqual(true);
+});
+
+test("get existing QnA session not belonging to provided conversation", async () => {
+  const randomConversationId: string = "random";
+  await qnaSessionDataService
+    .isExistingQnASession(testQnASession._id, randomConversationId)
+    .catch((error) => {
+      expect(error).toEqual(
+        new Error(
+          `session ${testQnASession._id} does not belong to conversation ${randomConversationId}`
+        )
+      );
+    });
 });
 
 test("upvote question that has not been upvoted yet with existing user", async () => {
@@ -538,14 +565,17 @@ test("upvote question with new user not in database", async () => {
 
 test("ending non-existing qna", async () => {
   await qnaSessionDataService
-    .endQnASession(sampleQnASessionID)
+    .endQnASession(sampleQnASessionID, sampleConversationId)
     .catch((error) => {
       expect(error).toEqual(new Error("QnA Session record not found"));
     });
 });
 
 test("ending existing qna with no questions", async () => {
-  await qnaSessionDataService.endQnASession(testQnASession._id);
+  await qnaSessionDataService.endQnASession(
+    testQnASession._id,
+    sampleConversationId
+  );
 
   // get data
   const qnaSessionData: any = await QnASession.findById(testQnASession._id)
@@ -565,11 +595,15 @@ test("ending existing qna with a few questions", async () => {
       testQnASession._id,
       randomString,
       sampleUserName4,
-      sampleQuestionContent
+      sampleQuestionContent,
+      sampleConversationId
     );
   }
 
-  await qnaSessionDataService.endQnASession(testQnASession._id);
+  await qnaSessionDataService.endQnASession(
+    testQnASession._id,
+    sampleConversationId
+  );
 
   // get data
   const qnaSessionData: any = await QnASession.findById(testQnASession._id)
@@ -580,6 +614,19 @@ test("ending existing qna with a few questions", async () => {
 
   expect(qnaSessionData.isActive).toBe(false);
   expect(qnaSessionData.dateTimeEnded).not.toBe(null);
+});
+
+test("ending qna from different conversation", async () => {
+  const randomConversationId: string = "random";
+  await qnaSessionDataService
+    .endQnASession(testQnASession._id, randomConversationId)
+    .catch((error) => {
+      expect(error).toEqual(
+        new Error(
+          `session ${testQnASession._id} does not belong to conversation ${randomConversationId}`
+        )
+      );
+    });
 });
 
 test("checking if current host is the host", async () => {
@@ -630,7 +677,10 @@ test("checking if inactive QnA is currently active", async () => {
     data.isChannel
   );
 
-  await qnaSessionDataService.endQnASession(result.qnaSessionId);
+  await qnaSessionDataService.endQnASession(
+    result.qnaSessionId,
+    sampleConversationId
+  );
 
   const isActive = await qnaSessionDataService.isActiveQnA(result.qnaSessionId);
   expect(isActive).toEqual(false);

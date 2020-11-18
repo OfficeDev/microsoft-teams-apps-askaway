@@ -1,7 +1,9 @@
-import Express, { Router } from 'express';
+import Express from 'express';
 import {
     IConversationDataService,
     qnaSessionDataService,
+    IUser,
+    questionDataService,
 } from 'msteams-app-questionly.data';
 import { exceptionLogger } from 'src/util/exceptionTracking';
 import {
@@ -43,6 +45,44 @@ router.get('/:conversationId/sessions', async (req, res) => {
     }
     res.send(qnaSessionResponse);
 });
+
+// Post a question
+router.post(
+    '/:conversationId/sessions/:sessionId/questions',
+    async (req, res) => {
+        let response;
+        try {
+            const user: IUser = <IUser>req.user;
+            const questionContent: string = req.body.questionContent;
+
+            if (
+                questionContent === undefined ||
+                questionContent === null ||
+                questionContent === ''
+            ) {
+                res.statusCode = 400;
+                res.send('questionContent is missing in the request');
+                return;
+            }
+
+            response = await questionDataService.createQuestion(
+                req.params['sessionId'],
+                user._id,
+                user.userName,
+                questionContent,
+                req.params['conversationId']
+            );
+        } catch (err) {
+            exceptionLogger(err);
+            res.statusCode = 500;
+            res.send(err.message);
+            return;
+        }
+
+        res.statusCode = 201;
+        res.send(response);
+    }
+);
 
 // Create a new qna session
 router.post('/:conversationId/sessions', async (req, res) => {

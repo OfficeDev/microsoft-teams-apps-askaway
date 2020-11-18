@@ -322,7 +322,8 @@ describe('handle submit question', () => {
             taskModuleRequest.data.qnaSessionId,
             user.aadObjectId,
             user.name,
-            taskModuleRequest.data.usertext
+            taskModuleRequest.data.usertext,
+            context.activity.conversation.id
         );
         expect(handler._updateMainCard).toBeCalledTimes(1);
     });
@@ -462,7 +463,8 @@ test('handle submit end qna', async () => {
     expect(endQnASession).toBeCalledTimes(1);
     expect(endQnASession).toBeCalledWith(
         taskModuleRequest.data.qnaSessionId,
-        context.activity.from.aadObjectId
+        context.activity.from.aadObjectId,
+        context.activity.conversation.id
     );
     expect(context.updateActivity).toBeCalledTimes(1);
 });
