@@ -1,9 +1,9 @@
 import { BotFrameworkAdapter, ConversationAccount } from "botbuilder";
+import { getConversationData } from "../../utils/dbUtility";
 import { activityMockContext } from "../mocks/testContext";
 import httpFunction from "./../../../send-notification-bubble/index";
 
-// hardcoding the service url here too. since it is hardoded in send-notification-bubble, test fails for any other url
-const sampleServiceUrl = "https://smba.trafficmanager.net/amer/";
+const sampleServiceUrl = "sampleServiceUrl";
 const sampleConversationId = "sampleConversationId";
 const testAdapter: BotFrameworkAdapter = new BotFrameworkAdapter();
 let testConversationReference: any;
@@ -16,6 +16,7 @@ beforeAll(() => {
   process.env.AppId = "random";
   process.env.NotificationBubblePageUrl = "random";
 
+  (<any>getConversationData) = jest.fn();
   (<any>BotFrameworkAdapter) = jest.fn();
   testAdapter.continueConversation = jest.fn();
   (<any>BotFrameworkAdapter).mockImplementation(() => {
@@ -45,6 +46,11 @@ beforeEach(() => {
 
 test("send notifcation bubble - continueConversation success", async () => {
   (<any>testAdapter.continueConversation).mockImplementationOnce(() => {});
+  (<any>getConversationData).mockImplementationOnce(() => {
+    return {
+      serviceUrl: sampleServiceUrl,
+    };
+  });
 
   await httpFunction(activityMockContext, request);
 
@@ -64,6 +70,11 @@ test("send notifcation bubble - continueConversation throws error", async () => 
   const testError: Error = new Error();
   (<any>testAdapter.continueConversation).mockImplementationOnce(() => {
     throw testError;
+  });
+  (<any>getConversationData).mockImplementationOnce(() => {
+    return {
+      serviceUrl: sampleServiceUrl,
+    };
   });
 
   await expect(httpFunction(activityMockContext, request)).rejects.toThrow(
