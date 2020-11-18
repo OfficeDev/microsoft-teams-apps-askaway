@@ -1,14 +1,15 @@
 import mongoose from "mongoose";
 import { Conversation } from "src/schemas/conversation";
+
 import {
   ConversationDataService,
   IConversationDataService,
 } from "src/services/conversationDataService";
 
-const sampleconversationId = "test";
-const sampleServiceUrl = "test";
-const sampleTenantId = "test";
-
+const sampleConversationId = "testConversationId";
+const sampleServiceUrl = "testServiceUrl";
+const sampleTenantId = "testTenantId";
+const sampleMeetingId = "testMeetingId";
 let conversationDataService: IConversationDataService;
 
 beforeAll(async () => {
@@ -24,86 +25,128 @@ afterAll(async () => {
   await mongoose.connection.close();
 });
 
-test("Create conversation documment", async () => {
+test("Create conversation document without meeting id", async () => {
   await conversationDataService.createConversationData(
-    sampleconversationId,
+    sampleConversationId,
     sampleServiceUrl,
     sampleTenantId
   );
 
-  const doc: any = await Conversation.findById(sampleconversationId);
+  const doc: any = await Conversation.findById(sampleConversationId);
   expect(doc).not.toBeNull();
-  expect(doc._id).toEqual(sampleconversationId);
+  expect(doc._id).toEqual(sampleConversationId);
   expect(doc.toObject().serviceUrl).toEqual(sampleServiceUrl);
   expect(doc.toObject().tenantId).toEqual(sampleTenantId);
 
-  await Conversation.remove({ _id: sampleconversationId });
+  await Conversation.remove({ _id: sampleConversationId });
 });
 
-test("Create duplicate conversation documment", async () => {
+test("Create conversation document with meeting id", async () => {
   await conversationDataService.createConversationData(
-    sampleconversationId,
+    sampleConversationId,
+    sampleServiceUrl,
+    sampleTenantId,
+    sampleMeetingId
+  );
+
+  const doc: any = await Conversation.findById(sampleConversationId);
+  expect(doc).not.toBeNull();
+  expect(doc._id).toEqual(sampleConversationId);
+  expect(doc.toObject().serviceUrl).toEqual(sampleServiceUrl);
+  expect(doc.toObject().tenantId).toEqual(sampleTenantId);
+  expect(doc.toObject().meetingId).toEqual(sampleMeetingId);
+
+  await Conversation.remove({ _id: sampleConversationId });
+});
+
+test("Create duplicate conversation document", async () => {
+  await conversationDataService.createConversationData(
+    sampleConversationId,
     sampleServiceUrl,
     sampleTenantId
   );
 
-  const doc: any = await Conversation.findById(sampleconversationId);
+  const doc: any = await Conversation.findById(sampleConversationId);
   expect(doc).not.toBeNull();
 
   await expect(
     conversationDataService.createConversationData(
-      sampleconversationId,
+      sampleConversationId,
       sampleServiceUrl,
       sampleTenantId
     )
   ).rejects.toThrow();
 
-  await Conversation.remove({ _id: sampleconversationId });
+  await Conversation.remove({ _id: sampleConversationId });
 });
 
-test("Delete conversation documment", async () => {
+test("Delete conversation document", async () => {
   await conversationDataService.createConversationData(
-    sampleconversationId,
+    sampleConversationId,
     sampleServiceUrl,
     sampleTenantId
   );
 
-  let doc: any = await Conversation.findById(sampleconversationId);
+  let doc: any = await Conversation.findById(sampleConversationId);
   expect(doc).not.toBeNull();
 
-  await conversationDataService.deleteConversationData(sampleconversationId);
+  await conversationDataService.deleteConversationData(sampleConversationId);
 
-  doc = await Conversation.findById(sampleconversationId);
+  doc = await Conversation.findById(sampleConversationId);
   expect(doc).toBeNull();
 });
 
-test("Get conversation documment", async () => {
+test("Get conversation document without meeting id", async () => {
   await conversationDataService.createConversationData(
-    sampleconversationId,
+    sampleConversationId,
     sampleServiceUrl,
     sampleTenantId
   );
 
-  const doc: any = await Conversation.findById(sampleconversationId);
+  const doc: any = await Conversation.findById(sampleConversationId);
   expect(doc).not.toBeNull();
 
   const conversation = await conversationDataService.getConversationData(
-    sampleconversationId
+    sampleConversationId
   );
 
   expect(conversation).toBeDefined();
-  expect(conversation._id).toEqual(sampleconversationId);
-  expect(conversation.serviceUrl).toEqual(sampleconversationId);
+  expect(conversation._id).toEqual(sampleConversationId);
+  expect(conversation.serviceUrl).toEqual(sampleServiceUrl);
   expect(conversation.tenantId).toEqual(sampleTenantId);
 
-  await Conversation.remove({ _id: sampleconversationId });
+  await Conversation.remove({ _id: sampleConversationId });
 });
 
-test("Get conversation documment when it does not exist", async () => {
-  const doc: any = await Conversation.findById(sampleconversationId);
+test("Get conversation document with meeting id", async () => {
+  await conversationDataService.createConversationData(
+    sampleConversationId,
+    sampleServiceUrl,
+    sampleTenantId,
+    sampleMeetingId
+  );
+
+  const doc: any = await Conversation.findById(sampleConversationId);
+  expect(doc).not.toBeNull();
+
+  const conversation = await conversationDataService.getConversationData(
+    sampleConversationId
+  );
+
+  expect(conversation).toBeDefined();
+  expect(conversation._id).toEqual(sampleConversationId);
+  expect(conversation.serviceUrl).toEqual(sampleServiceUrl);
+  expect(conversation.tenantId).toEqual(sampleTenantId);
+  expect(conversation.meetingId).toEqual(sampleMeetingId);
+
+  await Conversation.remove({ _id: sampleConversationId });
+});
+
+test("Get conversation document when it does not exist", async () => {
+  const doc: any = await Conversation.findById(sampleConversationId);
   expect(doc).toBeNull();
 
   await expect(
-    conversationDataService.getConversationData(sampleconversationId)
+    conversationDataService.getConversationData(sampleConversationId)
   ).rejects.toThrow("Conversation document not found");
 });

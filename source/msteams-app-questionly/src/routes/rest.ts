@@ -1,6 +1,7 @@
 import Express from 'express';
 import {
     IConversationDataService,
+    IConversation,
     qnaSessionDataService,
     IUser,
     questionDataService,
@@ -8,6 +9,7 @@ import {
 import { exceptionLogger } from 'src/util/exceptionTracking';
 import {
     getAllQnASesssionsDataForTab,
+    getParticipantRole,
     isPresenterOrOrganizer,
 } from 'src/routes/restUtils';
 
@@ -44,6 +46,42 @@ router.get('/:conversationId/sessions', async (req, res) => {
         qnaSessionResponse = err.message;
     }
     res.send(qnaSessionResponse);
+});
+
+// Get user information
+router.get('/:conversationId/me', async (req, res) => {
+    let userRole;
+    try {
+        const user: any = req.user;
+        const userId = user._id;
+
+        const conversationId: string = req.params['conversationId'];
+        const conversation: IConversation = await conversationDataService.getConversationData(
+            conversationId
+        );
+        const tenantId = conversation.tenantId;
+        const serviceUrl = conversation.serviceUrl;
+        const meetingId = conversation.meetingId;
+
+        if (meetingId === undefined) {
+            throw new Error(
+                `meeting does not exist for provided conversation id ${conversationId}`
+            );
+        }
+
+        userRole = await getParticipantRole(
+            meetingId,
+            userId,
+            tenantId,
+            serviceUrl
+        );
+    } catch (err) {
+        exceptionLogger(err);
+        res.statusCode = 500;
+        res.send(err.message);
+    }
+
+    res.send(userRole);
 });
 
 // Post a question
@@ -96,7 +134,6 @@ router.post('/:conversationId/sessions', async (req, res) => {
     }
 
     const conversationId = req.params['conversationId'];
-    const meetingId = req.body.meetingId;
     let response;
 
     try {
@@ -105,6 +142,7 @@ router.post('/:conversationId/sessions', async (req, res) => {
         );
         const serviceUrl = conversationData.serviceUrl;
         const tenantId = conversationData.tenantId;
+        const meetingId = conversationData.meetingId;
 
         // check if the user/participant is either presenter or organizer.
         if (meetingId !== undefined) {
@@ -126,6 +164,10 @@ router.post('/:conversationId/sessions', async (req, res) => {
                     'Only a Presenter or an Organizer can create new QnA Session.'
                 );
             }
+        } else {
+            throw new Error(
+                `meeting does not exist for provided conversation id ${conversationId}`
+            );
         }
 
         // get all ama sessions and check if number of active sessions is less than 1.

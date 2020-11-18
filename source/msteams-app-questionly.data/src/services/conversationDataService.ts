@@ -5,7 +5,8 @@ export interface IConversationDataService {
   createConversationData: (
     conversationId: string,
     serviceUrl: string,
-    tenantId: string
+    tenantId: string,
+    meetingId?: string
   ) => Promise<void>;
   getConversationData: (conversationId: string) => Promise<IConversation>;
   deleteConversationData: (conversationId: string) => Promise<void>;
@@ -22,13 +23,25 @@ export class ConversationDataService implements IConversationDataService {
   public async createConversationData(
     conversationId: string,
     serviceUrl: string,
-    tenantId: string
+    tenantId: string,
+    meetingId?: string
   ): Promise<void> {
-    const conversation = new Conversation({
-      _id: conversationId,
-      serviceUrl: serviceUrl,
-      tenantId: tenantId,
-    });
+    let conversation;
+
+    if (meetingId !== undefined) {
+      conversation = new Conversation({
+        _id: conversationId,
+        serviceUrl: serviceUrl,
+        tenantId: tenantId,
+        meetingId: meetingId,
+      });
+    } else {
+      conversation = new Conversation({
+        _id: conversationId,
+        serviceUrl: serviceUrl,
+        tenantId: tenantId,
+      });
+    }
 
     await retryWrapper(() => conversation.save());
   }

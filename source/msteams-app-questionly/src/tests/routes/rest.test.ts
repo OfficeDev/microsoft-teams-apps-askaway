@@ -9,6 +9,7 @@ import {
 } from 'msteams-app-questionly.data';
 import {
     getAllQnASesssionsDataForTab,
+    getParticipantRole,
     isPresenterOrOrganizer,
 } from 'src/routes/restUtils';
 import { generateUniqueId } from 'adaptivecards';
@@ -214,6 +215,7 @@ describe('test post conversations/:conversationId/sessions api', () => {
             return {
                 serviceUrl: sampleServiceUrl,
                 tenantId: sampleTenantId,
+                meetingId: sampleMeetingId,
             };
         });
         (<any>isPresenterOrOrganizer).mockImplementationOnce(() => {
@@ -241,7 +243,6 @@ describe('test post conversations/:conversationId/sessions api', () => {
                 scopeId: sampleScopeId,
                 hostUserId: sampleHostUserId,
                 isChannel: true,
-                meetingId: sampleMeetingId,
             });
         expect(result).toBeDefined();
         expect(result.status).toBe(200);
@@ -261,6 +262,7 @@ describe('test post conversations/:conversationId/sessions api', () => {
             return {
                 serviceUrl: sampleServiceUrl,
                 tenantId: sampleTenantId,
+                meetingId: sampleMeetingId,
             };
         });
         (<any>isPresenterOrOrganizer).mockImplementationOnce(() => {
@@ -285,7 +287,6 @@ describe('test post conversations/:conversationId/sessions api', () => {
                 scopeId: sampleScopeId,
                 hostUserId: sampleHostUserId,
                 isChannel: true,
-                meetingId: sampleMeetingId,
             });
         expect(result.status).toBe(500);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
@@ -303,6 +304,7 @@ describe('test post conversations/:conversationId/sessions api', () => {
             return {
                 serviceUrl: sampleServiceUrl,
                 tenantId: sampleTenantId,
+                meetingId: sampleMeetingId,
             };
         });
         (<any>isPresenterOrOrganizer).mockImplementationOnce(() => {
@@ -322,7 +324,6 @@ describe('test post conversations/:conversationId/sessions api', () => {
                 scopeId: sampleScopeId,
                 hostUserId: sampleHostUserId,
                 isChannel: true,
-                meetingId: sampleMeetingId,
             });
         expect(result.status).toBe(500);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
@@ -343,6 +344,7 @@ describe('test post conversations/:conversationId/sessions api', () => {
             return {
                 serviceUrl: sampleServiceUrl,
                 tenantId: sampleTenantId,
+                meetingId: sampleMeetingId,
             };
         });
         (<any>isPresenterOrOrganizer).mockImplementationOnce(() => {
@@ -357,7 +359,6 @@ describe('test post conversations/:conversationId/sessions api', () => {
                 scopeId: sampleScopeId,
                 hostUserId: sampleHostUserId,
                 isChannel: true,
-                meetingId: sampleMeetingId,
             });
         expect(result.status).toBe(400);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
@@ -383,7 +384,6 @@ describe('test post conversations/:conversationId/sessions api', () => {
                 scopeId: sampleScopeId,
                 hostUserId: sampleHostUserId,
                 isChannel: true,
-                meetingId: sampleMeetingId,
             });
         expect(result.status).toBe(500);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
@@ -522,6 +522,162 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
             testUserName,
             testQuestionContent,
             sampleConversationId
+        );
+    });
+});
+
+describe('test /conversations/:conversationId/me api', () => {
+    beforeAll(() => {
+        app = Express();
+
+        const mockEnsureAuthenticated = (req, res, next) => {
+            req.user = {
+                _id: testUserId,
+            };
+            next();
+        };
+
+        (<any>getParticipantRole) = jest.fn();
+        (<any>conversationDataService.getConversationData) = jest.fn();
+
+        // Rest endpoints
+        app.use('/api/conversations', mockEnsureAuthenticated, router);
+    });
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
+    it('validates me api', async () => {
+        const testConversation = {
+            _id: 'testConvId',
+            serviceUrl: 'testServiceUrl',
+            tenantId: 'testTenantId',
+            meetingId: 'testMeetingId',
+        };
+
+        const testRole = 'testRole';
+
+        (<any>(
+            conversationDataService.getConversationData
+        )).mockImplementationOnce(() => {
+            return testConversation;
+        });
+
+        (<any>getParticipantRole).mockImplementationOnce(() => {
+            return testRole;
+        });
+
+        const result = await request(app).get(
+            `/api/conversations/${testConversation._id}/me`
+        );
+
+        expect(result).toBeDefined();
+        expect(result.text).toEqual(testRole);
+        expect(conversationDataService.getConversationData).toBeCalledTimes(1);
+        expect(conversationDataService.getConversationData).toBeCalledWith(
+            testConversation._id
+        );
+        expect(getParticipantRole).toBeCalledTimes(1);
+        expect(getParticipantRole).toBeCalledWith(
+            testConversation.meetingId,
+            testUserId,
+            testConversation.tenantId,
+            testConversation.serviceUrl
+        );
+    });
+
+    it('validates me api - getParticipantRole throws error', async () => {
+        const testConversation = {
+            _id: 'testConvId',
+            serviceUrl: 'testServiceUrl',
+            tenantId: 'testTenantId',
+            meetingId: 'testMeetingId',
+        };
+
+        const testError = new Error('test error');
+
+        (<any>(
+            conversationDataService.getConversationData
+        )).mockImplementationOnce(() => {
+            return testConversation;
+        });
+
+        (<any>getParticipantRole).mockImplementationOnce(() => {
+            throw testError;
+        });
+
+        const result = await request(app).get(
+            `/api/conversations/${testConversation._id}/me`
+        );
+
+        expect(result).toBeDefined();
+        expect(result.text).toEqual(testError.message);
+        expect(conversationDataService.getConversationData).toBeCalledTimes(1);
+        expect(conversationDataService.getConversationData).toBeCalledWith(
+            testConversation._id
+        );
+        expect(getParticipantRole).toBeCalledTimes(1);
+        expect(getParticipantRole).toBeCalledWith(
+            testConversation.meetingId,
+            testUserId,
+            testConversation.tenantId,
+            testConversation.serviceUrl
+        );
+    });
+
+    it('validates me api - meeting id not associated with conversation', async () => {
+        const testConversation = {
+            _id: 'testConvId',
+            serviceUrl: 'testServiceUrl',
+            tenantId: 'testTenantId',
+        };
+
+        (<any>(
+            conversationDataService.getConversationData
+        )).mockImplementationOnce(() => {
+            return testConversation;
+        });
+
+        const result = await request(app).get(
+            `/api/conversations/${testConversation._id}/me`
+        );
+
+        expect(result).toBeDefined();
+        expect(result.text).toEqual(
+            `meeting does not exist for provided conversation id ${testConversation._id}`
+        );
+        expect(conversationDataService.getConversationData).toBeCalledTimes(1);
+        expect(conversationDataService.getConversationData).toBeCalledWith(
+            testConversation._id
+        );
+    });
+
+    it('validates me api - getParticipantRole throws error', async () => {
+        const testConversation = {
+            _id: 'testConvId',
+            serviceUrl: 'testServiceUrl',
+            tenantId: 'testTenantId',
+            meetingId: 'testMeetingId',
+        };
+
+        const testError = new Error('test error');
+
+        (<any>(
+            conversationDataService.getConversationData
+        )).mockImplementationOnce(() => {
+            throw testError;
+        });
+
+        const result = await request(app).get(
+            `/api/conversations/${testConversation._id}/me`
+        );
+
+        expect(result).toBeDefined();
+        expect(result.text).toEqual(testError.message);
+        expect(conversationDataService.getConversationData).toBeCalledTimes(1);
+        expect(conversationDataService.getConversationData).toBeCalledWith(
+            testConversation._id
         );
     });
 });

@@ -87,7 +87,8 @@ export class AskAway extends TeamsActivityHandler {
                         await conversationDataService.createConversationData(
                             activity.conversation.id,
                             activity.serviceUrl,
-                            activity.conversation.tenantId
+                            activity.conversation.tenantId,
+                            activity.channelData?.meeting?.id
                         );
                     }
                 }
