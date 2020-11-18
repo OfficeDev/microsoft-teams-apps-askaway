@@ -146,7 +146,7 @@ class QnASessionDataService {
 
     if (!result) throw new Error("QnA Session record not found");
 
-    if (result.conversationId !== conversationId) {
+    if (result.conversationId.split(";")[0] !== conversationId.split(";")[0]) {
       throw new Error(
         `session ${qnaTeamsSessionId} does not belong to conversation ${conversationId}`
       );
