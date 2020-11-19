@@ -39,7 +39,50 @@
         top: 67%;
         position: absolute;
     }
-    .success-caption {
-        top: 44%;
+}
+.meeting-panel {
+    .sidepanel-form {
+        display: flex;
+        flex-direction: column;
+        .form-grid {
+            margin-top: 0.5rem;
+            span {
+                font-size: 12px;
+                line-height: 16px;
+                color: #c8c6c4;
+            }
+            .btn-create-session {
+                display: flex;
+                font-size: 14px;
+                line-height: 20px;
+                text-align: center;
+                span {
+                    color: #fff;
+                }
+            }
+        }
+        .ui-input,
+        .ui-textarea {
+            margin-top: 0.25rem;
+            font-size: 14px;
+        }
+    }
+    .no-question {
+        .text-caption-panel {
+            font-size: 12px;
+            line-height: 16px;
+            color: #ffffff;
+            top: 52%;
+            position: absolute;
+            text-align: center;
+            width: 70%;
+            left: 17%;
+        }
+        .icon2 {
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            position: absolute;
+        }
     }
 }

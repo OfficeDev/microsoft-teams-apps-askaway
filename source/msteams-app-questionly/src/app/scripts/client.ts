@@ -2,4 +2,3 @@
 export * from './askAwayTab/AskAwayTab';
 export * from './askAwayTab/AskAwayTabConfig';
 export * from './askAwayTab/AskAwayTabRemove';
-export * from './askAwayTab/AskAwayTabSuccessModel';
