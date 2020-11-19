@@ -24,8 +24,12 @@ export interface IAskAwayTabState extends ITeamsBaseComponentState {
     name?: string;
     error?: string;
     token?: string;
-    teamContext: microsoftTeams.Context | null;
+    channelId?: string;
+    chatId?: string;
+    userId?: string;
+    meetingId?: string;
     theme: any;
+    teamContext: microsoftTeams.Context | null;
     frameContext?: string;
 }
 /**
@@ -184,6 +188,10 @@ export class AskAwayTab extends msteamsReactBaseComponent<
                         this.setState({ name: decoded!.name });
                         microsoftTeams.appInitialization.notifySuccess();
                         this.setState({ token: token });
+                        this.setState({ channelId: context.channelId });
+                        this.setState({ chatId: context.chatId });
+                        this.setState({ userId: context.userObjectId });
+                        this.setState({ meetingId: context['meetingId'] });
                     },
                     failureCallback: (message: string) => {
                         this.setState({ error: message });

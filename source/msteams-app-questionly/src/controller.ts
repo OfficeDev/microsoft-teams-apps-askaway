@@ -2,12 +2,15 @@
 import * as adaptiveCardBuilder from 'src/adaptive-cards/adaptiveCardBuilder'; // To populate adaptive cards
 import { ok, err, Result } from 'src/util/resultWrapper';
 import { AdaptiveCard } from 'adaptivecards';
-import { IQuestion, IQuestionPopulatedUser } from 'src/data/schemas/question';
 import { exceptionLogger } from 'src/util/exceptionTracking';
 import jimp from 'jimp';
 import { join } from 'path';
-import { qnaSessionDataService } from './data/services/qnaSessionDataService';
-import { questionDataService } from './data/services/questionDataService';
+import {
+    IQuestion,
+    IQuestionPopulatedUser,
+    qnaSessionDataService,
+    questionDataService,
+} from 'msteams-app-questionly.data';
 
 export const getMainCard = adaptiveCardBuilder.getMainCard;
 export const getStartQnACard = adaptiveCardBuilder.getStartQnACard;
@@ -163,20 +166,23 @@ export const getNewQuestionCard = (qnaSessionId: string): AdaptiveCard => {
  * @param userAadObjId - AAD Obj ID of the current user
  * @param userName - name of the user
  * @param questionContent - question content asked by the user
+ * @param conversationId - conversation id.
  * @returns Returns ok object if successful, otherwise returns error
  */
 export const submitNewQuestion = async (
     qnaSessionId: string,
     userAadObjId: string,
     userName: string,
-    questionContent: string
+    questionContent: string,
+    conversationId: string
 ): Promise<Result<boolean, Error>> => {
     try {
         await questionDataService.createQuestion(
             qnaSessionId,
             <string>userAadObjId,
             userName,
-            questionContent
+            questionContent,
+            conversationId
         );
 
         return ok(true);
@@ -264,11 +270,13 @@ export const getEndQnAConfirmationCard = (
  * Communicates with database to end the QnA and retrieves details
  * @param qnaSessionId - id of the current QnA session
  * @param aadObjectId - aadObjectId of the user attempting to end the QnA session
+ * @param conversationId - conversation id
  * @returns Ok object with updated Master Card
  */
 export const endQnASession = async (
     qnaSessionId: string,
-    aadObjectId: string
+    aadObjectId: string,
+    conversationId: string
 ): Promise<Result<{ card: AdaptiveCard; activityId: string }, Error>> => {
     try {
         const isActive = await qnaSessionDataService.isActiveQnA(qnaSessionId);
@@ -280,7 +288,7 @@ export const endQnASession = async (
         if (!isActive) return err(Error('The QnA session has already ended'));
         if (!isHost)
             return err(Error('Insufficient permissions to end QnA session'));
-        await qnaSessionDataService.endQnASession(qnaSessionId);
+        await qnaSessionDataService.endQnASession(qnaSessionId, conversationId);
 
         const updatedMainCard = await getUpdatedMainCard(qnaSessionId, true);
 

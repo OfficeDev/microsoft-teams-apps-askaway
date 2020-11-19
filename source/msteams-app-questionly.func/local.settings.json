@@ -10,7 +10,10 @@
     "TenantId": "{{TenantId}}",
     "AzureSignalRConnectionString": "{{AzureSignalRConnectionString}}",
     "MicrosoftAppId": "{{MicrosoftAppId}}",
-    "MicrosoftAppPassword": "{{MicrosoftAppPassword}}"
+    "MicrosoftAppPassword": "{{MicrosoftAppPassword}}",
+    "MongoDbUri": "{{MongoDbUri}}",
+    "AppId": "{{ManifestAppId}}",
+    "NotificationBubblePageUrl": "{{NotificationBubblePageUrl}}"
   },
   "Host": {
     "LocalHttpPort": 7071,

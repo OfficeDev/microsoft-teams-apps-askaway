@@ -13,6 +13,7 @@ import {
 } from 'src/Controller';
 import { ok, err } from 'src/util/resultWrapper';
 import { errorStrings, initLocalization } from 'src/localization/locale';
+import { ConversationDataService } from 'msteams-app-questionly.data';
 
 jest.mock('src/controller');
 
@@ -21,7 +22,7 @@ beforeAll(async () => {
 });
 
 test('config configured properly', async () => {
-    const handler = <any>new AskAway();
+    const handler = <any>new AskAway(new ConversationDataService());
 
     expect(typeof handler._config.updateMainCardDebounceTimeInterval).toBe(
         'number'
@@ -37,7 +38,7 @@ describe('teams task module fetch', () => {
     let context;
 
     beforeEach(() => {
-        handler = <any>new AskAway();
+        handler = <any>new AskAway(new ConversationDataService());
         handler.handleTeamsTaskModuleFetchViewLeaderboard = jest.fn();
         handler.handleTeamsTaskModuleFetchAskQuestion = jest.fn();
         handler.handleTeamsTaskModuleFetchError = jest.fn();
@@ -115,7 +116,7 @@ describe('teams task module submit', () => {
     let context;
 
     beforeEach(() => {
-        handler = <any>new AskAway();
+        handler = <any>new AskAway(new ConversationDataService());
         handler.handleTeamsTaskModuleSubmitQuestion = jest.fn();
         handler.handleTeamsTaskModuleSubmitUpvote = jest.fn();
         handler.handleTeamsTaskModuleSubmitConfirmEndQnA = jest.fn();
@@ -275,7 +276,7 @@ describe('handle submit question', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        handler = <any>new AskAway();
+        handler = <any>new AskAway(new ConversationDataService());
         handler.handleTeamsTaskModuleResubmitQuestion = jest.fn();
         handler._updateMainCard = jest.fn();
         context = {
@@ -321,7 +322,8 @@ describe('handle submit question', () => {
             taskModuleRequest.data.qnaSessionId,
             user.aadObjectId,
             user.name,
-            taskModuleRequest.data.usertext
+            taskModuleRequest.data.usertext,
+            context.activity.conversation.id
         );
         expect(handler._updateMainCard).toBeCalledTimes(1);
     });
@@ -392,7 +394,7 @@ describe('handle submit question', () => {
 });
 
 test('handle submit upvote', async () => {
-    const handler = <any>new AskAway();
+    const handler = <any>new AskAway(new ConversationDataService());
     handler.handleTeamsTaskModuleResubmitQuestion = jest.fn();
     handler._updateMainCard = jest.fn();
     handler._buildTaskModuleContinueResponse = jest.fn();
@@ -430,7 +432,7 @@ test('handle submit upvote', async () => {
 });
 
 test('handle submit end qna', async () => {
-    const handler = <any>new AskAway();
+    const handler = <any>new AskAway(new ConversationDataService());
     handler.handleTeamsTaskModuleResubmitQuestion = jest.fn();
     handler._updateMainCard = jest.fn();
     handler._buildTaskModuleContinueResponse = jest.fn();
@@ -461,13 +463,14 @@ test('handle submit end qna', async () => {
     expect(endQnASession).toBeCalledTimes(1);
     expect(endQnASession).toBeCalledWith(
         taskModuleRequest.data.qnaSessionId,
-        context.activity.from.aadObjectId
+        context.activity.from.aadObjectId,
+        context.activity.conversation.id
     );
     expect(context.updateActivity).toBeCalledTimes(1);
 });
 
 test('bot message preview send', async () => {
-    const handler = <any>new AskAway();
+    const handler = <any>new AskAway(new ConversationDataService());
     handler._extractMainCardFromActivityPreview = jest.fn(() => ok(cardData));
     const context = {
         activity: {
@@ -522,7 +525,7 @@ describe('messaging extension submit', () => {
     let handler, context;
 
     beforeEach(() => {
-        handler = <any>new AskAway();
+        handler = <any>new AskAway(new ConversationDataService());
         context = {
             activity: {
                 from: {
@@ -608,7 +611,7 @@ describe('messaging extension submit', () => {
 test('different session id calls different update master card function', () => {
     process.env.UpdateMainCardDebounceTimeInterval = '1000'; // milliseconds
     process.env.UpdateMainCardPostDebounceTimeInterval = '50';
-    const handler = <any>new AskAway();
+    const handler = <any>new AskAway(new ConversationDataService());
     const context = {
         activity: {
             from: {

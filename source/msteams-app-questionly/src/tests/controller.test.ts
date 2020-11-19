@@ -16,8 +16,10 @@ import {
     isActiveQnA,
 } from 'src/controller';
 import * as acb from 'src/adaptive-cards/adaptiveCardBuilder';
-import { qnaSessionDataService } from 'src/data/services/qnaSessionDataService';
-import { questionDataService } from 'src/data/services/questionDataService';
+import {
+    qnaSessionDataService,
+    questionDataService,
+} from 'msteams-app-questionly.data';
 
 const sampleUserAADObjId1 = 'be36140g-9729-3024-8yg1-147bbi67g2c9';
 const sampleUserName = 'Sample Name';
@@ -34,7 +36,7 @@ const sampleQuestionId = '2321232';
 const sampleHostUserId = '5f160b862655575054393a0e';
 
 jest.mock('../adaptive-cards/adaptiveCardBuilder');
-jest.mock('../data/database');
+jest.mock('msteams-app-questionly.data');
 
 beforeEach(() => {
     process.env.debugMode = 'true';
@@ -187,14 +189,16 @@ test('submit new question', async () => {
         sampleQnASessionId,
         sampleUserAADObjId1,
         sampleUserName,
-        sampleQuestionContent
+        sampleQuestionContent,
+        sampleConversationId
     );
     expect(questionDataService.createQuestion).toBeCalledTimes(1);
     expect(questionDataService.createQuestion).toBeCalledWith(
         sampleQnASessionId,
         sampleUserAADObjId1,
         sampleUserName,
-        sampleQuestionContent
+        sampleQuestionContent,
+        sampleConversationId
     );
 });
 
@@ -251,7 +255,11 @@ test('get end qna confirmation card', async () => {
 });
 
 test('end ama session', async () => {
-    await endQnASession(sampleQnASessionId, sampleUserAADObjId1);
+    await endQnASession(
+        sampleQnASessionId,
+        sampleUserAADObjId1,
+        sampleConversationId
+    );
     expect(qnaSessionDataService.isActiveQnA).toBeCalledTimes(1);
     expect(qnaSessionDataService.isActiveQnA).toBeCalledWith(
         sampleQnASessionId

@@ -9,7 +9,7 @@ const getMockLogger = (): Logger => {
   return logger;
 };
 
-export const mockContext: Context = {
+export const triggerMockContext: Context = {
   bindings: {},
   bindingData: {},
   bindingDefinitions: [],
@@ -18,6 +18,32 @@ export const mockContext: Context = {
   executionContext: {
     invocationId: null,
     functionName: "httpTrigger",
+    functionDirectory: null,
+  },
+  traceContext: null,
+  res: {
+    status: 200,
+    body: {},
+    json: jest.fn(),
+  },
+  done: jest.fn(),
+};
+
+const sampleConversationId = "sampleConversationId";
+
+export const activityMockContext: Context = {
+  bindings: {
+    name: {
+      conversationId: sampleConversationId,
+    },
+  },
+  bindingData: {},
+  bindingDefinitions: [],
+  log: getMockLogger(),
+  invocationId: null,
+  executionContext: {
+    invocationId: null,
+    functionName: "activityTrigger",
     functionDirectory: null,
   },
   traceContext: null,

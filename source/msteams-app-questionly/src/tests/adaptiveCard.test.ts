@@ -21,14 +21,13 @@ import {
     mainCardStrings,
 } from 'src/localization/locale';
 import { IAdaptiveCard } from 'adaptivecards/lib/schema';
-import { IQuestionPopulatedUser } from 'src/Data/Schemas/Question';
-import { IUser } from 'src/data/schemas/user';
 import { extractMainCardData } from 'src/adaptive-cards/mainCard';
 import random from 'random';
 import seedrandom from 'seedrandom';
 import * as jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { initKeyVault } from 'src/util/keyvault';
+import { IQuestionPopulatedUser, IUser } from 'msteams-app-questionly.data';
 
 const sampleUserAADObjId1 = 'be36140g-9729-3024-8yg1-147bbi67g2c9';
 const sampleQnASessionID = '5f160b862655575054393a0e';
@@ -561,7 +560,6 @@ describe('main card', () => {
                     type: 'TextBlock',
                     text: mainCardStrings('noQuestions'),
                     color: 'accent',
-                    $when: true,
                 },
             ],
             wrap: true,

@@ -14,14 +14,17 @@
     "axios": "^0.20.0",
     "azure-ad-jwt-lite": "^1.1.0",
     "botbuilder": "^4.10.4",
+    "durable-functions": "^1.4.4",
     "moment": "^2.29.1"
   },
   "devDependencies": {
     "@azure/functions": "^1.0.2-beta2",
     "@types/jest": "^24.9.1",
     "@types/jsonwebtoken": "^8.5.0",
+    "@types/mongoose": "^5.7.37",
     "@types/node": "^14.11.8",
     "jest": "^26.6.0",
+    "mongoose": "^5.10.12",
     "typescript": "^3.9.7",
     "ts-jest": "^26.4.1"
   }

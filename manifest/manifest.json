@@ -1,14 +1,14 @@
 {
   "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.6/MicrosoftTeams.schema.json",
   "manifestVersion": "1.6",
-  "id": "3760bd95-daa7-45e7-b7fa-ebc6fe2e9ec4",
+  "id": "{{MicrosoftAppId}}",
   "version": "{{Version}}",
   "packageName": "{{BotDisplayName}}",
   "developer": {
     "name": "{{Company}}",
-    "websiteUrl": "https://76f5d4c9fd8a.ngrok.io",
-    "privacyUrl": "https://76f5d4c9fd8a.ngrok.io/privacy.html",
-    "termsOfUseUrl": "https://76f5d4c9fd8a.ngrok.io/tou.html"
+    "websiteUrl": "https://{{HostName}}",
+    "privacyUrl": "https://{{HostName}}/privacy.html",
+    "termsOfUseUrl": "https://{{HostName}}/tou.html"
   },
   "name": {
     "short": "Ask Away",
@@ -25,15 +25,15 @@
   "accentColor": "#F9F9FA",
   "configurableTabs": [
     {
-      "configurationUrl": "https://76f5d4c9fd8a.ngrok.io/askAwayTab/config.html",
+      "configurationUrl": "https://{{HostName}}/askAwayTab/config.html",
       "canUpdateConfiguration": true,
-      "scopes": ["team", "groupchat"]
+      "scopes": ["groupchat"]
     }
   ],
   "staticTabs": [],
   "bots": [
     {
-      "botId": "3760bd95-daa7-45e7-b7fa-ebc6fe2e9ec4",
+      "botId": "{{MicrosoftAppId}}",
       "needsChannelSelector": true,
       "isNotificationOnly": false,
       "scopes": ["team", "groupchat"]
@@ -42,7 +42,7 @@
   "connectors": [],
   "composeExtensions": [
     {
-      "botId": "3760bd95-daa7-45e7-b7fa-ebc6fe2e9ec4",
+      "botId": "{{MicrosoftAppId}}",
       "canUpdateConfiguration": true,
       "commands": [
         {
@@ -57,10 +57,10 @@
     }
   ],
   "webApplicationInfo": {
-    "id": "3760bd95-daa7-45e7-b7fa-ebc6fe2e9ec4",
-    "resource": "api://76f5d4c9fd8a.ngrok.io/3760bd95-daa7-45e7-b7fa-ebc6fe2e9ec4"
+    "id": "{{MicrosoftAppId}}",
+    "resource": "api://{{HostName}}/{{MicrosoftAppId}}"
   },
   "permissions": ["identity", "messageTeamMembers"],
-  "validDomains": ["*.ngrok.io"],
+  "validDomains": ["{{HostName}}"],
   "showLoadingIndicator": false
 }

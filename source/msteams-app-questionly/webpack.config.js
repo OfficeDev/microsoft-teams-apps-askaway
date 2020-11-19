@@ -56,6 +56,9 @@ var config = [
                 },
             ],
         },
+        optimization: {
+            minimize: false
+        },
         plugins: [
             new copyWebpackPlugin({
                 patterns: [

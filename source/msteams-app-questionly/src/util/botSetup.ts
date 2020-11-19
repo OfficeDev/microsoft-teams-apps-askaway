@@ -9,18 +9,21 @@ import { AskAway } from 'src/askAway';
 import { exceptionLogger } from 'src/util/exceptionTracking';
 import { generateInitialsImage } from 'src/controller';
 import { getAvatarKey, getMicrosoftAppPassword } from 'src/util/keyvault';
-import { ifNumber } from 'src/util/retryPolicies';
 import { requestPolicyHelper } from 'src/util/requestPolicyHelper';
 import { USER_AGENT } from 'botbuilder/lib/botFrameworkAdapter';
+import { ifNumber } from 'src/util/typeUtility';
+import { IConversationDataService } from 'msteams-app-questionly.data';
 
 interface AvatarRequest {
     initials: string;
     index: number;
 }
 
-const bot: ActivityHandler = new AskAway();
-
-const setupBotAdapterAndRouting = async (app: ExpressType) => {
+const setupBotAdapterAndRouting = async (
+    app: ExpressType,
+    conversationDataService: IConversationDataService
+) => {
+    const bot: ActivityHandler = new AskAway(conversationDataService);
     const adapter = new BotFrameworkAdapter({
         appId: process.env.MicrosoftAppId,
         appPassword: await getMicrosoftAppPassword(),
@@ -98,8 +101,11 @@ const setupAvtarKeyEndpoint = (app: ExpressType) => {
     });
 };
 
-export const setupBot = async (app: ExpressType) => {
+export const setupBot = async (
+    app: ExpressType,
+    conversationDataService: IConversationDataService
+) => {
     setupConnectorClient();
-    await setupBotAdapterAndRouting(app);
+    await setupBotAdapterAndRouting(app, conversationDataService);
     setupAvtarKeyEndpoint(app);
 };
