@@ -59,9 +59,9 @@ export class MeetingPanel extends React.Component<
                     styles={{ display: 'flex', flexDirection: 'column' }}
                 >
                     <div className="form-grid">
-                        <Text content="Title name" size="small" />
+                        <Text content="Title" size="small" />
                         <Input
-                            label="Title"
+                            label=""
                             as="div"
                             fluid
                             placeholder="Type a name"
@@ -73,11 +73,11 @@ export class MeetingPanel extends React.Component<
                     </div>
                     <div className="form-grid">
                         <FlexItem push>
-                            <Button
-                                className="btn-create-session"
-                                size="small"
-                                content="Create a new session"
-                            />
+                            <Button className="btn-create-session" size="small">
+                                <Button.Content>
+                                    Create a new session
+                                </Button.Content>
+                            </Button>
                         </FlexItem>
                     </div>
                 </Form>
