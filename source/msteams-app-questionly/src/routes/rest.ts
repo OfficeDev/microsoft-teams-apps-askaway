@@ -5,10 +5,11 @@ import {
     qnaSessionDataService,
     IUser,
     questionDataService,
+    IQnASession_populated,
 } from 'msteams-app-questionly.data';
 import { exceptionLogger } from 'src/util/exceptionTracking';
 import {
-    getAllQnASesssionsDataForTab,
+    processQnASesssionsDataForMeetingTab,
     getParticipantRole,
     isPresenterOrOrganizer,
 } from 'src/routes/restUtils';
@@ -38,11 +39,16 @@ router.get('/:conversationId/sessions/:sessionId', async (req, res) => {
 router.get('/:conversationId/sessions', async (req, res) => {
     let qnaSessionResponse;
     try {
-        qnaSessionResponse = await getAllQnASesssionsDataForTab(
+        const qnaSessionsData: IQnASession_populated[] = await qnaSessionDataService.getAllQnASessionData(
             req.params['conversationId']
         );
-        if (qnaSessionResponse.length === 0) {
+        if (qnaSessionsData.length === 0) {
             res.statusCode = 204;
+            qnaSessionResponse = [];
+        } else {
+            qnaSessionResponse = await processQnASesssionsDataForMeetingTab(
+                qnaSessionsData
+            );
         }
     } catch (err) {
         exceptionLogger(err);
@@ -334,3 +340,26 @@ router.patch(
         res.send();
     }
 );
+
+// Get all active ama sessions
+router.get('/:conversationId/activesessions', async (req, res) => {
+    let response;
+    try {
+        const activeSessions: IQnASession_populated[] = await qnaSessionDataService.getAllActiveQnASessionData(
+            req.params['conversationId']
+        );
+        if (activeSessions.length === 0) {
+            res.statusCode = 204;
+            response = [];
+        } else {
+            response = await processQnASesssionsDataForMeetingTab(
+                activeSessions
+            );
+        }
+    } catch (error) {
+        exceptionLogger(error);
+        res.statusCode = 500;
+        res.send(error);
+    }
+    res.send(response);
+});
