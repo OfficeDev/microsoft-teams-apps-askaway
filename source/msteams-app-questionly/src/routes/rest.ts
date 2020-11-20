@@ -44,7 +44,6 @@ router.get('/:conversationId/sessions', async (req, res) => {
         );
         if (qnaSessionsData.length === 0) {
             res.statusCode = 204;
-            qnaSessionResponse = [];
         } else {
             qnaSessionResponse = await processQnASesssionsDataForMeetingTab(
                 qnaSessionsData
@@ -350,7 +349,6 @@ router.get('/:conversationId/activesessions', async (req, res) => {
         );
         if (activeSessions.length === 0) {
             res.statusCode = 204;
-            response = [];
         } else {
             response = await processQnASesssionsDataForMeetingTab(
                 activeSessions

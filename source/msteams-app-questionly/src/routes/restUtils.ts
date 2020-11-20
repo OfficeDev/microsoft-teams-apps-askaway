@@ -1,7 +1,6 @@
 import {
     IQnASession_populated,
     IQuestionPopulatedUser,
-    qnaSessionDataService,
     questionDataService,
     userDataService,
 } from 'msteams-app-questionly.data';
@@ -11,6 +10,10 @@ import axios from 'axios';
 import { getMicrosoftAppPassword } from 'src/util/keyvault';
 import { organizer, presenter } from 'src/constants/restConstants';
 
+/**
+ * Gets questions data and user data for each active qna sessions, process them and returns an array of detailed qna sessions.
+ * @param qnaSessionDataArray - Array of qna sessions data
+ */
 export const processQnASesssionsDataForMeetingTab = async (
     qnaSessionDataArray: IQnASession_populated[]
 ) => {
