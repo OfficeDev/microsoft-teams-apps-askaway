@@ -97,11 +97,7 @@ router.post(
             const user: IUser = <IUser>req.user;
             const questionContent: string = req.body.questionContent;
 
-            if (
-                questionContent === undefined ||
-                questionContent === null ||
-                questionContent === ''
-            ) {
+            if (!isDefined(questionContent)) {
                 res.statusCode = 400;
                 res.send('questionContent is missing in the request');
                 return;
@@ -125,6 +121,60 @@ router.post(
         res.send(response);
     }
 );
+
+// Update ama session
+router.patch('/:conversationId/sessions/:sessionId', async (req, res) => {
+    try {
+        const action: string = req.body.action;
+
+        if (!isDefined(action)) {
+            res.statusCode = 400;
+            res.send('patch action is missing in the request');
+            return;
+        }
+
+        const user: IUser = <IUser>req.user;
+        const sessionId: string = req.params['sessionId'];
+        const conversationId: string = req.params['conversationId'];
+
+        if (action === 'close') {
+            const conversationData: IConversation = await conversationDataService.getConversationData(
+                conversationId
+            );
+
+            if (
+                conversationData.meetingId !== undefined &&
+                isPresenterOrOrganizer(
+                    conversationData.meetingId,
+                    user._id,
+                    conversationData.tenantId,
+                    conversationData.serviceUrl
+                )
+            ) {
+                await qnaSessionDataService.endQnASession(
+                    sessionId,
+                    conversationId
+                );
+            } else {
+                res.statusCode = 403;
+                return res.send(
+                    'Only a Presenter or an Organizer can update session.'
+                );
+            }
+        } else {
+            res.statusCode = 400;
+            return res.send(`action ${action} is not supported`);
+        }
+    } catch (err) {
+        exceptionLogger(err);
+        res.statusCode = 500;
+        res.send(err.message);
+        return;
+    }
+
+    res.statusCode = 204;
+    res.send();
+});
 
 // Create a new qna session
 router.post('/:conversationId/sessions', async (req, res) => {

@@ -1029,3 +1029,265 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
         );
     });
 });
+
+describe('test /conversations/:conversationId/sessions/:sessionId patch api', () => {
+    beforeAll(() => {
+        app = Express();
+
+        app.use(
+            Express.json({
+                verify: (req, res, buf: Buffer): void => {
+                    (<any>req).rawBody = buf.toString();
+                },
+            })
+        );
+
+        app.use(Express.urlencoded({ extended: true }));
+
+        const mockEnsureAuthenticated = (req, res, next) => {
+            req.user = {
+                _id: testUserId,
+                userName: testUserName,
+            };
+            next();
+        };
+
+        (<any>qnaSessionDataService.endQnASession) = jest.fn();
+        (<any>isPresenterOrOrganizer) = jest.fn();
+        (<any>conversationDataService.getConversationData) = jest.fn();
+
+        // Rest endpoints
+        app.use('/api/conversations', mockEnsureAuthenticated, router);
+    });
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
+    it('patch action is missing in request', async () => {
+        const testSessionId = 'testId';
+        const sampleConversationId = '1';
+
+        const result = await request(app).patch(
+            `/api/conversations/${sampleConversationId}/sessions/${testSessionId}`
+        );
+
+        expect(result.status).toBe(400);
+        expect(result.text).toEqual('patch action is missing in the request');
+    });
+
+    it('patch action as null in request', async () => {
+        const testSessionId = 'testId';
+        const sampleConversationId = '1';
+
+        const result = await request(app)
+            .patch(
+                `/api/conversations/${sampleConversationId}/sessions/${testSessionId}`
+            )
+            .send({ action: null });
+
+        expect(result.status).toBe(400);
+        expect(result.text).toEqual('patch action is missing in the request');
+    });
+
+    it('patch action as empty string in request', async () => {
+        const testSessionId = 'testId';
+        const sampleConversationId = '1';
+
+        const result = await request(app)
+            .patch(
+                `/api/conversations/${sampleConversationId}/sessions/${testSessionId}`
+            )
+            .send({ action: '' });
+
+        expect(result.status).toBe(400);
+        expect(result.text).toEqual('patch action is missing in the request');
+    });
+
+    it('invalid patch action in request', async () => {
+        const testSessionId = 'testId';
+        const sampleConversationId = '1';
+        const randomAction = 'randomaction';
+
+        const result = await request(app)
+            .patch(
+                `/api/conversations/${sampleConversationId}/sessions/${testSessionId}`
+            )
+            .send({ action: randomAction });
+
+        expect(result.status).toBe(400);
+        expect(result.text).toEqual(`action ${randomAction} is not supported`);
+    });
+
+    it('endQnASession api throws error', async () => {
+        const testSessionId = 'testId';
+        const sampleConversationId = '1';
+        const testError: Error = new Error('test error');
+
+        (<any>(
+            conversationDataService.getConversationData
+        )).mockImplementationOnce(() => {
+            return {
+                _id: sampleConversationId,
+                serviceUrl: sampleServiceUrl,
+                tenantId: sampleTenantId,
+                meetingId: sampleMeetingId,
+            };
+        });
+
+        (<any>isPresenterOrOrganizer).mockImplementationOnce(() => {
+            return true;
+        });
+
+        (<any>qnaSessionDataService.endQnASession).mockImplementationOnce(
+            () => {
+                throw testError;
+            }
+        );
+
+        const result = await request(app)
+            .patch(
+                `/api/conversations/${sampleConversationId}/sessions/${testSessionId}`
+            )
+            .send({ action: 'close' });
+
+        expect(result.status).toBe(500);
+        expect(result.text).toEqual(testError.message);
+        expect(qnaSessionDataService.endQnASession).toBeCalledTimes(1);
+        expect(qnaSessionDataService.endQnASession).toBeCalledWith(
+            testSessionId,
+            sampleConversationId
+        );
+        expect(isPresenterOrOrganizer).toBeCalledTimes(1);
+        expect(isPresenterOrOrganizer).toBeCalledWith(
+            sampleMeetingId,
+            testUserId,
+            sampleTenantId,
+            sampleServiceUrl
+        );
+        expect(
+            <any>conversationDataService.getConversationData
+        ).toBeCalledTimes(1);
+        expect(<any>conversationDataService.getConversationData).toBeCalledWith(
+            sampleConversationId
+        );
+    });
+
+    it('getConversationData api throws error', async () => {
+        const testSessionId = 'testId';
+        const sampleConversationId = '1';
+        const testError: Error = new Error('test error');
+
+        (<any>(
+            conversationDataService.getConversationData
+        )).mockImplementationOnce(() => {
+            throw testError;
+        });
+
+        const result = await request(app)
+            .patch(
+                `/api/conversations/${sampleConversationId}/sessions/${testSessionId}`
+            )
+            .send({ action: 'close' });
+
+        expect(result.status).toBe(500);
+        expect(result.text).toEqual(testError.message);
+        expect(
+            <any>conversationDataService.getConversationData
+        ).toBeCalledTimes(1);
+        expect(<any>conversationDataService.getConversationData).toBeCalledWith(
+            sampleConversationId
+        );
+    });
+
+    it('user is not presenter or organizer', async () => {
+        const testSessionId = 'testId';
+        const sampleConversationId = '1';
+
+        (<any>(
+            conversationDataService.getConversationData
+        )).mockImplementationOnce(() => {
+            return {
+                _id: sampleConversationId,
+                serviceUrl: sampleServiceUrl,
+                tenantId: sampleTenantId,
+                meetingId: sampleMeetingId,
+            };
+        });
+
+        (<any>isPresenterOrOrganizer).mockImplementationOnce(() => {
+            return false;
+        });
+
+        const result = await request(app)
+            .patch(
+                `/api/conversations/${sampleConversationId}/sessions/${testSessionId}`
+            )
+            .send({ action: 'close' });
+
+        expect(result.status).toBe(400);
+        expect(result.text).toEqual(
+            'Only a Presenter or an Organizer can update session.'
+        );
+        expect(isPresenterOrOrganizer).toBeCalledTimes(1);
+        expect(isPresenterOrOrganizer).toBeCalledWith(
+            sampleMeetingId,
+            testUserId,
+            sampleTenantId,
+            sampleServiceUrl
+        );
+        expect(
+            <any>conversationDataService.getConversationData
+        ).toBeCalledTimes(1);
+        expect(<any>conversationDataService.getConversationData).toBeCalledWith(
+            sampleConversationId
+        );
+    });
+
+    it('close session action', async () => {
+        const testSessionId = 'testId';
+        const sampleConversationId = '1';
+
+        (<any>(
+            conversationDataService.getConversationData
+        )).mockImplementationOnce(() => {
+            return {
+                _id: sampleConversationId,
+                serviceUrl: sampleServiceUrl,
+                tenantId: sampleTenantId,
+                meetingId: sampleMeetingId,
+            };
+        });
+
+        (<any>isPresenterOrOrganizer).mockImplementationOnce(() => {
+            return true;
+        });
+
+        const result = await request(app)
+            .patch(
+                `/api/conversations/${sampleConversationId}/sessions/${testSessionId}`
+            )
+            .send({ action: 'close' });
+
+        expect(result.status).toBe(204);
+        expect(result.noContent).toBeTruthy();
+        expect(qnaSessionDataService.endQnASession).toBeCalledTimes(1);
+        expect(qnaSessionDataService.endQnASession).toBeCalledWith(
+            testSessionId,
+            sampleConversationId
+        );
+        expect(isPresenterOrOrganizer).toBeCalledTimes(1);
+        expect(isPresenterOrOrganizer).toBeCalledWith(
+            sampleMeetingId,
+            testUserId,
+            sampleTenantId,
+            sampleServiceUrl
+        );
+        expect(
+            <any>conversationDataService.getConversationData
+        ).toBeCalledTimes(1);
+        expect(<any>conversationDataService.getConversationData).toBeCalledWith(
+            sampleConversationId
+        );
+    });
+});
