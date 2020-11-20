@@ -24,11 +24,16 @@ const QuestionSchema = new mongoose.Schema({
     type: Date,
     default: () => new Date(),
   },
+  isAnswered: {
+    type: Boolean,
+    required: true,
+  },
 });
 
 interface IQuestionBase extends mongoose.Document {
   content: string;
   dateTimeCreated: Date;
+  isAnswered: Boolean;
 }
 
 /**

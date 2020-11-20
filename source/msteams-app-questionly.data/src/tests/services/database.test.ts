@@ -177,6 +177,7 @@ test("retrieve most recent/top questions with three questions", async () => {
       qnaSessionId: testQnASession._id,
       userId: testUser._id,
       content: "This is test question 1",
+      isAnswered: false,
       voters: [
         {
           _id: "456",
@@ -192,12 +193,14 @@ test("retrieve most recent/top questions with three questions", async () => {
       qnaSessionId: testQnASession._id,
       userId: testUser._id,
       content: "This is test question 2",
+      isAnswered: false,
       voters: [],
     },
     {
       qnaSessionId: testQnASession._id,
       userId: testUser._id,
       content: "This is test question 3",
+      isAnswered: false,
       voters: [
         {
           _id: "456",
@@ -246,18 +249,21 @@ test("retrieve most top questions with no votes should be most recent questions"
       qnaSessionId: testQnASession._id,
       userId: testUser._id,
       content: "This is test question 1",
+      isAnswered: false,
       voters: [],
     },
     {
       qnaSessionId: testQnASession._id,
       userId: testUser._id,
       content: "This is test question 2",
+      isAnswered: false,
       voters: [],
     },
     {
       qnaSessionId: testQnASession._id,
       userId: testUser._id,
       content: "This is test question 3",
+      isAnswered: false,
       voters: [],
     },
   ];
@@ -295,6 +301,7 @@ test("retrieve most top questions with some votes should be most recent question
       qnaSessionId: testQnASession._id,
       userId: testUser._id,
       content: "This is test question 1",
+      isAnswered: false,
       voters: [
         {
           _id: "456",
@@ -306,12 +313,14 @@ test("retrieve most top questions with some votes should be most recent question
       qnaSessionId: testQnASession._id,
       userId: testUser._id,
       content: "This is test question 2",
+      isAnswered: false,
       voters: [],
     },
     {
       qnaSessionId: testQnASession._id,
       userId: testUser._id,
       content: "This is test question 3",
+      isAnswered: false,
       voters: [],
     },
   ];
@@ -368,12 +377,14 @@ test("retrieve question data in non-empty QnA", async () => {
       qnaSessionId: testQnASession._id,
       userId: testUser._id,
       content: "This is test question 1",
+      isAnswered: false,
       voters: [],
     }),
     new Question({
       qnaSessionId: testQnASession._id,
       userId: testUser._id,
       content: "This is test question 2",
+      isAnswered: false,
       voters: [],
     }),
   ];
@@ -489,6 +500,7 @@ test("upvote question that has not been upvoted yet with existing user", async (
     qnaSessionId: testQnASession._id,
     userId: testUser._id,
     content: "This is a question to test upvotes?",
+    isAnswered: false,
     voters: [],
   });
 
@@ -511,6 +523,7 @@ test("upvote question that has already been upvoted with existing user", async (
     qnaSessionId: testQnASession._id,
     userId: testUser._id,
     content: "This is a question to test upvotes?",
+    isAnswered: false,
     voters: [],
   });
 
@@ -546,6 +559,7 @@ test("upvote question with new user not in database", async () => {
     qnaSessionId: testQnASession._id,
     userId: testUser._id,
     content: "This is a question to test upvotes?",
+    isAnswered: false,
     voters: [],
   });
 

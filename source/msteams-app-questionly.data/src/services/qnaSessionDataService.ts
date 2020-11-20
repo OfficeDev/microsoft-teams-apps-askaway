@@ -193,6 +193,20 @@ class QnASessionDataService {
   }
 
   /**
+   * Fetch QnASession document by id
+   * @param qnaSessionId - document database id of the QnA session
+   */
+  public async getQnASession(
+    qnaSessionId: string
+  ): Promise<IQnASession | null> {
+    const result = await retryWrapper<IQnASession | null>(() =>
+      QnASession.findById(qnaSessionId).exec()
+    );
+
+    return result;
+  }
+
+  /**
    * Retrives all QnA sessions for a given conversation Id.
    * @param conversationId - the conversation id for which QnA session data has to be retrived.
    * @return - Array of QnA session data.
