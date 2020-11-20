@@ -7,6 +7,7 @@ import {
 } from "./../schemas/qnaSession";
 import { User } from "./../schemas/user";
 import { userDataService } from "./userDataService";
+import { QnASessionLimitExhausted } from "src/errors/qnaSessionLimitExhausted";
 
 class QnASessionDataService {
   private userDataService;
@@ -39,6 +40,19 @@ class QnASessionDataService {
     hostUserId: string,
     isChannel: boolean
   ): Promise<{ qnaSessionId: string; hostId: string }> {
+    if (process.env.NumberOfActiveAMASessions === undefined) {
+      throw new Error("Number of active sessions missing in the settings");
+    }
+    const currentActiveSessions = await this.getNumberOfActiveSessions(
+      conversationId
+    );
+    if (
+      currentActiveSessions >= Number(process.env.NumberOfActiveAMASessions)
+    ) {
+      throw new QnASessionLimitExhausted(
+        `Could not create a new QnA session. There are ${currentActiveSessions} active session(s) already.`
+      );
+    }
     await this.userDataService.getUserOrCreate(userAadObjId, userName);
 
     const qnaSession = new QnASession({
