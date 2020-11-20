@@ -160,7 +160,7 @@ class QnASessionDataService {
 
     if (!result) throw new Error("QnA Session record not found");
 
-    if (result.conversationId !== conversationId) {
+    if (result.conversationId.split(";")[0] !== conversationId.split(";")[0]) {
       throw new Error(
         `session ${qnaTeamsSessionId} does not belong to conversation ${conversationId}`
       );
@@ -204,6 +204,20 @@ class QnASessionDataService {
     if (!result) throw new Error("Result is empty");
 
     return result.isActive;
+  }
+
+  /**
+   * Fetch QnASession document by id
+   * @param qnaSessionId - document database id of the QnA session
+   */
+  public async getQnASession(
+    qnaSessionId: string
+  ): Promise<IQnASession | null> {
+    const result = await retryWrapper<IQnASession | null>(() =>
+      QnASession.findById(qnaSessionId).exec()
+    );
+
+    return result;
   }
 
   /**

@@ -46,6 +46,7 @@ export class QuestionDataService {
       qnaSessionId: qnaTeamsSessionId,
       userId: userAadObjId,
       content: questionContent,
+      isAnswered: false,
     });
 
     const savedSession: mongoose.MongooseDocument = await retryWrapper(
@@ -162,6 +163,133 @@ export class QuestionDataService {
 
       return question;
     }, new ExponentialBackOff());
+  }
+
+  /**
+   * Returns question corresponding to questionId if it belongs to given session and conversation.
+   * @param conversationId - conversation id corresponding to session.
+   * @param sessionId - The DBID of the session document.
+   * @param questionId - The DBID of the question document.
+   * @returns - question document.
+   * @throws - exception if question validation fails.
+   */
+  private async getAndValidateQuestion(
+    conversationId: string,
+    sessionId: string,
+    questionId: string
+  ): Promise<IQuestion> {
+    const session = await qnaSessionDataService.getQnASession(sessionId);
+
+    if (!session) {
+      throw new Error(`Invalid session id ${sessionId}`);
+    } else if (session.conversationId !== conversationId) {
+      throw new Error(
+        `session ${sessionId} does not belong to conversation ${conversationId}`
+      );
+    } else if (!session.isActive) {
+      throw new Error(`session ${sessionId} is not active`);
+    }
+
+    const question: IQuestion = await retryWrapper<IQuestion>(() =>
+      Question.findById(questionId)
+    );
+
+    if (!question) {
+      throw new Error(`Invalid question id ${questionId}`);
+    } else if (question.qnaSessionId.toString() !== sessionId) {
+      throw new Error(
+        `question ${questionId} does not belong to session ${sessionId}`
+      );
+    }
+
+    return question;
+  }
+
+  /**
+   * Adds the aadObjectId of the user upvoting the question to the 'voters' array of that question document if the user has not already upvoted the question.
+   * @param conversationId - conversation id corresponding to session.
+   * @param sessionId - The DBID of the session document.
+   * @param questionId - The DBID of the question document for the question being upvoted.
+   * @param aadObjectId - The aadObjectId of the user upvoting the question.
+   * @param name - The name of the user upvoting the question, used for creating a new User document if one doesn't exist.
+   * @throws - exception if question validation fails.
+   */
+  public async upVoteQuestion(
+    conversationId: string,
+    sessionId: string,
+    questionId: string,
+    aadObjectId: string,
+    name: string
+  ): Promise<void> {
+    const question: IQuestion = await this.getAndValidateQuestion(
+      conversationId,
+      sessionId,
+      questionId
+    );
+
+    if (question.userId.toString() === aadObjectId) {
+      throw new Error("User cannot upvote/ downvote own question");
+    }
+
+    if (!question.voters.includes(aadObjectId)) {
+      question.voters.push(aadObjectId);
+      await this.userDataService.getUserOrCreate(aadObjectId, name);
+      await retryWrapper(() => question.save(), new ExponentialBackOff());
+    }
+  }
+
+  /**
+   * Removes the aadObjectId of the user downvoting the question from the 'voters' array of that question document if the user has upvoted the question.
+   * @param conversationId - conversation id corresponding to session.
+   * @param sessionId - The DBID of the session document.
+   * @param questionId - The DBID of the question document for the question being upvoted.
+   * @param aadObjectId - The aadObjectId of the user upvoting the question.
+   * @throws - exception if question validation fails.
+   */
+  public async downVoteQuestion(
+    conversationId: string,
+    sessionId: string,
+    questionId: string,
+    aadObjectId: string
+  ): Promise<void> {
+    const question: IQuestion = await this.getAndValidateQuestion(
+      conversationId,
+      sessionId,
+      questionId
+    );
+
+    if (question.userId.toString() === aadObjectId) {
+      throw new Error("User cannot upvote/ downvote own question");
+    }
+
+    if (question.voters.includes(aadObjectId)) {
+      question.voters.splice(question.voters.indexOf(aadObjectId), 1);
+      await retryWrapper(() => question.save(), new ExponentialBackOff());
+    }
+  }
+
+  /**
+   * Updates question as answered.
+   * @param conversationId - conversation id corresponding to session.
+   * @param sessionId - The DBID of the session document.
+   * @param questionId - The DBID of the question document for the question being upvoted.
+   * @throws - exception if question validation fails.
+   */
+  public async markQuestionAsAnswered(
+    conversationId: string,
+    sessionId: string,
+    questionId: string
+  ): Promise<void> {
+    const question: IQuestion = await this.getAndValidateQuestion(
+      conversationId,
+      sessionId,
+      questionId
+    );
+
+    if (!question.isAnswered) {
+      question.isAnswered = true;
+      await retryWrapper(() => question.save(), new ExponentialBackOff());
+    }
   }
 
   /**
