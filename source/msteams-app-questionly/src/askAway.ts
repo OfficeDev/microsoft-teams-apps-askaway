@@ -557,7 +557,9 @@ export class AskAway extends TeamsActivityHandler {
             const error = response.value;
             if (error['code'] === 'QnASessionLimitExhausted') {
                 await context.sendActivity(
-                    MessageFactory.text(`${error.message}`)
+                    MessageFactory.text(
+                        errorStrings('qnasessionlimitexhausted')
+                    )
                 );
             }
         }

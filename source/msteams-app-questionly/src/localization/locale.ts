@@ -32,6 +32,7 @@ export interface Errors {
     taskSubmit: string;
     leaderboard: string;
     conversationInvalid: string;
+    qnasessionlimitexhausted: string;
 }
 
 export interface Generic {

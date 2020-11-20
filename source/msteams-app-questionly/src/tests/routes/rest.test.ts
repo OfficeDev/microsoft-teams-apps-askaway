@@ -987,7 +987,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
             )
             .send({ action: 'markAnswered' });
 
-        expect(result.status).toBe(400);
+        expect(result.status).toBe(403);
         expect(result.text).toEqual(
             'Only a Presenter or an Organizer can mark question as answered.'
         );
@@ -1202,7 +1202,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
             )
             .send({ action: 'close' });
 
-        expect(result.status).toBe(400);
+        expect(result.status).toBe(403);
         expect(result.text).toEqual(
             'Only a Presenter or an Organizer can update session.'
         );
