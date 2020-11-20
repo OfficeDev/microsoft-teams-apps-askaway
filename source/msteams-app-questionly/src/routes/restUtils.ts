@@ -1,6 +1,6 @@
 import {
     IQnASession_populated,
-    qnaSessionDataService,
+    IQuestionPopulatedUser,
     questionDataService,
     userDataService,
 } from 'msteams-app-questionly.data';
@@ -10,39 +10,43 @@ import axios from 'axios';
 import { getMicrosoftAppPassword } from 'src/util/keyvault';
 import { organizer, presenter } from 'src/constants/restConstants';
 
-export const getAllQnASesssionsDataForTab = async (conversationId: string) => {
-    const qnaSessionDataArray: IQnASession_populated[] = await qnaSessionDataService.getAllQnASessionData(
-        conversationId
-    );
-
-    if (qnaSessionDataArray.length === 0) {
-        return qnaSessionDataArray;
-    }
-
+/**
+ * Gets questions data and user data for each active qna sessions, process them and returns an array of detailed qna sessions.
+ * @param qnaSessionDataArray - Array of qna sessions data
+ */
+export const processQnASesssionsDataForMeetingTab = async (
+    qnaSessionDataArray: IQnASession_populated[]
+) => {
     let qnaSessionData: IQnASession_populated;
     const qnaSessionArrayForTab: any[] = [];
     for (let i = 0; i < qnaSessionDataArray.length; i++) {
         qnaSessionData = qnaSessionDataArray[i];
-        let questionsData;
-        try {
-            questionsData = await questionDataService.getQuestions(
-                qnaSessionData.id
-            );
-        } catch (err) {
-            exceptionLogger(err);
-            throw err;
-        }
-        const recentQuestions = questionsData.recentQuestions;
+
+        const questionData: IQuestionPopulatedUser[] = await questionDataService.getQuestionData(
+            qnaSessionData._id
+        );
+
+        const voteSortedQuestions: IQuestionPopulatedUser[] = questionData.sort(
+            (a, b) => {
+                const diff = b.voters.length - a.voters.length;
+                if (diff !== 0) return diff;
+                return (
+                    new Date(b.dateTimeCreated).getTime() -
+                    new Date(a.dateTimeCreated).getTime()
+                );
+            }
+        );
+
         const userSet = new Set();
         const users: any[] = [];
-        if (recentQuestions !== undefined) {
-            for (let j = 0; j < recentQuestions.length; j++) {
-                if (!userSet.has(recentQuestions[j].userId._id)) {
+        if (questionData !== undefined) {
+            for (let j = 0; j < questionData.length; j++) {
+                if (!userSet.has(questionData[j].userId._id)) {
                     users.push({
-                        id: recentQuestions[j].userId._id,
-                        name: recentQuestions[j].userId.userName,
+                        id: questionData[j].userId._id,
+                        name: questionData[j].userId.userName,
                     });
-                    userSet.add(recentQuestions[j].userId._id);
+                    userSet.add(questionData[j].userId._id);
                 }
             }
         }
@@ -62,7 +66,8 @@ export const getAllQnASesssionsDataForTab = async (conversationId: string) => {
             dateTimeCreated: qnaSessionData.dateTimeCreated,
             dateTimeEnded: qnaSessionData.dateTimeEnded,
             hostUser: { id: hostUser.id, name: hostUser.userName },
-            numberOfQuestions: questionsData.numQuestions,
+            numberOfQuestions: questionData.length,
+            questions: voteSortedQuestions,
             users: users,
         };
         qnaSessionArrayForTab.push(qnaSessionDataObject);
