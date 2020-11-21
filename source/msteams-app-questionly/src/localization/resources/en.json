@@ -47,7 +47,8 @@
         "taskFetch": "Something went wrong. Please try opening again.",
         "taskSubmit": "Your submission encountered an error. Please try submitting again!",
         "leaderboard": "Could not retrieve leaderboard. Please try again",
-        "conversationInvalid": "Requests pertaining to a QnA must be made in the same conversation the QnA is in."
+        "conversationInvalid": "Requests pertaining to a QnA must be made in the same conversation the QnA is in.",
+        "qnasessionlimitexhausted": "Could not create a new QnA session. Number of active sessions cannot exceed 1. Please end existing session(s) and try again."
     },
     "generic": {
         "submit": "Submit",

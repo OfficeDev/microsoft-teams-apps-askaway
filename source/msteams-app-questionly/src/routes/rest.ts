@@ -5,10 +5,11 @@ import {
     qnaSessionDataService,
     IUser,
     questionDataService,
+    IQnASession_populated,
 } from 'msteams-app-questionly.data';
 import { exceptionLogger } from 'src/util/exceptionTracking';
 import {
-    getAllQnASesssionsDataForTab,
+    processQnASesssionsDataForMeetingTab,
     getParticipantRole,
     isPresenterOrOrganizer,
 } from 'src/routes/restUtils';
@@ -20,6 +21,10 @@ export const initializeRouter = (
     _conversationDataService: IConversationDataService
 ) => {
     conversationDataService = _conversationDataService;
+};
+
+const isDefined = (param: string): boolean => {
+    return param !== '' && param !== undefined && param != null;
 };
 
 // Get session details
@@ -34,11 +39,15 @@ router.get('/:conversationId/sessions/:sessionId', async (req, res) => {
 router.get('/:conversationId/sessions', async (req, res) => {
     let qnaSessionResponse;
     try {
-        qnaSessionResponse = await getAllQnASesssionsDataForTab(
+        const qnaSessionsData: IQnASession_populated[] = await qnaSessionDataService.getAllQnASessionData(
             req.params['conversationId']
         );
-        if (qnaSessionResponse.length === 0) {
+        if (qnaSessionsData.length === 0) {
             res.statusCode = 204;
+        } else {
+            qnaSessionResponse = await processQnASesssionsDataForMeetingTab(
+                qnaSessionsData
+            );
         }
     } catch (err) {
         exceptionLogger(err);
@@ -93,11 +102,7 @@ router.post(
             const user: IUser = <IUser>req.user;
             const questionContent: string = req.body.questionContent;
 
-            if (
-                questionContent === undefined ||
-                questionContent === null ||
-                questionContent === ''
-            ) {
+            if (!isDefined(questionContent)) {
                 res.statusCode = 400;
                 res.send('questionContent is missing in the request');
                 return;
@@ -121,6 +126,60 @@ router.post(
         res.send(response);
     }
 );
+
+// Update ama session
+router.patch('/:conversationId/sessions/:sessionId', async (req, res) => {
+    try {
+        const action: string = req.body.action;
+
+        if (!isDefined(action)) {
+            res.statusCode = 400;
+            res.send('patch action is missing in the request');
+            return;
+        }
+
+        const user: IUser = <IUser>req.user;
+        const sessionId: string = req.params['sessionId'];
+        const conversationId: string = req.params['conversationId'];
+
+        if (action === 'close') {
+            const conversationData: IConversation = await conversationDataService.getConversationData(
+                conversationId
+            );
+
+            if (
+                conversationData.meetingId !== undefined &&
+                isPresenterOrOrganizer(
+                    conversationData.meetingId,
+                    user._id,
+                    conversationData.tenantId,
+                    conversationData.serviceUrl
+                )
+            ) {
+                await qnaSessionDataService.endQnASession(
+                    sessionId,
+                    conversationId
+                );
+            } else {
+                res.statusCode = 403;
+                return res.send(
+                    'Only a Presenter or an Organizer can update session.'
+                );
+            }
+        } else {
+            res.statusCode = 400;
+            return res.send(`action ${action} is not supported`);
+        }
+    } catch (err) {
+        exceptionLogger(err);
+        res.statusCode = 500;
+        res.send(err.message);
+        return;
+    }
+
+    res.statusCode = 204;
+    res.send();
+});
 
 // Create a new qna session
 router.post('/:conversationId/sessions', async (req, res) => {
@@ -170,22 +229,6 @@ router.post('/:conversationId/sessions', async (req, res) => {
         //     );
         // }
 
-        // get all ama sessions and check if number of active sessions is less than 1.
-        const numberOfActiveSessions = await qnaSessionDataService.getNumberOfActiveSessions(
-            conversationId
-        );
-        if (numberOfActiveSessions >= 1) {
-            res.statusCode = 500;
-            exceptionLogger(
-                new Error(
-                    `Could not create a new QnA session. There are ${numberOfActiveSessions} active session(s) already.`
-                )
-            );
-            return res.send(
-                `Could not create a new QnA session. There are ${numberOfActiveSessions} active session(s) already.`
-            );
-        }
-
         response = await qnaSessionDataService.createQnASession(
             req.body.title,
             req.body.description,
@@ -201,6 +244,103 @@ router.post('/:conversationId/sessions', async (req, res) => {
     } catch (error) {
         res.statusCode = 500;
         exceptionLogger(error);
+        res.send(error);
+    }
+    res.send(response);
+});
+
+// Update question
+router.patch(
+    '/:conversationId/sessions/:sessionId/questions/:questionId',
+    async (req, res) => {
+        try {
+            const action: string = req.body.action;
+
+            if (!isDefined(action)) {
+                res.statusCode = 400;
+                res.send('patch action is missing in the request');
+                return;
+            }
+
+            const user: IUser = <IUser>req.user;
+            const sessionId: string = req.params['sessionId'];
+            const conversationId: string = req.params['conversationId'];
+            const questionId: string = req.params['questionId'];
+
+            if (action === 'upvote') {
+                await questionDataService.upVoteQuestion(
+                    conversationId,
+                    sessionId,
+                    questionId,
+                    user._id,
+                    user.userName
+                );
+            } else if (action === 'downvote') {
+                await questionDataService.downVoteQuestion(
+                    conversationId,
+                    sessionId,
+                    questionId,
+                    user._id
+                );
+            } else if (action === 'markAnswered') {
+                const conversationData: IConversation = await conversationDataService.getConversationData(
+                    conversationId
+                );
+
+                if (
+                    conversationData.meetingId !== undefined &&
+                    isPresenterOrOrganizer(
+                        conversationData.meetingId,
+                        user._id,
+                        conversationData.tenantId,
+                        conversationData.serviceUrl
+                    )
+                ) {
+                    await questionDataService.markQuestionAsAnswered(
+                        conversationId,
+                        sessionId,
+                        questionId
+                    );
+                } else {
+                    res.statusCode = 403;
+                    return res.send(
+                        'Only a Presenter or an Organizer can mark question as answered.'
+                    );
+                }
+            } else {
+                res.statusCode = 400;
+                res.send(`action ${action} is not supported`);
+                return;
+            }
+        } catch (err) {
+            exceptionLogger(err);
+            res.statusCode = 500;
+            res.send(err.message);
+            return;
+        }
+
+        res.statusCode = 204;
+        res.send();
+    }
+);
+
+// Get all active ama sessions
+router.get('/:conversationId/activesessions', async (req, res) => {
+    let response;
+    try {
+        const activeSessions: IQnASession_populated[] = await qnaSessionDataService.getAllActiveQnASessionData(
+            req.params['conversationId']
+        );
+        if (activeSessions.length === 0) {
+            res.statusCode = 204;
+        } else {
+            response = await processQnASesssionsDataForMeetingTab(
+                activeSessions
+            );
+        }
+    } catch (error) {
+        exceptionLogger(error);
+        res.statusCode = 500;
         res.send(error);
     }
     res.send(response);

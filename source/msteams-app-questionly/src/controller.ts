@@ -88,6 +88,9 @@ export const startQnASession = async (
         });
     } catch (error) {
         exceptionLogger(error);
+        if (error.code === 'QnASessionLimitExhausted') {
+            return err(error);
+        }
         return err(Error('Failed to start QnA'));
     }
 };
