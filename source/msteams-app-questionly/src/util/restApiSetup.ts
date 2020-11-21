@@ -15,5 +15,5 @@ export const setupRestApis = (
     initializeRouter(conversationDataService);
 
     // Rest endpoints
-    app.use('/api/conversations', ensureAuthenticated(), router);
+    app.use('/api/conversations', router);
 };

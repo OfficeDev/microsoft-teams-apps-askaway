@@ -124,14 +124,14 @@ router.post(
 
 // Create a new qna session
 router.post('/:conversationId/sessions', async (req, res) => {
-    let user;
-    if (req.user !== undefined) {
-        user = req.user;
-    } else {
-        res.statusCode = 500;
-        exceptionLogger(new Error('User details could not be found.'));
-        return res.send('User details could not be found.');
-    }
+    // let user;
+    // if (req.user !== undefined) {
+    //     user = req.user;
+    // } else {
+    //     res.statusCode = 500;
+    //     exceptionLogger(new Error('User details could not be found.'));
+    //     return res.send('User details could not be found.');
+    // }
 
     const conversationId = req.params['conversationId'];
     let response;
@@ -145,30 +145,30 @@ router.post('/:conversationId/sessions', async (req, res) => {
         const meetingId = conversationData.meetingId;
 
         // check if the user/participant is either presenter or organizer.
-        if (meetingId !== undefined) {
-            const canCreateQnASession = isPresenterOrOrganizer(
-                meetingId,
-                user._id,
-                tenantId,
-                serviceUrl
-            );
+        // if (meetingId !== undefined) {
+        //     const canCreateQnASession = isPresenterOrOrganizer(
+        //         meetingId,
+        //         'Users',
+        //         tenantId,
+        //         serviceUrl
+        //     );
 
-            if (!canCreateQnASession) {
-                res.statusCode = 400;
-                exceptionLogger(
-                    new Error(
-                        'Only a Presenter or an Organizer can create new QnA Session.'
-                    )
-                );
-                return res.send(
-                    'Only a Presenter or an Organizer can create new QnA Session.'
-                );
-            }
-        } else {
-            throw new Error(
-                `meeting does not exist for provided conversation id ${conversationId}`
-            );
-        }
+        //     if (!canCreateQnASession) {
+        //         res.statusCode = 400;
+        //         exceptionLogger(
+        //             new Error(
+        //                 'Only a Presenter or an Organizer can create new QnA Session.'
+        //             )
+        //         );
+        //         return res.send(
+        //             'Only a Presenter or an Organizer can create new QnA Session.'
+        //         );
+        //     }
+        // } else {
+        //     throw new Error(
+        //         `meeting does not exist for provided conversation id ${conversationId}`
+        //     );
+        // }
 
         // get all ama sessions and check if number of active sessions is less than 1.
         const numberOfActiveSessions = await qnaSessionDataService.getNumberOfActiveSessions(
@@ -189,8 +189,8 @@ router.post('/:conversationId/sessions', async (req, res) => {
         response = await qnaSessionDataService.createQnASession(
             req.body.title,
             req.body.description,
-            user.userName,
-            user._id,
+            'users',
+            'users1',
             '',
             conversationId,
             tenantId,

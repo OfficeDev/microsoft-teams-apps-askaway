@@ -37,7 +37,7 @@ export class AskAwayTab extends msteamsReactBaseComponent<
     IAskAwayTabProps,
     IAskAwayTabState
 > {
-    constructor(props: {}) {
+    constructor(props) {
         super(props);
         microsoftTeams.initialize();
         this.state = {
@@ -109,7 +109,7 @@ export class AskAwayTab extends msteamsReactBaseComponent<
                 )}
                 {this.state.frameContext === 'content' && (
                     <React.Fragment>
-                        <TeamsContent />
+                        <TeamsContent teamsData={this.state.teamContext} />
                     </React.Fragment>
                 )}
             </Provider>

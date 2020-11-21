@@ -3,7 +3,10 @@ import './index.scss';
 import * as React from 'react';
 import { Flex, Text, Button, Image } from '@fluentui/react-northstar';
 import * as microsoftTeams from '@microsoft/teams-js';
-export interface TeamsContentProps {}
+import axios from './shared/HttpService';
+export interface TeamsContentProps {
+    teamsData: any;
+}
 export interface TeamsContentState {}
 
 export class TeamsContent extends React.Component<
@@ -15,7 +18,18 @@ export class TeamsContent extends React.Component<
         this.onShowTaskModule = this.onShowTaskModule.bind(this);
     }
 
-    componentDidMount() {}
+    componentDidMount() {
+        console.log('test', this.props);
+        // tslint:disable-next-line:no-http-string
+        axios
+            .get(`/conversations/${this.props.teamsData.chatId}/sessions`)
+            .then((response: any) => {
+                console.log('res', response);
+            })
+            .catch((error) => {
+                console.log('error', error);
+            });
+    }
 
     public adaptiveCardTemplate() {
         return {
