@@ -7,11 +7,14 @@ import {
     questionDataService,
     IQnASession_populated,
 } from 'msteams-app-questionly.data';
+import { verifyUserFromConversationId } from 'msteams-app-questionly.conversation.utility';
 import { exceptionLogger } from 'src/util/exceptionTracking';
 import {
     processQnASesssionsDataForMeetingTab,
     getParticipantRole,
     isPresenterOrOrganizer,
+    patchActionForQuestion,
+    formResponseWhenUserIsNotPartOfConversation,
 } from 'src/routes/restUtils';
 
 export const router = Express.Router();
@@ -29,6 +32,25 @@ const isDefined = (param: string): boolean => {
 
 // Get session details
 router.get('/:conversationId/sessions/:sessionId', async (req, res) => {
+    const user: any = req.user;
+    const userId = user._id;
+    const conversationId: string = req.params['conversationId'];
+    const conversationData: IConversation = await conversationDataService.getConversationData(
+        conversationId
+    );
+
+    const isUserPartOfConversation: boolean = await verifyUserFromConversationId(
+        conversationId,
+        conversationData.serviceUrl,
+        conversationData.tenantId,
+        userId
+    );
+
+    if (!isUserPartOfConversation) {
+        formResponseWhenUserIsNotPartOfConversation(res);
+        return;
+    }
+
     // This logic will be improved as part of rest api TASK 1211744, this is a boilerplate code.
     res.send(
         await qnaSessionDataService.getQnASessionData(req.params['sessionId'])
@@ -39,9 +61,29 @@ router.get('/:conversationId/sessions/:sessionId', async (req, res) => {
 router.get('/:conversationId/sessions', async (req, res) => {
     let qnaSessionResponse;
     try {
-        const qnaSessionsData: IQnASession_populated[] = await qnaSessionDataService.getAllQnASessionData(
-            req.params['conversationId']
+        const user: any = req.user;
+        const userId = user._id;
+        const conversationId: string = req.params['conversationId'];
+        const conversationData: IConversation = await conversationDataService.getConversationData(
+            conversationId
         );
+
+        const isUserPartOfConversation: boolean = await verifyUserFromConversationId(
+            conversationId,
+            conversationData.serviceUrl,
+            conversationData.tenantId,
+            userId
+        );
+
+        if (!isUserPartOfConversation) {
+            formResponseWhenUserIsNotPartOfConversation(res);
+            return;
+        }
+
+        const qnaSessionsData: IQnASession_populated[] = await qnaSessionDataService.getAllQnASessionData(
+            conversationId
+        );
+
         if (qnaSessionsData.length === 0) {
             res.statusCode = 204;
         } else {
@@ -99,12 +141,30 @@ router.post(
     async (req, res) => {
         let response;
         try {
-            const user: IUser = <IUser>req.user;
             const questionContent: string = req.body.questionContent;
 
             if (!isDefined(questionContent)) {
                 res.statusCode = 400;
                 res.send('questionContent is missing in the request');
+                return;
+            }
+
+            const user: IUser = <IUser>req.user;
+            const userId = user._id;
+            const conversationId: string = req.params['conversationId'];
+            const conversationData: IConversation = await conversationDataService.getConversationData(
+                conversationId
+            );
+
+            const isUserPartOfConversation: boolean = await verifyUserFromConversationId(
+                conversationId,
+                conversationData.serviceUrl,
+                conversationData.tenantId,
+                userId
+            );
+
+            if (!isUserPartOfConversation) {
+                formResponseWhenUserIsNotPartOfConversation(res);
                 return;
             }
 
@@ -260,6 +320,10 @@ router.patch(
                 res.statusCode = 400;
                 res.send('patch action is missing in the request');
                 return;
+            } else if (!patchActionForQuestion.includes(action.trim())) {
+                res.statusCode = 400;
+                res.send(`action ${action} is not supported`);
+                return;
             }
 
             const user: IUser = <IUser>req.user;
@@ -267,7 +331,25 @@ router.patch(
             const conversationId: string = req.params['conversationId'];
             const questionId: string = req.params['questionId'];
 
+            const conversationData: IConversation = await conversationDataService.getConversationData(
+                conversationId
+            );
+
+            let isUserPartOfConversation: boolean;
+
             if (action === 'upvote') {
+                isUserPartOfConversation = await verifyUserFromConversationId(
+                    conversationId,
+                    conversationData.serviceUrl,
+                    conversationData.tenantId,
+                    user._id
+                );
+
+                if (!isUserPartOfConversation) {
+                    formResponseWhenUserIsNotPartOfConversation(res);
+                    return;
+                }
+
                 await questionDataService.upVoteQuestion(
                     conversationId,
                     sessionId,
@@ -276,6 +358,18 @@ router.patch(
                     user.userName
                 );
             } else if (action === 'downvote') {
+                isUserPartOfConversation = await verifyUserFromConversationId(
+                    conversationId,
+                    conversationData.serviceUrl,
+                    conversationData.tenantId,
+                    user._id
+                );
+
+                if (!isUserPartOfConversation) {
+                    formResponseWhenUserIsNotPartOfConversation(res);
+                    return;
+                }
+
                 await questionDataService.downVoteQuestion(
                     conversationId,
                     sessionId,
@@ -283,10 +377,6 @@ router.patch(
                     user._id
                 );
             } else if (action === 'markAnswered') {
-                const conversationData: IConversation = await conversationDataService.getConversationData(
-                    conversationId
-                );
-
                 if (
                     conversationData.meetingId !== undefined &&
                     isPresenterOrOrganizer(
@@ -307,10 +397,6 @@ router.patch(
                         'Only a Presenter or an Organizer can mark question as answered.'
                     );
                 }
-            } else {
-                res.statusCode = 400;
-                res.send(`action ${action} is not supported`);
-                return;
             }
         } catch (err) {
             exceptionLogger(err);
@@ -328,8 +414,27 @@ router.patch(
 router.get('/:conversationId/activesessions', async (req, res) => {
     let response;
     try {
+        const user: any = req.user;
+        const userId = user._id;
+        const conversationId: string = req.params['conversationId'];
+        const conversationData: IConversation = await conversationDataService.getConversationData(
+            conversationId
+        );
+
+        const isUserPartOfConversation: boolean = await verifyUserFromConversationId(
+            conversationId,
+            conversationData.serviceUrl,
+            conversationData.tenantId,
+            userId
+        );
+
+        if (!isUserPartOfConversation) {
+            formResponseWhenUserIsNotPartOfConversation(res);
+            return;
+        }
+
         const activeSessions: IQnASession_populated[] = await qnaSessionDataService.getAllActiveQnASessionData(
-            req.params['conversationId']
+            conversationId
         );
         if (activeSessions.length === 0) {
             res.statusCode = 204;

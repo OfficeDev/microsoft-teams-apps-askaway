@@ -142,3 +142,10 @@ export const getParticipantRole = async (
 
     return role;
 };
+
+export const patchActionForQuestion = ['upvote', 'downvote', 'markAnswered'];
+
+export const formResponseWhenUserIsNotPartOfConversation = (res) => {
+    res.statusCode = 403;
+    res.send(`user is not part of the given conversationId`);
+};

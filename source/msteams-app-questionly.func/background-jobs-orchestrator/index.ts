@@ -1,37 +1,63 @@
 ﻿/*
  * This function is not intended to be invoked directly. Instead it will be
  * triggered by an HTTP starter function.
- *
- * Before running this sample, please:
- * - create a Durable activity function (default name is "Hello")
- * - create a Durable HTTP starter function
- * - run 'npm install durable-functions' from the wwwroot folder of your
- *    function app in Kudu
  */
 
 import * as df from "durable-functions";
+import { ifNumber } from "../src/utils/typeUtility";
+
+// Retry option for notification bubble activity
+const notificationBubbleActivityRetryOption: df.RetryOptions = new df.RetryOptions(
+  ifNumber(process.env.NotificationBubbleActivityRetryInterval, 2000),
+  ifNumber(process.env.NotificationBubbleActivityRetryAttemptCount, 1)
+);
+
+// Retry option for broadcast message activity
+const broadcastActivityRetryOption: df.RetryOptions = new df.RetryOptions(
+  ifNumber(process.env.BroadcastActivityRetryInterval, 1000),
+  ifNumber(process.env.BroadcastActivityRetryAttemptCount, 2)
+);
 
 const orchestrator = df.orchestrator(function* (context) {
-  const outputs = [];
+  if (!context.df.isReplaying) {
+    context.log.info(
+      `Background job started for conversation id ${context.bindingData.input.conversationId}`
+    );
+  }
 
-  outputs.push(
-    yield context.df.callActivity("broadcast-message", "broadcast message")
-  );
-  outputs.push(
-    yield context.df.callActivity(
-      "send-notification-bubble",
-      context.bindingData.input
-    )
-  );
-  outputs.push(
-    yield context.df.callActivity(
-      "update-adaptive-card",
-      "update adaptive card"
-    )
-  );
+  try {
+    const parallelTasks = [];
 
-  // returns ["Activity - broadcast message!", "Activity - send notification bubble!", "Activity - update adaptive card!"]
-  return outputs;
+    // Broadcast events to all clients from a meeting.
+    parallelTasks.push(
+      context.df.callActivityWithRetry(
+        "broadcast-message",
+        broadcastActivityRetryOption,
+        context.bindingData.input
+      )
+    );
+
+    // Send notification bubble activity.
+    parallelTasks.push(
+      context.df.callActivityWithRetry(
+        "send-notification-bubble",
+        notificationBubbleActivityRetryOption,
+        context.bindingData.input
+      )
+    );
+
+    // Update adaptive card activity.
+    parallelTasks.push(
+      context.df.callActivity("update-adaptive-card", "update adaptive card")
+    );
+
+    yield context.df.Task.all(parallelTasks);
+  } catch (error) {
+    context.log.error(
+      error,
+      "Error occurred while scheduling background tasks"
+    );
+  }
 });
 
 export default orchestrator;

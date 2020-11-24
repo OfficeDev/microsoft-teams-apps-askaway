@@ -4,6 +4,12 @@
       "name": "name",
       "type": "activityTrigger",
       "direction": "in"
+    },
+    {
+      "type": "signalR",
+      "name": "signalRMessages",
+      "hubName": "amaSession",
+      "direction": "out"
     }
   ],
   "scriptFile": "../dist/broadcast-message/index.js"

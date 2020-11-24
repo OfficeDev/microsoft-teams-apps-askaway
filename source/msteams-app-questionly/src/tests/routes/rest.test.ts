@@ -13,6 +13,7 @@ import {
     isPresenterOrOrganizer,
 } from 'src/routes/restUtils';
 import { generateUniqueId } from 'adaptivecards';
+import { verifyUserFromConversationId } from 'msteams-app-questionly.conversation.utility';
 
 let app: ExpressType;
 
@@ -25,7 +26,7 @@ const sampleDescription = 'sample description';
 const sampleScopeId = 'scoopeId';
 const sampleHostUserId = 'sampleHostId';
 const sampleMeetingId = 'sampleMeetingId';
-const sampleUserId = 'sampleUserID';
+const sampleUserId = 'sampleUserId';
 const sampleUserName = 'sampleUserName';
 const sampleQnASessionId = 'sampleQnASessionId';
 const sampleServiceUrl = 'sampleServiceUrl';
@@ -39,8 +40,18 @@ describe('test /conversations/:conversationId/sessions/:sessionId api', () => {
 
         initializeRouter(conversationDataService);
 
+        const mockEnsureAuthenticated = (req, res, next) => {
+            req.user = {
+                _id: sampleUserId,
+                userName: sampleUserName,
+            };
+            next();
+        };
         // Rest endpoints
-        app.use('/api/conversations', router);
+        app.use('/api/conversations', mockEnsureAuthenticated, router);
+
+        (<any>verifyUserFromConversationId) = jest.fn();
+        (<any>conversationDataService.getConversationData) = jest.fn();
     });
 
     it('validates get ama session api', async () => {
@@ -57,6 +68,23 @@ describe('test /conversations/:conversationId/sessions/:sessionId api', () => {
             isActive: true,
         };
 
+        const testConversation = {
+            _id: sampleConversationId,
+            serviceUrl: 'testServiceUrl',
+            tenantId: 'testTenantId',
+            meetingId: 'testMeetingId',
+        };
+
+        (<any>(
+            conversationDataService.getConversationData
+        )).mockImplementationOnce(() => {
+            return testConversation;
+        });
+
+        (<any>verifyUserFromConversationId).mockImplementationOnce(() => {
+            return true;
+        });
+
         (<any>qnaSessionDataService.getQnASessionData) = jest.fn();
         (<any>qnaSessionDataService.getQnASessionData).mockImplementationOnce(
             () => {
@@ -65,7 +93,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId api', () => {
         );
 
         const result = await request(app).get(
-            `/api/conversations/1/sessions/${testSessionId}`
+            `/api/conversations/${sampleConversationId}/sessions/${testSessionId}`
         );
 
         expect(result).toBeDefined();
@@ -73,6 +101,17 @@ describe('test /conversations/:conversationId/sessions/:sessionId api', () => {
         expect(qnaSessionDataService.getQnASessionData).toBeCalledTimes(1);
         expect(qnaSessionDataService.getQnASessionData).toBeCalledWith(
             testSessionId
+        );
+        expect(conversationDataService.getConversationData).toBeCalledTimes(1);
+        expect(conversationDataService.getConversationData).toBeCalledWith(
+            sampleConversationId
+        );
+        expect(verifyUserFromConversationId).toBeCalledTimes(1);
+        expect(verifyUserFromConversationId).toBeCalledWith(
+            sampleConversationId,
+            testConversation.serviceUrl,
+            testConversation.tenantId,
+            sampleUserId
         );
     });
 });
@@ -83,10 +122,20 @@ describe('test conversations/:conversationId/sessions api', () => {
 
         initializeRouter(conversationDataService);
 
+        const mockEnsureAuthenticated = (req, res, next) => {
+            req.user = {
+                _id: sampleUserId,
+                userName: sampleUserName,
+            };
+            next();
+        };
         // Rest endpoints
-        app.use('/api/conversations', router);
+        app.use('/api/conversations', mockEnsureAuthenticated, router);
         (<any>qnaSessionDataService.getAllQnASessionData) = jest.fn();
         (<any>processQnASesssionsDataForMeetingTab) = jest.fn();
+
+        (<any>verifyUserFromConversationId) = jest.fn();
+        (<any>conversationDataService.getConversationData) = jest.fn();
 
         testQnAData1 = {
             id: generateUniqueId(),
@@ -157,6 +206,23 @@ describe('test conversations/:conversationId/sessions api', () => {
             }
         );
 
+        const testConversation = {
+            _id: sampleConversationId,
+            serviceUrl: 'testServiceUrl',
+            tenantId: 'testTenantId',
+            meetingId: 'testMeetingId',
+        };
+
+        (<any>(
+            conversationDataService.getConversationData
+        )).mockImplementationOnce(() => {
+            return testConversation;
+        });
+
+        (<any>verifyUserFromConversationId).mockImplementationOnce(() => {
+            return true;
+        });
+
         const result = await request(app).get(
             `/api/conversations/${sampleConversationId}/sessions`
         );
@@ -170,6 +236,17 @@ describe('test conversations/:conversationId/sessions api', () => {
         expect(processQnASesssionsDataForMeetingTab).toBeCalledTimes(1);
         expect(processQnASesssionsDataForMeetingTab).toBeCalledWith(
             testQnAData
+        );
+        expect(conversationDataService.getConversationData).toBeCalledTimes(1);
+        expect(conversationDataService.getConversationData).toBeCalledWith(
+            sampleConversationId
+        );
+        expect(verifyUserFromConversationId).toBeCalledTimes(1);
+        expect(verifyUserFromConversationId).toBeCalledWith(
+            sampleConversationId,
+            testConversation.serviceUrl,
+            testConversation.tenantId,
+            sampleUserId
         );
     });
 
@@ -186,6 +263,24 @@ describe('test conversations/:conversationId/sessions api', () => {
             }
         );
         const sampleConversationId = '1';
+
+        const testConversation = {
+            _id: sampleConversationId,
+            serviceUrl: 'testServiceUrl',
+            tenantId: 'testTenantId',
+            meetingId: 'testMeetingId',
+        };
+
+        (<any>(
+            conversationDataService.getConversationData
+        )).mockImplementationOnce(() => {
+            return testConversation;
+        });
+
+        (<any>verifyUserFromConversationId).mockImplementationOnce(() => {
+            return true;
+        });
+
         const result = await request(app).get(
             `/api/conversations/${sampleConversationId}/sessions`
         );
@@ -193,6 +288,57 @@ describe('test conversations/:conversationId/sessions api', () => {
         expect(processQnASesssionsDataForMeetingTab).toBeCalledTimes(1);
         expect(processQnASesssionsDataForMeetingTab).toBeCalledWith(
             testQnAData
+        );
+        expect(conversationDataService.getConversationData).toBeCalledTimes(1);
+        expect(conversationDataService.getConversationData).toBeCalledWith(
+            sampleConversationId
+        );
+        expect(verifyUserFromConversationId).toBeCalledTimes(1);
+        expect(verifyUserFromConversationId).toBeCalledWith(
+            sampleConversationId,
+            testConversation.serviceUrl,
+            testConversation.tenantId,
+            sampleUserId
+        );
+    });
+
+    it('user is not part of the conversation', async () => {
+        const sampleConversationId = '1';
+
+        const testConversation = {
+            _id: sampleConversationId,
+            serviceUrl: 'testServiceUrl',
+            tenantId: 'testTenantId',
+            meetingId: 'testMeetingId',
+        };
+
+        (<any>(
+            conversationDataService.getConversationData
+        )).mockImplementationOnce(() => {
+            return testConversation;
+        });
+
+        (<any>verifyUserFromConversationId).mockImplementationOnce(() => {
+            return false;
+        });
+
+        const result = await request(app).get(
+            `/api/conversations/${sampleConversationId}/sessions`
+        );
+        expect(result.status).toBe(403);
+        expect(result.text).toEqual(
+            `user is not part of the given conversationId`
+        );
+        expect(conversationDataService.getConversationData).toBeCalledTimes(1);
+        expect(conversationDataService.getConversationData).toBeCalledWith(
+            sampleConversationId
+        );
+        expect(verifyUserFromConversationId).toBeCalledTimes(1);
+        expect(verifyUserFromConversationId).toBeCalledWith(
+            sampleConversationId,
+            testConversation.serviceUrl,
+            testConversation.tenantId,
+            sampleUserId
         );
     });
 
@@ -204,12 +350,41 @@ describe('test conversations/:conversationId/sessions api', () => {
         )).mockImplementationOnce(() => {
             return testQnAData;
         });
+
+        const testConversation = {
+            _id: sampleInvalidConversationId,
+            serviceUrl: 'testServiceUrl',
+            tenantId: 'testTenantId',
+            meetingId: 'testMeetingId',
+        };
+
+        (<any>(
+            conversationDataService.getConversationData
+        )).mockImplementationOnce(() => {
+            return testConversation;
+        });
+
+        (<any>verifyUserFromConversationId).mockImplementationOnce(() => {
+            return true;
+        });
+
         const result = await request(app).get(
             `/api/conversations/${sampleInvalidConversationId}/sessions`
         );
         expect(result.status).toBe(204);
         expect(result.noContent).toBe(true);
         expect(processQnASesssionsDataForMeetingTab).toBeCalledTimes(0);
+        expect(conversationDataService.getConversationData).toBeCalledTimes(1);
+        expect(conversationDataService.getConversationData).toBeCalledWith(
+            sampleInvalidConversationId
+        );
+        expect(verifyUserFromConversationId).toBeCalledTimes(1);
+        expect(verifyUserFromConversationId).toBeCalledWith(
+            sampleInvalidConversationId,
+            testConversation.serviceUrl,
+            testConversation.tenantId,
+            sampleUserId
+        );
     });
 });
 
@@ -394,8 +569,16 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
             next();
         };
 
+        (<any>verifyUserFromConversationId) = jest.fn();
+        (<any>questionDataService.createQuestion) = jest.fn();
+        (<any>conversationDataService.getConversationData) = jest.fn();
+
         // Rest endpoints
         app.use('/api/conversations', mockEnsureAuthenticated, router);
+    });
+
+    beforeEach(() => {
+        jest.clearAllMocks();
     });
 
     it('questionContent missing in request', async () => {
@@ -444,13 +627,143 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
         );
     });
 
+    it('getConversationData throws error', async () => {
+        const testSessionId = 'testId';
+        const sampleConversationId = '1';
+        const testError: Error = new Error('test error');
+        const testQuestionContent = 'testQuestionContent';
+
+        (<any>(
+            conversationDataService.getConversationData
+        )).mockImplementationOnce(() => {
+            throw testError;
+        });
+
+        const result = await request(app)
+            .post(
+                `/api/conversations/${sampleConversationId}/sessions/${testSessionId}/questions`
+            )
+            .send({ questionContent: testQuestionContent });
+
+        expect(result.status).toBe(500);
+        expect(result.text).toEqual(testError.message);
+        expect(conversationDataService.getConversationData).toBeCalledTimes(1);
+        expect(conversationDataService.getConversationData).toBeCalledWith(
+            sampleConversationId
+        );
+    });
+
+    it('verifyUserFromConversationId throws error', async () => {
+        const testSessionId = 'testId';
+        const sampleConversationId = '1';
+        const testError: Error = new Error('test error');
+        const testQuestionContent = 'testQuestionContent';
+
+        const testConversation = {
+            _id: sampleConversationId,
+            serviceUrl: 'testServiceUrl',
+            tenantId: 'testTenantId',
+            meetingId: 'testMeetingId',
+        };
+
+        (<any>(
+            conversationDataService.getConversationData
+        )).mockImplementationOnce(() => {
+            return testConversation;
+        });
+
+        (<any>verifyUserFromConversationId).mockImplementationOnce(() => {
+            throw testError;
+        });
+
+        const result = await request(app)
+            .post(
+                `/api/conversations/${sampleConversationId}/sessions/${testSessionId}/questions`
+            )
+            .send({ questionContent: testQuestionContent });
+
+        expect(result.status).toBe(500);
+        expect(result.text).toEqual(testError.message);
+        expect(conversationDataService.getConversationData).toBeCalledTimes(1);
+        expect(conversationDataService.getConversationData).toBeCalledWith(
+            sampleConversationId
+        );
+        expect(verifyUserFromConversationId).toBeCalledTimes(1);
+        expect(verifyUserFromConversationId).toBeCalledWith(
+            sampleConversationId,
+            testConversation.serviceUrl,
+            testConversation.tenantId,
+            testUserId
+        );
+    });
+
+    it('user is not part of conversation', async () => {
+        const testSessionId = 'testId';
+        const sampleConversationId = '1';
+        const testQuestionContent = 'testQuestionContent';
+
+        const testConversation = {
+            _id: sampleConversationId,
+            serviceUrl: 'testServiceUrl',
+            tenantId: 'testTenantId',
+            meetingId: 'testMeetingId',
+        };
+
+        (<any>(
+            conversationDataService.getConversationData
+        )).mockImplementationOnce(() => {
+            return testConversation;
+        });
+
+        (<any>verifyUserFromConversationId).mockImplementationOnce(() => {
+            return false;
+        });
+
+        const result = await request(app)
+            .post(
+                `/api/conversations/${sampleConversationId}/sessions/${testSessionId}/questions`
+            )
+            .send({ questionContent: testQuestionContent });
+
+        expect(result.status).toBe(403);
+        expect(result.text).toEqual(
+            `user is not part of the given conversationId`
+        );
+        expect(conversationDataService.getConversationData).toBeCalledTimes(1);
+        expect(conversationDataService.getConversationData).toBeCalledWith(
+            sampleConversationId
+        );
+        expect(verifyUserFromConversationId).toBeCalledTimes(1);
+        expect(verifyUserFromConversationId).toBeCalledWith(
+            sampleConversationId,
+            testConversation.serviceUrl,
+            testConversation.tenantId,
+            testUserId
+        );
+    });
+
     it('createQuestion throws error', async () => {
         const testSessionId = 'testId';
         const sampleConversationId = '1';
         const testError: Error = new Error('test error');
         const testQuestionContent = 'testQuestionContent';
 
-        (<any>questionDataService.createQuestion) = jest.fn();
+        const testConversation = {
+            _id: sampleConversationId,
+            serviceUrl: 'testServiceUrl',
+            tenantId: 'testTenantId',
+            meetingId: 'testMeetingId',
+        };
+
+        (<any>(
+            conversationDataService.getConversationData
+        )).mockImplementationOnce(() => {
+            return testConversation;
+        });
+        (<any>verifyUserFromConversationId).mockImplementationOnce(() => {
+            return true;
+        });
+
         (<any>questionDataService.createQuestion).mockImplementationOnce(() => {
             throw testError;
         });
@@ -471,6 +784,17 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
             testQuestionContent,
             sampleConversationId
         );
+        expect(verifyUserFromConversationId).toBeCalledTimes(1);
+        expect(verifyUserFromConversationId).toBeCalledWith(
+            sampleConversationId,
+            testConversation.serviceUrl,
+            testConversation.tenantId,
+            testUserId
+        );
+        expect(conversationDataService.getConversationData).toBeCalledTimes(1);
+        expect(conversationDataService.getConversationData).toBeCalledWith(
+            sampleConversationId
+        );
     });
 
     it('create question successfully', async () => {
@@ -479,7 +803,22 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
         const questionId = 'testQuestionId';
         const testQuestionContent = 'testQuestionContent';
 
-        (<any>questionDataService.createQuestion) = jest.fn();
+        const testConversation = {
+            _id: sampleConversationId,
+            serviceUrl: 'testServiceUrl',
+            tenantId: 'testTenantId',
+            meetingId: 'testMeetingId',
+        };
+
+        (<any>(
+            conversationDataService.getConversationData
+        )).mockImplementationOnce(() => {
+            return testConversation;
+        });
+        (<any>verifyUserFromConversationId).mockImplementationOnce(() => {
+            return true;
+        });
+
         (<any>questionDataService.createQuestion).mockImplementationOnce(() => {
             return questionId;
         });
@@ -498,6 +837,19 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
             testUserId,
             testUserName,
             testQuestionContent,
+            sampleConversationId
+        );
+        expect(verifyUserFromConversationId).toBeCalledTimes(1);
+        expect(conversationDataService.getConversationData).toBeCalledTimes(1);
+        expect(verifyUserFromConversationId).toBeCalledTimes(1);
+        expect(verifyUserFromConversationId).toBeCalledWith(
+            sampleConversationId,
+            testConversation.serviceUrl,
+            testConversation.tenantId,
+            testUserId
+        );
+        expect(conversationDataService.getConversationData).toBeCalledTimes(1);
+        expect(conversationDataService.getConversationData).toBeCalledWith(
             sampleConversationId
         );
     });
@@ -689,6 +1041,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
         (<any>questionDataService.markQuestionAsAnswered) = jest.fn();
         (<any>isPresenterOrOrganizer) = jest.fn();
         (<any>conversationDataService.getConversationData) = jest.fn();
+        (<any>verifyUserFromConversationId) = jest.fn();
     });
 
     beforeEach(() => {
@@ -760,6 +1113,21 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
         const testQuestionId = 'q1';
         const testError: Error = new Error('test error');
 
+        (<any>(
+            conversationDataService.getConversationData
+        )).mockImplementationOnce(() => {
+            return {
+                _id: sampleConversationId,
+                serviceUrl: sampleServiceUrl,
+                tenantId: sampleTenantId,
+                meetingId: sampleMeetingId,
+            };
+        });
+
+        (<any>verifyUserFromConversationId).mockImplementationOnce(() => {
+            return true;
+        });
+
         (<any>questionDataService.upVoteQuestion).mockImplementationOnce(() => {
             throw testError;
         });
@@ -780,12 +1148,38 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
             testUserId,
             testUserName
         );
+        expect(conversationDataService.getConversationData).toBeCalledTimes(1);
+        expect(conversationDataService.getConversationData).toBeCalledWith(
+            sampleConversationId
+        );
+        expect(verifyUserFromConversationId).toBeCalledTimes(1);
+        expect(verifyUserFromConversationId).toBeCalledWith(
+            sampleConversationId,
+            sampleServiceUrl,
+            sampleTenantId,
+            testUserId
+        );
     });
 
     it('upVote question action', async () => {
         const testSessionId = 'testId';
         const sampleConversationId = '1';
         const testQuestionId = 'q1';
+
+        (<any>(
+            conversationDataService.getConversationData
+        )).mockImplementationOnce(() => {
+            return {
+                _id: sampleConversationId,
+                serviceUrl: sampleServiceUrl,
+                tenantId: sampleTenantId,
+                meetingId: sampleMeetingId,
+            };
+        });
+
+        (<any>verifyUserFromConversationId).mockImplementationOnce(() => {
+            return true;
+        });
 
         const result = await request(app)
             .patch(
@@ -803,6 +1197,60 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
             testUserId,
             testUserName
         );
+        expect(conversationDataService.getConversationData).toBeCalledTimes(1);
+        expect(conversationDataService.getConversationData).toBeCalledWith(
+            sampleConversationId
+        );
+        expect(verifyUserFromConversationId).toBeCalledTimes(1);
+        expect(verifyUserFromConversationId).toBeCalledWith(
+            sampleConversationId,
+            sampleServiceUrl,
+            sampleTenantId,
+            testUserId
+        );
+    });
+
+    it('user is not part of conversation', async () => {
+        const testSessionId = 'testId';
+        const sampleConversationId = '1';
+        const testQuestionId = 'q1';
+
+        (<any>(
+            conversationDataService.getConversationData
+        )).mockImplementationOnce(() => {
+            return {
+                _id: sampleConversationId,
+                serviceUrl: sampleServiceUrl,
+                tenantId: sampleTenantId,
+                meetingId: sampleMeetingId,
+            };
+        });
+
+        (<any>verifyUserFromConversationId).mockImplementationOnce(() => {
+            return false;
+        });
+
+        const result = await request(app)
+            .patch(
+                `/api/conversations/${sampleConversationId}/sessions/${testSessionId}/questions/${testQuestionId}`
+            )
+            .send({ action: 'upvote' });
+
+        expect(result.status).toBe(403);
+        expect(result.text).toEqual(
+            `user is not part of the given conversationId`
+        );
+        expect(conversationDataService.getConversationData).toBeCalledTimes(1);
+        expect(conversationDataService.getConversationData).toBeCalledWith(
+            sampleConversationId
+        );
+        expect(verifyUserFromConversationId).toBeCalledTimes(1);
+        expect(verifyUserFromConversationId).toBeCalledWith(
+            sampleConversationId,
+            sampleServiceUrl,
+            sampleTenantId,
+            testUserId
+        );
     });
 
     it('downVoteQuestion api throws error for downvote action', async () => {
@@ -816,6 +1264,21 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
                 throw testError;
             }
         );
+
+        (<any>(
+            conversationDataService.getConversationData
+        )).mockImplementationOnce(() => {
+            return {
+                _id: sampleConversationId,
+                serviceUrl: sampleServiceUrl,
+                tenantId: sampleTenantId,
+                meetingId: sampleMeetingId,
+            };
+        });
+
+        (<any>verifyUserFromConversationId).mockImplementationOnce(() => {
+            return true;
+        });
 
         const result = await request(app)
             .patch(
@@ -832,12 +1295,38 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
             testQuestionId,
             testUserId
         );
+        expect(conversationDataService.getConversationData).toBeCalledTimes(1);
+        expect(conversationDataService.getConversationData).toBeCalledWith(
+            sampleConversationId
+        );
+        expect(verifyUserFromConversationId).toBeCalledTimes(1);
+        expect(verifyUserFromConversationId).toBeCalledWith(
+            sampleConversationId,
+            sampleServiceUrl,
+            sampleTenantId,
+            testUserId
+        );
     });
 
     it('downVote question action', async () => {
         const testSessionId = 'testId';
         const sampleConversationId = '1';
         const testQuestionId = 'q1';
+
+        (<any>(
+            conversationDataService.getConversationData
+        )).mockImplementationOnce(() => {
+            return {
+                _id: sampleConversationId,
+                serviceUrl: sampleServiceUrl,
+                tenantId: sampleTenantId,
+                meetingId: sampleMeetingId,
+            };
+        });
+
+        (<any>verifyUserFromConversationId).mockImplementationOnce(() => {
+            return true;
+        });
 
         const result = await request(app)
             .patch(
@@ -852,6 +1341,60 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
             sampleConversationId,
             testSessionId,
             testQuestionId,
+            testUserId
+        );
+        expect(conversationDataService.getConversationData).toBeCalledTimes(1);
+        expect(conversationDataService.getConversationData).toBeCalledWith(
+            sampleConversationId
+        );
+        expect(verifyUserFromConversationId).toBeCalledTimes(1);
+        expect(verifyUserFromConversationId).toBeCalledWith(
+            sampleConversationId,
+            sampleServiceUrl,
+            sampleTenantId,
+            testUserId
+        );
+    });
+
+    it('user is not part of conversation', async () => {
+        const testSessionId = 'testId';
+        const sampleConversationId = '1';
+        const testQuestionId = 'q1';
+
+        (<any>(
+            conversationDataService.getConversationData
+        )).mockImplementationOnce(() => {
+            return {
+                _id: sampleConversationId,
+                serviceUrl: sampleServiceUrl,
+                tenantId: sampleTenantId,
+                meetingId: sampleMeetingId,
+            };
+        });
+
+        (<any>verifyUserFromConversationId).mockImplementationOnce(() => {
+            return false;
+        });
+
+        const result = await request(app)
+            .patch(
+                `/api/conversations/${sampleConversationId}/sessions/${testSessionId}/questions/${testQuestionId}`
+            )
+            .send({ action: 'downvote' });
+
+        expect(result.status).toBe(403);
+        expect(result.text).toEqual(
+            `user is not part of the given conversationId`
+        );
+        expect(conversationDataService.getConversationData).toBeCalledTimes(1);
+        expect(conversationDataService.getConversationData).toBeCalledWith(
+            sampleConversationId
+        );
+        expect(verifyUserFromConversationId).toBeCalledTimes(1);
+        expect(verifyUserFromConversationId).toBeCalledWith(
+            sampleConversationId,
+            sampleServiceUrl,
+            sampleTenantId,
             testUserId
         );
     });
@@ -1275,8 +1818,19 @@ describe('test get /:conversationId/activesessions api', () => {
 
         initializeRouter(conversationDataService);
 
+        (<any>conversationDataService.getConversationData) = jest.fn();
+        (<any>verifyUserFromConversationId) = jest.fn();
+
+        const mockEnsureAuthenticated = (req, res, next) => {
+            req.user = {
+                _id: sampleUserId,
+                userName: sampleUserName,
+            };
+            next();
+        };
         // Rest endpoints
-        app.use('/api/conversations', router);
+        app.use('/api/conversations', mockEnsureAuthenticated, router);
+
         (<any>qnaSessionDataService.getAllActiveQnASessionData) = jest.fn();
         (<any>processQnASesssionsDataForMeetingTab) = jest.fn();
 
@@ -1315,6 +1869,24 @@ describe('test get /:conversationId/activesessions api', () => {
             return testQnAData;
         });
         const sampleConversationId = '1';
+
+        const testConversation = {
+            _id: sampleConversationId,
+            serviceUrl: 'testServiceUrl',
+            tenantId: 'testTenantId',
+            meetingId: 'testMeetingId',
+        };
+
+        (<any>(
+            conversationDataService.getConversationData
+        )).mockImplementationOnce(() => {
+            return testConversation;
+        });
+
+        (<any>verifyUserFromConversationId).mockImplementationOnce(() => {
+            return true;
+        });
+
         const qnaSessionDataObject1 = {
             sessionId: '1',
             title: generateUniqueId(),
@@ -1363,6 +1935,17 @@ describe('test get /:conversationId/activesessions api', () => {
         expect(processQnASesssionsDataForMeetingTab).toBeCalledWith(
             testQnAData
         );
+        expect(conversationDataService.getConversationData).toBeCalledTimes(1);
+        expect(conversationDataService.getConversationData).toBeCalledWith(
+            sampleConversationId
+        );
+        expect(verifyUserFromConversationId).toBeCalledTimes(1);
+        expect(verifyUserFromConversationId).toBeCalledWith(
+            sampleConversationId,
+            testConversation.serviceUrl,
+            testConversation.tenantId,
+            sampleUserId
+        );
     });
 
     it('get all QnA sessions data for internal server error', async () => {
@@ -1378,6 +1961,23 @@ describe('test get /:conversationId/activesessions api', () => {
             }
         );
         const sampleConversationId = '1';
+        const testConversation = {
+            _id: sampleConversationId,
+            serviceUrl: 'testServiceUrl',
+            tenantId: 'testTenantId',
+            meetingId: 'testMeetingId',
+        };
+
+        (<any>(
+            conversationDataService.getConversationData
+        )).mockImplementationOnce(() => {
+            return testConversation;
+        });
+
+        (<any>verifyUserFromConversationId).mockImplementationOnce(() => {
+            return true;
+        });
+
         const result = await request(app).get(
             `/api/conversations/${sampleConversationId}/activesessions`
         );
@@ -1385,6 +1985,17 @@ describe('test get /:conversationId/activesessions api', () => {
         expect(processQnASesssionsDataForMeetingTab).toBeCalledTimes(1);
         expect(processQnASesssionsDataForMeetingTab).toBeCalledWith(
             testQnAData
+        );
+        expect(conversationDataService.getConversationData).toBeCalledTimes(1);
+        expect(conversationDataService.getConversationData).toBeCalledWith(
+            sampleConversationId
+        );
+        expect(verifyUserFromConversationId).toBeCalledTimes(1);
+        expect(verifyUserFromConversationId).toBeCalledWith(
+            sampleConversationId,
+            testConversation.serviceUrl,
+            testConversation.tenantId,
+            sampleUserId
         );
     });
 
@@ -1396,11 +2007,79 @@ describe('test get /:conversationId/activesessions api', () => {
         )).mockImplementationOnce(() => {
             return testQnAData;
         });
+
+        const testConversation = {
+            _id: sampleInvalidConversationId,
+            serviceUrl: 'testServiceUrl',
+            tenantId: 'testTenantId',
+            meetingId: 'testMeetingId',
+        };
+
+        (<any>(
+            conversationDataService.getConversationData
+        )).mockImplementationOnce(() => {
+            return testConversation;
+        });
+
+        (<any>verifyUserFromConversationId).mockImplementationOnce(() => {
+            return true;
+        });
+
         const result = await request(app).get(
             `/api/conversations/${sampleInvalidConversationId}/activesessions`
         );
         expect(result.status).toBe(204);
         expect(result.noContent).toBe(true);
         expect(processQnASesssionsDataForMeetingTab).toBeCalledTimes(0);
+        expect(conversationDataService.getConversationData).toBeCalledTimes(1);
+        expect(conversationDataService.getConversationData).toBeCalledWith(
+            sampleInvalidConversationId
+        );
+        expect(verifyUserFromConversationId).toBeCalledTimes(1);
+        expect(verifyUserFromConversationId).toBeCalledWith(
+            sampleInvalidConversationId,
+            testConversation.serviceUrl,
+            testConversation.tenantId,
+            sampleUserId
+        );
+    });
+
+    it('user is not part of conversation', async () => {
+        const sampleConversationId = '1';
+        const testConversation = {
+            _id: sampleConversationId,
+            serviceUrl: 'testServiceUrl',
+            tenantId: 'testTenantId',
+            meetingId: 'testMeetingId',
+        };
+
+        (<any>(
+            conversationDataService.getConversationData
+        )).mockImplementationOnce(() => {
+            return testConversation;
+        });
+
+        (<any>verifyUserFromConversationId).mockImplementationOnce(() => {
+            return false;
+        });
+
+        const result = await request(app).get(
+            `/api/conversations/${sampleConversationId}/activesessions`
+        );
+        expect(result.status).toBe(403);
+        expect(result.text).toEqual(
+            `user is not part of the given conversationId`
+        );
+        expect(conversationDataService.getConversationData).toBeCalledTimes(1);
+        expect(conversationDataService.getConversationData).toBeCalledWith(
+            sampleConversationId
+        );
+        expect(verifyUserFromConversationId).toBeCalledTimes(1);
+        expect(verifyUserFromConversationId).toBeCalledWith(
+            sampleConversationId,
+            testConversation.serviceUrl,
+            testConversation.tenantId,
+            sampleUserId
+        );
     });
 });

@@ -36,7 +36,7 @@ test("tests add to group function for bad request: connectionId missing", async 
   await httpTrigger(triggerMockContext, request);
   expect(triggerMockContext.res.status).toBe(400);
   expect(triggerMockContext.res.body).toBe(
-    "parameter connectionId is missing."
+    "Parameter connectionId is missing."
   );
 });
 
@@ -45,7 +45,7 @@ test("tests add to group function for bad request: conversationId missing", asyn
   await httpTrigger(triggerMockContext, request);
   expect(triggerMockContext.res.status).toBe(400);
   expect(triggerMockContext.res.body).toBe(
-    "parameter conversationId is missing."
+    "Parameter conversationId is missing."
   );
 });
 

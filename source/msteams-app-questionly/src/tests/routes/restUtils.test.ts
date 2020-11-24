@@ -1,6 +1,5 @@
 import { generateUniqueId } from 'adaptivecards';
 import {
-    qnaSessionDataService,
     questionDataService,
     userDataService,
 } from 'msteams-app-questionly.data';
@@ -11,7 +10,6 @@ import {
     isPresenterOrOrganizer,
 } from 'src/routes/restUtils';
 
-const sampleConversationId = '1';
 const sampleMeetingId = 'sampleMeetingId';
 const sampleUserId = 'sampleUserId';
 const sampleTenantId = 'sampleTenantId';
