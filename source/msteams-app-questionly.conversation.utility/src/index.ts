@@ -22,7 +22,7 @@ export const verifyUserFromConversationId = async (
   serviceUrl: string,
   tenantId: string,
   userId: string
-): Promise<Boolean> => {
+): Promise<boolean> => {
   try {
     const conversation: ConversationAccount = {
       id: conversationId,
