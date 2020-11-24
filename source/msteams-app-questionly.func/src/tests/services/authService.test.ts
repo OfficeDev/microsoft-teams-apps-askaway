@@ -7,6 +7,7 @@ import {
   userIdParameterConstant,
 } from "../../constants/requestConstants";
 import { verifyAzureToken } from "azure-ad-jwt-lite";
+import { errorStrings } from "../../constants/errorStrings";
 jest.mock("azure-ad-jwt-lite");
 
 const mockRequest: HttpRequest = {
@@ -62,19 +63,19 @@ test("tests authenticateRequest for missing tenant id", async () => {
   delete process.env.TenantId;
   await expect(
     authenticateRequest(triggerMockContext, mockRequest)
-  ).rejects.toThrow("Tenant id is missing in the settings.");
+  ).rejects.toThrow(errorStrings.TenantIdMissingError);
 });
 
 test("tests authenticateRequest for missing AzureAd valid issuers", async () => {
   delete process.env.AzureAd_ValidIssuers;
   await expect(
     authenticateRequest(triggerMockContext, mockRequest)
-  ).rejects.toThrow("AzureAd ValidIssuers is missing in the settings.");
+  ).rejects.toThrow(errorStrings.AzureAdValidIssuersMissingError);
 });
 
 test("tests authenticateRequest for missing AzureAd applicationIdUri", async () => {
   delete process.env.AzureAd_ApplicationIdUri;
   await expect(
     authenticateRequest(triggerMockContext, mockRequest)
-  ).rejects.toThrow("AzureAd ApplicationIdUri is missing in the settings.");
+  ).rejects.toThrow(errorStrings.AzureAdApplicationIdUriMissingError);
 });

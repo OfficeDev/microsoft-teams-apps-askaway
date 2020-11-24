@@ -15,7 +15,7 @@
     {
       "type": "signalRConnectionInfo",
       "name": "connectionInfo",
-      "hubName": "chat",
+      "hubName": "amaSession",
       "direction": "in"
     }
   ],
