@@ -1,7 +1,7 @@
 // tslint:disable-next-line:no-relative-imports
 import './index.scss';
-import { MeetingPanel } from './MeetingPanel';
-import { TeamsContent } from './TeamsContent';
+import { MeetingPanel } from 'src/app/scripts/askAwayTab/MeetingPanel';
+import { TeamsContent } from 'src/app/scripts/askAwayTab/TeamsContent';
 import * as React from 'react';
 import { Provider } from '@fluentui/react-northstar';
 import msteamsReactBaseComponent, {

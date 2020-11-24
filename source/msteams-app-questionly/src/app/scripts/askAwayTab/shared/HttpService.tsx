@@ -1,6 +1,6 @@
 import axios, { AxiosResponse, AxiosRequestConfig } from 'axios';
 import * as microsoftTeams from '@microsoft/teams-js';
-import { getBaseUrl } from './ConfigVariables';
+import { getBaseUrl } from 'src/app/scripts/askAwayTab/shared/ConfigVariables';
 export class HttpService {
     /**
      * Get Method
@@ -19,8 +19,6 @@ export class HttpService {
             if (needAuthorizationHeader) {
                 config = await this.setupAuthorizationHeader(config);
             }
-            console.log('axios call', config);
-            console.log('url', getBaseUrl() + url);
             return await axios.get(getBaseUrl() + url, config);
         } catch (error) {
             if (handleError) {
