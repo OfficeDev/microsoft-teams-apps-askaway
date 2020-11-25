@@ -30,9 +30,7 @@ const activityFunction: AzureFunction = async function (
 ): Promise<void> {
   try {
     const conversationId = context.bindings.name.conversationId;
-
-    const conversation = await getConversationData(conversationId);
-    const serviceUrl = conversation.serviceUrl;
+    const serviceUrl = context.bindings.name.serviceUrl;
     const appId = process.env.AppId.toString();
     const notificationBubblePageUrl = process.env.NotificationBubblePageUrl.toString();
 

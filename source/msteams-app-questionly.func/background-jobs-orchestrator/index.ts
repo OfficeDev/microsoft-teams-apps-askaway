@@ -18,6 +18,12 @@ const broadcastActivityRetryOption: df.RetryOptions = new df.RetryOptions(
   ifNumber(process.env.BroadcastActivityRetryAttemptCount, 2)
 );
 
+// Retry option for update card activity
+const broadcastUpdateCardOption: df.RetryOptions = new df.RetryOptions(
+  ifNumber(process.env.BroadcastActivityRetryInterval, 1000),
+  ifNumber(process.env.BroadcastActivityRetryAttemptCount, 2)
+);
+
 const orchestrator = df.orchestrator(function* (context) {
   if (!context.df.isReplaying) {
     context.log.info(
@@ -26,6 +32,27 @@ const orchestrator = df.orchestrator(function* (context) {
   }
 
   try {
+    // Get conversation data before triggering any background job
+    const conversation = yield context.df.callActivity(
+      "get-conversation-data",
+      context.bindingData.input
+    );
+    if (conversation === undefined) {
+      context.log.error(
+        `Could not find conversation data for conversation id ${context.bindingData.input.conversationId}`
+      );
+      return;
+    }
+
+    // Create input object data with all the parameters required for background jobs.
+    const inputData = {
+      serviceUrl: conversation.serviceUrl,
+      conversationId: context.bindingData.input.conversationId,
+      qnaSessionId: context.bindingData.input.qnaSessionId,
+      activityId: context.bindingData.input.cardData?.activityId,
+      card: context.bindingData.input.cardData?.card,
+    };
+
     const parallelTasks = [];
 
     // Broadcast events to all clients from a meeting.
@@ -33,7 +60,7 @@ const orchestrator = df.orchestrator(function* (context) {
       context.df.callActivityWithRetry(
         "broadcast-message",
         broadcastActivityRetryOption,
-        context.bindingData.input
+        inputData
       )
     );
 
@@ -42,13 +69,17 @@ const orchestrator = df.orchestrator(function* (context) {
       context.df.callActivityWithRetry(
         "send-notification-bubble",
         notificationBubbleActivityRetryOption,
-        context.bindingData.input
+        inputData
       )
     );
 
     // Update adaptive card activity.
     parallelTasks.push(
-      context.df.callActivity("update-adaptive-card", "update adaptive card")
+      context.df.callActivityWithRetry(
+        "update-adaptive-card",
+        broadcastUpdateCardOption,
+        inputData
+      )
     );
 
     yield context.df.Task.all(parallelTasks);
