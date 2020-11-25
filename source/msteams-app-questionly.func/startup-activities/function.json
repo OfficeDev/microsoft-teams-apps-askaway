@@ -6,5 +6,5 @@
       "direction": "in"
     }
   ],
-  "scriptFile": "../dist/get-conversation-data/index.js"
+  "scriptFile": "../dist/startup-activities/index.js"
 }

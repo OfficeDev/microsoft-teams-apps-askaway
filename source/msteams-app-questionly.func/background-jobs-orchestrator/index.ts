@@ -34,7 +34,7 @@ const orchestrator = df.orchestrator(function* (context) {
   try {
     // Get conversation data before triggering any background job
     const conversation = yield context.df.callActivity(
-      "get-conversation-data",
+      "startup-activities",
       context.bindingData.input
     );
     if (conversation === undefined) {
