@@ -1,6 +1,7 @@
 import axios, { AxiosResponse, AxiosRequestConfig } from 'axios';
 import * as microsoftTeams from '@microsoft/teams-js';
-import { getBaseUrl } from 'src/app/scripts/askAwayTab/shared/ConfigVariables';
+// tslint:disable-next-line:no-relative-imports
+import { getBaseUrl } from './ConfigVariables';
 export class HttpService {
     /**
      * Get Method

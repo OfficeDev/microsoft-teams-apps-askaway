@@ -3,19 +3,12 @@ import './index.scss';
 import * as React from 'react';
 import { Flex, Text, Button, Image } from '@fluentui/react-northstar';
 import * as microsoftTeams from '@microsoft/teams-js';
-import HttpService from 'src/app/scripts/askAwayTab/shared/HttpService';
+// tslint:disable-next-line:no-relative-imports
+import HttpService from './shared/HttpService';
 export interface TeamsContentProps {
     teamsData: any;
 }
-export interface TeamsContentState {
-    sessionForm: {
-        title: string;
-        description: string;
-        scopeId: string;
-        hostUserId: string;
-        isChannel: boolean;
-    };
-}
+export interface TeamsContentState {}
 
 export class TeamsContent extends React.Component<
     TeamsContentProps,
@@ -171,7 +164,7 @@ export class TeamsContent extends React.Component<
                     title: result['title'],
                     description: result['description'],
                     scopeId: this.props.teamsData.chatId,
-                    hostUserId: null,
+                    hostUserId: '',
                     isChannel: false,
                 };
                 HttpService.post(
