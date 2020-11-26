@@ -45,7 +45,6 @@ export const setActivityId = async (
   try {
     await qnaSessionDataService.updateActivityId(qnaSessionId, activityId);
   } catch (error) {
-    // TODO: log error
     throw error;
   }
 };

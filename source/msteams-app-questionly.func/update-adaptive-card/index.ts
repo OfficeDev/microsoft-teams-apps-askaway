@@ -21,9 +21,12 @@ import { setActivityId } from "../src/utils/dbUtility";
 const activityFunction: AzureFunction = async function (
   context: Context
 ): Promise<void> {
+  const card = context.bindings.name.card;
+  if (card === undefined || card === null) {
+    return;
+  }
   const activityId = context.bindings.name.activityId;
   const qnaSessionId = context.bindings.name.qnaSessionId;
-  const card = context.bindings.name.card;
   const conversationId = context.bindings.name.conversationId;
   const serviceUrl = context.bindings.name.serviceUrl;
 
@@ -41,7 +44,11 @@ const activityFunction: AzureFunction = async function (
       } as ConversationAccount,
     } as ConversationReference;
 
-    if (activityId !== undefined && activityId !== null) {
+    if (
+      activityId !== undefined &&
+      activityId !== null &&
+      activityId.trim() !== ""
+    ) {
       // update activity
       await adapter.continueConversation(
         conversationReference,

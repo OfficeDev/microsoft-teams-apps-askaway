@@ -27,14 +27,6 @@ const httpStart: AzureFunction = async function (
     return context.res;
   }
 
-  if (!isValidParam(req.body?.cardData)) {
-    createBadRequestResponse(
-      context,
-      errorStrings.RequestParameterIsMissingError.replace("{0}", "cardData")
-    );
-    return context.res;
-  }
-
   const client = df.getClient(context);
   const instanceId = await client.startNew(
     "background-jobs-orchestrator",
