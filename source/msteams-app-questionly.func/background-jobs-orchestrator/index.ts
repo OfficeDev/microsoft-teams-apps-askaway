@@ -35,7 +35,7 @@ const orchestrator = df.orchestrator(function* (context) {
     // Get conversation data before triggering any background job
     const conversation = yield context.df.callActivity(
       "startup-activities",
-      context.bindingData.input
+      context.bindingData.input.conversationId
     );
     if (conversation === undefined) {
       context.log.error(
@@ -60,7 +60,7 @@ const orchestrator = df.orchestrator(function* (context) {
       context.df.callActivityWithRetry(
         "broadcast-message",
         broadcastActivityRetryOption,
-        inputData
+        context.bindingData.input
       )
     );
 

@@ -5,7 +5,6 @@ import {
   IConversationDataService,
   qnaSessionDataService,
 } from "msteams-app-questionly.data";
-import { err, ok } from "./resultWrapper";
 
 let dbInstance = null;
 let conversationDataService: IConversationDataService = new ConversationDataService();
@@ -44,11 +43,9 @@ export const setActivityId = async (
   activityId: string
 ) => {
   try {
-    return ok(
-      await qnaSessionDataService.updateActivityId(qnaSessionId, activityId)
-    );
+    await qnaSessionDataService.updateActivityId(qnaSessionId, activityId);
   } catch (error) {
     // TODO: log error
-    return err(error);
+    throw error;
   }
 };
