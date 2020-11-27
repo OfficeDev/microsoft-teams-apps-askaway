@@ -3,12 +3,12 @@ import './index.scss';
 import * as React from 'react';
 import { Flex, Text, Button, Image } from '@fluentui/react-northstar';
 import * as microsoftTeams from '@microsoft/teams-js';
-export interface TeamsContentProps {}
-export interface TeamsContentState {}
+export interface TabContentProps {}
+export interface TabContentState {}
 
-export class TeamsContent extends React.Component<
-    TeamsContentProps,
-    TeamsContentState
+export class TabContent extends React.Component<
+    TabContentProps,
+    TabContentState
 > {
     constructor(props) {
         super(props);

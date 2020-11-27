@@ -1,7 +1,7 @@
 // tslint:disable-next-line:no-relative-imports
 import './index.scss';
 import { MeetingPanel } from './MeetingPanel';
-import { TeamsContent } from './TeamsContent';
+import { TabContent } from './TabContent';
 import * as React from 'react';
 import { Provider } from '@fluentui/react-northstar';
 import msteamsReactBaseComponent, {
@@ -70,12 +70,13 @@ export class AskAwayTab extends msteamsReactBaseComponent<
                         ) as { [key: string]: any };
                         this.setState({ name: decoded!.name });
                         microsoftTeams.appInitialization.notifySuccess();
-                        const st = this.state;
-                        this.setState({ token: token });
-                        this.setState({ channelId: context.channelId });
-                        this.setState({ chatId: context.chatId });
-                        this.setState({ userId: context.userObjectId });
-                        this.setState({ meetingId: context['meetingId'] });
+                        this.setState({
+                            token: token,
+                            channelId: context.channelId,
+                            chatId: context.chatId,
+                            userId: context.userObjectId,
+                            meetingId: context['meetingId'],
+                        });
                     },
                     failureCallback: (message: string) => {
                         this.setState({ error: message });
@@ -109,7 +110,7 @@ export class AskAwayTab extends msteamsReactBaseComponent<
                 )}
                 {this.state.frameContext === 'content' && (
                     <React.Fragment>
-                        <TeamsContent />
+                        <TabContent />
                     </React.Fragment>
                 )}
             </Provider>
