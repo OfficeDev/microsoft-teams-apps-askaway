@@ -11,6 +11,7 @@ import {
     processQnASesssionsDataForMeetingTab,
     getParticipantRole,
     isPresenterOrOrganizer,
+    getHostUserId,
 } from 'src/routes/restUtils';
 import { generateUniqueId } from 'adaptivecards';
 import { verifyUserFromConversationId } from 'msteams-app-questionly.conversation.utility';
@@ -24,7 +25,8 @@ const sampleConversationId = 'sampleConversationId';
 const samplTtitle = 'sample title';
 const sampleDescription = 'sample description';
 const sampleScopeId = 'scoopeId';
-const sampleHostUserId = 'sampleHostId';
+const sampleHostId = 'sampleHostId';
+const sampleHostUserId = 'sampleHostUserId';
 const sampleMeetingId = 'sampleMeetingId';
 const sampleUserId = 'sampleUserId';
 const sampleUserName = 'sampleUserName';
@@ -413,6 +415,7 @@ describe('test post conversations/:conversationId/sessions api', () => {
         initializeRouter(conversationDataService);
 
         (<any>isPresenterOrOrganizer) = jest.fn();
+        (<any>getHostUserId) = jest.fn();
         (<any>qnaSessionDataService.createQnASession) = jest.fn();
         (<any>conversationDataService.getConversationData) = jest.fn();
     });
@@ -434,11 +437,14 @@ describe('test post conversations/:conversationId/sessions api', () => {
         (<any>isPresenterOrOrganizer).mockImplementationOnce(() => {
             return true;
         });
+        (<any>getHostUserId).mockImplementationOnce(() => {
+            return sampleHostUserId;
+        });
         (<any>qnaSessionDataService.createQnASession).mockImplementationOnce(
             () => {
                 return {
                     qnaSessionId: sampleQnASessionId,
-                    hostId: sampleHostUserId,
+                    hostId: sampleHostId,
                 };
             }
         );
@@ -449,13 +455,14 @@ describe('test post conversations/:conversationId/sessions api', () => {
                 title: samplTtitle,
                 description: sampleDescription,
                 scopeId: sampleScopeId,
-                hostUserId: sampleHostUserId,
+                hostUserId: sampleHostId,
                 isChannel: true,
             });
         expect(result).toBeDefined();
         expect(result.status).toBe(200);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(isPresenterOrOrganizer).toBeCalledTimes(1);
+        expect(getHostUserId).toBeCalledTimes(1);
         expect(qnaSessionDataService.createQnASession).toBeCalledTimes(1);
     });
 
@@ -473,6 +480,9 @@ describe('test post conversations/:conversationId/sessions api', () => {
         (<any>isPresenterOrOrganizer).mockImplementationOnce(() => {
             return true;
         });
+        (<any>getHostUserId).mockImplementationOnce(() => {
+            return sampleHostUserId;
+        });
         (<any>qnaSessionDataService.createQnASession).mockImplementationOnce(
             () => {
                 throw testError;
@@ -485,13 +495,48 @@ describe('test post conversations/:conversationId/sessions api', () => {
                 title: samplTtitle,
                 description: sampleDescription,
                 scopeId: sampleScopeId,
-                hostUserId: sampleHostUserId,
+                hostUserId: sampleHostId,
                 isChannel: true,
             });
         expect(result.status).toBe(500);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(isPresenterOrOrganizer).toBeCalledTimes(1);
+        expect(getHostUserId).toBeCalledTimes(1);
         expect(qnaSessionDataService.createQnASession).toBeCalledTimes(1);
+    });
+
+    it('test post a qna session - getHostUserId fails', async () => {
+        const testError = new Error();
+        (<any>(
+            conversationDataService.getConversationData
+        )).mockImplementationOnce(() => {
+            return {
+                serviceUrl: sampleServiceUrl,
+                tenantId: sampleTenantId,
+                meetingId: sampleMeetingId,
+            };
+        });
+        (<any>isPresenterOrOrganizer).mockImplementationOnce(() => {
+            return true;
+        });
+        (<any>getHostUserId).mockImplementationOnce(() => {
+            throw testError;
+        });
+
+        const result = await request(app)
+            .post(`/api/conversations/${sampleConversationId}/sessions`)
+            .send({
+                title: samplTtitle,
+                description: sampleDescription,
+                scopeId: sampleScopeId,
+                hostUserId: sampleHostId,
+                isChannel: true,
+            });
+        expect(result.status).toBe(500);
+        expect(conversationDataService.getConversationData).toBeCalledTimes(1);
+        expect(isPresenterOrOrganizer).toBeCalledTimes(1);
+        expect(getHostUserId).toBeCalledTimes(1);
+        expect(qnaSessionDataService.createQnASession).toBeCalledTimes(0);
     });
 
     it('test post a qna session - isPresenterOrOrganizer returns false', async () => {
@@ -514,7 +559,7 @@ describe('test post conversations/:conversationId/sessions api', () => {
                 title: samplTtitle,
                 description: sampleDescription,
                 scopeId: sampleScopeId,
-                hostUserId: sampleHostUserId,
+                hostUserId: sampleHostId,
                 isChannel: true,
             });
         expect(result.status).toBe(400);
@@ -537,13 +582,21 @@ describe('test post conversations/:conversationId/sessions api', () => {
                 title: samplTtitle,
                 description: sampleDescription,
                 scopeId: sampleScopeId,
-                hostUserId: sampleHostUserId,
+                hostUserId: sampleHostId,
                 isChannel: true,
             });
         expect(result.status).toBe(500);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(isPresenterOrOrganizer).toBeCalledTimes(0);
+        expect(getHostUserId).toBeCalledTimes(0);
         expect(qnaSessionDataService.createQnASession).toBeCalledTimes(0);
+    });
+
+    it('test post a qna session - parameters missing in request payload', async () => {
+        const result = await request(app)
+            .post(`/api/conversations/${sampleConversationId}/sessions`)
+            .send({});
+        expect(result.status).toBe(400);
     });
 });
 
