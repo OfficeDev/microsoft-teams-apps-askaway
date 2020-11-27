@@ -5,40 +5,13 @@ import { authenticateRequest } from "../src/services/authService";
 import { signalRUtility } from "../src/utils/signalRUtility";
 import { IConversation } from "msteams-app-questionly.data";
 import { getConversationData } from "../src/utils/dbUtility";
-
-/**
- * Forms 401 Unauthorized response.
- * @param context: azure function context.
- */
-const formUnauthorizedErrorResponse = (context: Context): void => {
-  context.res = {
-    status: 401,
-    body: "Unauthorized",
-  };
-};
-
-/**
- * Forms 400 Bad request response.
- * @param context: azure function context.
- * @param error: error message.
- */
-const formBadRequestResponse = (context: Context, error: string): void => {
-  context.res = {
-    status: 400,
-    body: error,
-  };
-};
-
-/**
- * Forms 500 Internal server error response.
- * @param context: azure function context.
- */
-const formInternalServerErrorResponse = (context: Context): void => {
-  context.res = {
-    status: 500,
-    body: null,
-  };
-};
+import {
+  createBadRequestResponse,
+  createInternalServerErrorResponse,
+  createUnauthorizedErrorResponse,
+} from "../src/utils/responseUtility";
+import { isValidParam } from "../src/utils/requestUtility";
+import { errorStrings } from "../src/constants/errorStrings";
 
 const httpTrigger: AzureFunction = async function (
   context: Context,
@@ -48,18 +21,32 @@ const httpTrigger: AzureFunction = async function (
     const conversationId: string = req.body?.conversationId;
     const connectionId: string = req.body?.connectionId;
 
-    if (conversationId === undefined) {
-      formBadRequestResponse(context, `parameter conversationId is missing.`);
+    // Validate request parameters.
+    if (!isValidParam(conversationId)) {
+      createBadRequestResponse(
+        context,
+        errorStrings.RequestParameterIsMissingError.replace(
+          "{0}",
+          "conversationId"
+        )
+      );
       return;
-    } else if (connectionId === undefined) {
-      formBadRequestResponse(context, `parameter connectionId is missing.`);
+    } else if (!isValidParam(connectionId)) {
+      createBadRequestResponse(
+        context,
+        errorStrings.RequestParameterIsMissingError.replace(
+          "{0}",
+          "connectionId"
+        )
+      );
       return;
     }
 
+    // Authenticate the request.
     const isAuthenticRequest: Boolean = await authenticateRequest(context, req);
 
     if (!isAuthenticRequest) {
-      formUnauthorizedErrorResponse(context);
+      createUnauthorizedErrorResponse(context);
       return;
     }
 
@@ -67,6 +54,8 @@ const httpTrigger: AzureFunction = async function (
     const conversation: IConversation = await getConversationData(
       conversationId
     );
+
+    // Check if user is part of conversation.
     const isValidUser: Boolean = await verifyUserFromConversationId(
       conversationId,
       conversation.serviceUrl,
@@ -75,11 +64,12 @@ const httpTrigger: AzureFunction = async function (
     );
 
     if (!isValidUser) {
-      formUnauthorizedErrorResponse(context);
+      createUnauthorizedErrorResponse(context);
       return;
     }
 
     try {
+      // Add connection to the group.
       await signalRUtility.addConnectionToGroup(connectionId, conversationId);
     } catch (error) {
       context.log.error(error);
@@ -90,7 +80,7 @@ const httpTrigger: AzureFunction = async function (
           body: error["message"],
         };
       } else {
-        formInternalServerErrorResponse(context);
+        createInternalServerErrorResponse(context);
       }
 
       return;
@@ -101,7 +91,7 @@ const httpTrigger: AzureFunction = async function (
     };
   } catch (error) {
     context.log.error(error);
-    formInternalServerErrorResponse(context);
+    createInternalServerErrorResponse(context);
   }
 };
 

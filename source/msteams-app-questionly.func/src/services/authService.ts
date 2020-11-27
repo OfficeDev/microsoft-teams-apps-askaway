@@ -1,6 +1,7 @@
 import { Context, HttpRequest } from "@azure/functions";
 import { verifyAzureToken } from "azure-ad-jwt-lite";
 import { VerifyOptions } from "jsonwebtoken";
+import { errorStrings } from "../constants/errorStrings";
 import {
   aadObjectIdParameterConstant,
   authorizationHeaderConstant,
@@ -13,7 +14,7 @@ import {
  */
 const getTenantId = (): string => {
   if (process.env.TenantId === undefined) {
-    throw new Error("Tenant id is missing in the settings.");
+    throw new Error(errorStrings.TenantIdMissingError);
   }
 
   return process.env.TenantId.toString().trim();
@@ -25,7 +26,7 @@ const getTenantId = (): string => {
  */
 export const getValidIssuers = (): string[] => {
   if (process.env.AzureAd_ValidIssuers === undefined) {
-    throw new Error("AzureAd ValidIssuers is missing in the settings.");
+    throw new Error(errorStrings.AzureAdValidIssuersMissingError);
   }
 
   let validIssuers: string[] = [];
@@ -48,7 +49,7 @@ export const getValidIssuers = (): string[] => {
  */
 const getVerifyOptions = (): VerifyOptions => {
   if (process.env.AzureAd_ApplicationIdUri === undefined) {
-    throw new Error("AzureAd ApplicationIdUri is missing in the settings.");
+    throw new Error(errorStrings.AzureAdApplicationIdUriMissingError);
   }
 
   const options: VerifyOptions = {

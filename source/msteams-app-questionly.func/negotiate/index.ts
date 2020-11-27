@@ -1,5 +1,9 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 import { authenticateRequest } from "../src/services/authService";
+import {
+  createInternalServerErrorResponse,
+  createUnauthorizedErrorResponse,
+} from "../src/utils/responseUtility";
 
 const httpTrigger: AzureFunction = async function (
   context: Context,
@@ -12,18 +16,12 @@ const httpTrigger: AzureFunction = async function (
     if (isAuthenticRequest) {
       context.res.json(connectionInfo);
     } else {
-      context.res = {
-        status: 401,
-        body: "Unauthorized",
-      };
+      createUnauthorizedErrorResponse(context);
     }
   } catch (error) {
     context.log.error(error);
 
-    context.res = {
-      status: 500,
-      body: null,
-    };
+    createInternalServerErrorResponse(context);
   }
 };
 

@@ -30,11 +30,19 @@ export const triggerMockContext: Context = {
 };
 
 const sampleConversationId = "sampleConversationId";
+const sampleActivityId = "sampleActivityId";
+const sampleQnASessionId = "sampleQnASessionId";
+const sampleCard = "sampleCard";
+const sampleSericeUrl = "sampleServiceUrl";
 
 export const activityMockContext: Context = {
   bindings: {
     name: {
       conversationId: sampleConversationId,
+      qnaSessionId: sampleQnASessionId,
+      activityId: sampleActivityId,
+      serviceUrl: sampleSericeUrl,
+      card: sampleCard,
     },
   },
   bindingData: {},

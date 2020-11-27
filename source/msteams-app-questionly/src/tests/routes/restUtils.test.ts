@@ -1,17 +1,15 @@
 import { generateUniqueId } from 'adaptivecards';
 import {
-    qnaSessionDataService,
     questionDataService,
     userDataService,
 } from 'msteams-app-questionly.data';
 
 import {
-    getAllQnASesssionsDataForTab,
+    processQnASesssionsDataForMeetingTab,
     getParticipantRole,
     isPresenterOrOrganizer,
 } from 'src/routes/restUtils';
 
-const sampleConversationId = '1';
 const sampleMeetingId = 'sampleMeetingId';
 const sampleUserId = 'sampleUserId';
 const sampleTenantId = 'sampleTenantId';
@@ -24,14 +22,13 @@ let user1: any;
 let user2: any;
 
 // Test cases will be improved as part of rest api TASK 1211744, this is a boilerplate code.
-describe('test /conversations/:conversationId/sessions/:sessionId api', () => {
+describe('test process QnA sesssions for meeting tab', () => {
     beforeAll(() => {
-        (<any>qnaSessionDataService.getAllQnASessionData) = jest.fn();
-        (<any>questionDataService.getQuestions) = jest.fn();
+        (<any>questionDataService.getQuestionData) = jest.fn();
         (<any>userDataService.getUser) = jest.fn();
 
         testQnAData1 = {
-            id: generateUniqueId(),
+            _id: generateUniqueId(),
             hostId: generateUniqueId(),
             hostUserId: generateUniqueId(),
             title: generateUniqueId(),
@@ -42,7 +39,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId api', () => {
         };
 
         testQnAData2 = {
-            id: generateUniqueId(),
+            _id: generateUniqueId(),
             hostId: generateUniqueId(),
             hostUserId: generateUniqueId(),
             title: generateUniqueId(),
@@ -53,26 +50,26 @@ describe('test /conversations/:conversationId/sessions/:sessionId api', () => {
         };
 
         question1 = {
-            qnaSessionId: testQnAData1.id,
+            qnaSessionId: testQnAData1._id,
             userId: { _id: testQnAData1.hostId, userName: generateUniqueId() },
             content: generateUniqueId(),
-            voters: [],
+            voters: [generateUniqueId(), generateUniqueId()],
         };
 
         question2 = {
-            qnaSessionId: testQnAData1.id,
+            qnaSessionId: testQnAData1._id,
             userId: { _id: testQnAData2.hostId, userName: generateUniqueId() },
             content: generateUniqueId(),
-            voters: [],
+            voters: [generateUniqueId(), generateUniqueId()],
         };
 
         user1 = {
-            id: testQnAData1.hostId,
+            _id: testQnAData1.hostId,
             userName: question1.userId.userName,
         };
 
         user2 = {
-            id: testQnAData2.hostId,
+            _id: testQnAData2.hostId,
             userName: question2.userId.userName,
         };
     });
@@ -81,29 +78,17 @@ describe('test /conversations/:conversationId/sessions/:sessionId api', () => {
         jest.clearAllMocks();
     });
 
-    it('validates get all qna session data for tab', async () => {
-        (<any>(
-            qnaSessionDataService.getAllQnASessionData
-        )).mockImplementationOnce(() => {
-            return [testQnAData1, testQnAData2];
-        });
-
-        (<any>questionDataService.getQuestions).mockImplementation((qnaid) => {
-            if (qnaid == testQnAData1.id) {
-                return {
-                    topQuestions: [question1, question2],
-                    recentQuestions: [question1, question2],
-                    numQuestions: 2,
-                };
-            } else if (qnaid == testQnAData2.id) {
-                return {
-                    topQuestions: [],
-                    recentQuestions: [],
-                    numQuestions: 0,
-                };
+    it('validates process QnA sesssions for meeting tab', async () => {
+        const qnaSessionsData = [testQnAData1, testQnAData2];
+        (<any>questionDataService.getQuestionData).mockImplementation(
+            (qnaid) => {
+                if (qnaid === testQnAData1._id) {
+                    return [question1, question2];
+                } else if (qnaid === testQnAData2._id) {
+                    return [];
+                }
             }
-        });
-
+        );
         (<any>userDataService.getUser).mockImplementation((id) => {
             if (id == testQnAData1.hostId) {
                 return user1;
@@ -111,8 +96,9 @@ describe('test /conversations/:conversationId/sessions/:sessionId api', () => {
                 return user2;
             }
         });
-
-        const result = await getAllQnASesssionsDataForTab(sampleConversationId);
+        const result = await processQnASesssionsDataForMeetingTab(
+            qnaSessionsData
+        );
         expect(result.length).toEqual(2);
         expect(result[0].title).toEqual(testQnAData1.title);
         expect(result[0].numberOfQuestions).toEqual(2);
@@ -122,102 +108,72 @@ describe('test /conversations/:conversationId/sessions/:sessionId api', () => {
         expect(result[0].users.length).toEqual(2);
         expect(result[0].users[0].name).toEqual(user1.userName);
         expect(result[0].users[1].name).toEqual(user2.userName);
-        expect(result[0].users[0].id).toEqual(user1.id);
-        expect(result[0].users[1].id).toEqual(user2.id);
+        expect(result[0].users[0]._id).toEqual(user1.id);
+        expect(result[0].users[1]._id).toEqual(user2.id);
+        expect(result[0].questions[0].qnaSessionId).toEqual(
+            question2.qnaSessionId
+        );
+        expect(result[0].questions[1].qnaSessionId).toEqual(
+            question1.qnaSessionId
+        );
         expect(result[1].title).toEqual(testQnAData2.title);
         expect(result[1].numberOfQuestions).toEqual(0);
         expect(result[1].isActive).toEqual(testQnAData2.isActive);
         expect(result[1].hostUser.id).toEqual(user2.id);
         expect(result[1].hostUser.name).toEqual(user2.userName);
         expect(result[1].users.length).toEqual(0);
-        expect(qnaSessionDataService.getAllQnASessionData).toBeCalledTimes(1);
-        expect(qnaSessionDataService.getAllQnASessionData).toBeCalledWith(
-            sampleConversationId
-        );
-        expect(questionDataService.getQuestions).toBeCalledTimes(2);
+        expect(questionDataService.getQuestionData).toBeCalledTimes(2);
         expect(userDataService.getUser).toBeCalledTimes(2);
     });
 
-    it('validates get all qna session data for tab for invalid conversation id', async () => {
-        (<any>(
-            qnaSessionDataService.getAllQnASessionData
-        )).mockImplementationOnce(() => {
-            return [];
-        });
-        const result = await getAllQnASesssionsDataForTab(sampleConversationId);
+    it('validates process QnA sesssions for meeting tab - no qna session data', async () => {
+        const qnaSessionsData = [];
+        const result = await processQnASesssionsDataForMeetingTab(
+            qnaSessionsData
+        );
 
         expect(result.length).toEqual(0);
-        expect(qnaSessionDataService.getAllQnASessionData).toBeCalledTimes(1);
-        expect(qnaSessionDataService.getAllQnASessionData).toBeCalledWith(
-            sampleConversationId
-        );
     });
 
-    it('validates get all qna session data for tab - error while getting user data', async () => {
+    it('validates process QnA sesssions for meeting tab - error while getting user data', async () => {
         const sampleError: Error = new Error();
-        (<any>(
-            qnaSessionDataService.getAllQnASessionData
-        )).mockImplementationOnce(() => {
-            return [testQnAData1, testQnAData2];
-        });
-
-        (<any>questionDataService.getQuestions).mockImplementation((qnaid) => {
-            if (qnaid == testQnAData1.id) {
-                return {
-                    topQuestions: [question1, question2],
-                    recentQuestions: [question1, question2],
-                    numQuestions: 2,
-                };
-            } else if (qnaid == testQnAData2.id) {
-                return {
-                    topQuestions: [],
-                    recentQuestions: [],
-                    numQuestions: 0,
-                };
+        (<any>questionDataService.getQuestionData).mockImplementation(
+            (qnaid) => {
+                if (qnaid === testQnAData1._id) {
+                    return [question1, question2];
+                } else if (qnaid === testQnAData2._id) {
+                    return [];
+                }
             }
-        });
-
+        );
         (<any>userDataService.getUser).mockImplementationOnce(() => {
             throw sampleError;
         });
 
-        await getAllQnASesssionsDataForTab(sampleConversationId).catch(
+        const qnaSessionsData = [testQnAData1, testQnAData2];
+        await processQnASesssionsDataForMeetingTab(qnaSessionsData).catch(
             (err) => {
                 expect(err).toEqual(new Error());
             }
         );
-
-        expect(qnaSessionDataService.getAllQnASessionData).toBeCalledTimes(1);
-        expect(qnaSessionDataService.getAllQnASessionData).toBeCalledWith(
-            sampleConversationId
-        );
-        expect(questionDataService.getQuestions).toBeCalledTimes(1);
+        expect(questionDataService.getQuestionData).toBeCalledTimes(1);
         expect(userDataService.getUser).toBeCalledTimes(1);
     });
 
-    it('validates get all qna session data for tab - error while getting question data', async () => {
+    it('validates process QnA sesssions for meeting tab - error while getting question data', async () => {
         const sampleError: Error = new Error();
-        (<any>(
-            qnaSessionDataService.getAllQnASessionData
-        )).mockImplementationOnce(() => {
-            return [testQnAData1, testQnAData2];
-        });
-
-        (<any>questionDataService.getQuestions).mockImplementationOnce(() => {
-            throw sampleError;
-        });
-
-        await getAllQnASesssionsDataForTab(sampleConversationId).catch(
+        (<any>questionDataService.getQuestionData).mockImplementationOnce(
+            () => {
+                throw sampleError;
+            }
+        );
+        const qnaSessionsData = [testQnAData1, testQnAData2];
+        await processQnASesssionsDataForMeetingTab(qnaSessionsData).catch(
             (err) => {
                 expect(err).toEqual(sampleError);
             }
         );
-
-        expect(qnaSessionDataService.getAllQnASessionData).toBeCalledTimes(1);
-        expect(qnaSessionDataService.getAllQnASessionData).toBeCalledWith(
-            sampleConversationId
-        );
-        expect(questionDataService.getQuestions).toBeCalledTimes(1);
+        expect(questionDataService.getQuestionData).toBeCalledTimes(1);
         expect(userDataService.getUser).toBeCalledTimes(0);
     });
 });

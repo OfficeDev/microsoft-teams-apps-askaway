@@ -50,7 +50,8 @@
         "taskFetch": "taskFetch",
         "taskSubmit": "taskSubmit",
         "leaderboard": "leaderboard",
-        "conversationInvalid": "conversationInvalid"
+        "conversationInvalid": "conversationInvalid",
+        "qnasessionlimitexhausted": "qnasessionlimitexhausted"
     },
     "generic": {
         "submit": "submit",
