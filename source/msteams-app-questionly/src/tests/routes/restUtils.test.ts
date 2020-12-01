@@ -1,4 +1,5 @@
 import { generateUniqueId } from 'adaptivecards';
+import { BotFrameworkAdapter } from 'botbuilder';
 import {
     questionDataService,
     userDataService,
@@ -8,12 +9,16 @@ import {
     processQnASesssionsDataForMeetingTab,
     getParticipantRole,
     isPresenterOrOrganizer,
+    getHostUserId,
+    getMemberInfo,
 } from 'src/routes/restUtils';
+import { getMicrosoftAppPassword } from 'src/util/keyvault';
 
 const sampleMeetingId = 'sampleMeetingId';
 const sampleUserId = 'sampleUserId';
 const sampleTenantId = 'sampleTenantId';
 const sampleServiceUrl = 'sampleServiceUrl';
+const sampleConversationId = 'sampleConversationId';
 let testQnAData1: any;
 let testQnAData2: any;
 let question1: any;
@@ -227,5 +232,59 @@ describe('validates isPreseterOrOrganizer', () => {
         );
         expect(result).toBeFalsy();
         expect(getParticipantRole).toBeCalledTimes(1);
+    });
+});
+
+describe('test getHostUserId', () => {
+    beforeAll(() => {
+        process.env.MicrosoftAppId = 'random';
+        (<any>BotFrameworkAdapter) = jest.fn();
+        (<any>getMemberInfo) = jest.fn();
+        (<any>getMicrosoftAppPassword) = jest.fn();
+    });
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
+    it('validate getHostUserId', async () => {
+        const sampleId = '1';
+        (<any>getMicrosoftAppPassword).mockImplementationOnce(() => {
+            return 'random';
+        });
+        (<any>getMemberInfo).mockImplementationOnce(() => {
+            return {
+                id: sampleId,
+            };
+        });
+        const result = await getHostUserId(
+            sampleUserId,
+            sampleConversationId,
+            sampleServiceUrl
+        );
+
+        expect(result).toBeTruthy();
+        expect(result).toEqual(sampleId);
+        expect(getMemberInfo).toBeCalledTimes(1);
+    });
+
+    it('validate getHostUserId - get member info fails', async () => {
+        const sampleId = '1';
+        (<any>getMicrosoftAppPassword).mockImplementationOnce(() => {
+            return 'random';
+        });
+        (<any>getMemberInfo).mockImplementationOnce(() => {
+            return undefined;
+        });
+
+        await getHostUserId(
+            sampleUserId,
+            sampleConversationId,
+            sampleServiceUrl
+        ).catch((err) => {
+            expect(err).toEqual(
+                new Error('Could not get member info for teams user')
+            );
+        });
     });
 });

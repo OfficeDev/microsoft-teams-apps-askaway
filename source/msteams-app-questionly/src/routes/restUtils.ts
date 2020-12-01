@@ -9,6 +9,13 @@ import { exceptionLogger } from 'src/util/exceptionTracking';
 import axios from 'axios';
 import { getMicrosoftAppPassword } from 'src/util/keyvault';
 import { organizer, presenter } from 'src/constants/restConstants';
+import {
+    BotFrameworkAdapter,
+    ConversationAccount,
+    ConversationReference,
+    TeamsChannelAccount,
+    TeamsInfo,
+} from 'botbuilder';
 
 /**
  * Gets questions data and user data for each active qna sessions, process them and returns an array of detailed qna sessions.
@@ -148,4 +155,54 @@ export const patchActionForQuestion = ['upvote', 'downvote', 'markAnswered'];
 export const formResponseWhenUserIsNotPartOfConversation = (res) => {
     res.statusCode = 403;
     res.send(`user is not part of the given conversationId`);
+};
+
+export const getHostUserId = async (
+    userId: string,
+    conversationId: string,
+    serviceUrl: string
+) => {
+    try {
+        const conversationReference = {
+            serviceUrl: serviceUrl,
+            channelId: 'msteams',
+            conversation: {
+                id: conversationId,
+            } as ConversationAccount,
+        } as ConversationReference;
+
+        const adapter: BotFrameworkAdapter = new BotFrameworkAdapter({
+            appId: process.env.MicrosoftAppId,
+            appPassword: await getMicrosoftAppPassword(),
+        });
+
+        const teamMember = await getMemberInfo(
+            userId,
+            adapter,
+            conversationReference
+        );
+        if (teamMember !== undefined) {
+            return teamMember.id;
+        }
+        throw new Error('Could not get member info for teams user');
+    } catch (error) {
+        exceptionLogger(error);
+        throw error;
+    }
+};
+
+// This function returns teams api to get member info. Added this as a separate function for better UT coverage.
+export const getMemberInfo = async (
+    userId: string,
+    adapter: BotFrameworkAdapter,
+    conversationReference: ConversationReference
+): Promise<TeamsChannelAccount> => {
+    let teamMember;
+    await adapter.continueConversation(
+        conversationReference,
+        async (context) => {
+            teamMember = await TeamsInfo.getMember(context, userId);
+        }
+    );
+    return teamMember;
 };

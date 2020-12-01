@@ -80,7 +80,7 @@ const getSecretFromCache = async (secretName: string): Promise<string> => {
         const secret: string = await getSecretFromVault(secretName);
 
         // Secrets last in memory for some time (default 24 hours), post that cache should be updated from key vault.
-        // Currently only one secret `AvatarKey` is set in cache as it's used multiple time.
+        // Currently only `AvatarKey` and `MicrosoftAppPassword` are set in cache as it's used multiple time.
         // All other secrets are used once during initialization hence fetched from key vault directly.
         const retryAfterMs = ifNumber(
             process.env.ExpireInMemorySecretsAfterMs,
@@ -122,7 +122,7 @@ export const getApplicationInsightsInstrumentationKeyURI = async (): Promise<
  * @throws - Error if error occurs while fetching secret from key vault.
  */
 export const getMicrosoftAppPassword = async (): Promise<string> => {
-    return await getSecretFromVault(microsoftAppPasswordSecretName);
+    return await getSecretFromCache(microsoftAppPasswordSecretName);
 };
 
 /**
