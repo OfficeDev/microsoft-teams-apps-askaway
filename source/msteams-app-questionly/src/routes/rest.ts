@@ -11,12 +11,14 @@ import { verifyUserFromConversationId } from 'msteams-app-questionly.conversatio
 import { exceptionLogger } from 'src/util/exceptionTracking';
 import {
     processQnASesssionsDataForMeetingTab,
-    getParticipantRole,
-    isPresenterOrOrganizer,
     patchActionForQuestion,
     formResponseWhenUserIsNotPartOfConversation,
     getHostUserId,
 } from 'src/routes/restUtils';
+import {
+    getParticipantRole,
+    isPresenterOrOrganizer,
+} from 'src/util/meetingsUtility';
 
 export const router = Express.Router();
 let conversationDataService: IConversationDataService;

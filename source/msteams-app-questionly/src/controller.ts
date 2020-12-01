@@ -11,6 +11,9 @@ import {
     qnaSessionDataService,
     questionDataService,
 } from 'msteams-app-questionly.data';
+import { isPresenterOrOrganizer } from './util/meetingsUtility';
+import { InsufficientPermissionsToCreateQnASessionError } from './errors/insufficientPermissionsToCreateQnASessionError';
+import { InsufficientPermissionsToEndQnASessionError } from './errors/insufficientPermissionsToEndQnASessionError';
 
 export const getMainCard = adaptiveCardBuilder.getMainCard;
 export const getStartQnACard = adaptiveCardBuilder.getStartQnACard;
@@ -57,9 +60,33 @@ export const startQnASession = async (
     tenantId: string,
     scopeId: string,
     hostUserId: string,
-    isChannel: boolean
+    isChannel: boolean,
+    serviceURL: string,
+    meetingId: string
 ): Promise<Result<{ card: AdaptiveCard; qnaSessionId: string }, Error>> => {
     try {
+        // Only a presenter or organizer can create a new QnA session in the meeting.
+        if (!isChannel) {
+            if (
+                !(await isPresenterOrOrganizer(
+                    meetingId,
+                    userAadObjId,
+                    tenantId,
+                    serviceURL
+                ))
+            ) {
+                exceptionLogger(
+                    new InsufficientPermissionsToCreateQnASessionError(
+                        'Only a Presenter or an Organizer can create new QnA Session.'
+                    )
+                );
+                return err(
+                    new InsufficientPermissionsToCreateQnASessionError(
+                        'Only a Presenter or an Organizer can create new QnA Session.'
+                    )
+                );
+            }
+        }
         // save data to db
         const response = await qnaSessionDataService.createQnASession(
             title,
@@ -279,18 +306,52 @@ export const getEndQnAConfirmationCard = (
 export const endQnASession = async (
     qnaSessionId: string,
     aadObjectId: string,
-    conversationId: string
+    conversationId: string,
+    tenantId: string,
+    serviceURL: string,
+    meetingId: string
 ): Promise<Result<{ card: AdaptiveCard; activityId: string }, Error>> => {
     try {
         const isActive = await qnaSessionDataService.isActiveQnA(qnaSessionId);
+        if (!isActive) return err(Error('The QnA session has already ended'));
+
         const isHost = await qnaSessionDataService.isHost(
             qnaSessionId,
             aadObjectId
         );
 
-        if (!isActive) return err(Error('The QnA session has already ended'));
-        if (!isHost)
-            return err(Error('Insufficient permissions to end QnA session'));
+        // Either a presenter, an organizer or the host can end QnA session in the meeting.
+        if (
+            meetingId !== undefined &&
+            meetingId !== null &&
+            meetingId.trim() !== ''
+        ) {
+            let canEndQnASession = await isPresenterOrOrganizer(
+                meetingId,
+                aadObjectId,
+                tenantId,
+                serviceURL
+            );
+            canEndQnASession = canEndQnASession || isHost;
+            if (!canEndQnASession) {
+                exceptionLogger(
+                    new InsufficientPermissionsToEndQnASessionError(
+                        'Either a presenter, an organizer, or the host can end QnA Session.'
+                    )
+                );
+                return err(
+                    new InsufficientPermissionsToEndQnASessionError(
+                        'Either a presenter, an organizer, or the host can end QnA Session.'
+                    )
+                );
+            }
+        } else {
+            if (!isHost)
+                return err(
+                    Error('Insufficient permissions to end QnA session')
+                );
+        }
+
         await qnaSessionDataService.endQnASession(qnaSessionId, conversationId);
 
         const updatedMainCard = await getUpdatedMainCard(qnaSessionId, true);
