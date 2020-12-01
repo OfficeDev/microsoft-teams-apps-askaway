@@ -15,6 +15,7 @@ import {
     isPresenterOrOrganizer,
     patchActionForQuestion,
     formResponseWhenUserIsNotPartOfConversation,
+    getHostUserId,
 } from 'src/routes/restUtils';
 
 export const router = Express.Router();
@@ -252,9 +253,22 @@ router.post('/:conversationId/sessions', async (req, res) => {
         return res.send('User details could not be found.');
     }
 
+    if (
+        !isDefined(req.body) ||
+        !isDefined(req.body.title) ||
+        !isDefined(req.body.description) ||
+        !isDefined(req.body.scopeId) ||
+        !isDefined(req.body.isChannel)
+    ) {
+        res.statusCode = 400;
+        res.send(
+            `One or more parameters missing in the request payload. Check if title, description, scopeId, and isChannel are provided.`
+        );
+        return;
+    }
+
     const conversationId = req.params['conversationId'];
     let response;
-
     try {
         const conversationData = await conversationDataService.getConversationData(
             conversationId
@@ -289,6 +303,12 @@ router.post('/:conversationId/sessions', async (req, res) => {
             );
         }
 
+        const hostUserId = await getHostUserId(
+            user._id,
+            conversationId,
+            serviceUrl
+        );
+
         response = await qnaSessionDataService.createQnASession(
             req.body.title,
             req.body.description,
@@ -298,7 +318,7 @@ router.post('/:conversationId/sessions', async (req, res) => {
             conversationId,
             tenantId,
             req.body.scopeId,
-            req.body.hostUserId,
+            hostUserId,
             req.body.isChannel
         );
     } catch (error) {
