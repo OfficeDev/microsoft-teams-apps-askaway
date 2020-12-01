@@ -1,12 +1,12 @@
 // tslint:disable-next-line:no-relative-imports
 import './index.scss';
 import * as React from 'react';
+// tslint:disable-next-line:no-relative-imports
+import HttpService from './shared/HttpService';
 import {
-    Provider,
     Flex,
     Text,
     Button,
-    Header,
     Image,
     Form,
     Input,
@@ -15,7 +15,9 @@ import {
     SendIcon,
 } from '@fluentui/react-northstar';
 
-export interface MeetingPanelProps {}
+export interface MeetingPanelProps {
+    teamsData: any;
+}
 
 export interface MeetingPanelState {
     isSessionCreated: boolean;
@@ -25,14 +27,28 @@ export class MeetingPanel extends React.Component<
     MeetingPanelProps,
     MeetingPanelState
 > {
-    constructor(props: {}) {
+    constructor(props) {
         super(props);
         this.state = {
             isSessionCreated: false,
         };
     }
 
-    componentDidMount() {}
+    componentDidMount() {
+        this.getActiveSession();
+    }
+
+    public getActiveSession() {
+        console.log('props', this.props);
+
+        HttpService.get(
+            `/conversations/${this.props.teamsData.chatId}/sessions`
+        )
+            .then((response: any) => {
+                console.log('response', response);
+            })
+            .catch((error) => {});
+    }
 
     public onSubmitCreateSession(e) {
         this.setState({
@@ -100,10 +116,10 @@ export class MeetingPanel extends React.Component<
                 />
                 <div className="no-question">
                     <Image
-                        className="icon2"
+                        className="no-post-questions"
                         alt="image"
                         styles={{ width: '278px' }}
-                        src={require('./../../web/assets/icon2.png')}
+                        src={require('./../../web/assets/create_session.png')}
                     />
                     <Flex.Item align="center">
                         <Text

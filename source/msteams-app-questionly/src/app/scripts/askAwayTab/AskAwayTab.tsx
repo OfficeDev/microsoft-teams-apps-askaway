@@ -2,8 +2,7 @@
 import './index.scss';
 // tslint:disable-next-line:no-relative-imports
 import { MeetingPanel } from './MeetingPanel';
-// tslint:disable-next-line:no-relative-imports
-import { TeamsContent } from './TeamsContent';
+import { TabContent } from './TabContent';
 import * as React from 'react';
 import { Provider } from '@fluentui/react-northstar';
 import msteamsReactBaseComponent, {
@@ -24,7 +23,7 @@ export interface IAskAwayTabState extends ITeamsBaseComponentState {
     userId?: string;
     meetingId?: string;
     theme: any;
-    teamContext: microsoftTeams.Context | null;
+    teamContext: microsoftTeams.Context;
     frameContext?: string;
 }
 /**
@@ -42,10 +41,6 @@ export class AskAwayTab extends msteamsReactBaseComponent<
     constructor(props) {
         super(props);
         microsoftTeams.initialize();
-        this.state = {
-            teamContext: null,
-            theme: 'Light',
-        };
         microsoftTeams.getContext((context) => {
             this.setState({ teamContext: context });
         });
@@ -72,12 +67,13 @@ export class AskAwayTab extends msteamsReactBaseComponent<
                         ) as { [key: string]: any };
                         this.setState({ name: decoded!.name });
                         microsoftTeams.appInitialization.notifySuccess();
-                        const st = this.state;
-                        this.setState({ token: token });
-                        this.setState({ channelId: context.channelId });
-                        this.setState({ chatId: context.chatId });
-                        this.setState({ userId: context.userObjectId });
-                        this.setState({ meetingId: context['meetingId'] });
+                        this.setState({
+                            token: token,
+                            channelId: context.channelId,
+                            chatId: context.chatId,
+                            userId: context.userObjectId,
+                            meetingId: context['meetingId'],
+                        });
                     },
                     failureCallback: (message: string) => {
                         this.setState({ error: message });
@@ -106,12 +102,12 @@ export class AskAwayTab extends msteamsReactBaseComponent<
             <Provider theme={this.state.theme}>
                 {this.state.frameContext === 'sidePanel' && (
                     <React.Fragment>
-                        <MeetingPanel />
+                        <MeetingPanel teamsData={this.state.teamContext} />
                     </React.Fragment>
                 )}
                 {this.state.frameContext === 'content' && (
                     <React.Fragment>
-                        <TeamsContent teamsData={this.state.teamContext} />
+                        <TabContent teamsData={this.state.teamContext} />
                     </React.Fragment>
                 )}
             </Provider>

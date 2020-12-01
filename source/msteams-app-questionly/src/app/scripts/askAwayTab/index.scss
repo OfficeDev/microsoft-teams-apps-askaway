@@ -1,12 +1,12 @@
 .screen {
     background-color: #f3f2f1;
-    .icon3 {
+    .askaway-tab-added {
         top: 30%;
         left: 50%;
         transform: translate(-50%, -50%);
         position: absolute;
     }
-    .icon2 {
+    .create-session {
         top: 30%;
         left: 50%;
         transform: translate(-50%, -50%);
@@ -79,11 +79,17 @@
             width: 70%;
             left: 17%;
         }
-        .icon2 {
+        .no-post-questions {
             top: 30%;
             left: 50%;
             transform: translate(-50%, -50%);
             position: absolute;
         }
+    }
+}
+
+.ac-input-container {
+    span.ac-input-validation-error-message {
+        color: red;
     }
 }

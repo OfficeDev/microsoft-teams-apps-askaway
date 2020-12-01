@@ -2,30 +2,44 @@
 import './index.scss';
 import * as React from 'react';
 import { Flex, Text, Button, Image } from '@fluentui/react-northstar';
-import * as microsoftTeams from '@microsoft/teams-js';
 // tslint:disable-next-line:no-relative-imports
 import HttpService from './shared/HttpService';
-export interface TeamsContentProps {
+import * as microsoftTeams from '@microsoft/teams-js';
+export interface TabContentProps {
     teamsData: any;
 }
-export interface TeamsContentState {}
+export interface TabContentState {}
 
-export class TeamsContent extends React.Component<
-    TeamsContentProps,
-    TeamsContentState
+export class TabContent extends React.Component<
+    TabContentProps,
+    TabContentState
 > {
     constructor(props) {
         super(props);
         this.onShowTaskModule = this.onShowTaskModule.bind(this);
     }
 
-    componentDidMount() {}
+    componentDidMount() {
+        this.getActiveSession();
+    }
+
+    public getActiveSession() {
+        console.log('props', this.props);
+
+        HttpService.get(
+            `/conversations/${this.props.teamsData.chatId}/activesessions`
+        )
+            .then((response: any) => {
+                console.log('response', response);
+            })
+            .catch((error) => {});
+    }
 
     public adaptiveCardTemplate() {
         return {
             $schema: 'https://adaptivecards.io/schemas/adaptive-card.json',
             type: 'AdaptiveCard',
-            version: '1.2',
+            version: '1.3',
             body: [
                 {
                     type: 'ColumnSet',
@@ -45,10 +59,13 @@ export class TeamsContent extends React.Component<
                                         {
                                             type: 'Input.Text',
                                             id: 'title',
-                                            isRequired: true,
-                                            errorMessage: 'Name is required',
                                             placeholder:
                                                 'Connect with explore interns',
+                                            validation: {
+                                                necessity: 'Required',
+                                                errorMessage:
+                                                    'Title is required*',
+                                            },
                                         },
                                         {
                                             type: 'TextBlock',
@@ -58,12 +75,14 @@ export class TeamsContent extends React.Component<
                                         {
                                             type: 'Input.Text',
                                             id: 'description',
-                                            required: true,
-                                            requiredError:
-                                                'This is a required input',
                                             placeholder:
                                                 'Ask these upcoming interns anything! Life, work and anything you are interested!',
                                             isMultiline: true,
+                                            validation: {
+                                                necessity: 'Required',
+                                                errorMessage:
+                                                    'Description is required*',
+                                            },
                                         },
                                     ],
                                 },
@@ -95,7 +114,7 @@ export class TeamsContent extends React.Component<
                     items: [
                         {
                             type: 'Image',
-                            url: `https://${process.env.HostName}/src/app/web/assets/Icon4.png`,
+                            url: `https://${process.env.HostName}/images/success_image.png`,
                             width: '20px',
                             horizontalAlignment: 'center',
                         },
@@ -164,7 +183,7 @@ export class TeamsContent extends React.Component<
                     title: result['title'],
                     description: result['description'],
                     scopeId: this.props.teamsData.chatId,
-                    hostUserId: '',
+                    // hostUserId: '',
                     isChannel: false,
                 };
                 HttpService.post(
@@ -173,13 +192,13 @@ export class TeamsContent extends React.Component<
                 )
                     .then((response: any) => {
                         if (response && response['qnaSessionId']) {
-                            this.showSuccessModel(true);
+                            this.showAlertModel(true);
                         } else {
-                            this.showSuccessModel(false);
+                            this.showAlertModel(false);
                         }
                     })
                     .catch((error) => {
-                        this.showSuccessModel(false);
+                        this.showAlertModel(false);
                     });
             }
         };
@@ -190,7 +209,7 @@ export class TeamsContent extends React.Component<
     /**
      * Show success popup
      */
-    public showSuccessModel(isSuccess = false) {
+    public showAlertModel(isSuccess = false) {
         let taskInfo: any = {
             title: 'Microsoft Corporation',
             fallbackUrl: '',
@@ -209,9 +228,9 @@ export class TeamsContent extends React.Component<
         return (
             <Flex hAlign="center" vAlign="center" className="screen">
                 <Image
-                    className="icon2"
+                    className="create-session"
                     alt="image"
-                    src={require('./../../web/assets/icon2.png')}
+                    src={require('./../../web/assets/create_session.png')}
                 />
                 <Flex.Item align="center">
                     <Text

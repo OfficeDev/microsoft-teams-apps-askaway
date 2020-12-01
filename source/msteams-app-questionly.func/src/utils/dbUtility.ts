@@ -3,6 +3,7 @@ import {
   ConversationDataService,
   IConversation,
   IConversationDataService,
+  qnaSessionDataService,
 } from "msteams-app-questionly.data";
 
 let dbInstance = null;
@@ -30,4 +31,20 @@ export const getConversationData = async (
 ): Promise<IConversation> => {
   await initiateDBConnection();
   return await conversationDataService.getConversationData(conversationId);
+};
+
+/**
+ * Sets the activity id of an existing QnA session
+ * @param qnaSessionId - document database id of the QnA session
+ * @param activityId - id of the master card message used for proactive updating of the card
+ */
+export const setActivityId = async (
+  qnaSessionId: string,
+  activityId: string
+) => {
+  try {
+    await qnaSessionDataService.updateActivityId(qnaSessionId, activityId);
+  } catch (error) {
+    throw error;
+  }
 };

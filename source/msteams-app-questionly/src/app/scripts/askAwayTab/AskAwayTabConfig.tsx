@@ -1,14 +1,6 @@
 import './index.scss';
 import * as React from 'react';
-import {
-    Provider,
-    Flex,
-    Header,
-    Input,
-    Text,
-    RadioGroup,
-    Image,
-} from '@fluentui/react-northstar';
+import { Provider, Flex, Text, Image } from '@fluentui/react-northstar';
 import msteamsReactBaseComponent, {
     ITeamsBaseComponentState,
 } from 'msteams-react-base-component';
@@ -74,9 +66,9 @@ export class AskAwayTabConfig extends msteamsReactBaseComponent<
             <Provider theme={this.state.theme}>
                 <Flex hAlign="center" vAlign="center" className="screen">
                     <Image
-                        className="icon3"
+                        className="askaway-tab-added"
                         alt="image"
-                        src={require('./../../web/assets/icon3.png')}
+                        src={require('./../../web/assets/askaway_tab_added.png')}
                     />
                     <Flex.Item align="center">
                         <Text
