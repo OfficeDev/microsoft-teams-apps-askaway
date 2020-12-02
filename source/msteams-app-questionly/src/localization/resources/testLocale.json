@@ -52,8 +52,7 @@
         "leaderboard": "leaderboard",
         "conversationInvalid": "conversationInvalid",
         "qnasessionlimitexhausted": "qnasessionlimitexhausted",
-        "insufficientPermissionsToCreateQnASessionError": "insufficientPermissionsToCreateQnASessionError",
-        "insufficientPermissionsToEndQnASessionError": "insufficientPermissionsToEndQnASessionError"
+        "insufficientPermissionsToCreateOrEndQnASessionError": "insufficientPermissionsToCreateOrEndQnASessionError"
     },
     "generic": {
         "submit": "submit",

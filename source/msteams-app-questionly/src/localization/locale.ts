@@ -33,8 +33,7 @@ export interface Errors {
     leaderboard: string;
     conversationInvalid: string;
     qnasessionlimitexhausted: string;
-    insufficientPermissionsToCreateQnASessionError: string;
-    insufficientPermissionsToEndQnASessionError: string;
+    insufficientPermissionsToCreateOrEndQnASessionError: string;
 }
 
 export interface Generic {

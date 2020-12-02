@@ -20,6 +20,7 @@ import {
     qnaSessionDataService,
     questionDataService,
 } from 'msteams-app-questionly.data';
+import { isPresenterOrOrganizer } from 'src/util/meetingsUtility';
 
 const sampleUserAADObjId1 = 'be36140g-9729-3024-8yg1-147bbi67g2c9';
 const sampleUserName = 'Sample Name';
@@ -34,6 +35,8 @@ const sampleScopeId = '12311';
 const sampleQuestionContent = 'Sample Question?';
 const sampleQuestionId = '2321232';
 const sampleHostUserId = '5f160b862655575054393a0e';
+const sampleServiceUrl = 'sampleServiceUrl';
+const sampleMeetingId = 'meetingId';
 
 jest.mock('../adaptive-cards/adaptiveCardBuilder');
 jest.mock('msteams-app-questionly.data');
@@ -96,7 +99,9 @@ test('start qna session in channel', async () => {
         sampleTenantId,
         sampleScopeId,
         sampleHostUserId,
-        true
+        true,
+        sampleServiceUrl,
+        sampleMeetingId
     );
     expect(qnaSessionDataService.createQnASession).toBeCalledTimes(1);
     expect(qnaSessionDataService.createQnASession).toBeCalledWith(
@@ -114,6 +119,10 @@ test('start qna session in channel', async () => {
 });
 
 test('start qna session in group chat', async () => {
+    (<any>isPresenterOrOrganizer) = jest.fn();
+    (<any>isPresenterOrOrganizer).mockImplementationOnce(() => {
+        return true;
+    });
     (<any>qnaSessionDataService.createQnASession).mockImplementationOnce(
         () => ({
             qnaSessionId: sampleQnASessionId,
@@ -130,7 +139,9 @@ test('start qna session in group chat', async () => {
         sampleTenantId,
         sampleScopeId,
         sampleHostUserId,
-        false
+        false,
+        sampleServiceUrl,
+        sampleMeetingId
     );
     expect(qnaSessionDataService.createQnASession).toBeCalledTimes(1);
     expect(qnaSessionDataService.createQnASession).toBeCalledWith(
@@ -145,6 +156,35 @@ test('start qna session in group chat', async () => {
         sampleHostUserId,
         false
     );
+});
+
+test('start qna session in meeting for attendee', async () => {
+    (<any>isPresenterOrOrganizer) = jest.fn();
+    (<any>isPresenterOrOrganizer).mockImplementationOnce(() => {
+        return false;
+    });
+    (<any>qnaSessionDataService.createQnASession).mockImplementationOnce(
+        () => ({
+            qnaSessionId: sampleQnASessionId,
+            hostId: sampleUserAADObjId1,
+        })
+    );
+    const res = await startQnASession(
+        sampleTitle,
+        sampleDescription,
+        sampleUserName,
+        sampleUserAADObjId1,
+        sampleActivityId,
+        sampleConversationId,
+        sampleTenantId,
+        sampleScopeId,
+        sampleHostUserId,
+        false,
+        sampleServiceUrl,
+        sampleMeetingId
+    );
+    expect(res.isErr()).toBeTruthy();
+    expect(qnaSessionDataService.createQnASession).toBeCalledTimes(0);
 });
 
 test('generate leaderboard', async () => {
@@ -254,21 +294,82 @@ test('get end qna confirmation card', async () => {
     expect(acb.getEndQnAConfirmationCard).toBeCalledWith(sampleQnASessionId);
 });
 
-test('end ama session', async () => {
+test('end ama session - channel', async () => {
     await endQnASession(
         sampleQnASessionId,
         sampleUserAADObjId1,
-        sampleConversationId
+        sampleConversationId,
+        sampleTenantId,
+        sampleServiceUrl,
+        ''
     );
     expect(qnaSessionDataService.isActiveQnA).toBeCalledTimes(1);
     expect(qnaSessionDataService.isActiveQnA).toBeCalledWith(
         sampleQnASessionId
     );
-    expect(qnaSessionDataService.isHost).toBeCalledTimes(1);
-    expect(qnaSessionDataService.isHost).toBeCalledWith(
+});
+
+test('end ama session - meeting', async () => {
+    (<any>isPresenterOrOrganizer) = jest.fn();
+    (<any>qnaSessionDataService.isActiveQnA) = jest.fn();
+    (<any>isPresenterOrOrganizer).mockImplementationOnce(() => {
+        return true;
+    });
+    (<any>qnaSessionDataService.isActiveQnA).mockImplementationOnce(() => {
+        return true;
+    });
+
+    await endQnASession(
         sampleQnASessionId,
-        sampleUserAADObjId1
+        sampleUserAADObjId1,
+        sampleConversationId,
+        sampleTenantId,
+        sampleServiceUrl,
+        sampleMeetingId
     );
+    expect(qnaSessionDataService.isActiveQnA).toBeCalledTimes(1);
+    expect(qnaSessionDataService.isActiveQnA).toBeCalledWith(
+        sampleQnASessionId
+    );
+    expect(isPresenterOrOrganizer).toBeCalledTimes(1);
+    expect(isPresenterOrOrganizer).toBeCalledWith(
+        sampleMeetingId,
+        sampleUserAADObjId1,
+        sampleTenantId,
+        sampleServiceUrl
+    );
+});
+
+test('end ama session - meeting for attendee', async () => {
+    (<any>isPresenterOrOrganizer) = jest.fn();
+    (<any>qnaSessionDataService.isActiveQnA) = jest.fn();
+    (<any>qnaSessionDataService.isActiveQnA).mockImplementationOnce(() => {
+        return true;
+    });
+    (<any>isPresenterOrOrganizer).mockImplementationOnce(() => {
+        return false;
+    });
+
+    const res = await endQnASession(
+        sampleQnASessionId,
+        sampleUserAADObjId1,
+        sampleConversationId,
+        sampleTenantId,
+        sampleServiceUrl,
+        sampleMeetingId
+    );
+    expect(qnaSessionDataService.isActiveQnA).toBeCalledTimes(1);
+    expect(qnaSessionDataService.isActiveQnA).toBeCalledWith(
+        sampleQnASessionId
+    );
+    expect(isPresenterOrOrganizer).toBeCalledTimes(1);
+    expect(isPresenterOrOrganizer).toBeCalledWith(
+        sampleMeetingId,
+        sampleUserAADObjId1,
+        sampleTenantId,
+        sampleServiceUrl
+    );
+    expect(res.isErr()).toBeTruthy();
 });
 
 test('get resubmit question card', async () => {

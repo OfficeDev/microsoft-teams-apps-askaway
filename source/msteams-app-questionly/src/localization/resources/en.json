@@ -47,10 +47,9 @@
         "taskFetch": "Something went wrong. Please try opening again.",
         "taskSubmit": "Your submission encountered an error. Please try submitting again!",
         "leaderboard": "Could not retrieve leaderboard. Please try again",
-        "conversationInvalid": "Requests pertaining to a QnA must be made in the same conversation the QnA is in.",
-        "qnasessionlimitexhausted": "Could not create a new QnA session. Number of active sessions cannot exceed 1. Please end existing session(s) and try again.",
-        "insufficientPermissionsToCreateQnASessionError": "Only a Presenter or an Organizer can create new QnA Session.",
-        "insufficientPermissionsToEndQnASessionError": "Either a presenter, an organizer, or the host can end QnA Session."
+        "conversationInvalid": "Requests pertaining to a Q & A must be made in the same conversation the Q & A is in.",
+        "qnasessionlimitexhausted": "Could not create a new Q & A session. Number of active sessions cannot exceed 1. Please end existing session(s) and try again.",
+        "insufficientPermissionsToCreateOrEndQnASessionError": "Only a Presenter or an Organizer can create/end a Q & A Session."
     },
     "generic": {
         "submit": "Submit",

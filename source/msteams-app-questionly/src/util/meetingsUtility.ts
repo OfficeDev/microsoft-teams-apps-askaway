@@ -1,6 +1,8 @@
 import axios from 'axios';
+import { ConversationAccount, TurnContext } from 'botbuilder';
 import { MicrosoftAppCredentials } from 'botframework-connector';
-import { organizer, presenter } from 'src/constants/restConstants';
+import { ConversationType } from 'src/enums/ConversationType';
+import { ParticipantRoles } from 'src/enums/ParticipantRoles';
 import { exceptionLogger } from './exceptionTracking';
 import { getMicrosoftAppPassword } from './keyvault';
 
@@ -16,7 +18,11 @@ export const isPresenterOrOrganizer = async (
         tenantId,
         serviceUrl
     );
-    if (role === organizer || role === presenter) {
+
+    if (
+        role === ParticipantRoles.Organizer ||
+        role === ParticipantRoles.Presenter
+    ) {
         return true;
     }
     return false;
@@ -28,31 +34,24 @@ export const getParticipantRole = async (
     tenantId: string,
     serviceUrl: string
 ) => {
-    let token;
-    let role;
+    let token: string;
+    let role: string;
+
     try {
         token = await getToken();
-    } catch (error) {
-        exceptionLogger(error);
-        throw new Error('Error while getting participant role.');
-    }
-
-    await axios
-        .get(
+        const result = await axios.get(
             `${serviceUrl}/v1/meetings/${meetingId}/participants/${userId}?tenantId=${tenantId}`,
             {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             }
-        )
-        .then((res) => {
-            role = res.data.meeting.role;
-        })
-        .catch((error) => {
-            exceptionLogger(error);
-            throw new Error('Error while getting participant role.');
-        });
+        );
+        role = result.data.meeting.role;
+    } catch (error) {
+        exceptionLogger(error);
+        throw new Error('Error while getting participant role.');
+    }
 
     return role;
 };
@@ -69,4 +68,14 @@ const getToken = async () => {
     const appCredentials = new MicrosoftAppCredentials(appId, appPassword);
     const token = await appCredentials.getToken();
     return token;
+};
+
+export const getMeetingIdFromContext = async (context: TurnContext) => {
+    const conversation = context.activity.conversation;
+    const isChannel =
+        conversation.conversationType === ConversationType.Channel;
+    if (!isChannel) {
+        return context.activity.channelData?.meeting?.id;
+    }
+    return '';
 };

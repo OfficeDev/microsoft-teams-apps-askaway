@@ -12,8 +12,7 @@ import {
     questionDataService,
 } from 'msteams-app-questionly.data';
 import { isPresenterOrOrganizer } from './util/meetingsUtility';
-import { InsufficientPermissionsToCreateQnASessionError } from './errors/insufficientPermissionsToCreateQnASessionError';
-import { InsufficientPermissionsToEndQnASessionError } from './errors/insufficientPermissionsToEndQnASessionError';
+import { InsufficientPermissionsToCreateOrEndQnASessionError } from './errors/insufficientPermissionsToCreateOrEndQnASessionError';
 
 export const getMainCard = adaptiveCardBuilder.getMainCard;
 export const getStartQnACard = adaptiveCardBuilder.getStartQnACard;
@@ -76,12 +75,12 @@ export const startQnASession = async (
                 ))
             ) {
                 exceptionLogger(
-                    new InsufficientPermissionsToCreateQnASessionError(
+                    new InsufficientPermissionsToCreateOrEndQnASessionError(
                         'Only a Presenter or an Organizer can create new QnA Session.'
                     )
                 );
                 return err(
-                    new InsufficientPermissionsToCreateQnASessionError(
+                    new InsufficientPermissionsToCreateOrEndQnASessionError(
                         'Only a Presenter or an Organizer can create new QnA Session.'
                     )
                 );
@@ -320,28 +319,27 @@ export const endQnASession = async (
             aadObjectId
         );
 
-        // Either a presenter, an organizer or the host can end QnA session in the meeting.
+        //Only a Presenter or an Organizer can end QnA session in the meeting.
         if (
             meetingId !== undefined &&
             meetingId !== null &&
             meetingId.trim() !== ''
         ) {
-            let canEndQnASession = await isPresenterOrOrganizer(
+            const canEndQnASession = await isPresenterOrOrganizer(
                 meetingId,
                 aadObjectId,
                 tenantId,
                 serviceURL
             );
-            canEndQnASession = canEndQnASession || isHost;
             if (!canEndQnASession) {
                 exceptionLogger(
-                    new InsufficientPermissionsToEndQnASessionError(
-                        'Either a presenter, an organizer, or the host can end QnA Session.'
+                    new InsufficientPermissionsToCreateOrEndQnASessionError(
+                        'Only a Presenter or an Organizer can end Q & A Session.'
                     )
                 );
                 return err(
-                    new InsufficientPermissionsToEndQnASessionError(
-                        'Either a presenter, an organizer, or the host can end QnA Session.'
+                    new InsufficientPermissionsToCreateOrEndQnASessionError(
+                        'Only a Presenter or an Organizer can end Q & A Session.'
                     )
                 );
             }

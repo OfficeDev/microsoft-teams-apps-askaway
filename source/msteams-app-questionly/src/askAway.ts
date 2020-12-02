@@ -28,6 +28,8 @@ import {
 import { exceptionLogger } from 'src/util/exceptionTracking';
 import { ifNumber } from 'src/util/typeUtility';
 import { IConversationDataService } from 'msteams-app-questionly.data';
+import { getMeetingIdFromContext } from './util/meetingsUtility';
+import { ConversationType } from './enums/ConversationType';
 
 const NULL_RESPONSE: any = null;
 /**
@@ -408,10 +410,7 @@ export class AskAway extends TeamsActivityHandler {
 
         const conversation = context.activity.conversation;
         const qnaSessionId = taskModuleRequest.data.qnaSessionId,
-            isChannel = conversation.conversationType === 'channel',
-            meetingId = isChannel
-                ? ''
-                : context.activity.channelData?.meeting?.id;
+            meetingId = await getMeetingIdFromContext(context);
 
         if (taskModuleRequest.data.id == 'submitEndQnA') {
             const result = await controller.endQnASession(
@@ -426,7 +425,7 @@ export class AskAway extends TeamsActivityHandler {
             if (result.isErr()) {
                 if (
                     result.value['code'] ===
-                    'InsufficientPermissionsToEndQnASessionError'
+                    'InsufficientPermissionsToCreateOrEndQnASessionError'
                 ) {
                     return this.handleTeamsTaskModuleInsufficientPermissionsError();
                 }
@@ -446,7 +445,9 @@ export class AskAway extends TeamsActivityHandler {
     private handleTeamsTaskModuleInsufficientPermissionsError(): TaskModuleResponse {
         return this._buildTaskModuleContinueResponse(
             controller.getErrorCard(
-                errorStrings('insufficientPermissionsToEndQnASessionError')
+                errorStrings(
+                    'insufficientPermissionsToCreateOrEndQnASessionError'
+                )
             )
         );
     }
@@ -550,15 +551,14 @@ export class AskAway extends TeamsActivityHandler {
             userAadObjId = <string>context.activity.from.aadObjectId,
             activityId = '',
             tenantId = conversation.tenantId,
-            isChannel = conversation.conversationType === 'channel',
+            isChannel =
+                conversation.conversationType === ConversationType.Channel,
             hostUserId = context.activity.from.id,
             scopeId = isChannel
                 ? teamsGetChannelId(context.activity)
                 : conversation.id,
             serviceURL = context.activity.serviceUrl,
-            meetingId = isChannel
-                ? ''
-                : context.activity.channelData?.meeting?.id;
+            meetingId = await getMeetingIdFromContext(context);
 
         const response = await controller.startQnASession(
             title,
@@ -593,12 +593,12 @@ export class AskAway extends TeamsActivityHandler {
                 );
             } else if (
                 error['code'] ===
-                'InsufficientPermissionsToCreateQnASessionError'
+                'InsufficientPermissionsToCreateOrEndQnASessionError'
             ) {
                 await context.sendActivity(
                     MessageFactory.text(
                         errorStrings(
-                            'insufficientPermissionsToCreateQnASessionError'
+                            'insufficientPermissionsToCreateOrEndQnASessionError'
                         )
                     )
                 );
@@ -657,8 +657,8 @@ export class AskAway extends TeamsActivityHandler {
                 activityPreview: <Activity>(
                     MessageFactory.attachment(
                         card,
-                        NULL_RESPONSE,
-                        NULL_RESPONSE,
+                        '',
+                        '',
                         InputHints.ExpectingInput
                     )
                 ),
