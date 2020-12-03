@@ -34,6 +34,7 @@ export interface Errors {
     conversationInvalid: string;
     qnasessionlimitexhaustedError: string;
     qnasessionCreationError: string;
+    insufficientPermissionsToCreateOrEndQnASessionError: string;
 }
 
 export interface Generic {

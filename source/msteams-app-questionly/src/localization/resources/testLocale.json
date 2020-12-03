@@ -52,7 +52,8 @@
         "leaderboard": "leaderboard",
         "conversationInvalid": "conversationInvalid",
         "qnasessionlimitexhaustedError": "qnasessionlimitexhaustedError",
-        "qnasessionCreationError": "qnasessionCreationError"
+        "qnasessionCreationError": "qnasessionCreationError",
+        "insufficientPermissionsToCreateOrEndQnASessionError": "insufficientPermissionsToCreateOrEndQnASessionError"
     },
     "generic": {
         "submit": "submit",

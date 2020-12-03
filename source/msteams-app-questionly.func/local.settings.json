@@ -18,7 +18,9 @@
     "NotificationBubbleActivityRetryAttemptCount": 1,
     "BroadcastActivityRetryInterval": 1000,
     "BroadcastActivityRetryAttemptCount": 2,
-    "MaxWaitTimeForAdaptiveCardRefreshInMs": 5000
+    "MaxWaitTimeForAdaptiveCardRefreshInMs": 5000,
+    "AvatarKey": "{{AvatarKey}}",
+    "HostName": "{{HostName}}"
   },
   "Host": {
     "LocalHttpPort": 7071,

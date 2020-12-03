@@ -16,7 +16,6 @@ import {
 import * as controller from 'src/controller';
 import { AdaptiveCard } from 'adaptivecards';
 import { extractMainCardData, MainCardData } from 'src/adaptive-cards/mainCard';
-import { Result, err, ok } from 'src/util/resultWrapper';
 import {
     endQnAStrings,
     askQuestionStrings,
@@ -26,6 +25,9 @@ import {
 } from 'src/localization/locale';
 import { exceptionLogger } from 'src/util/exceptionTracking';
 import { IConversationDataService } from 'msteams-app-questionly.data';
+import { ConversationType } from 'src/enums/ConversationType';
+import { getMeetingIdFromContext } from 'src/util/meetingsUtility';
+import { Result, err, ok } from 'src/util/resultWrapper';
 
 const NULL_RESPONSE: any = null;
 /**
@@ -373,14 +375,19 @@ export class AskAway extends TeamsActivityHandler {
                 controller.getErrorCard(errorStrings('conversationInvalid'))
             );
 
-        const qnaSessionId = taskModuleRequest.data.qnaSessionId;
+        const conversation = context.activity.conversation;
+        const qnaSessionId = taskModuleRequest.data.qnaSessionId,
+            meetingId = await getMeetingIdFromContext(context);
 
         if (taskModuleRequest.data.id == 'submitEndQnA') {
             try {
                 await controller.endQnASession(
                     qnaSessionId,
                     <string>context.activity.from.aadObjectId,
-                    context.activity.conversation.id
+                    context.activity.conversation.id,
+                    conversation.tenantId,
+                    context.activity.serviceUrl,
+                    meetingId
                 );
             } catch (error) {
                 exceptionLogger(error);
@@ -389,6 +396,16 @@ export class AskAway extends TeamsActivityHandler {
         }
 
         return NULL_RESPONSE;
+    }
+
+    private handleTeamsTaskModuleInsufficientPermissionsError(): TaskModuleResponse {
+        return this._buildTaskModuleContinueResponse(
+            controller.getErrorCard(
+                errorStrings(
+                    'insufficientPermissionsToCreateOrEndQnASessionError'
+                )
+            )
+        );
     }
 
     private handleTeamsTaskModuleSubmitError(): TaskModuleResponse {
@@ -490,11 +507,14 @@ export class AskAway extends TeamsActivityHandler {
             userAadObjId = <string>context.activity.from.aadObjectId,
             activityId = '',
             tenantId = conversation.tenantId,
-            isChannel = conversation.conversationType === 'channel',
+            isChannel =
+                conversation.conversationType === ConversationType.Channel,
             hostUserId = context.activity.from.id,
             scopeId = isChannel
                 ? teamsGetChannelId(context.activity)
-                : conversation.id;
+                : conversation.id,
+            serviceURL = context.activity.serviceUrl,
+            meetingId = await getMeetingIdFromContext(context);
 
         try {
             await controller.startQnASession(
@@ -507,7 +527,9 @@ export class AskAway extends TeamsActivityHandler {
                 tenantId,
                 scopeId,
                 hostUserId,
-                isChannel
+                isChannel,
+                serviceURL,
+                meetingId
             );
         } catch (error) {
             exceptionLogger(error);
@@ -515,6 +537,17 @@ export class AskAway extends TeamsActivityHandler {
                 await context.sendActivity(
                     MessageFactory.text(
                         errorStrings('qnasessionlimitexhaustedError')
+                    )
+                );
+            } else if (
+                error['code'] ===
+                'InsufficientPermissionsToCreateOrEndQnASessionError'
+            ) {
+                await context.sendActivity(
+                    MessageFactory.text(
+                        errorStrings(
+                            'insufficientPermissionsToCreateOrEndQnASessionError'
+                        )
                     )
                 );
             } else {
@@ -576,8 +609,8 @@ export class AskAway extends TeamsActivityHandler {
                 activityPreview: <Activity>(
                     MessageFactory.attachment(
                         card,
-                        NULL_RESPONSE,
-                        NULL_RESPONSE,
+                        '',
+                        '',
                         InputHints.ExpectingInput
                     )
                 ),

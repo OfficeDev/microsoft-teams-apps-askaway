@@ -9,14 +9,16 @@ import {
 } from 'msteams-app-questionly.data';
 import {
     processQnASesssionsDataForMeetingTab,
-    getParticipantRole,
-    isPresenterOrOrganizer,
     getHostUserId,
 } from 'src/routes/restUtils';
 import { generateUniqueId } from 'adaptivecards';
 import { verifyUserFromConversationId } from 'msteams-app-questionly.common';
 import { endQnASession } from 'src/controller';
 import { StatusCodes } from 'http-status-codes';
+import {
+    getParticipantRole,
+    isPresenterOrOrganizer,
+} from 'src/util/meetingsUtility';
 
 let app: ExpressType;
 

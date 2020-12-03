@@ -14,6 +14,7 @@ import {
 import { ok, err } from 'src/util/resultWrapper';
 import { errorStrings, initLocalization } from 'src/localization/locale';
 import { ConversationDataService } from 'msteams-app-questionly.data';
+import { getMeetingIdFromContext } from 'src/util/meetingsUtility';
 
 jest.mock('src/controller');
 
@@ -439,6 +440,11 @@ test('handle submit end qna', async () => {
     (<any>validateConversationId).mockImplementationOnce(() => {
         return true;
     });
+    const sampleMeetingId = 'sampleMeetingId';
+    (<any>getMeetingIdFromContext) = jest.fn();
+    (<any>getMeetingIdFromContext).mockImplementationOnce(() => {
+        return sampleMeetingId;
+    });
     const context = {
         activity: {
             from: {
@@ -447,7 +453,9 @@ test('handle submit end qna', async () => {
             },
             conversation: {
                 id: 'randomConvoId',
+                tenantId: 'sampleTenantId',
             },
+            serviceUrl: 'sampleServiceUrl',
         },
         updateActivity: jest.fn(),
     };
@@ -464,13 +472,21 @@ test('handle submit end qna', async () => {
     expect(endQnASession).toBeCalledWith(
         taskModuleRequest.data.qnaSessionId,
         context.activity.from.aadObjectId,
-        context.activity.conversation.id
+        context.activity.conversation.id,
+        context.activity.conversation.tenantId,
+        context.activity.serviceUrl,
+        sampleMeetingId
     );
 });
 
 test('bot message preview send', async () => {
     const handler = <any>new AskAway(new ConversationDataService());
     handler._extractMainCardFromActivityPreview = jest.fn(() => ok(cardData));
+    const sampleMeetingId = 'sampleMeetingId';
+    (<any>getMeetingIdFromContext) = jest.fn();
+    (<any>getMeetingIdFromContext).mockImplementationOnce(() => {
+        return sampleMeetingId;
+    });
     const context = {
         activity: {
             from: {
@@ -483,6 +499,7 @@ test('bot message preview send', async () => {
                 tenantId: 'tenantId',
                 coversationType: 'not channel',
             },
+            serviceUrl: 'sampleServiceUrl',
         },
         sendActivity: jest.fn(),
     };
@@ -515,7 +532,9 @@ test('bot message preview send', async () => {
         context.activity.conversation.tenantId,
         context.activity.conversation.id,
         context.activity.from.id,
-        false
+        false,
+        context.activity.serviceUrl,
+        sampleMeetingId
     );
 });
 

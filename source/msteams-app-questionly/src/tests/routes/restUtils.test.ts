@@ -7,16 +7,12 @@ import {
 
 import {
     processQnASesssionsDataForMeetingTab,
-    getParticipantRole,
-    isPresenterOrOrganizer,
     getHostUserId,
     getMemberInfo,
 } from 'src/routes/restUtils';
 import { getMicrosoftAppPassword } from 'src/util/keyvault';
 
-const sampleMeetingId = 'sampleMeetingId';
 const sampleUserId = 'sampleUserId';
-const sampleTenantId = 'sampleTenantId';
 const sampleServiceUrl = 'sampleServiceUrl';
 const sampleConversationId = 'sampleConversationId';
 let testQnAData1: any;
@@ -183,58 +179,6 @@ describe('test process QnA sesssions for meeting tab', () => {
     });
 });
 
-describe('validates isPreseterOrOrganizer', () => {
-    beforeAll(() => {
-        (<any>getParticipantRole) = jest.fn();
-    });
-
-    beforeEach(() => {
-        jest.clearAllMocks();
-    });
-
-    it('test isPreseterOrOrganizer - when the user is Organizer', async () => {
-        (<any>getParticipantRole).mockImplementationOnce(() => {
-            return 'Organizer';
-        });
-        const result = await isPresenterOrOrganizer(
-            sampleMeetingId,
-            sampleUserId,
-            sampleTenantId,
-            sampleServiceUrl
-        );
-        expect(result).toBeTruthy();
-        expect(getParticipantRole).toBeCalledTimes(1);
-    });
-
-    it('test isPreseterOrOrganizer - when the user is Presenter', async () => {
-        (<any>getParticipantRole).mockImplementationOnce(() => {
-            return 'Presenter';
-        });
-        const result = await isPresenterOrOrganizer(
-            sampleMeetingId,
-            sampleUserId,
-            sampleTenantId,
-            sampleServiceUrl
-        );
-        expect(result).toBeTruthy();
-        expect(getParticipantRole).toBeCalledTimes(1);
-    });
-
-    it('test isPreseterOrOrganizer - when the user is neither Organizer nor Presenter', async () => {
-        (<any>getParticipantRole).mockImplementationOnce(() => {
-            return 'test';
-        });
-        const result = await isPresenterOrOrganizer(
-            sampleMeetingId,
-            sampleUserId,
-            sampleTenantId,
-            sampleServiceUrl
-        );
-        expect(result).toBeFalsy();
-        expect(getParticipantRole).toBeCalledTimes(1);
-    });
-});
-
 describe('test getHostUserId', () => {
     beforeAll(() => {
         process.env.MicrosoftAppId = 'random';
@@ -269,7 +213,6 @@ describe('test getHostUserId', () => {
     });
 
     it('validate getHostUserId - get member info fails', async () => {
-        const sampleId = '1';
         (<any>getMicrosoftAppPassword).mockImplementationOnce(() => {
             return 'random';
         });

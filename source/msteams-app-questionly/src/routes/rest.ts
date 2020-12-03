@@ -9,12 +9,15 @@ import {
 import { exceptionLogger } from 'src/util/exceptionTracking';
 import {
     processQnASesssionsDataForMeetingTab,
-    getParticipantRole,
-    isPresenterOrOrganizer,
     patchActionForQuestion,
     getHostUserId,
     ensureUserIsPartOfConversation,
 } from 'src/routes/restUtils';
+import {
+    getParticipantRole,
+    isPresenterOrOrganizer,
+} from 'src/util/meetingsUtility';
+import { StatusCodes } from 'http-status-codes';
 import {
     downvoteQuestion,
     endQnASession,
@@ -23,7 +26,6 @@ import {
     submitNewQuestion,
     upvoteQuestion,
 } from 'src/controller';
-import { StatusCodes } from 'http-status-codes';
 
 export const router = Express.Router();
 let conversationDataService: IConversationDataService;
@@ -219,7 +221,14 @@ router.patch('/:conversationId/sessions/:sessionId', async (req, res) => {
                     conversationData.serviceUrl
                 )
             ) {
-                await endQnASession(sessionId, user._id, conversationId);
+                await endQnASession(
+                    sessionId,
+                    user._id,
+                    conversationId,
+                    conversationData.tenantId,
+                    conversationData.serviceUrl,
+                    conversationData.meetingId
+                );
             } else {
                 res.status(StatusCodes.FORBIDDEN).send(
                     'Only a Presenter or an Organizer can update session.'
@@ -318,7 +327,9 @@ router.post('/:conversationId/sessions', async (req, res) => {
             tenantId,
             req.body.scopeId,
             hostUserId,
-            req.body.isChannel
+            req.body.isChannel,
+            serviceUrl,
+            meetingId
         );
 
         response = { qnaSessionId: session._id };

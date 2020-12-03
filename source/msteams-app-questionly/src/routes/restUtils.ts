@@ -1,14 +1,12 @@
 import {
+    IConversation,
     IQnASession_populated,
     IQuestionPopulatedUser,
     questionDataService,
     userDataService,
 } from 'msteams-app-questionly.data';
-import { MicrosoftAppCredentials } from 'botframework-connector';
 import { exceptionLogger } from 'src/util/exceptionTracking';
-import axios from 'axios';
 import { getMicrosoftAppPassword } from 'src/util/keyvault';
-import { organizer, presenter } from 'src/constants/restConstants';
 import {
     BotFrameworkAdapter,
     ConversationAccount,
@@ -16,8 +14,7 @@ import {
     TeamsChannelAccount,
     TeamsInfo,
 } from 'botbuilder';
-import { verifyUserFromConversationId } from 'msteams-app-questionly.conversation.utility';
-import { IConversation } from 'msteams-app-questionly.data';
+import { verifyUserFromConversationId } from 'msteams-app-questionly.common';
 import { Response } from 'express';
 
 /**
@@ -86,38 +83,6 @@ export const processQnASesssionsDataForMeetingTab = async (
     return qnaSessionArrayForTab;
 };
 
-export const isPresenterOrOrganizer = async (
-    meetingId: string,
-    userId: string,
-    tenantId: string,
-    serviceUrl: string
-): Promise<boolean> => {
-    const role = await getParticipantRole(
-        meetingId,
-        userId,
-        tenantId,
-        serviceUrl
-    );
-    if (role === organizer || role === presenter) {
-        return true;
-    }
-    return false;
-};
-
-const getToken = async () => {
-    let appId;
-    if (process.env.MicrosoftAppId !== undefined) {
-        appId = process.env.MicrosoftAppId;
-    } else {
-        exceptionLogger('MicrosoftAppId missing in app settings.');
-        throw new Error('MicrosoftAppId missing in app settings.');
-    }
-    const appPassword = await getMicrosoftAppPassword();
-    const appCredentials = new MicrosoftAppCredentials(appId, appPassword);
-    const token = await appCredentials.getToken();
-    return token;
-};
-
 /**
  * Ensures if user is part of the conversation, if not sends `403` response back.
  * @param res - Response.
@@ -141,41 +106,6 @@ export const ensureUserIsPartOfConversation = async (
     }
 
     return isUserPartOfConversation;
-};
-
-export const getParticipantRole = async (
-    meetingId: string,
-    userId: string,
-    tenantId: string,
-    serviceUrl: string
-) => {
-    let token;
-    let role;
-    try {
-        token = await getToken();
-    } catch (error) {
-        exceptionLogger(error);
-        throw new Error('Error while getting participant role.');
-    }
-
-    await axios
-        .get(
-            `${serviceUrl}/v1/meetings/${meetingId}/participants/${userId}?tenantId=${tenantId}`,
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            }
-        )
-        .then((res) => {
-            role = res.data.meeting.role;
-        })
-        .catch((error) => {
-            exceptionLogger(error);
-            throw new Error('Error while getting participant role.');
-        });
-
-    return role;
 };
 
 export const patchActionForQuestion = ['upvote', 'downvote', 'markAnswered'];
