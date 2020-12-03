@@ -466,7 +466,6 @@ test('handle submit end qna', async () => {
         context.activity.from.aadObjectId,
         context.activity.conversation.id
     );
-    expect(context.updateActivity).toBeCalledTimes(1);
 });
 
 test('bot message preview send', async () => {
@@ -518,7 +517,6 @@ test('bot message preview send', async () => {
         context.activity.from.id,
         false
     );
-    expect(context.sendActivity).toBeCalledTimes(1);
 });
 
 describe('messaging extension submit', () => {

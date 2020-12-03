@@ -1,5 +1,5 @@
 import { BotFrameworkAdapter, ConversationAccount } from "botbuilder";
-import { verifyUserFromConversationId } from "../index";
+import { verifyUserFromConversationId } from "../conversationUtility";
 
 const sampleConversationId = "sampleConversationId";
 const sampleServiceUrl = "sampleServiceUrl";

@@ -1,5 +1,5 @@
 import { BotFrameworkAdapter, ConversationAccount } from "botbuilder";
-import { setActivityId } from "../../utils/dbUtility";
+import { qnaSessionDataService } from "msteams-app-questionly.data";
 import { activityMockContext } from "../mocks/testContext";
 import httpFunction from "./../../../update-adaptive-card/index";
 
@@ -16,7 +16,7 @@ beforeAll(() => {
 
   (<any>BotFrameworkAdapter) = jest.fn();
   testAdapter.continueConversation = jest.fn();
-  (<any>setActivityId) = jest.fn();
+  (<any>qnaSessionDataService.updateActivityId) = jest.fn();
   (<any>BotFrameworkAdapter).mockImplementation(() => {
     return testAdapter;
   });
@@ -65,9 +65,7 @@ test("update adaptive card - continueConversation throws error", async () => {
     throw testError;
   });
 
-  await expect(httpFunction(activityMockContext, request)).rejects.toThrow(
-    testError
-  );
+  await httpFunction(activityMockContext, request);
 
   expect(BotFrameworkAdapter).toBeCalledTimes(1);
   expect(BotFrameworkAdapter).toBeCalledWith({

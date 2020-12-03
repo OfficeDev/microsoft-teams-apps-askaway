@@ -13,7 +13,6 @@ import {
     ChannelAccount,
     BotMessagePreviewActionType,
 } from 'botbuilder';
-import { clone, debounce, delay } from 'lodash';
 import * as controller from 'src/controller';
 import { AdaptiveCard } from 'adaptivecards';
 import { extractMainCardData, MainCardData } from 'src/adaptive-cards/mainCard';
@@ -26,7 +25,6 @@ import {
     leaderboardStrings,
 } from 'src/localization/locale';
 import { exceptionLogger } from 'src/util/exceptionTracking';
-import { ifNumber } from 'src/util/typeUtility';
 import { IConversationDataService } from 'msteams-app-questionly.data';
 
 const NULL_RESPONSE: any = null;
@@ -34,41 +32,12 @@ const NULL_RESPONSE: any = null;
  * Main bot activity handler class
  */
 export class AskAway extends TeamsActivityHandler {
-    // Each QnA sesion gets mapped to a unique function used to update the Master Card.
-    private _updateMainCardFunctionMap: {
-        [key: string]: {
-            func: (context: TurnContext, qnaSessionId: string) => void;
-            timeLastUpdated: number;
-        };
-    };
-
-    private _config: {
-        updateMainCardDebounceTimeInterval: number;
-        updateMainCardDebounceMaxWait: number;
-        updateMainCardPostDebounceTimeInterval: number;
-    };
-
     /**
      * The constructor
      * @param conversationDataService - conversation data service
      */
     public constructor(conversationDataService: IConversationDataService) {
         super();
-        this._updateMainCardFunctionMap = {};
-
-        const env = process.env;
-        const maxWait = env.UpdateMainCardDebounceMaxWait;
-        const timeInterval = env.UpdateMainCardDebounceTimeInterval;
-        const postTimeInterval = env.UpdateMainCardPostDebounceTimeInterval;
-        this._config = {
-            updateMainCardDebounceTimeInterval: ifNumber(timeInterval, 15000),
-            updateMainCardDebounceMaxWait: ifNumber(maxWait, 20000),
-            updateMainCardPostDebounceTimeInterval: ifNumber(
-                postTimeInterval,
-                5000
-            ),
-        };
-
         this.onMembersAdded(async (context, next) => {
             const activity = context.activity;
             const membersAdded = activity.membersAdded;
@@ -343,8 +312,6 @@ export class AskAway extends TeamsActivityHandler {
                 questionContent
             );
 
-        this._updateMainCard(taskModuleRequest.data.qnaSessionId, context);
-
         return NULL_RESPONSE;
     }
 
@@ -353,15 +320,15 @@ export class AskAway extends TeamsActivityHandler {
         taskModuleRequest: TaskModuleRequest
     ): Promise<TaskModuleResponse> => {
         const updatedLeaderboard = await controller.updateUpvote(
+            taskModuleRequest.data.qnaSessionId,
             taskModuleRequest.data.questionId,
             <string>context.activity.from.aadObjectId,
             context.activity.from.name,
+            context.activity.conversation.id,
             taskModuleRequest.context
                 ? <string>taskModuleRequest.context.theme
                 : 'default'
         );
-
-        this._updateMainCard(taskModuleRequest.data.qnaSessionId, context);
 
         return updatedLeaderboard.isOk()
             ? this._buildTaskModuleContinueResponse(updatedLeaderboard.value)
@@ -409,19 +376,16 @@ export class AskAway extends TeamsActivityHandler {
         const qnaSessionId = taskModuleRequest.data.qnaSessionId;
 
         if (taskModuleRequest.data.id == 'submitEndQnA') {
-            const result = await controller.endQnASession(
-                qnaSessionId,
-                <string>context.activity.from.aadObjectId,
-                context.activity.conversation.id
-            );
-
-            if (result.isErr()) return this.handleTeamsTaskModuleSubmitError();
-
-            await context.updateActivity({
-                attachments: [CardFactory.adaptiveCard(result.value.card)],
-                id: result.value.activityId,
-                type: 'message',
-            });
+            try {
+                await controller.endQnASession(
+                    qnaSessionId,
+                    <string>context.activity.from.aadObjectId,
+                    context.activity.conversation.id
+                );
+            } catch (error) {
+                exceptionLogger(error);
+                return this.handleTeamsTaskModuleSubmitError();
+            }
         }
 
         return NULL_RESPONSE;
@@ -532,34 +496,30 @@ export class AskAway extends TeamsActivityHandler {
                 ? teamsGetChannelId(context.activity)
                 : conversation.id;
 
-        const response = await controller.startQnASession(
-            title,
-            description,
-            userName,
-            userAadObjId,
-            activityId,
-            context.activity.conversation.id,
-            tenantId,
-            scopeId,
-            hostUserId,
-            isChannel
-        );
-
-        if (response.isOk()) {
-            const data = response.value;
-            const resource = await context.sendActivity({
-                attachments: [CardFactory.adaptiveCard(data.card)],
-            });
-            if (resource !== undefined) {
-                await controller.setActivityId(data.qnaSessionId, resource.id);
-            }
-        } else if (response.isErr()) {
-            const error = response.value;
-            if (error['code'] === 'QnASessionLimitExhausted') {
+        try {
+            await controller.startQnASession(
+                title,
+                description,
+                userName,
+                userAadObjId,
+                activityId,
+                context.activity.conversation.id,
+                tenantId,
+                scopeId,
+                hostUserId,
+                isChannel
+            );
+        } catch (error) {
+            exceptionLogger(error);
+            if (error.code === 'QnASessionLimitExhaustedError') {
                 await context.sendActivity(
                     MessageFactory.text(
-                        errorStrings('qnasessionlimitexhausted')
+                        errorStrings('qnasessionlimitexhaustedError')
                     )
+                );
+            } else {
+                await context.sendActivity(
+                    MessageFactory.text(errorStrings('qnasessionCreationError'))
                 );
             }
         }
@@ -628,73 +588,6 @@ export class AskAway extends TeamsActivityHandler {
     // -------------------------------------------------------------------------- //
     //                         ANCHOR Other helper methods                        //
     // -------------------------------------------------------------------------- //
-
-    /**
-     * Handles proactively updating the master card with the top questions.
-     * @param context - Current bot turn context.
-     * @param qnaSessionId - QnA session database document id.
-     */
-    private _getHandleMainCardTopQuestion = () => {
-        const _function = async (
-            context: TurnContext,
-            qnaSessionId: string
-        ) => {
-            const updatedMaincard = await controller.getUpdatedMainCard(
-                qnaSessionId
-            );
-
-            if (updatedMaincard.isOk()) {
-                this._updateMainCardFunctionMap[
-                    qnaSessionId
-                ].timeLastUpdated = Date.now();
-
-                const card = CardFactory.adaptiveCard(
-                    updatedMaincard.value.card
-                );
-
-                try {
-                    await context.updateActivity({
-                        id: updatedMaincard.value.activityId,
-                        attachments: [card],
-                        type: 'message',
-                    });
-                } catch (error) {
-                    exceptionLogger(error);
-                }
-            }
-        };
-
-        return debounce(
-            _function,
-            this._config.updateMainCardDebounceTimeInterval,
-            {
-                leading: true,
-                trailing: true,
-                maxWait: this._config.updateMainCardDebounceMaxWait,
-            }
-        );
-    };
-
-    private _updateMainCard = (qnaSessionId: string, context: TurnContext) => {
-        const _context = clone(context);
-        if (!(qnaSessionId in this._updateMainCardFunctionMap)) {
-            this._updateMainCardFunctionMap[qnaSessionId] = {
-                func: this._getHandleMainCardTopQuestion(),
-                timeLastUpdated: 0,
-            };
-        }
-
-        const map = this._updateMainCardFunctionMap[qnaSessionId];
-        if (
-            Date.now() - map.timeLastUpdated <
-            this._config.updateMainCardPostDebounceTimeInterval
-        )
-            delay(
-                () => map.func(_context, qnaSessionId),
-                this._config.updateMainCardPostDebounceTimeInterval
-            );
-        else map.func(_context, qnaSessionId);
-    };
 
     private _extractMainCardFromActivityPreview = (
         action: MessagingExtensionAction

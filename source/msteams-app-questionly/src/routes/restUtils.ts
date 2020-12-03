@@ -16,6 +16,9 @@ import {
     TeamsChannelAccount,
     TeamsInfo,
 } from 'botbuilder';
+import { verifyUserFromConversationId } from 'msteams-app-questionly.conversation.utility';
+import { IConversation } from 'msteams-app-questionly.data';
+import { Response } from 'express';
 
 /**
  * Gets questions data and user data for each active qna sessions, process them and returns an array of detailed qna sessions.
@@ -113,6 +116,31 @@ const getToken = async () => {
     const appCredentials = new MicrosoftAppCredentials(appId, appPassword);
     const token = await appCredentials.getToken();
     return token;
+};
+
+/**
+ * Ensures if user is part of the conversation, if not sends `403` response back.
+ * @param res - Response.
+ * @param conversationData - Conversation data.
+ * @param userId - Aad object id of user.
+ */
+export const ensureUserIsPartOfConversation = async (
+    res: Response,
+    conversationData: IConversation,
+    userId: string
+): Promise<boolean> => {
+    const isUserPartOfConversation = await verifyUserFromConversationId(
+        conversationData.id,
+        conversationData.serviceUrl,
+        conversationData.tenantId,
+        userId
+    );
+
+    if (!isUserPartOfConversation) {
+        formResponseWhenUserIsNotPartOfConversation(res);
+    }
+
+    return isUserPartOfConversation;
 };
 
 export const getParticipantRole = async (

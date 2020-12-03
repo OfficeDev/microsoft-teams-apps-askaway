@@ -6,7 +6,6 @@ import {
     setActivityId,
     getNewQuestionCard,
     submitNewQuestion,
-    getUpdatedMainCard,
     updateUpvote,
     getErrorCard,
     endQnASession,
@@ -202,42 +201,16 @@ test('submit new question', async () => {
     );
 });
 
-test('get updated main card', async () => {
-    (<any>qnaSessionDataService.getQnASessionData).mockImplementationOnce(
-        () => ({
-            // arbitrary
-            title: [],
-            description: [],
-            userName: 1,
-            userAADObject: null,
-        })
-    );
-    (<any>questionDataService.getQuestions).mockImplementationOnce(() => ({
-        // arbitrary
-        topQuestions: [],
-        recentQuestions: [],
-        numQuestions: 1,
-    }));
-    await getUpdatedMainCard(sampleQnASessionId, false);
-    expect(qnaSessionDataService.getQnASessionData).toBeCalledTimes(1);
-    expect(qnaSessionDataService.getQnASessionData).toBeCalledWith(
-        sampleQnASessionId
-    );
-    expect(questionDataService.getQuestions).toBeCalledTimes(1);
-    expect(questionDataService.getQuestions).toBeCalledWith(
-        sampleQnASessionId,
-        3
-    );
-});
-
 test('add upvote', async () => {
     (<any>questionDataService.updateUpvote).mockImplementationOnce(() => ({
         qnaSessionId: sampleQnASessionId,
     }));
     await updateUpvote(
+        sampleQnASessionId,
         sampleQuestionId,
         sampleUserAADObjId1,
         sampleUserName,
+        sampleConversationId,
         'default'
     );
     expect(questionDataService.updateUpvote).toBeCalledTimes(1);
@@ -255,19 +228,17 @@ test('get end qna confirmation card', async () => {
 });
 
 test('end ama session', async () => {
-    await endQnASession(
-        sampleQnASessionId,
-        sampleUserAADObjId1,
-        sampleConversationId
-    );
+    await expect(
+        endQnASession(
+            sampleQnASessionId,
+            sampleUserAADObjId1,
+            sampleConversationId
+        )
+    ).rejects.toThrow();
+
     expect(qnaSessionDataService.isActiveQnA).toBeCalledTimes(1);
     expect(qnaSessionDataService.isActiveQnA).toBeCalledWith(
         sampleQnASessionId
-    );
-    expect(qnaSessionDataService.isHost).toBeCalledTimes(1);
-    expect(qnaSessionDataService.isHost).toBeCalledWith(
-        sampleQnASessionId,
-        sampleUserAADObjId1
     );
 });
 

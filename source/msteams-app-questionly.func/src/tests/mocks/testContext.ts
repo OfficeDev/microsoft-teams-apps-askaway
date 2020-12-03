@@ -1,4 +1,5 @@
 import { Context, Logger } from "@azure/functions";
+import { DataEventType } from "msteams-app-questionly.common";
 
 const getMockLogger = (): Logger => {
   let logger = function (...args: any[]) {} as Logger;
@@ -43,6 +44,9 @@ export const activityMockContext: Context = {
       activityId: sampleActivityId,
       serviceUrl: sampleSericeUrl,
       card: sampleCard,
+      eventData: {
+        type: DataEventType.qnaSessionCreatedEvent,
+      },
     },
   },
   bindingData: {},

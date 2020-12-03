@@ -32,7 +32,8 @@ export interface Errors {
     taskSubmit: string;
     leaderboard: string;
     conversationInvalid: string;
-    qnasessionlimitexhausted: string;
+    qnasessionlimitexhaustedError: string;
+    qnasessionCreationError: string;
 }
 
 export interface Generic {
@@ -79,10 +80,7 @@ export interface StartQnA {
     taskModuleTitleEdit: string;
 }
 
-export const initLocalization = async (
-    testing = false,
-    testStrings?: Strings
-) => {
+export const initLocalization = (testing = false, testStrings?: Strings) => {
     const config = {
         language: process.env.Language ? process.env.Language : 'en',
         fallbackLanguage: process.env.FallbackLanguage
