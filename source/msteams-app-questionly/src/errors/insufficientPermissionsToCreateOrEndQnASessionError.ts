@@ -6,7 +6,7 @@ export class InsufficientPermissionsToCreateOrEndQnASessionError extends Error {
 
     /**
      * Constructor that initializes the error code.
-     * @param message error message.
+     * @param message - error message.
      */
     constructor(message: string) {
         super(message);

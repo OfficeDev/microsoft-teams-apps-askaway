@@ -66,14 +66,13 @@ const getToken = async () => {
     }
     const appPassword = await getMicrosoftAppPassword();
     const appCredentials = new MicrosoftAppCredentials(appId, appPassword);
-    const token = await appCredentials.getToken();
-    return token;
+    return await appCredentials.getToken();
 };
 
 /**
  * Get meeting id from turn context.
  * Returns meeting id for meeting, otherwise returns empty string.
- * @param context turn context
+ * @param context - turn context
  */
 export const getMeetingIdFromContext = async (context: TurnContext) => {
     const conversation = context.activity.conversation;
