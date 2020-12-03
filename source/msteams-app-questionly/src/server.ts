@@ -19,6 +19,7 @@ import { getMongoURI, initKeyVault } from 'src/util/keyvault';
 import { setupBot } from 'src/util/botSetup';
 import { setupClientApp } from 'src/util/clientAppSetup';
 import { setupRestApis } from 'src/util/restApiSetup';
+import { initBackgroundJobSetup } from 'src/background-job/backgroundJobTrigger';
 
 // Initialize debug logging module
 const log = debug('msteams');
@@ -33,6 +34,9 @@ initKeyVault();
 
 // Set up app insights
 initiateAppInsights();
+
+// initiate background job setup.
+initBackgroundJobSetup();
 
 // The import of components has to be done AFTER the dotenv config
 import { initLocalization } from 'src/localization/locale';

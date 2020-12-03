@@ -10,7 +10,7 @@ import { getConversationData } from "../src/utils/dbUtility";
 const activityFunction: AzureFunction = async function (
   context: Context
 ): Promise<IConversation> {
-  const conversationId = context.bindings.name;
+  const conversationId = context.bindings.name.conversationId;
   return await getConversationData(conversationId);
 };
 

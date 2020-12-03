@@ -6,7 +6,6 @@ import {
     setActivityId,
     getNewQuestionCard,
     submitNewQuestion,
-    getUpdatedMainCard,
     updateUpvote,
     getErrorCard,
     endQnASession,
@@ -169,21 +168,22 @@ test('start qna session in meeting for attendee', async () => {
             hostId: sampleUserAADObjId1,
         })
     );
-    const res = await startQnASession(
-        sampleTitle,
-        sampleDescription,
-        sampleUserName,
-        sampleUserAADObjId1,
-        sampleActivityId,
-        sampleConversationId,
-        sampleTenantId,
-        sampleScopeId,
-        sampleHostUserId,
-        false,
-        sampleServiceUrl,
-        sampleMeetingId
-    );
-    expect(res.isErr()).toBeTruthy();
+    await expect(
+        startQnASession(
+            sampleTitle,
+            sampleDescription,
+            sampleUserName,
+            sampleUserAADObjId1,
+            sampleActivityId,
+            sampleConversationId,
+            sampleTenantId,
+            sampleScopeId,
+            sampleHostUserId,
+            false,
+            sampleServiceUrl,
+            sampleMeetingId
+        )
+    ).rejects.toThrow();
     expect(qnaSessionDataService.createQnASession).toBeCalledTimes(0);
 });
 
@@ -242,42 +242,16 @@ test('submit new question', async () => {
     );
 });
 
-test('get updated main card', async () => {
-    (<any>qnaSessionDataService.getQnASessionData).mockImplementationOnce(
-        () => ({
-            // arbitrary
-            title: [],
-            description: [],
-            userName: 1,
-            userAADObject: null,
-        })
-    );
-    (<any>questionDataService.getQuestions).mockImplementationOnce(() => ({
-        // arbitrary
-        topQuestions: [],
-        recentQuestions: [],
-        numQuestions: 1,
-    }));
-    await getUpdatedMainCard(sampleQnASessionId, false);
-    expect(qnaSessionDataService.getQnASessionData).toBeCalledTimes(1);
-    expect(qnaSessionDataService.getQnASessionData).toBeCalledWith(
-        sampleQnASessionId
-    );
-    expect(questionDataService.getQuestions).toBeCalledTimes(1);
-    expect(questionDataService.getQuestions).toBeCalledWith(
-        sampleQnASessionId,
-        3
-    );
-});
-
 test('add upvote', async () => {
     (<any>questionDataService.updateUpvote).mockImplementationOnce(() => ({
         qnaSessionId: sampleQnASessionId,
     }));
     await updateUpvote(
+        sampleQnASessionId,
         sampleQuestionId,
         sampleUserAADObjId1,
         sampleUserName,
+        sampleConversationId,
         'default'
     );
     expect(questionDataService.updateUpvote).toBeCalledTimes(1);
@@ -294,15 +268,18 @@ test('get end qna confirmation card', async () => {
     expect(acb.getEndQnAConfirmationCard).toBeCalledWith(sampleQnASessionId);
 });
 
-test('end ama session - channel', async () => {
-    await endQnASession(
-        sampleQnASessionId,
-        sampleUserAADObjId1,
-        sampleConversationId,
-        sampleTenantId,
-        sampleServiceUrl,
-        ''
-    );
+test('end ama session', async () => {
+    await expect(
+        endQnASession(
+            sampleQnASessionId,
+            sampleUserAADObjId1,
+            sampleConversationId,
+            sampleTenantId,
+            sampleServiceUrl,
+            ''
+        )
+    ).rejects.toThrow();
+
     expect(qnaSessionDataService.isActiveQnA).toBeCalledTimes(1);
     expect(qnaSessionDataService.isActiveQnA).toBeCalledWith(
         sampleQnASessionId
@@ -350,14 +327,17 @@ test('end ama session - meeting for attendee', async () => {
         return false;
     });
 
-    const res = await endQnASession(
-        sampleQnASessionId,
-        sampleUserAADObjId1,
-        sampleConversationId,
-        sampleTenantId,
-        sampleServiceUrl,
-        sampleMeetingId
-    );
+    await expect(
+        endQnASession(
+            sampleQnASessionId,
+            sampleUserAADObjId1,
+            sampleConversationId,
+            sampleTenantId,
+            sampleServiceUrl,
+            sampleMeetingId
+        )
+    ).rejects.toThrow();
+
     expect(qnaSessionDataService.isActiveQnA).toBeCalledTimes(1);
     expect(qnaSessionDataService.isActiveQnA).toBeCalledWith(
         sampleQnASessionId
@@ -369,7 +349,6 @@ test('end ama session - meeting for attendee', async () => {
         sampleTenantId,
         sampleServiceUrl
     );
-    expect(res.isErr()).toBeTruthy();
 });
 
 test('get resubmit question card', async () => {

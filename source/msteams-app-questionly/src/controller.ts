@@ -10,9 +10,18 @@ import {
     IQuestionPopulatedUser,
     qnaSessionDataService,
     questionDataService,
+    IQnASession_populated,
 } from 'msteams-app-questionly.data';
-import { isPresenterOrOrganizer } from './util/meetingsUtility';
-import { InsufficientPermissionsToCreateOrEndQnASessionError } from './errors/insufficientPermissionsToCreateOrEndQnASessionError';
+import { isPresenterOrOrganizer } from 'src/util/meetingsUtility';
+import { InsufficientPermissionsToCreateOrEndQnASessionError } from 'src/errors/insufficientPermissionsToCreateOrEndQnASessionError';
+import {
+    triggerBackgroundJobForQnaSessionCreatedEvent,
+    triggerBackgroundJobForQnaSessionEndedEvent,
+    triggerBackgroundJobForQuestionDownvotedEvent,
+    triggerBackgroundJobForQuestionMarkedAsAnsweredEvent,
+    triggerBackgroundJobForQuestionPostedEvent,
+    triggerBackgroundJobForQuestionUpvotedEvent,
+} from 'src/background-job/backgroundJobTrigger';
 
 export const getMainCard = adaptiveCardBuilder.getMainCard;
 export const getStartQnACard = adaptiveCardBuilder.getStartQnACard;
@@ -62,63 +71,40 @@ export const startQnASession = async (
     isChannel: boolean,
     serviceURL: string,
     meetingId: string
-): Promise<Result<{ card: AdaptiveCard; qnaSessionId: string }, Error>> => {
-    try {
-        // Only a presenter or organizer can create a new QnA session in the meeting.
-        if (!isChannel) {
-            if (
-                !(await isPresenterOrOrganizer(
-                    meetingId,
-                    userAadObjId,
-                    tenantId,
-                    serviceURL
-                ))
-            ) {
-                exceptionLogger(
-                    new InsufficientPermissionsToCreateOrEndQnASessionError(
-                        'Only a Presenter or an Organizer can create new QnA Session.'
-                    )
-                );
-                return err(
-                    new InsufficientPermissionsToCreateOrEndQnASessionError(
-                        'Only a Presenter or an Organizer can create new QnA Session.'
-                    )
-                );
-            }
+): Promise<IQnASession_populated> => {
+    // Only a presenter or organizer can create a new QnA session in the meeting.
+    if (!isChannel) {
+        if (
+            !(await isPresenterOrOrganizer(
+                meetingId,
+                userAadObjId,
+                tenantId,
+                serviceURL
+            ))
+        ) {
+            throw new InsufficientPermissionsToCreateOrEndQnASessionError(
+                'Only a Presenter or an Organizer can create new QnA Session.'
+            );
         }
-        // save data to db
-        const response = await qnaSessionDataService.createQnASession(
-            title,
-            description,
-            userName,
-            userAadObjId,
-            activityId,
-            conversationId,
-            tenantId,
-            scopeId,
-            hostUserId,
-            isChannel
-        );
-
-        // generate and return maincard
-        return ok({
-            card: await getMainCard(
-                title,
-                description,
-                userName,
-                response.qnaSessionId,
-                response.hostId,
-                hostUserId
-            ),
-            qnaSessionId: response.qnaSessionId,
-        });
-    } catch (error) {
-        exceptionLogger(error);
-        if (error.code === 'QnASessionLimitExhausted') {
-            return err(error);
-        }
-        return err(Error('Failed to start QnA'));
     }
+
+    // save data to db
+    const response = await qnaSessionDataService.createQnASession(
+        title,
+        description,
+        userName,
+        userAadObjId,
+        activityId,
+        conversationId,
+        tenantId,
+        scopeId,
+        hostUserId,
+        isChannel
+    );
+
+    await triggerBackgroundJobForQnaSessionCreatedEvent(response);
+
+    return response;
 };
 
 /**
@@ -191,6 +177,7 @@ export const getNewQuestionCard = (qnaSessionId: string): AdaptiveCard => {
 
 /**
  * Handles and formats the parameters, then sends new question details to the database.
+ * Also triggers backgorund job.
  * @param qnaSessionId - id of the current QnA session
  * @param userAadObjId - AAD Obj ID of the current user
  * @param userName - name of the user
@@ -204,9 +191,9 @@ export const submitNewQuestion = async (
     userName: string,
     questionContent: string,
     conversationId: string
-): Promise<Result<boolean, Error>> => {
+): Promise<Result<IQuestion, Error>> => {
     try {
-        await questionDataService.createQuestion(
+        const question: IQuestion = await questionDataService.createQuestion(
             qnaSessionId,
             <string>userAadObjId,
             userName,
@@ -214,50 +201,106 @@ export const submitNewQuestion = async (
             conversationId
         );
 
-        return ok(true);
+        triggerBackgroundJobForQuestionPostedEvent(
+            conversationId,
+            question,
+            qnaSessionId,
+            userAadObjId
+        );
+
+        return ok(question);
     } catch (error) {
         exceptionLogger(error);
         return err(Error('Failed to submit new question'));
     }
 };
 
-export const getUpdatedMainCard = async (
+/**
+ * Marks question as answered and triggers background job.
+ * @param conversationId - conversation id.
+ * @param qnaSessionId - qnasession id.
+ * @param questionId - question id.
+ * @param aadObjectId - aad object id of user who marked question as answered.
+ */
+export const markQuestionAsAnswered = async (
+    conversationId: string,
     qnaSessionId: string,
-    ended = false
-): Promise<Result<{ card: AdaptiveCard; activityId: string }, Error>> => {
-    try {
-        const qnaSessionData = await qnaSessionDataService.getQnASessionData(
-            qnaSessionId
-        );
-        // eslint-disable-next-line prefer-const
-        const {
-            topQuestions,
-            recentQuestions,
-            numQuestions,
-        } = await questionDataService.getQuestions(qnaSessionId, 3);
+    questionId: string,
+    aadObjectId: string
+) => {
+    await questionDataService.markQuestionAsAnswered(
+        conversationId,
+        qnaSessionId,
+        questionId
+    );
 
-        // generate and return maincard
-        return ok({
-            card: await getMainCard(
-                qnaSessionData.title,
-                qnaSessionData.description,
-                qnaSessionData.userName,
-                qnaSessionId,
-                qnaSessionData.userAadObjId,
-                qnaSessionData.hostUserId,
-                ended || !qnaSessionData.isActive,
-                topQuestions,
-                recentQuestions,
-                numQuestions
-            ),
-            activityId: qnaSessionData.activityId,
-            numQuestions,
-        });
-    } catch (error) {
-        exceptionLogger(error);
-        return err(Error('Failed to get top questions'));
-    }
+    await triggerBackgroundJobForQuestionMarkedAsAnsweredEvent(
+        conversationId,
+        questionId,
+        qnaSessionId,
+        aadObjectId
+    );
 };
+
+/**
+ * upvotes question and triggers background job.
+ * @param conversationId - conversation id.
+ * @param qnaSessionId - qnasession id.
+ * @param questionId - question id.
+ * @param aadObjectId - aad object id of user who upvoted question.
+ * @param userName - name of user who upvoted the question.
+ */
+export const upvoteQuestion = async (
+    conversationId: string,
+    qnaSessionId: string,
+    questionId: string,
+    aadObjectId: string,
+    userName: string
+) => {
+    await questionDataService.upVoteQuestion(
+        conversationId,
+        qnaSessionId,
+        questionId,
+        aadObjectId,
+        userName
+    );
+
+    await triggerBackgroundJobForQuestionUpvotedEvent(
+        conversationId,
+        questionId,
+        qnaSessionId,
+        aadObjectId
+    );
+};
+
+/**
+ * downvotes question and triggers background job.
+ * @param conversationId - conversation id.
+ * @param qnaSessionId - qnasession id.
+ * @param questionId - question id.
+ * @param aadObjectId - aad object id of user who downvoted question.
+ */
+export const downvoteQuestion = async (
+    conversationId: string,
+    qnaSessionId: string,
+    questionId: string,
+    aadObjectId: string
+) => {
+    await questionDataService.downVoteQuestion(
+        conversationId,
+        qnaSessionId,
+        questionId,
+        aadObjectId
+    );
+
+    await triggerBackgroundJobForQuestionDownvotedEvent(
+        conversationId,
+        questionId,
+        qnaSessionId,
+        aadObjectId
+    );
+};
+
 /**
  * Upvotes a question and returns an updated leaderboard
  * @param questionId - DBID of the question being upvoted
@@ -266,18 +309,41 @@ export const getUpdatedMainCard = async (
  * @param theme - Teams theme of the user upvoting. Options are 'default', 'dark', or 'high-contrast'
  */
 export const updateUpvote = async (
+    qnaSessionId: string,
     questionId: string,
     aadObjectId: string,
     name: string,
+    conversationId: string,
     theme: string
 ): Promise<Result<AdaptiveCard, Error>> => {
     try {
-        const question: IQuestion = await questionDataService.updateUpvote(
+        const response = await questionDataService.updateUpvote(
             questionId,
             aadObjectId,
             name
         );
-        return generateLeaderboard(question.qnaSessionId, aadObjectId, theme);
+
+        if (response.upvoted) {
+            await triggerBackgroundJobForQuestionUpvotedEvent(
+                conversationId,
+                response.question.id,
+                qnaSessionId,
+                aadObjectId
+            );
+        } else {
+            await triggerBackgroundJobForQuestionDownvotedEvent(
+                conversationId,
+                response.question.id,
+                qnaSessionId,
+                aadObjectId
+            );
+        }
+
+        return generateLeaderboard(
+            response.question.qnaSessionId,
+            aadObjectId,
+            theme
+        );
     } catch (error) {
         exceptionLogger(error);
         return err(Error('Failed to upvote question.'));
@@ -309,58 +375,47 @@ export const endQnASession = async (
     tenantId: string,
     serviceURL: string,
     meetingId: string
-): Promise<Result<{ card: AdaptiveCard; activityId: string }, Error>> => {
-    try {
-        const isActive = await qnaSessionDataService.isActiveQnA(qnaSessionId);
-        if (!isActive) return err(Error('The QnA session has already ended'));
-
-        const isHost = await qnaSessionDataService.isHost(
-            qnaSessionId,
-            aadObjectId
-        );
-
-        //Only a Presenter or an Organizer can end QnA session in the meeting.
-        if (
-            meetingId !== undefined &&
-            meetingId !== null &&
-            meetingId.trim() !== ''
-        ) {
-            const canEndQnASession = await isPresenterOrOrganizer(
-                meetingId,
-                aadObjectId,
-                tenantId,
-                serviceURL
-            );
-            if (!canEndQnASession) {
-                exceptionLogger(
-                    new InsufficientPermissionsToCreateOrEndQnASessionError(
-                        'Only a Presenter or an Organizer can end Q & A Session.'
-                    )
-                );
-                return err(
-                    new InsufficientPermissionsToCreateOrEndQnASessionError(
-                        'Only a Presenter or an Organizer can end Q & A Session.'
-                    )
-                );
-            }
-        } else {
-            if (!isHost)
-                return err(
-                    Error('Insufficient permissions to end QnA session')
-                );
-        }
-
-        await qnaSessionDataService.endQnASession(qnaSessionId, conversationId);
-
-        const updatedMainCard = await getUpdatedMainCard(qnaSessionId, true);
-
-        if (updatedMainCard.isErr()) throw updatedMainCard.value;
-
-        return updatedMainCard;
-    } catch (error) {
-        exceptionLogger(error);
-        return err(Error('Failed to end QnA session'));
+): Promise<void> => {
+    const isActive = await qnaSessionDataService.isActiveQnA(qnaSessionId);
+    if (!isActive) {
+        throw new Error('The QnA session has already ended');
     }
+
+    const isHost = await qnaSessionDataService.isHost(
+        qnaSessionId,
+        aadObjectId
+    );
+
+    //Only a Presenter or an Organizer can end QnA session in the meeting.
+    if (
+        meetingId !== undefined &&
+        meetingId !== null &&
+        meetingId.trim() !== ''
+    ) {
+        const canEndQnASession = await isPresenterOrOrganizer(
+            meetingId,
+            aadObjectId,
+            tenantId,
+            serviceURL
+        );
+        if (!canEndQnASession) {
+            throw new InsufficientPermissionsToCreateOrEndQnASessionError(
+                'Only a Presenter or an Organizer can end Q & A Session.'
+            );
+        }
+    } else {
+        if (!isHost) {
+            throw new Error('Insufficient permissions to end QnA session');
+        }
+    }
+
+    await qnaSessionDataService.endQnASession(qnaSessionId, conversationId);
+
+    await triggerBackgroundJobForQnaSessionEndedEvent(
+        conversationId,
+        qnaSessionId,
+        aadObjectId
+    );
 };
 
 /**

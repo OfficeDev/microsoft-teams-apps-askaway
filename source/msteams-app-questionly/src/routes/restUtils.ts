@@ -1,4 +1,5 @@
 import {
+    IConversation,
     IQnASession_populated,
     IQuestionPopulatedUser,
     questionDataService,
@@ -13,6 +14,8 @@ import {
     TeamsChannelAccount,
     TeamsInfo,
 } from 'botbuilder';
+import { verifyUserFromConversationId } from 'msteams-app-questionly.common';
+import { Response } from 'express';
 
 /**
  * Gets questions data and user data for each active qna sessions, process them and returns an array of detailed qna sessions.
@@ -78,6 +81,31 @@ export const processQnASesssionsDataForMeetingTab = async (
     }
 
     return qnaSessionArrayForTab;
+};
+
+/**
+ * Ensures if user is part of the conversation, if not sends `403` response back.
+ * @param res - Response.
+ * @param conversationData - Conversation data.
+ * @param userId - Aad object id of user.
+ */
+export const ensureUserIsPartOfConversation = async (
+    res: Response,
+    conversationData: IConversation,
+    userId: string
+): Promise<boolean> => {
+    const isUserPartOfConversation = await verifyUserFromConversationId(
+        conversationData.id,
+        conversationData.serviceUrl,
+        conversationData.tenantId,
+        userId
+    );
+
+    if (!isUserPartOfConversation) {
+        formResponseWhenUserIsNotPartOfConversation(res);
+    }
+
+    return isUserPartOfConversation;
 };
 
 export const patchActionForQuestion = ['upvote', 'downvote', 'markAnswered'];

@@ -1,7 +1,7 @@
 {
-  "name": "msteams-app-questionly.conversation.utility",
+  "name": "msteams-app-questionly.common",
   "version": "1.0.0",
-  "description": "conversation utility.",
+  "description": "Ask away common",
   "scripts": {
     "build": "webpack",
     "test": "jest",

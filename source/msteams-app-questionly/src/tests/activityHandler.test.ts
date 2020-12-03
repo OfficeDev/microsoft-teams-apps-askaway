@@ -477,7 +477,6 @@ test('handle submit end qna', async () => {
         context.activity.serviceUrl,
         sampleMeetingId
     );
-    expect(context.updateActivity).toBeCalledTimes(1);
 });
 
 test('bot message preview send', async () => {
@@ -537,7 +536,6 @@ test('bot message preview send', async () => {
         context.activity.serviceUrl,
         sampleMeetingId
     );
-    expect(context.sendActivity).toBeCalledTimes(1);
 });
 
 describe('messaging extension submit', () => {

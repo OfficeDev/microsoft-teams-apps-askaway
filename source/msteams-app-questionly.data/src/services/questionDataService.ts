@@ -8,7 +8,6 @@ import {
 import { User } from "./../schemas/user";
 import { qnaSessionDataService } from "./qnaSessionDataService";
 import { userDataService } from "./userDataService";
-import * as mongoose from "mongoose";
 
 export class QuestionDataService {
   private qnaSessionDataService;
@@ -26,7 +25,7 @@ export class QuestionDataService {
    * @param userTeamsName - Name of user on Teams
    * @param questionContent - Question asked by user
    * @param conversationId - conversation id
-   * @returns Returns id of created document
+   * @returns Returns created document
    * @throws Error thrown when database fails to save the question
    */
   public async createQuestion(
@@ -35,9 +34,9 @@ export class QuestionDataService {
     userTeamsName: string,
     questionContent: string,
     conversationId: string
-  ): Promise<string> {
+  ): Promise<IQuestion> {
     await this.userDataService.getUserOrCreate(userAadObjId, userTeamsName);
-    await this.qnaSessionDataService.isExistingQnASession(
+    await this.qnaSessionDataService.isExistingActiveQnASession(
       qnaTeamsSessionId,
       conversationId
     );
@@ -49,12 +48,12 @@ export class QuestionDataService {
       isAnswered: false,
     });
 
-    const savedSession: mongoose.MongooseDocument = await retryWrapper(
+    const savedQuestion: IQuestion = await retryWrapper(
       () => question.save(),
       new ExponentialBackOff()
     );
 
-    return savedSession._id;
+    return savedQuestion;
   }
 
   /**
@@ -134,35 +133,42 @@ export class QuestionDataService {
    * @param questionId - The DBID of the question document for the question being upvoted.
    * @param aadObjectId - The aadObjectId of the user upvoting the question.
    * @param name - The name of the user upvoting the question, used for creating a new User document if one doesn't exist.
+   * @returns - question document and boolean (true if question is upvoted).
    */
   public async updateUpvote(
     questionId: string,
     aadObjectId: string,
     name: string
-  ): Promise<IQuestion> {
+  ): Promise<{ question: IQuestion; upvoted: Boolean }> {
     await this.userDataService.getUserOrCreate(aadObjectId, name);
 
-    return await retryWrapper<IQuestion>(async () => {
-      const question: IQuestion = <IQuestion>(
-        await Question.findById(questionId)
-      );
+    return await retryWrapper<{ question: IQuestion; upvoted: Boolean }>(
+      async () => {
+        const question: IQuestion = <IQuestion>(
+          await Question.findById(questionId)
+        );
 
-      const qnaSession: IQnASession = <IQnASession>(
-        await QnASession.findById(question.qnaSessionId)
-      );
+        const qnaSession: IQnASession = <IQnASession>(
+          await QnASession.findById(question.qnaSessionId)
+        );
 
-      if (qnaSession.isActive) {
-        if (question.voters.includes(aadObjectId))
-          question.voters.splice(question.voters.indexOf(aadObjectId), 1);
-        else {
-          question.voters.push(aadObjectId);
+        let upvoted = false;
+
+        if (qnaSession.isActive) {
+          if (question.voters.includes(aadObjectId))
+            question.voters.splice(question.voters.indexOf(aadObjectId), 1);
+          else {
+            question.voters.push(aadObjectId);
+            upvoted = true;
+          }
+
+          await question.save();
         }
 
-        await question.save();
-      }
-
-      return question;
-    }, new ExponentialBackOff());
+        return { question: question, upvoted: upvoted };
+      },
+      new ExponentialBackOff()
+    );
   }
 
   /**
@@ -227,7 +233,7 @@ export class QuestionDataService {
       questionId
     );
 
-    if (question.userId.toString() === aadObjectId) {
+    if (question.userId === aadObjectId) {
       throw new Error("User cannot upvote/ downvote own question");
     }
 
@@ -252,13 +258,13 @@ export class QuestionDataService {
     questionId: string,
     aadObjectId: string
   ): Promise<void> {
-    const question: IQuestion = await this.getAndValidateQuestion(
+    const question = await this.getAndValidateQuestion(
       conversationId,
       sessionId,
       questionId
     );
 
-    if (question.userId.toString() === aadObjectId) {
+    if (question.userId === aadObjectId) {
       throw new Error("User cannot upvote/ downvote own question");
     }
 
@@ -280,7 +286,7 @@ export class QuestionDataService {
     sessionId: string,
     questionId: string
   ): Promise<void> {
-    const question: IQuestion = await this.getAndValidateQuestion(
+    const question = await this.getAndValidateQuestion(
       conversationId,
       sessionId,
       questionId

@@ -1,10 +1,10 @@
 import axios from 'axios';
-import { ConversationAccount, TurnContext } from 'botbuilder';
+import { TurnContext } from 'botbuilder';
 import { MicrosoftAppCredentials } from 'botframework-connector';
 import { ConversationType } from 'src/enums/ConversationType';
 import { ParticipantRoles } from 'src/enums/ParticipantRoles';
-import { exceptionLogger } from './exceptionTracking';
-import { getMicrosoftAppPassword } from './keyvault';
+import { exceptionLogger } from 'src/util/exceptionTracking';
+import { getMicrosoftAppPassword } from 'src/util/keyvault';
 
 export const isPresenterOrOrganizer = async (
     meetingId: string,

@@ -12,7 +12,9 @@ import {
     getHostUserId,
 } from 'src/routes/restUtils';
 import { generateUniqueId } from 'adaptivecards';
-import { verifyUserFromConversationId } from 'msteams-app-questionly.conversation.utility';
+import { verifyUserFromConversationId } from 'msteams-app-questionly.common';
+import { endQnASession } from 'src/controller';
+import { StatusCodes } from 'http-status-codes';
 import {
     getParticipantRole,
     isPresenterOrOrganizer,
@@ -288,7 +290,7 @@ describe('test conversations/:conversationId/sessions api', () => {
         const result = await request(app).get(
             `/api/conversations/${sampleConversationId}/sessions`
         );
-        expect(result.status).toBe(500);
+        expect(result.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
         expect(processQnASesssionsDataForMeetingTab).toBeCalledTimes(1);
         expect(processQnASesssionsDataForMeetingTab).toBeCalledWith(
             testQnAData
@@ -329,7 +331,7 @@ describe('test conversations/:conversationId/sessions api', () => {
         const result = await request(app).get(
             `/api/conversations/${sampleConversationId}/sessions`
         );
-        expect(result.status).toBe(403);
+        expect(result.status).toBe(StatusCodes.FORBIDDEN);
         expect(result.text).toEqual(
             `user is not part of the given conversationId`
         );
@@ -375,7 +377,7 @@ describe('test conversations/:conversationId/sessions api', () => {
         const result = await request(app).get(
             `/api/conversations/${sampleInvalidConversationId}/sessions`
         );
-        expect(result.status).toBe(204);
+        expect(result.status).toBe(StatusCodes.NO_CONTENT);
         expect(result.noContent).toBe(true);
         expect(processQnASesssionsDataForMeetingTab).toBeCalledTimes(0);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
@@ -461,7 +463,7 @@ describe('test post conversations/:conversationId/sessions api', () => {
                 isChannel: true,
             });
         expect(result).toBeDefined();
-        expect(result.status).toBe(200);
+        expect(result.status).toBe(StatusCodes.OK);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(isPresenterOrOrganizer).toBeCalledTimes(1);
         expect(getHostUserId).toBeCalledTimes(1);
@@ -500,7 +502,7 @@ describe('test post conversations/:conversationId/sessions api', () => {
                 hostUserId: sampleHostId,
                 isChannel: true,
             });
-        expect(result.status).toBe(500);
+        expect(result.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(isPresenterOrOrganizer).toBeCalledTimes(1);
         expect(getHostUserId).toBeCalledTimes(1);
@@ -564,7 +566,7 @@ describe('test post conversations/:conversationId/sessions api', () => {
                 hostUserId: sampleHostId,
                 isChannel: true,
             });
-        expect(result.status).toBe(400);
+        expect(result.status).toBe(StatusCodes.BAD_REQUEST);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(isPresenterOrOrganizer).toBeCalledTimes(1);
         expect(qnaSessionDataService.createQnASession).toBeCalledTimes(0);
@@ -587,7 +589,7 @@ describe('test post conversations/:conversationId/sessions api', () => {
                 hostUserId: sampleHostId,
                 isChannel: true,
             });
-        expect(result.status).toBe(500);
+        expect(result.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(isPresenterOrOrganizer).toBeCalledTimes(0);
         expect(getHostUserId).toBeCalledTimes(0);
@@ -598,7 +600,7 @@ describe('test post conversations/:conversationId/sessions api', () => {
         const result = await request(app)
             .post(`/api/conversations/${sampleConversationId}/sessions`)
             .send({});
-        expect(result.status).toBe(400);
+        expect(result.status).toBe(StatusCodes.BAD_REQUEST);
     });
 });
 
@@ -644,7 +646,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
             `/api/conversations/${sampleConversationId}/sessions/${testSessionId}/questions`
         );
 
-        expect(result.status).toBe(400);
+        expect(result.status).toBe(StatusCodes.BAD_REQUEST);
         expect(result.text).toEqual(
             'questionContent is missing in the request'
         );
@@ -660,7 +662,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
             )
             .send({ questionContent: null });
 
-        expect(result.status).toBe(400);
+        expect(result.status).toBe(StatusCodes.BAD_REQUEST);
         expect(result.text).toEqual(
             'questionContent is missing in the request'
         );
@@ -676,7 +678,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
             )
             .send({ questionContent: '' });
 
-        expect(result.status).toBe(400);
+        expect(result.status).toBe(StatusCodes.BAD_REQUEST);
         expect(result.text).toEqual(
             'questionContent is missing in the request'
         );
@@ -700,7 +702,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
             )
             .send({ questionContent: testQuestionContent });
 
-        expect(result.status).toBe(500);
+        expect(result.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
         expect(result.text).toEqual(testError.message);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(
@@ -737,7 +739,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
             )
             .send({ questionContent: testQuestionContent });
 
-        expect(result.status).toBe(500);
+        expect(result.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
         expect(result.text).toEqual(testError.message);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(
@@ -780,7 +782,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
             )
             .send({ questionContent: testQuestionContent });
 
-        expect(result.status).toBe(403);
+        expect(result.status).toBe(StatusCodes.CREATED);
         expect(result.text).toEqual(
             `user is not part of the given conversationId`
         );
@@ -829,7 +831,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
             )
             .send({ questionContent: testQuestionContent });
 
-        expect(result.status).toBe(500);
+        expect(result.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
         expect(result.text).toEqual(testError.message);
         expect(questionDataService.createQuestion).toBeCalledTimes(1);
         expect(questionDataService.createQuestion).toBeCalledWith(
@@ -884,7 +886,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
             )
             .send({ questionContent: testQuestionContent });
 
-        expect(result.status).toBe(201);
+        expect(result.status).toBe(StatusCodes.CREATED);
         expect(result.text).toEqual(questionId);
         expect(questionDataService.createQuestion).toBeCalledTimes(1);
         expect(questionDataService.createQuestion).toBeCalledWith(
@@ -1112,7 +1114,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
             `/api/conversations/${sampleConversationId}/sessions/${testSessionId}/questions/${testQuestionId}`
         );
 
-        expect(result.status).toBe(400);
+        expect(result.status).toBe(StatusCodes.BAD_REQUEST);
         expect(result.text).toEqual('patch action is missing in the request');
     });
 
@@ -1127,7 +1129,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
             )
             .send({ action: null });
 
-        expect(result.status).toBe(400);
+        expect(result.status).toBe(StatusCodes.BAD_REQUEST);
         expect(result.text).toEqual('patch action is missing in the request');
     });
 
@@ -1142,7 +1144,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
             )
             .send({ action: '' });
 
-        expect(result.status).toBe(400);
+        expect(result.status).toBe(StatusCodes.BAD_REQUEST);
         expect(result.text).toEqual('patch action is missing in the request');
     });
 
@@ -1158,7 +1160,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
             )
             .send({ action: randomAction });
 
-        expect(result.status).toBe(400);
+        expect(result.status).toBe(StatusCodes.BAD_REQUEST);
         expect(result.text).toEqual(`action ${randomAction} is not supported`);
     });
 
@@ -1193,7 +1195,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
             )
             .send({ action: 'upvote' });
 
-        expect(result.status).toBe(500);
+        expect(result.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
         expect(result.text).toEqual(testError.message);
         expect(questionDataService.upVoteQuestion).toBeCalledTimes(1);
         expect(questionDataService.upVoteQuestion).toBeCalledWith(
@@ -1242,7 +1244,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
             )
             .send({ action: 'upvote' });
 
-        expect(result.status).toBe(204);
+        expect(result.status).toBe(StatusCodes.NO_CONTENT);
         expect(result.noContent).toBeTruthy();
         expect(questionDataService.upVoteQuestion).toBeCalledTimes(1);
         expect(questionDataService.upVoteQuestion).toBeCalledWith(
@@ -1291,7 +1293,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
             )
             .send({ action: 'upvote' });
 
-        expect(result.status).toBe(403);
+        expect(result.status).toBe(StatusCodes.FORBIDDEN);
         expect(result.text).toEqual(
             `user is not part of the given conversationId`
         );
@@ -1341,7 +1343,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
             )
             .send({ action: 'downvote' });
 
-        expect(result.status).toBe(500);
+        expect(result.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
         expect(result.text).toEqual(testError.message);
         expect(questionDataService.downVoteQuestion).toBeCalledTimes(1);
         expect(questionDataService.downVoteQuestion).toBeCalledWith(
@@ -1389,7 +1391,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
             )
             .send({ action: 'downvote' });
 
-        expect(result.status).toBe(204);
+        expect(result.status).toBe(StatusCodes.NO_CONTENT);
         expect(result.noContent).toBeTruthy();
         expect(questionDataService.downVoteQuestion).toBeCalledTimes(1);
         expect(questionDataService.downVoteQuestion).toBeCalledWith(
@@ -1437,7 +1439,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
             )
             .send({ action: 'downvote' });
 
-        expect(result.status).toBe(403);
+        expect(result.status).toBe(StatusCodes.CREATED);
         expect(result.text).toEqual(
             `user is not part of the given conversationId`
         );
@@ -1487,7 +1489,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
             )
             .send({ action: 'markAnswered' });
 
-        expect(result.status).toBe(500);
+        expect(result.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
         expect(result.text).toEqual(testError.message);
         expect(questionDataService.markQuestionAsAnswered).toBeCalledTimes(1);
         expect(questionDataService.markQuestionAsAnswered).toBeCalledWith(
@@ -1536,7 +1538,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
             )
             .send({ action: 'markAnswered' });
 
-        expect(result.status).toBe(204);
+        expect(result.status).toBe(StatusCodes.NO_CONTENT);
         expect(result.noContent).toBeTruthy();
         expect(questionDataService.markQuestionAsAnswered).toBeCalledTimes(1);
         expect(questionDataService.markQuestionAsAnswered).toBeCalledWith(
@@ -1585,7 +1587,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
             )
             .send({ action: 'markAnswered' });
 
-        expect(result.status).toBe(403);
+        expect(result.status).toBe(StatusCodes.CREATED);
         expect(result.text).toEqual(
             'Only a Presenter or an Organizer can mark question as answered.'
         );
@@ -1627,7 +1629,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
             next();
         };
 
-        (<any>qnaSessionDataService.endQnASession) = jest.fn();
+        (<any>endQnASession) = jest.fn();
         (<any>isPresenterOrOrganizer) = jest.fn();
         (<any>conversationDataService.getConversationData) = jest.fn();
 
@@ -1647,7 +1649,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
             `/api/conversations/${sampleConversationId}/sessions/${testSessionId}`
         );
 
-        expect(result.status).toBe(400);
+        expect(result.status).toBe(StatusCodes.BAD_REQUEST);
         expect(result.text).toEqual('patch action is missing in the request');
     });
 
@@ -1661,7 +1663,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
             )
             .send({ action: null });
 
-        expect(result.status).toBe(400);
+        expect(result.status).toBe(StatusCodes.BAD_REQUEST);
         expect(result.text).toEqual('patch action is missing in the request');
     });
 
@@ -1675,7 +1677,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
             )
             .send({ action: '' });
 
-        expect(result.status).toBe(400);
+        expect(result.status).toBe(StatusCodes.BAD_REQUEST);
         expect(result.text).toEqual('patch action is missing in the request');
     });
 
@@ -1690,7 +1692,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
             )
             .send({ action: randomAction });
 
-        expect(result.status).toBe(400);
+        expect(result.status).toBe(StatusCodes.BAD_REQUEST);
         expect(result.text).toEqual(`action ${randomAction} is not supported`);
     });
 
@@ -1714,23 +1716,22 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
             return true;
         });
 
-        (<any>qnaSessionDataService.endQnASession).mockImplementationOnce(
-            () => {
-                throw testError;
-            }
-        );
+        (<any>endQnASession).mockImplementationOnce(() => {
+            throw testError;
+        });
 
         const result = await request(app)
             .patch(
                 `/api/conversations/${sampleConversationId}/sessions/${testSessionId}`
             )
-            .send({ action: 'close' });
+            .send({ action: 'end' });
 
-        expect(result.status).toBe(500);
+        expect(result.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
         expect(result.text).toEqual(testError.message);
-        expect(qnaSessionDataService.endQnASession).toBeCalledTimes(1);
-        expect(qnaSessionDataService.endQnASession).toBeCalledWith(
+        expect(endQnASession).toBeCalledTimes(1);
+        expect(endQnASession).toBeCalledWith(
             testSessionId,
+            testUserId,
             sampleConversationId
         );
         expect(isPresenterOrOrganizer).toBeCalledTimes(1);
@@ -1763,9 +1764,9 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
             .patch(
                 `/api/conversations/${sampleConversationId}/sessions/${testSessionId}`
             )
-            .send({ action: 'close' });
+            .send({ action: 'end' });
 
-        expect(result.status).toBe(500);
+        expect(result.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
         expect(result.text).toEqual(testError.message);
         expect(
             <any>conversationDataService.getConversationData
@@ -1798,9 +1799,9 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
             .patch(
                 `/api/conversations/${sampleConversationId}/sessions/${testSessionId}`
             )
-            .send({ action: 'close' });
+            .send({ action: 'end' });
 
-        expect(result.status).toBe(403);
+        expect(result.status).toBe(StatusCodes.CREATED);
         expect(result.text).toEqual(
             'Only a Presenter or an Organizer can update session.'
         );
@@ -1819,7 +1820,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
         );
     });
 
-    it('close session action', async () => {
+    it('end session action', async () => {
         const testSessionId = 'testId';
         const sampleConversationId = '1';
 
@@ -1842,13 +1843,14 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
             .patch(
                 `/api/conversations/${sampleConversationId}/sessions/${testSessionId}`
             )
-            .send({ action: 'close' });
+            .send({ action: 'end' });
 
-        expect(result.status).toBe(204);
+        expect(result.status).toBe(StatusCodes.NO_CONTENT);
         expect(result.noContent).toBeTruthy();
-        expect(qnaSessionDataService.endQnASession).toBeCalledTimes(1);
-        expect(qnaSessionDataService.endQnASession).toBeCalledWith(
+        expect(endQnASession).toBeCalledTimes(1);
+        expect(endQnASession).toBeCalledWith(
             testSessionId,
+            testUserId,
             sampleConversationId
         );
         expect(isPresenterOrOrganizer).toBeCalledTimes(1);
@@ -2036,7 +2038,7 @@ describe('test get /:conversationId/activesessions api', () => {
         const result = await request(app).get(
             `/api/conversations/${sampleConversationId}/activesessions`
         );
-        expect(result.status).toBe(500);
+        expect(result.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
         expect(processQnASesssionsDataForMeetingTab).toBeCalledTimes(1);
         expect(processQnASesssionsDataForMeetingTab).toBeCalledWith(
             testQnAData
@@ -2083,7 +2085,7 @@ describe('test get /:conversationId/activesessions api', () => {
         const result = await request(app).get(
             `/api/conversations/${sampleInvalidConversationId}/activesessions`
         );
-        expect(result.status).toBe(204);
+        expect(result.status).toBe(StatusCodes.NO_CONTENT);
         expect(result.noContent).toBe(true);
         expect(processQnASesssionsDataForMeetingTab).toBeCalledTimes(0);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
@@ -2121,7 +2123,7 @@ describe('test get /:conversationId/activesessions api', () => {
         const result = await request(app).get(
             `/api/conversations/${sampleConversationId}/activesessions`
         );
-        expect(result.status).toBe(403);
+        expect(result.status).toBe(StatusCodes.CREATED);
         expect(result.text).toEqual(
             `user is not part of the given conversationId`
         );

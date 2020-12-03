@@ -15,7 +15,12 @@
     "azure-ad-jwt-lite": "^1.1.0",
     "botbuilder": "^4.10.4",
     "durable-functions": "^1.4.4",
-    "moment": "^2.29.1"
+    "moment": "^2.29.1",
+    "adaptivecards": "^1.2.6",
+    "adaptivecards-templating": "^1.0.0-rc.0",
+    "i18next": "^19.6.0",
+    "random": "^2.2.0",
+    "seedrandom": "^3.0.5"
   },
   "devDependencies": {
     "@azure/functions": "^1.0.2-beta2",
@@ -23,6 +28,9 @@
     "@types/jsonwebtoken": "^8.5.0",
     "@types/mongoose": "^5.7.37",
     "@types/node": "^14.11.8",
+    "@types/moment": "^2.13.0",
+    "@types/random": "^2.1.1",
+    "@types/seedrandom": "^2.4.28",
     "jest": "^26.6.0",
     "mongoose": "^5.10.12",
     "typescript": "^3.9.7",

@@ -94,6 +94,34 @@ export const retryWrapper = async <T>(
   }
 };
 
+/**
+ * Wrapper to retry 16500 (Too Many Requests) error code and VersionError from database calls
+ * @param fn - Function to retry
+ * @param retryPolicy - policy to handle retries
+ */
+export const retryWrapperForConcurrency = async <T>(
+  fn,
+  retryPolicy?: IRetryPolicy
+): Promise<T> => {
+  if (!retryPolicy) retryPolicy = new DefaultRetryPolicy();
+  try {
+    return await fn();
+  } catch (error) {
+    const mongoError = <MongoError>error;
+    if (mongoError.code === 16500 || mongoError.name === "VersionError") {
+      // `VersionError` is thrown when document updating changed between when it's loaded and getting updated.
+      // 16500 is code for Too Many Requests
+      if (retryPolicy.shouldRetry()) {
+        await _delay(retryPolicy.retryAfterMs);
+        return retryWrapper(fn, retryPolicy);
+      } else {
+        throw error;
+      }
+    }
+    throw error;
+  }
+};
+
 const _delay = (ms: number): Promise<void> => {
   return new Promise((resolve) => setTimeout(() => resolve(), ms));
 };

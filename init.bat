@@ -10,13 +10,13 @@ cd .\..\msteams-app-questionly
 call npm.cmd install 
 xcopy .\..\msteams-app-questionly.data\dist\* node_modules\msteams-app-questionly.data\dist\* /s /Y
 xcopy .\..\msteams-app-questionly.data\package.json node_modules\msteams-app-questionly.data\  /Y
-xcopy .\..\msteams-app-questionly.conversation.utility\dist\* node_modules\msteams-app-questionly.conversation.utility\dist\* /s /Y
-xcopy .\..\msteams-app-questionly.conversation.utility\package.json node_modules\msteams-app-questionly.conversation.utility\  /Y
+xcopy .\..\msteams-app-questionly.common\dist\* node_modules\msteams-app-questionly.common\dist\* /s /Y
+xcopy .\..\msteams-app-questionly.common\package.json node_modules\msteams-app-questionly.common\  /Y
 
 cd .\..\msteams-app-questionly.func
 call npm.cmd install 
 xcopy .\..\msteams-app-questionly.data\dist\* node_modules\msteams-app-questionly.data\dist\* /s /Y
 xcopy .\..\msteams-app-questionly.data\package.json node_modules\msteams-app-questionly.data\  /Y
-xcopy .\..\msteams-app-questionly.conversation.utility\dist\* node_modules\msteams-app-questionly.conversation.utility\dist\* /s /Y
-xcopy .\..\msteams-app-questionly.conversation.utility\package.json node_modules\msteams-app-questionly.conversation.utility\  /Y
+xcopy .\..\msteams-app-questionly.common\dist\* node_modules\msteams-app-questionly.common\dist\* /s /Y
+xcopy .\..\msteams-app-questionly.common\package.json node_modules\msteams-app-questionly.common\  /Y
 call npm.cmd run build 
