@@ -13,6 +13,7 @@ import {
     TextArea,
     FlexItem,
     SendIcon,
+    Loader,
 } from '@fluentui/react-northstar';
 
 export interface MeetingPanelProps {
@@ -21,6 +22,7 @@ export interface MeetingPanelProps {
 
 export interface MeetingPanelState {
     activeSessionData: any;
+    showLoader: boolean;
     input: {
         title: string;
         description: string;
@@ -39,6 +41,7 @@ export class MeetingPanel extends React.Component<
         super(props);
         this.state = {
             activeSessionData: null,
+            showLoader: true,
             input: {
                 title: '',
                 description: '',
@@ -67,8 +70,11 @@ export class MeetingPanel extends React.Component<
                         activeSessionData: response.data[0],
                     });
                 }
+                this.setState({ showLoader: false });
             })
-            .catch((error) => {});
+            .catch((error) => {
+                this.setState({ showLoader: false });
+            });
     }
 
     /**
@@ -77,6 +83,7 @@ export class MeetingPanel extends React.Component<
      */
     private onSubmitCreateSession(e) {
         e.preventDefault();
+        this.setState({ showLoader: true });
         const inputData = this.state.input;
         this.validateCreateSession(inputData);
         if (inputData && inputData['title'] && inputData['description']) {
@@ -101,8 +108,11 @@ export class MeetingPanel extends React.Component<
                             activeSessionData: response.data,
                         });
                     }
+                    this.setState({ showLoader: false });
                 })
-                .catch((error) => {});
+                .catch((error) => {
+                    this.setState({ showLoader: false });
+                });
         }
     }
 
@@ -283,15 +293,20 @@ export class MeetingPanel extends React.Component<
      * The render() method to create the UI of the tab
      */
     public render() {
+        const stateVal = this.state;
+        if (stateVal.showLoader)
+            return <Loader label="Loading Meeting Information" />;
         return (
-            <div className="meeting-panel">
-                {!this.state.activeSessionData && (
-                    <div>{this.showCreateSessionForm()}</div>
-                )}
-                {this.state.activeSessionData && (
-                    <div>{this.postQuestions()}</div>
-                )}
-            </div>
+            <React.Fragment>
+                <div className="meeting-panel">
+                    {!stateVal.activeSessionData && (
+                        <div>{this.showCreateSessionForm()}</div>
+                    )}
+                    {stateVal.activeSessionData && (
+                        <div>{this.postQuestions()}</div>
+                    )}
+                </div>
+            </React.Fragment>
         );
     }
 }
