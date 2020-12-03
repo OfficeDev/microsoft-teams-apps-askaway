@@ -23,19 +23,15 @@ export class TabContent extends React.Component<
         this.getActiveSession();
     }
 
-    public getActiveSession() {
-        console.log('props', this.props);
-
+    private getActiveSession() {
         HttpService.get(
             `/conversations/${this.props.teamsData.chatId}/activesessions`
         )
-            .then((response: any) => {
-                console.log('response', response);
-            })
+            .then((response: any) => {})
             .catch((error) => {});
     }
 
-    public adaptiveCardTemplate() {
+    private adaptiveCardTemplate() {
         return {
             $schema: 'https://adaptivecards.io/schemas/adaptive-card.json',
             type: 'AdaptiveCard',
@@ -101,7 +97,7 @@ export class TabContent extends React.Component<
         };
     }
 
-    public successModel() {
+    private successModel() {
         return {
             $schema: 'https://adaptivecards.io/schemas/adaptive-card.json',
             type: 'AdaptiveCard',
@@ -115,7 +111,7 @@ export class TabContent extends React.Component<
                         {
                             type: 'Image',
                             url: `https://${process.env.HostName}/images/success_image.png`,
-                            width: '20px',
+                            width: '75px',
                             horizontalAlignment: 'center',
                         },
                         {
@@ -131,7 +127,7 @@ export class TabContent extends React.Component<
         };
     }
 
-    public failureModel() {
+    private failureModel() {
         return {
             $schema: 'https://adaptivecards.io/schemas/adaptive-card.json',
             type: 'AdaptiveCard',
@@ -169,9 +165,9 @@ export class TabContent extends React.Component<
         };
     }
 
-    public onShowTaskModule() {
+    private onShowTaskModule() {
         let taskInfo: any = {
-            title: 'Microsoft Corporation',
+            // title: 'Microsoft Corporation',
             fallbackUrl: '',
             appId: process.env.MicrosoftAppId,
             card: this.adaptiveCardTemplate(),
@@ -183,7 +179,6 @@ export class TabContent extends React.Component<
                     title: result['title'],
                     description: result['description'],
                     scopeId: this.props.teamsData.chatId,
-                    // hostUserId: '',
                     isChannel: false,
                 };
                 HttpService.post(
@@ -191,7 +186,11 @@ export class TabContent extends React.Component<
                     createSessionData
                 )
                     .then((response: any) => {
-                        if (response && response['qnaSessionId']) {
+                        if (
+                            response &&
+                            response['data'] &&
+                            response['data']['qnaSessionId']
+                        ) {
                             this.showAlertModel(true);
                         } else {
                             this.showAlertModel(false);
@@ -209,9 +208,9 @@ export class TabContent extends React.Component<
     /**
      * Show success popup
      */
-    public showAlertModel(isSuccess = false) {
+    private showAlertModel(isSuccess = false) {
         let taskInfo: any = {
-            title: 'Microsoft Corporation',
+            // title: 'Microsoft Corporation',
             fallbackUrl: '',
             appID: process.env.MicrosoftAppId,
             card: isSuccess ? this.successModel() : this.failureModel(),

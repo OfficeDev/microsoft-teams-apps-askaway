@@ -50,7 +50,6 @@
             span {
                 font-size: 12px;
                 line-height: 16px;
-                color: #c8c6c4;
             }
             .btn-create-session {
                 display: flex;
@@ -79,17 +78,11 @@
             width: 70%;
             left: 17%;
         }
-        .no-post-questions {
+        .create-session {
             top: 30%;
             left: 50%;
             transform: translate(-50%, -50%);
             position: absolute;
         }
-    }
-}
-
-.ac-input-container {
-    span.ac-input-validation-error-message {
-        color: red;
     }
 }

@@ -20,7 +20,15 @@ export interface MeetingPanelProps {
 }
 
 export interface MeetingPanelState {
-    isSessionCreated: boolean;
+    activeSessionData: any;
+    input: {
+        title: string;
+        description: string;
+    };
+    error: {
+        isTitle: boolean;
+        isDescription: boolean;
+    };
 }
 
 export class MeetingPanel extends React.Component<
@@ -30,7 +38,15 @@ export class MeetingPanel extends React.Component<
     constructor(props) {
         super(props);
         this.state = {
-            isSessionCreated: false,
+            activeSessionData: null,
+            input: {
+                title: '',
+                description: '',
+            },
+            error: {
+                isTitle: false,
+                isDescription: false,
+            },
         };
     }
 
@@ -38,26 +54,100 @@ export class MeetingPanel extends React.Component<
         this.getActiveSession();
     }
 
-    public getActiveSession() {
-        console.log('props', this.props);
-
+    /**
+     * To Identify Active Session
+     */
+    private getActiveSession() {
         HttpService.get(
             `/conversations/${this.props.teamsData.chatId}/sessions`
         )
             .then((response: any) => {
-                console.log('response', response);
+                if (response && response.data && response.data.length > 0) {
+                    this.setState({
+                        activeSessionData: response.data[0],
+                    });
+                }
             })
             .catch((error) => {});
     }
 
-    public onSubmitCreateSession(e) {
-        this.setState({
-            isSessionCreated: true,
-        });
+    /**
+     * on submit create a new session
+     * @param e
+     */
+    private onSubmitCreateSession(e) {
         e.preventDefault();
+        const inputData = this.state.input;
+        this.validateCreateSession(inputData);
+        if (inputData && inputData['title'] && inputData['description']) {
+            const createSessionData = {
+                title: inputData['title'],
+                description: inputData['description'],
+                scopeId: this.props.teamsData.chatId,
+                // hostUserId: '',
+                isChannel: false,
+            };
+            HttpService.post(
+                `/conversations/${this.props.teamsData.chatId}/sessions`,
+                createSessionData
+            )
+                .then((response: any) => {
+                    if (
+                        response &&
+                        response['data'] &&
+                        response['data']['qnaSessionId']
+                    ) {
+                        this.setState({
+                            activeSessionData: response.data,
+                        });
+                    }
+                })
+                .catch((error) => {});
+        }
     }
 
-    public showCreateSessionForm() {
+    /**
+     * Append the value to Input Fields
+     * @param e
+     * @param key
+     */
+    private appendInput = (e, key) => {
+        const i = this.state;
+        i.input[key] = e.target.value;
+        this.setState(i);
+    };
+
+    /**
+     * Validate the input field
+     * @param input
+     * @param field
+     */
+    private validateCreateSessionField(input, field) {
+        const errorInput = this.state;
+        errorInput['error'][field] = true;
+        if (input) {
+            errorInput['error'][field] = false;
+        }
+        this.setState(errorInput);
+    }
+
+    /**
+     * Validate Create Sesion Form
+     */
+    private validateCreateSession(inputData) {
+        const errorInput = this.state;
+        errorInput['error']['isTitle'] = false;
+        errorInput['error']['isDescription'] = false;
+        if (!inputData['title']) {
+            errorInput['error']['isTitle'] = true;
+        }
+        if (!inputData['description']) {
+            errorInput['error']['isDescription'] = true;
+        }
+        this.setState(errorInput);
+    }
+
+    private showCreateSessionForm() {
         return (
             <Flex column>
                 <Text
@@ -70,6 +160,7 @@ export class MeetingPanel extends React.Component<
                     size="medium"
                 />
                 <Form
+                    // tslint:disable-next-line:react-this-binding-issue
                     onSubmit={(e) => this.onSubmitCreateSession(e)}
                     className="sidepanel-form"
                     styles={{ display: 'flex', flexDirection: 'column' }}
@@ -81,15 +172,54 @@ export class MeetingPanel extends React.Component<
                             as="div"
                             fluid
                             placeholder="Type a name"
+                            styles={{ color: '#c8c6c4' }}
+                            onKeyUp={(e) =>
+                                this.validateCreateSessionField(
+                                    this.state.input.title,
+                                    'isTitle'
+                                )
+                            }
+                            onChange={(e) => this.appendInput(e, 'title')}
                         />
+                        {this.state.error.isTitle && (
+                            <Text
+                                styles={{ display: 'inline-flex' }}
+                                error
+                                content="Title is required*"
+                                size="small"
+                            />
+                        )}
                     </div>
                     <div className="form-grid">
                         <Text content="Description" size="small" />
-                        <TextArea fluid placeholder="Type a description" />
+                        <TextArea
+                            styles={{ color: '#c8c6c4' }}
+                            fluid
+                            placeholder="Type a description"
+                            onKeyUp={(e) =>
+                                this.validateCreateSessionField(
+                                    this.state.input.description,
+                                    'isDescription'
+                                )
+                            }
+                            onChange={(e) => this.appendInput(e, 'description')}
+                        />
+                        {this.state.error.isDescription && (
+                            <Text
+                                styles={{ display: 'inline-flex' }}
+                                error
+                                content="Description is required*"
+                                size="small"
+                            />
+                        )}
                     </div>
                     <div className="form-grid">
                         <FlexItem push>
-                            <Button className="btn-create-session" size="small">
+                            <Button
+                                type="submit"
+                                className="btn-create-session"
+                                size="small"
+                            >
                                 <Button.Content>
                                     Create a new session
                                 </Button.Content>
@@ -101,7 +231,10 @@ export class MeetingPanel extends React.Component<
         );
     }
 
-    public postQuestions() {
+    private postQuestions() {
+        const sessionTitle = this.state.input.title
+            ? this.state.input.title
+            : this.state.activeSessionData.title;
         return (
             <Flex hAlign="center" vAlign="center">
                 <Text
@@ -111,14 +244,14 @@ export class MeetingPanel extends React.Component<
                         lineHeight: '20px',
                         color: '#ffffff',
                     }}
-                    content="Connect with Explore Interns"
+                    content={sessionTitle}
                     size="medium"
                 />
                 <div className="no-question">
                     <Image
-                        className="no-post-questions"
+                        className="create-session"
                         alt="image"
-                        styles={{ width: '278px' }}
+                        styles={{ width: '17rem' }}
                         src={require('./../../web/assets/create_session.png')}
                     />
                     <Flex.Item align="center">
@@ -152,10 +285,10 @@ export class MeetingPanel extends React.Component<
     public render() {
         return (
             <div className="meeting-panel">
-                {!this.state.isSessionCreated && (
+                {!this.state.activeSessionData && (
                     <div>{this.showCreateSessionForm()}</div>
                 )}
-                {this.state.isSessionCreated && (
+                {this.state.activeSessionData && (
                     <div>{this.postQuestions()}</div>
                 )}
             </div>
