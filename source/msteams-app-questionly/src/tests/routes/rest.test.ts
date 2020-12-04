@@ -494,9 +494,6 @@ describe('test post conversations/:conversationId/sessions api', () => {
                 meetingId: sampleMeetingId,
             };
         });
-        (<any>isPresenterOrOrganizer).mockImplementationOnce(() => {
-            return true;
-        });
         (<any>getHostUserId).mockImplementationOnce(() => {
             throw testError;
         });
@@ -512,37 +509,7 @@ describe('test post conversations/:conversationId/sessions api', () => {
             });
         expect(result.status).toBe(500);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
-        expect(isPresenterOrOrganizer).toBeCalledTimes(1);
         expect(getHostUserId).toBeCalledTimes(1);
-        expect(qnaSessionDataService.createQnASession).toBeCalledTimes(0);
-    });
-
-    it('test post a qna session - isPresenterOrOrganizer returns false', async () => {
-        (<any>(
-            conversationDataService.getConversationData
-        )).mockImplementationOnce(() => {
-            return {
-                serviceUrl: sampleServiceUrl,
-                tenantId: sampleTenantId,
-                meetingId: sampleMeetingId,
-            };
-        });
-        (<any>isPresenterOrOrganizer).mockImplementationOnce(() => {
-            return false;
-        });
-
-        const result = await request(app)
-            .post(`/api/conversations/${sampleConversationId}/sessions`)
-            .send({
-                title: samplTtitle,
-                description: sampleDescription,
-                scopeId: sampleScopeId,
-                hostUserId: sampleHostId,
-                isChannel: true,
-            });
-        expect(result.status).toBe(StatusCodes.BAD_REQUEST);
-        expect(conversationDataService.getConversationData).toBeCalledTimes(1);
-        expect(isPresenterOrOrganizer).toBeCalledTimes(1);
         expect(qnaSessionDataService.createQnASession).toBeCalledTimes(0);
     });
 
@@ -1580,10 +1547,6 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
             };
         });
 
-        (<any>isPresenterOrOrganizer).mockImplementationOnce(() => {
-            return true;
-        });
-
         (<any>endQnASession).mockImplementationOnce(() => {
             throw testError;
         });
@@ -1604,13 +1567,6 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
             sampleTenantId,
             sampleServiceUrl,
             sampleMeetingId
-        );
-        expect(isPresenterOrOrganizer).toBeCalledTimes(1);
-        expect(isPresenterOrOrganizer).toBeCalledWith(
-            sampleMeetingId,
-            testUserId,
-            sampleTenantId,
-            sampleServiceUrl
         );
         expect(
             <any>conversationDataService.getConversationData
@@ -1646,49 +1602,6 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
         );
     });
 
-    it('user is not presenter or organizer', async () => {
-        const testSessionId = 'testId';
-
-        (<any>(
-            conversationDataService.getConversationData
-        )).mockImplementationOnce(() => {
-            return {
-                _id: sampleConversationId,
-                serviceUrl: sampleServiceUrl,
-                tenantId: sampleTenantId,
-                meetingId: sampleMeetingId,
-            };
-        });
-
-        (<any>isPresenterOrOrganizer).mockImplementationOnce(() => {
-            return false;
-        });
-
-        const result = await request(app)
-            .patch(
-                `/api/conversations/${sampleConversationId}/sessions/${testSessionId}`
-            )
-            .send({ action: 'end' });
-
-        expect(result.status).toBe(StatusCodes.FORBIDDEN);
-        expect(result.text).toEqual(
-            'Only a Presenter or an Organizer can update session.'
-        );
-        expect(isPresenterOrOrganizer).toBeCalledTimes(1);
-        expect(isPresenterOrOrganizer).toBeCalledWith(
-            sampleMeetingId,
-            testUserId,
-            sampleTenantId,
-            sampleServiceUrl
-        );
-        expect(
-            <any>conversationDataService.getConversationData
-        ).toBeCalledTimes(1);
-        expect(<any>conversationDataService.getConversationData).toBeCalledWith(
-            sampleConversationId
-        );
-    });
-
     it('end session action', async () => {
         const testSessionId = 'testId';
 
@@ -1701,10 +1614,6 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
                 tenantId: sampleTenantId,
                 meetingId: sampleMeetingId,
             };
-        });
-
-        (<any>isPresenterOrOrganizer).mockImplementationOnce(() => {
-            return true;
         });
 
         const result = await request(app)
@@ -1723,13 +1632,6 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
             sampleTenantId,
             sampleServiceUrl,
             sampleMeetingId
-        );
-        expect(isPresenterOrOrganizer).toBeCalledTimes(1);
-        expect(isPresenterOrOrganizer).toBeCalledWith(
-            sampleMeetingId,
-            testUserId,
-            sampleTenantId,
-            sampleServiceUrl
         );
         expect(
             <any>conversationDataService.getConversationData

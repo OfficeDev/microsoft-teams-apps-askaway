@@ -75,11 +75,5 @@ const getToken = async () => {
  * @param context - turn context
  */
 export const getMeetingIdFromContext = async (context: TurnContext) => {
-    const conversation = context.activity.conversation;
-    const isChannel =
-        conversation.conversationType === ConversationType.Channel;
-    if (!isChannel) {
-        return context.activity.channelData?.meeting?.id;
-    }
-    return '';
+    return context.activity.channelData?.meeting?.id;
 };

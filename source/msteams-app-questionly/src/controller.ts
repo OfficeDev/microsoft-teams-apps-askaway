@@ -73,7 +73,7 @@ export const startQnASession = async (
     meetingId: string
 ): Promise<IQnASession_populated> => {
     // Only a presenter or organizer can create a new QnA session in the meeting.
-    if (!isChannel) {
+    if (meetingId) {
         if (
             !(await isPresenterOrOrganizer(
                 meetingId,
@@ -387,11 +387,7 @@ export const endQnASession = async (
     );
 
     //Only a Presenter or an Organizer can end QnA session in the meeting.
-    if (
-        meetingId !== undefined &&
-        meetingId !== null &&
-        meetingId.trim() !== ''
-    ) {
+    if (meetingId) {
         const canEndQnASession = await isPresenterOrOrganizer(
             meetingId,
             aadObjectId,

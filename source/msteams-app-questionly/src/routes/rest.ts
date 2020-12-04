@@ -212,29 +212,20 @@ router.patch('/:conversationId/sessions/:sessionId', async (req, res) => {
                 conversationId
             );
 
-            if (
-                conversationData.meetingId !== undefined &&
-                isPresenterOrOrganizer(
-                    conversationData.meetingId,
-                    user._id,
-                    conversationData.tenantId,
-                    conversationData.serviceUrl
-                )
-            ) {
-                await endQnASession(
-                    sessionId,
-                    user._id,
-                    conversationId,
-                    conversationData.tenantId,
-                    conversationData.serviceUrl,
-                    conversationData.meetingId
-                );
-            } else {
-                res.status(StatusCodes.FORBIDDEN).send(
-                    'Only a Presenter or an Organizer can update session.'
+            if (!conversationData.meetingId) {
+                res.status(StatusCodes.BAD_REQUEST).send(
+                    `meeting does not exist for provided conversation id ${conversationId}`
                 );
                 return;
             }
+            await endQnASession(
+                sessionId,
+                user._id,
+                conversationId,
+                conversationData.tenantId,
+                conversationData.serviceUrl,
+                conversationData.meetingId
+            );
         } else {
             res.status(StatusCodes.BAD_REQUEST).send(
                 `action ${action} is not supported`
@@ -286,27 +277,8 @@ router.post('/:conversationId/sessions', async (req, res) => {
         const tenantId = conversationData.tenantId;
         const meetingId = conversationData.meetingId;
 
-        // check if the user/participant is either presenter or organizer.
-        if (meetingId !== undefined) {
-            const canCreateQnASession = isPresenterOrOrganizer(
-                meetingId,
-                user._id,
-                tenantId,
-                serviceUrl
-            );
-
-            if (!canCreateQnASession) {
-                exceptionLogger(
-                    new Error(
-                        'Only a Presenter or an Organizer can create new QnA Session.'
-                    )
-                );
-                res.status(StatusCodes.BAD_REQUEST).send(
-                    'Only a Presenter or an Organizer can create new QnA Session.'
-                );
-                return;
-            }
-        } else {
+        // In meeting, check if the user/participant is either presenter or organizer.
+        if (!meetingId) {
             throw new Error(
                 `meeting does not exist for provided conversation id ${conversationId}`
             );
