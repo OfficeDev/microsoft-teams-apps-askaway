@@ -239,6 +239,7 @@ router.patch('/:conversationId/sessions/:sessionId', async (req, res) => {
             res.status(StatusCodes.BAD_REQUEST).send(
                 `action ${action} is not supported`
             );
+            return;
         }
     } catch (err) {
         exceptionLogger(err);
@@ -424,6 +425,7 @@ router.patch(
                     res.status(StatusCodes.FORBIDDEN).send(
                         'Only a Presenter or an Organizer can mark question as answered.'
                     );
+                    return;
                 }
             }
         } catch (err) {
