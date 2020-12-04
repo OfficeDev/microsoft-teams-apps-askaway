@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { TurnContext } from 'botbuilder';
 import { MicrosoftAppCredentials } from 'botframework-connector';
-import { ConversationType } from 'src/enums/ConversationType';
 import { ParticipantRoles } from 'src/enums/ParticipantRoles';
 import { exceptionLogger } from 'src/util/exceptionTracking';
 import { getMicrosoftAppPassword } from 'src/util/keyvault';
@@ -71,15 +70,9 @@ const getToken = async () => {
 
 /**
  * Get meeting id from turn context.
- * Returns meeting id for meeting, otherwise returns empty string.
+ * Returns meeting id for meeting, if it is defined. Otherwise undefined.
  * @param context - turn context
  */
 export const getMeetingIdFromContext = async (context: TurnContext) => {
-    const conversation = context.activity.conversation;
-    const isChannel =
-        conversation.conversationType === ConversationType.Channel;
-    if (!isChannel) {
-        return context.activity.channelData?.meeting?.id;
-    }
-    return '';
+    return context.activity.channelData?.meeting?.id;
 };

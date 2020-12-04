@@ -100,7 +100,7 @@ test('start qna session in channel', async () => {
         sampleHostUserId,
         true,
         sampleServiceUrl,
-        sampleMeetingId
+        ''
     );
     expect(qnaSessionDataService.createQnASession).toBeCalledTimes(1);
     expect(qnaSessionDataService.createQnASession).toBeCalledWith(

@@ -22,18 +22,6 @@ beforeAll(async () => {
     await initLocalization();
 });
 
-test('config configured properly', async () => {
-    const handler = <any>new AskAway(new ConversationDataService());
-
-    expect(typeof handler._config.updateMainCardDebounceTimeInterval).toBe(
-        'number'
-    );
-    expect(typeof handler._config.updateMainCardDebounceMaxWait).toBe('number');
-    expect(typeof handler._config.updateMainCardPostDebounceTimeInterval).toBe(
-        'number'
-    );
-});
-
 describe('teams task module fetch', () => {
     let handler;
     let context;
@@ -326,7 +314,6 @@ describe('handle submit question', () => {
             taskModuleRequest.data.usertext,
             context.activity.conversation.id
         );
-        expect(handler._updateMainCard).toBeCalledTimes(1);
     });
 
     it('empty question', async () => {
@@ -413,6 +400,7 @@ test('handle submit upvote', async () => {
     const taskModuleRequest = {
         data: {
             questionId: 'randQ',
+            qnaSessionId: 'randQnA',
         },
         context: null,
     };
@@ -421,12 +409,13 @@ test('handle submit upvote', async () => {
 
     expect(updateUpvote).toBeCalledTimes(1);
     expect(updateUpvote).toBeCalledWith(
+        taskModuleRequest.data.qnaSessionId,
         taskModuleRequest.data.questionId,
         context.activity.from.aadObjectId,
         context.activity.from.name,
+        context.activity.conversation.id,
         'default'
     );
-    expect(handler._updateMainCard).toBeCalledTimes(1);
     expect(handler._buildTaskModuleContinueResponse).toBeCalledTimes(1);
     expect(getErrorCard).toBeCalledTimes(1);
     expect(getErrorCard).toBeCalledWith(errorStrings('upvoting'));
@@ -623,43 +612,4 @@ describe('messaging extension submit', () => {
             errorStrings('missingFields')
         );
     });
-});
-
-test('different session id calls different update master card function', () => {
-    process.env.UpdateMainCardDebounceTimeInterval = '1000'; // milliseconds
-    process.env.UpdateMainCardPostDebounceTimeInterval = '50';
-    const handler = <any>new AskAway(new ConversationDataService());
-    const context = {
-        activity: {
-            from: {
-                name: 'name',
-                aadObjectId: 'objId',
-            },
-        },
-    };
-    handler._getHandleMainCardTopQuestion = jest.fn(() => jest.fn());
-
-    const qnaSessionId1 = 'id1';
-    const qnaSessionId2 = 'id2';
-    handler._updateMainCard(qnaSessionId1, context);
-    expect(Object.keys(handler._updateMainCardFunctionMap).length).toBe(1);
-    // new qnaSessionId creates new function
-    handler._updateMainCard(qnaSessionId2, context);
-    expect(Object.keys(handler._updateMainCardFunctionMap).length).toBe(2);
-    // calling with existing qnaSessionId calls already defined function
-    handler._updateMainCard(qnaSessionId1, context);
-    expect(Object.keys(handler._updateMainCardFunctionMap).length).toBe(2);
-
-    // different session id has different functions
-    expect(handler._updateMainCardFunctionMap[qnaSessionId1].func).not.toEqual(
-        handler._updateMainCardFunctionMap[qnaSessionId2].func
-    );
-
-    // called twice
-    expect(
-        handler._updateMainCardFunctionMap[qnaSessionId1].func
-    ).toBeCalledTimes(2);
-    expect(
-        handler._updateMainCardFunctionMap[qnaSessionId2].func
-    ).toBeCalledTimes(1);
 });
