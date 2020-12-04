@@ -277,7 +277,7 @@ router.post('/:conversationId/sessions', async (req, res) => {
         const tenantId = conversationData.tenantId;
         const meetingId = conversationData.meetingId;
 
-        // In meeting, check if the user/participant is either presenter or organizer.
+        // Throw error if meeting id is not defined.
         if (!meetingId) {
             throw new Error(
                 `meeting does not exist for provided conversation id ${conversationId}`
@@ -308,7 +308,7 @@ router.post('/:conversationId/sessions', async (req, res) => {
         response = { qnaSessionId: session._id };
     } catch (error) {
         exceptionLogger(error);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error.message);
         return;
     }
     res.send(response);
@@ -443,7 +443,7 @@ router.get('/:conversationId/activesessions', async (req, res) => {
         }
     } catch (error) {
         exceptionLogger(error);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error.message);
         return;
     }
     res.send(response);
