@@ -141,6 +141,7 @@ test("can create qna session", async () => {
   };
 
   expect(doc.isActive).toBe(true);
+  expect(doc.dataEventVersion).toBe(0);
   expect(expectedData).toEqual(data);
 
   await QnASession.remove({ _id: result._id });

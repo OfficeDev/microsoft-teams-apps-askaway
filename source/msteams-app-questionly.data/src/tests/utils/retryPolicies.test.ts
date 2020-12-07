@@ -3,6 +3,7 @@ import {
   retryWrapper,
   DefaultRetryPolicy,
   ExponentialBackOff,
+  retryWrapperForConcurrency,
 } from "src/utils/retryPolicies";
 
 test("default retry policy should retry 2 times", async () => {
@@ -84,4 +85,50 @@ test("exponential retry policy retryAfterMs should increase exponentially", asyn
   };
 
   await retryWrapper(func, new ExponentialBackOff());
+});
+
+describe("tests retryWrapperForConcurrency", () => {
+  it("test retry for mongo version error", async () => {
+    const functionToRetry = jest.fn();
+    const mongoVersionError = new MongoError("VersionError");
+    mongoVersionError.name = "VersionError";
+    const testResult = "testResult";
+
+    // Function should throw mongo version error when called for the first time
+    functionToRetry.mockImplementationOnce(async () => {
+      throw mongoVersionError;
+    });
+
+    // Function should return testString when retried.
+    functionToRetry.mockImplementationOnce(async () => {
+      return testResult;
+    });
+
+    const result = await retryWrapperForConcurrency<string>(functionToRetry);
+
+    expect(result).toEqual(testResult);
+    expect(functionToRetry).toBeCalledTimes(2);
+  });
+
+  it("test retry for mongo too many requests error", async () => {
+    const functionToRetry = jest.fn();
+    const mongoVersionError = new MongoError("VersionError");
+    mongoVersionError.code = 16500;
+    const testResult = "testResult";
+
+    // Function should throw mongo too many requests error when called for the first time
+    functionToRetry.mockImplementationOnce(async () => {
+      throw mongoVersionError;
+    });
+
+    // Function should return testString when retried.
+    functionToRetry.mockImplementationOnce(async () => {
+      return testResult;
+    });
+
+    const result = await retryWrapperForConcurrency<string>(functionToRetry);
+
+    expect(result).toEqual(testResult);
+    expect(functionToRetry).toBeCalledTimes(2);
+  });
 });

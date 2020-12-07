@@ -18,21 +18,18 @@ import {
   qnaSessionDataService,
   questionDataService,
 } from "msteams-app-questionly.data";
-
-const adapter = new BotFrameworkAdapter({
-  appId: process.env.MicrosoftAppId.toString(),
-  appPassword: process.env.MicrosoftAppPassword.toString(),
-});
+import { IDataEvent } from "msteams-app-questionly.common";
 
 const activityFunction: AzureFunction = async function (
   context: Context
 ): Promise<void> {
-  const qnaSessionId = context.bindings.name.qnaSessionId;
-  const conversationId = context.bindings.name.conversationId;
-  const serviceUrl = context.bindings.name.serviceUrl;
-  const eventData = context.bindings.name.eventData;
-  const isSessionEnded: boolean =
-    eventData.type === DataEventType.qnaSessionEndedEvent;
+  const qnaSessionId: string = context.bindings.name.qnaSessionId;
+  const conversationId: string = context.bindings.name.conversationId;
+  const serviceUrl: string = context.bindings.name.serviceUrl;
+  const eventData: IDataEvent = context.bindings.name.eventData;
+  const isSessionEnded = eventData.type === DataEventType.qnaSessionEndedEvent;
+  const adapter: BotFrameworkAdapter =
+    context.bindings.name.botFrameworkAdapter;
 
   // Fetch adaptive card and activity id for card refresh.
   const result = await getUpdatedMainCard(

@@ -4,7 +4,10 @@ import { authenticateRequest } from "../../services/authService";
 import { userIdParameterConstant } from "../../constants/requestConstants";
 import { signalRUtility } from "../../utils/signalRUtility";
 import { verifyUserFromConversationId } from "msteams-app-questionly.common";
-import { getConversationData } from "../../utils/dbUtility";
+import {
+  initiateDBConnection,
+  getConversationData,
+} from "../../utils/dbUtility";
 jest.mock("../../services/authService");
 jest.mock("../../utils/signalRUtility");
 jest.mock("msteams-app-questionly.common");
@@ -15,6 +18,7 @@ let testConversation: any;
 beforeEach(() => {
   jest.clearAllMocks();
   (<any>getConversationData) = jest.fn();
+  (<any>initiateDBConnection) = jest.fn();
 
   testConversation = {
     _id: "testConversationId",
@@ -88,6 +92,7 @@ test("tests add to group function: conversation document is not present", async 
 
   await httpTrigger(triggerMockContext, request);
   expect(authenticateRequest).toBeCalledTimes(1);
+  expect(initiateDBConnection).toBeCalledTimes(1);
 
   expect(triggerMockContext.res.status).toBe(500);
   expect(triggerMockContext.res.body).toBe(null);
@@ -113,6 +118,7 @@ test("tests add to group function: user not part of conversation", async () => {
 
   await httpTrigger(triggerMockContext, request);
   expect(authenticateRequest).toBeCalledTimes(1);
+  expect(initiateDBConnection).toBeCalledTimes(1);
   expect(verifyUserFromConversationId).toBeCalledTimes(1);
   expect(verifyUserFromConversationId).toBeCalledWith(
     request.body.conversationId,
@@ -141,6 +147,7 @@ test("tests add to group function: exception from verifyUserFromConversationId",
   });
 
   await httpTrigger(triggerMockContext, request);
+  expect(initiateDBConnection).toBeCalledTimes(1);
   expect(authenticateRequest).toBeCalledTimes(1);
   expect(verifyUserFromConversationId).toBeCalledTimes(1);
   expect(verifyUserFromConversationId).toBeCalledWith(
@@ -177,6 +184,7 @@ test("tests add to group function: exception from addConnectionToGroup", async (
 
   await httpTrigger(triggerMockContext, request);
   expect(authenticateRequest).toBeCalledTimes(1);
+  expect(initiateDBConnection).toBeCalledTimes(1);
   expect(verifyUserFromConversationId).toBeCalledTimes(1);
   expect(verifyUserFromConversationId).toBeCalledWith(
     request.body.conversationId,
@@ -213,6 +221,7 @@ test("tests add to group function: positive test case", async () => {
 
   await httpTrigger(triggerMockContext, request);
   expect(authenticateRequest).toBeCalledTimes(1);
+  expect(initiateDBConnection).toBeCalledTimes(1);
   expect(verifyUserFromConversationId).toBeCalledTimes(1);
   expect(verifyUserFromConversationId).toBeCalledWith(
     request.body.conversationId,

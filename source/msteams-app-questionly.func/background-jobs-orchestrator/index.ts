@@ -3,6 +3,7 @@
  * triggered by an HTTP starter function.
  */
 
+import { BotFrameworkAdapter } from "botbuilder";
 import * as df from "durable-functions";
 import moment = require("moment");
 import {
@@ -29,6 +30,11 @@ const broadcastUpdateCardOption: df.RetryOptions = new df.RetryOptions(
   ifNumber(process.env.BroadcastActivityRetryInterval, 1000),
   ifNumber(process.env.BroadcastActivityRetryAttemptCount, 2)
 );
+
+const adapter = new BotFrameworkAdapter({
+  appId: process.env.MicrosoftAppId.toString(),
+  appPassword: process.env.MicrosoftAppPassword.toString(),
+});
 
 const orchestrator = df.orchestrator(function* (context) {
   if (!context.df.isReplaying) {
@@ -67,6 +73,7 @@ const orchestrator = df.orchestrator(function* (context) {
       conversationId: conversationId,
       eventData: context.bindingData.input.eventData,
       serviceUrl: conversation.serviceUrl,
+      botFrameworkAdapter: adapter,
     };
 
     const updateAdaptivecardActivityInput = {
@@ -74,6 +81,7 @@ const orchestrator = df.orchestrator(function* (context) {
       eventData: context.bindingData.input.eventData,
       serviceUrl: conversation.serviceUrl,
       qnaSessionId: context.bindingData.input.qnaSessionId,
+      botFrameworkAdapter: adapter,
     };
 
     const parallelTasks = [];

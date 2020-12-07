@@ -4,7 +4,7 @@ import { IUser } from "./user";
 
 const QuestionSchema = new mongoose.Schema({
   qnaSessionId: {
-    type: mongoose.SchemaTypes.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     ref: "QnASession",
     required: true,
   },

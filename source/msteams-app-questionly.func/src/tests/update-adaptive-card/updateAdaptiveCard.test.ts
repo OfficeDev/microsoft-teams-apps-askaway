@@ -2,23 +2,30 @@ import { BotFrameworkAdapter, ConversationAccount } from "botbuilder";
 import { qnaSessionDataService } from "msteams-app-questionly.data";
 import { activityMockContext } from "../mocks/testContext";
 import httpFunction from "./../../../update-adaptive-card/index";
+import { DataEventType } from "msteams-app-questionly.common";
+import { getUpdatedMainCard } from "../../adaptive-card/mainCardBuilder";
+import { AdaptiveCard } from "adaptivecards";
 
 const sampleServiceUrl = "sampleServiceUrl";
 const sampleConversationId = "sampleConversationId";
+const sampleQnASessionId = "sampleQnASessionId";
 const testAdapter: BotFrameworkAdapter = new BotFrameworkAdapter();
 let testConversationReference: any;
 let request: any;
 let sampleContext: any;
+const sampleCard = new AdaptiveCard();
 
 beforeAll(() => {
-  process.env.MicrosoftAppId = "random";
-  process.env.MicrosoftAppPassword = "random";
-
-  (<any>BotFrameworkAdapter) = jest.fn();
   testAdapter.continueConversation = jest.fn();
-  (<any>qnaSessionDataService.updateActivityId) = jest.fn();
-  (<any>BotFrameworkAdapter).mockImplementation(() => {
-    return testAdapter;
+  activityMockContext.bindings.name.botFrameworkAdapter = testAdapter;
+  activityMockContext.bindings.name.sampleSericeUrl = sampleServiceUrl;
+  activityMockContext.bindings.name.sampleQnASessionId = "sampleQnASessionId";
+
+  (<any>qnaSessionDataService.updateDateTimeCardLastUpdated) = jest.fn();
+  (<any>getUpdatedMainCard) = jest.fn();
+
+  (<any>getUpdatedMainCard).mockImplementation(() => {
+    return { card: sampleCard, activityId: "1" };
   });
 
   const testConversation = {
@@ -42,39 +49,80 @@ beforeEach(() => {
   };
 });
 
-test("update adaptive card - continueConversation success", async () => {
+test("update adaptive card - post card for qnaSession started event", async () => {
   (<any>testAdapter.continueConversation).mockImplementationOnce(() => {});
+  activityMockContext.bindings.name.eventData.type =
+    DataEventType.qnaSessionCreatedEvent;
 
   await httpFunction(activityMockContext, request);
 
-  expect(BotFrameworkAdapter).toBeCalledTimes(1);
-  expect(BotFrameworkAdapter).toBeCalledWith({
-    appId: process.env.MicrosoftAppId?.toString(),
-    appPassword: process.env.MicrosoftAppPassword?.toString(),
-  });
   expect(testAdapter.continueConversation).toBeCalledTimes(1);
   expect(testAdapter.continueConversation).toBeCalledWith(
     testConversationReference,
     expect.anything()
   );
+
+  expect(getUpdatedMainCard).toBeCalledTimes(1);
+  expect(getUpdatedMainCard).toBeCalledWith(
+    expect.anything(),
+    expect.anything(),
+    sampleQnASessionId,
+    false
+  );
+
+  expect(
+    <any>qnaSessionDataService.updateDateTimeCardLastUpdated
+  ).toBeCalledTimes(0);
 });
 
-test("update adaptive card - continueConversation throws error", async () => {
-  const testError: Error = new Error();
-  (<any>testAdapter.continueConversation).mockImplementationOnce(() => {
-    throw testError;
-  });
+test("update adaptive card - post card for qnaSession ended event", async () => {
+  (<any>testAdapter.continueConversation).mockImplementationOnce(() => {});
+  activityMockContext.bindings.name.eventData.type =
+    DataEventType.qnaSessionEndedEvent;
 
   await httpFunction(activityMockContext, request);
 
-  expect(BotFrameworkAdapter).toBeCalledTimes(1);
-  expect(BotFrameworkAdapter).toBeCalledWith({
-    appId: process.env.MicrosoftAppId?.toString(),
-    appPassword: process.env.MicrosoftAppPassword?.toString(),
-  });
   expect(testAdapter.continueConversation).toBeCalledTimes(1);
   expect(testAdapter.continueConversation).toBeCalledWith(
     testConversationReference,
     expect.anything()
   );
+
+  expect(getUpdatedMainCard).toBeCalledTimes(1);
+  expect(getUpdatedMainCard).toBeCalledWith(
+    expect.anything(),
+    expect.anything(),
+    sampleQnASessionId,
+    true
+  );
+
+  expect(
+    <any>qnaSessionDataService.updateDateTimeCardLastUpdated
+  ).toBeCalledTimes(1);
+});
+
+test("update adaptive card - post card for question related event", async () => {
+  (<any>testAdapter.continueConversation).mockImplementationOnce(() => {});
+  activityMockContext.bindings.name.eventData.type =
+    DataEventType.newQuestionAddedEvent;
+
+  await httpFunction(activityMockContext, request);
+
+  expect(testAdapter.continueConversation).toBeCalledTimes(1);
+  expect(testAdapter.continueConversation).toBeCalledWith(
+    testConversationReference,
+    expect.anything()
+  );
+
+  expect(getUpdatedMainCard).toBeCalledTimes(1);
+  expect(getUpdatedMainCard).toBeCalledWith(
+    expect.anything(),
+    expect.anything(),
+    sampleQnASessionId,
+    false
+  );
+
+  expect(
+    <any>qnaSessionDataService.updateDateTimeCardLastUpdated
+  ).toBeCalledTimes(1);
 });

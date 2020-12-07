@@ -1,7 +1,7 @@
 import { BotFrameworkAdapter, ConversationAccount } from "botbuilder";
-import { getConversationData } from "../../utils/dbUtility";
 import { activityMockContext } from "../mocks/testContext";
 import httpFunction from "./../../../send-notification-bubble/index";
+import { DataEventType } from "msteams-app-questionly.common";
 
 const sampleServiceUrl = "sampleServiceUrl";
 const sampleConversationId = "sampleConversationId";
@@ -11,17 +11,12 @@ let request: any;
 let sampleContext: any;
 
 beforeAll(() => {
-  process.env.MicrosoftAppId = "random";
-  process.env.MicrosoftAppPassword = "random";
   process.env.AppId = "random";
   process.env.NotificationBubblePageUrl = "random";
 
-  (<any>getConversationData) = jest.fn();
-  (<any>BotFrameworkAdapter) = jest.fn();
   testAdapter.continueConversation = jest.fn();
-  (<any>BotFrameworkAdapter).mockImplementation(() => {
-    return testAdapter;
-  });
+  activityMockContext.bindings.name.botFrameworkAdapter = testAdapter;
+  activityMockContext.bindings.name.sampleSericeUrl = sampleServiceUrl;
 
   const testConversation = {
     id: sampleConversationId,
@@ -44,21 +39,45 @@ beforeEach(() => {
   };
 });
 
+test("send notifcation bubble - `questionUpvotedEvent` events should not send notification bubble", async () => {
+  activityMockContext.bindings.name.eventData.type =
+    DataEventType.questionUpvotedEvent;
+  await httpFunction(activityMockContext, request);
+
+  expect(testAdapter.continueConversation).toBeCalledTimes(0);
+});
+
+test("send notifcation bubble - `questionDownvotedEvent` events should not send notification bubble", async () => {
+  activityMockContext.bindings.name.eventData.type =
+    DataEventType.questionDownvotedEvent;
+  await httpFunction(activityMockContext, request);
+
+  expect(testAdapter.continueConversation).toBeCalledTimes(0);
+});
+
+test("send notifcation bubble - `questionMarkedAsAnsweredEvent` events should not send notification bubble", async () => {
+  activityMockContext.bindings.name.eventData.type =
+    DataEventType.questionMarkedAsAnsweredEvent;
+  await httpFunction(activityMockContext, request);
+
+  expect(testAdapter.continueConversation).toBeCalledTimes(0);
+});
+
+test("send notifcation bubble - `newQuestionAddedEvent` events should not send notification bubble", async () => {
+  activityMockContext.bindings.name.eventData.type =
+    DataEventType.newQuestionAddedEvent;
+  await httpFunction(activityMockContext, request);
+
+  expect(testAdapter.continueConversation).toBeCalledTimes(0);
+});
+
 test("send notifcation bubble - continueConversation success", async () => {
+  activityMockContext.bindings.name.eventData.type =
+    DataEventType.qnaSessionCreatedEvent;
   (<any>testAdapter.continueConversation).mockImplementationOnce(() => {});
-  (<any>getConversationData).mockImplementationOnce(() => {
-    return {
-      serviceUrl: sampleServiceUrl,
-    };
-  });
 
   await httpFunction(activityMockContext, request);
 
-  expect(BotFrameworkAdapter).toBeCalledTimes(1);
-  expect(BotFrameworkAdapter).toBeCalledWith({
-    appId: process.env.MicrosoftAppId?.toString(),
-    appPassword: process.env.MicrosoftAppPassword?.toString(),
-  });
   expect(testAdapter.continueConversation).toBeCalledTimes(1);
   expect(testAdapter.continueConversation).toBeCalledWith(
     testConversationReference,
@@ -67,25 +86,17 @@ test("send notifcation bubble - continueConversation success", async () => {
 });
 
 test("send notifcation bubble - continueConversation throws error", async () => {
+  activityMockContext.bindings.name.eventData.type =
+    DataEventType.qnaSessionEndedEvent;
   const testError: Error = new Error();
   (<any>testAdapter.continueConversation).mockImplementationOnce(() => {
     throw testError;
-  });
-  (<any>getConversationData).mockImplementationOnce(() => {
-    return {
-      serviceUrl: sampleServiceUrl,
-    };
   });
 
   await expect(httpFunction(activityMockContext, request)).rejects.toThrow(
     testError
   );
 
-  expect(BotFrameworkAdapter).toBeCalledTimes(1);
-  expect(BotFrameworkAdapter).toBeCalledWith({
-    appId: process.env.MicrosoftAppId?.toString(),
-    appPassword: process.env.MicrosoftAppPassword?.toString(),
-  });
   expect(testAdapter.continueConversation).toBeCalledTimes(1);
   expect(testAdapter.continueConversation).toBeCalledWith(
     testConversationReference,

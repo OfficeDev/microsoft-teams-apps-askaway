@@ -92,7 +92,7 @@ class QnASessionDataService {
    * @param activityId - id of the master card message used for proactive updating of the card
    */
   public async updateActivityId(qnaSessionId: string, activityId: string) {
-    await retryWrapper(
+    await retryWrapperForConcurrency(
       () => QnASession.findByIdAndUpdate({ _id: qnaSessionId }, { activityId }),
       new ExponentialBackOff()
     );
@@ -139,7 +139,7 @@ class QnASessionDataService {
    * */
   public async endQnASession(qnaSessionId: string, conversationId: string) {
     await this.isExistingQnASession(qnaSessionId, conversationId);
-    const result = await retryWrapper(
+    const result = await retryWrapperForConcurrency(
       () =>
         QnASession.findByIdAndUpdate(qnaSessionId, {
           $set: { isActive: false, dateTimeEnded: new Date() },
@@ -339,7 +339,7 @@ class QnASessionDataService {
     qnaSessionId: string,
     dateTimeCardLastUpdated: Date
   ): Promise<void> {
-    await retryWrapper(() =>
+    await retryWrapperForConcurrency(() =>
       QnASession.findByIdAndUpdate(qnaSessionId, {
         $set: { dateTimeCardLastUpdated: dateTimeCardLastUpdated },
       }).exec()
@@ -355,7 +355,7 @@ class QnASessionDataService {
     qnaSessionId: string,
     dateTimeNextCardUpdateScheduled: Date
   ): Promise<void> {
-    await retryWrapper(() =>
+    await retryWrapperForConcurrency(() =>
       QnASession.findByIdAndUpdate(qnaSessionId, {
         $set: {
           dateTimeNextCardUpdateScheduled: dateTimeNextCardUpdateScheduled,
