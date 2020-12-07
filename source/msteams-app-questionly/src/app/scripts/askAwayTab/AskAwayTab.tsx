@@ -16,6 +16,11 @@ import * as microsoftTeams from '@microsoft/teams-js';
 import i18next from './../askAwayTab/shared/i18next';
 // tslint:disable-next-line:no-relative-imports
 import { CONST } from './../askAwayTab/shared/ConfigVariables';
+import { withAITracking } from '@microsoft/applicationinsights-react-js';
+import { SeverityLevel } from '@microsoft/applicationinsights-web';
+import { HttpService } from './shared/HttpService';
+import { telemetryService } from './../telemetryService';
+
 /**
  * State for the askAwayTabTab React component
  */
@@ -44,6 +49,8 @@ export class AskAwayTab extends msteamsReactBaseComponent<
     IAskAwayTabProps,
     IAskAwayTabState
 > {
+    private httpService: HttpService;
+
     constructor(props) {
         super(props);
         microsoftTeams.initialize();
@@ -52,6 +59,7 @@ export class AskAwayTab extends msteamsReactBaseComponent<
     public async componentWillMount() {
         this.updateTheme(this.getQueryVariable('theme'));
         await this.initializeTeams();
+        this.httpService = new HttpService(telemetryService.appInsights);
     }
 
     /**
@@ -87,6 +95,11 @@ export class AskAwayTab extends msteamsReactBaseComponent<
                                     .AuthFailed,
                             message,
                         });
+                        telemetryService.appInsights.trackTrace({
+                            message:
+                                'Authentication failure. Could not get authentication token.',
+                            severityLevel: SeverityLevel.Error,
+                        });
                     },
                     resources: [process.env.ASKAWAYTAB_APP_URI as string],
                 });
@@ -106,13 +119,23 @@ export class AskAwayTab extends msteamsReactBaseComponent<
             <Provider theme={this.state.theme}>
                 {this.state.frameContext ===
                     CONST.TAB_FRAME_CONTEXT.FC_SIDEPANEL && (
-                    <MeetingPanel teamsData={this.state.teamContext} />
+                    <MeetingPanel
+                        teamsData={this.state.teamContext}
+                        httpService={this.httpService}
+                        appInsights={telemetryService.appInsights}
+                    />
                 )}
                 {this.state.frameContext ===
                     CONST.TAB_FRAME_CONTEXT.FC_CONTENT && (
-                    <TabContent teamsData={this.state.teamContext} />
+                    <TabContent
+                        teamsData={this.state.teamContext}
+                        httpService={this.httpService}
+                        appInsights={telemetryService.appInsights}
+                    />
                 )}
             </Provider>
         );
     }
 }
+
+export default withAITracking(telemetryService.reactPlugin, AskAwayTab);

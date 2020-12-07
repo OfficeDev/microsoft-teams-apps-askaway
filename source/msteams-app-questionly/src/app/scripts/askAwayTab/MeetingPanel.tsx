@@ -2,8 +2,6 @@
 import './index.scss';
 // tslint:disable-next-line:no-relative-imports
 import * as React from 'react';
-// tslint:disable-next-line:no-relative-imports
-import HttpService from './shared/HttpService';
 import * as microsoftTeams from '@microsoft/teams-js';
 import {
     Flex,
@@ -24,9 +22,13 @@ import {
     LeaveIcon,
     RetryIcon,
 } from '@fluentui/react-icons-northstar';
+import { ApplicationInsights } from '@microsoft/applicationinsights-web';
+import { HttpService } from './shared/HttpService';
 
 export interface MeetingPanelProps {
     teamsData: any;
+    httpService: HttpService;
+    appInsights: ApplicationInsights;
 }
 
 export interface MeetingPanelState {
@@ -70,9 +72,8 @@ class MeetingPanel extends React.Component<
      * To Identify Active Session
      */
     private getActiveSession() {
-        HttpService.get(
-            `/conversations/${this.props.teamsData.chatId}/sessions`
-        )
+        this.props.httpService
+            .get(`/conversations/${this.props.teamsData.chatId}/sessions`)
             .then((response: any) => {
                 if (response && response.data && response.data.length > 0) {
                     this.setState({
@@ -107,10 +108,11 @@ class MeetingPanel extends React.Component<
                     scopeId: this.props.teamsData.chatId,
                     isChannel: false,
                 };
-                HttpService.post(
-                    `/conversations/${this.props.teamsData.chatId}/sessions`,
-                    { ...this.state.input, ...createSessionData }
-                )
+                this.props.httpService
+                    .post(
+                        `/conversations/${this.props.teamsData.chatId}/sessions`,
+                        { ...this.state.input, ...createSessionData }
+                    )
                     .then((response: any) => {
                         if (
                             response &&
