@@ -1,2 +1,2 @@
 // SignalR hub name
-export const hubName: string = "amaSession";
+export const hubName = "amaSession";

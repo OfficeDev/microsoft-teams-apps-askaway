@@ -84,7 +84,7 @@ test("tests add to group function for exception from from auth function", async 
 });
 
 test("tests add to group function: conversation document is not present", async () => {
-  const testUserId: string = "testUserId";
+  const testUserId = "testUserId";
 
   (<any>getConversationData).mockImplementationOnce(() => {
     throw testError;
@@ -106,7 +106,7 @@ test("tests add to group function: conversation document is not present", async 
 });
 
 test("tests add to group function: user not part of conversation", async () => {
-  const testUserId: string = "testUserId";
+  const testUserId = "testUserId";
 
   (<any>getConversationData).mockImplementationOnce(() => {
     return testConversation;
@@ -138,7 +138,7 @@ test("tests add to group function: user not part of conversation", async () => {
 });
 
 test("tests add to group function: exception from verifyUserFromConversationId", async () => {
-  const testUserId: string = "testUserId";
+  const testUserId = "testUserId";
 
   (<any>getConversationData).mockImplementationOnce(() => {
     return testConversation;
@@ -172,7 +172,7 @@ test("tests add to group function: exception from verifyUserFromConversationId",
 });
 
 test("tests add to group function: exception from addConnectionToGroup", async () => {
-  const testUserId: string = "testUserId";
+  const testUserId = "testUserId";
   (<any>getConversationData).mockImplementationOnce(() => {
     return testConversation;
   });
@@ -210,7 +210,7 @@ test("tests add to group function: exception from addConnectionToGroup", async (
 });
 
 test("tests add to group function: positive test case", async () => {
-  const testUserId: string = "testUserId";
+  const testUserId = "testUserId";
 
   (<any>getConversationData).mockImplementationOnce(() => {
     return testConversation;

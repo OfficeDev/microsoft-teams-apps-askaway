@@ -5,8 +5,7 @@ import {
   TurnContext,
 } from "botbuilder";
 
-const memberNotFoundInConversationError: string =
-  "MemberNotFoundInConversation";
+const memberNotFoundInConversationError = "MemberNotFoundInConversation";
 
 /**
  * Verifies if the user is a member of conversation.

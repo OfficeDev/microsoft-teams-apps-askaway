@@ -101,7 +101,7 @@ describe('valid issuers tests', () => {
         process.env.AzureAd_ValidIssuers =
             'https://login.microsoftonline.com/TENANT_ID/v2.0,https://sts.windows.net/TENANT_ID/';
 
-        const validIssuers: string[] = getValidIssuers();
+        const validIssuers = getValidIssuers();
         expect(validIssuers.length).toEqual(2);
         expect(validIssuers).toContain(
             'https://login.microsoftonline.com/testTenant/v2.0'
@@ -114,7 +114,7 @@ describe('valid issuers tests', () => {
         process.env.AzureAd_ValidIssuers =
             'https://login.microsoftonline.com/TENANT_ID/v2.0 ,  https://sts.windows.net/TENANT_ID/';
 
-        const validIssuers: string[] = getValidIssuers();
+        const validIssuers = getValidIssuers();
         expect(validIssuers.length).toEqual(2);
         expect(validIssuers).toContain(
             'https://login.microsoftonline.com/testTenant/v2.0'
@@ -148,7 +148,7 @@ describe('azure ad valid audiance tests', () => {
         process.env.AzureAd_ApplicationIdUri =
             'api://example.com/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 
-        const validAudiance: string[] = getValidAudiance();
+        const validAudiance = getValidAudiance();
         expect(validAudiance.length).toEqual(2);
         expect(validAudiance).toContain(process.env.AzureAd_ClientId);
         expect(validAudiance).toContain(process.env.AzureAd_ApplicationIdUri);
@@ -160,7 +160,7 @@ describe('azure ad valid audiance tests', () => {
         process.env.AzureAd_ApplicationIdUri =
             '  api://example.com/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa  ';
 
-        const validAudiance: string[] = getValidAudiance();
+        const validAudiance = getValidAudiance();
         expect(validAudiance.length).toEqual(2);
         expect(validAudiance).toContain('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa');
         expect(validAudiance).toContain(

@@ -62,7 +62,7 @@ export const getIdentityMetadata = (): string => {
         throw new Error('Metadata endpoint is missing in the settings.');
     }
 
-    const tenantId: string = getTenantId();
+    const tenantId = getTenantId();
 
     return process.env.AzureAd_Metadata_Endpoint.toString()
         .replace('TENANT_ID', tenantId)
@@ -81,11 +81,11 @@ export const getValidIssuers = (): string[] => {
 
     let validIssuers: string[] = [];
 
-    const validIssuerFromSettings: string[] = process.env.AzureAd_ValidIssuers?.toString().split(
+    const validIssuerFromSettings = process.env.AzureAd_ValidIssuers?.toString().split(
         ','
     );
 
-    const tenantId: string = getTenantId();
+    const tenantId = getTenantId();
 
     validIssuers = validIssuerFromSettings.map((issuer) => {
         return issuer.replace('TENANT_ID', tenantId).trim();

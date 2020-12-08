@@ -38,7 +38,7 @@ test("SignalR endPoint/accessKey parsed correctly", () => {
 
 test("SignalR accessToken", () => {
   const testSignalRUtility = <any>signalRUtility;
-  const testRestApi: string =
+  const testRestApi =
     "https://test.service.signalr.net//api/v1/hubs/hub_name/groups/group_name/connections/connection_id";
   const signalRAccessToken: string = testSignalRUtility._getSignalRAccessToken(
     testRestApi
@@ -58,9 +58,9 @@ test("AddConnectionToGroup functionality", () => {
   const testSignalRUtility = <any>signalRUtility;
   testSignalRUtility._getSignalRAccessToken = jest.fn();
 
-  const testConnectionId: string = "testConnectionId";
-  const testGroupName: string = "testGroupName";
-  const testApi: string = `https://test.service.signalr.net/api/v1/hubs/${hubName}/groups/${testGroupName}/connections/${testConnectionId}`;
+  const testConnectionId = "testConnectionId";
+  const testGroupName = "testGroupName";
+  const testApi = `https://test.service.signalr.net/api/v1/hubs/${hubName}/groups/${testGroupName}/connections/${testConnectionId}`;
   testSignalRUtility.addConnectionToGroup(testConnectionId, testGroupName);
   expect(axios.put).toBeCalledTimes(1);
   expect(axios.put).toBeCalledWith(

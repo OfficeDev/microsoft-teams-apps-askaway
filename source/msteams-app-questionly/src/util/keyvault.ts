@@ -34,7 +34,7 @@ export const initKeyVault = async () => {
  * @throws - Error that occurs while reading secret.
  */
 const getSecretFromAppSettings = (secretName: string): string => {
-    const secretValue: string | undefined = process.env[secretName];
+    const secretValue = process.env[secretName];
 
     if (secretValue === undefined) {
         throw new Error(`Secret not set in app settings: ${secretName}`);
@@ -75,10 +75,10 @@ const getSecretFromVault = async (secretName: string): Promise<string> => {
  * @throws - Error that occurs while reading secret.
  */
 const getSecretFromCache = async (secretName: string): Promise<string> => {
-    const secretValueFromCache: string | null = memCache.get(secretName);
+    const secretValueFromCache = memCache.get(secretName);
 
     if (secretValueFromCache === null) {
-        const secret: string = await getSecretFromVault(secretName);
+        const secret = await getSecretFromVault(secretName);
 
         // Secrets last in memory for some time (default 24 hours), post that cache should be updated from key vault.
         // Currently only `AvatarKey` and `MicrosoftAppPassword` are set in cache as it's used multiple time.
