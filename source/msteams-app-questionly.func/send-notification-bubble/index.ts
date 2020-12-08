@@ -20,13 +20,18 @@ import {
 import { isQnaStartedOrEndedEvent } from "../src/utils/requestUtility";
 import { IDataEvent } from "msteams-app-questionly.common";
 
+let adapter = new BotFrameworkAdapter({
+  appId: process.env.MicrosoftAppId.toString(),
+  appPassword: process.env.MicrosoftAppPassword.toString(),
+});
+
 const activityFunction: AzureFunction = async function (
   context: Context
 ): Promise<void> {
   try {
     const eventData: IDataEvent = context.bindings.name.eventData;
-    const adapter: BotFrameworkAdapter =
-      context.bindings.name.botFrameworkAdapter;
+    // Adapter is injected as dependency for UTs.
+    adapter = context.bindings.name.botFrameworkAdapter ?? adapter;
 
     // Notification bubble is only triggered for qna session created and ended event.
     if (isQnaStartedOrEndedEvent(eventData)) {

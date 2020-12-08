@@ -15,6 +15,11 @@ let request: any;
 const testError: Error = new Error("test error");
 let testConversation: any;
 
+beforeAll(() => {
+  process.env.MicrosoftAppId = "random";
+  process.env.MicrosoftAppPassword = "random";
+});
+
 beforeEach(() => {
   jest.clearAllMocks();
   (<any>getConversationData) = jest.fn();
@@ -121,6 +126,8 @@ test("tests add to group function: user not part of conversation", async () => {
   expect(initiateDBConnection).toBeCalledTimes(1);
   expect(verifyUserFromConversationId).toBeCalledTimes(1);
   expect(verifyUserFromConversationId).toBeCalledWith(
+    process.env.MicrosoftAppId,
+    process.env.MicrosoftAppPassword,
     request.body.conversationId,
     testConversation.serviceUrl,
     testConversation.tenantId,
@@ -151,6 +158,8 @@ test("tests add to group function: exception from verifyUserFromConversationId",
   expect(authenticateRequest).toBeCalledTimes(1);
   expect(verifyUserFromConversationId).toBeCalledTimes(1);
   expect(verifyUserFromConversationId).toBeCalledWith(
+    process.env.MicrosoftAppId,
+    process.env.MicrosoftAppPassword,
     request.body.conversationId,
     testConversation.serviceUrl,
     testConversation.tenantId,
@@ -187,6 +196,8 @@ test("tests add to group function: exception from addConnectionToGroup", async (
   expect(initiateDBConnection).toBeCalledTimes(1);
   expect(verifyUserFromConversationId).toBeCalledTimes(1);
   expect(verifyUserFromConversationId).toBeCalledWith(
+    process.env.MicrosoftAppId,
+    process.env.MicrosoftAppPassword,
     request.body.conversationId,
     testConversation.serviceUrl,
     testConversation.tenantId,
@@ -224,6 +235,8 @@ test("tests add to group function: positive test case", async () => {
   expect(initiateDBConnection).toBeCalledTimes(1);
   expect(verifyUserFromConversationId).toBeCalledTimes(1);
   expect(verifyUserFromConversationId).toBeCalledWith(
+    process.env.MicrosoftAppId,
+    process.env.MicrosoftAppPassword,
     request.body.conversationId,
     testConversation.serviceUrl,
     testConversation.tenantId,

@@ -1,4 +1,4 @@
-cd source\msteams-app-questionly.conversation.utility
+cd source\msteams-app-questionly.common
 call npm.cmd install 
 call npm.cmd run build 
 
@@ -19,4 +19,3 @@ xcopy .\..\msteams-app-questionly.data\dist\* node_modules\msteams-app-questionl
 xcopy .\..\msteams-app-questionly.data\package.json node_modules\msteams-app-questionly.data\  /Y
 xcopy .\..\msteams-app-questionly.common\dist\* node_modules\msteams-app-questionly.common\dist\* /s /Y
 xcopy .\..\msteams-app-questionly.common\package.json node_modules\msteams-app-questionly.common\  /Y
-call npm.cmd run build 

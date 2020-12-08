@@ -25,6 +25,7 @@ import {
 } from 'src/util/meetingsUtility';
 import { ok } from 'src/util/resultWrapper';
 import { verifyUserFromConversationId } from 'msteams-app-questionly.common';
+import { getMicrosoftAppPassword } from 'src/util/keyvault';
 
 let app: ExpressType;
 
@@ -63,6 +64,8 @@ describe('test /conversations/:conversationId/sessions/:sessionId api', () => {
         app.use('/api/conversations', mockEnsureAuthenticated, router);
 
         (<any>verifyUserFromConversationId) = jest.fn();
+        process.env.MicrosoftAppId = 'random';
+        (<any>getMicrosoftAppPassword) = jest.fn();
         (<any>conversationDataService.getConversationData) = jest.fn();
     });
 
@@ -141,6 +144,8 @@ describe('test conversations/:conversationId/sessions api', () => {
         (<any>processQnASesssionsDataForMeetingTab) = jest.fn();
 
         (<any>verifyUserFromConversationId) = jest.fn();
+        process.env.MicrosoftAppId = 'random';
+        (<any>getMicrosoftAppPassword) = jest.fn();
         (<any>conversationDataService.getConversationData) = jest.fn();
 
         testQnAData1 = {
@@ -568,6 +573,8 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
             next();
         };
 
+        process.env.MicrosoftAppId = 'random';
+        (<any>getMicrosoftAppPassword) = jest.fn();
         (<any>verifyUserFromConversationId) = jest.fn();
         (<any>submitNewQuestion) = jest.fn();
         (<any>conversationDataService.getConversationData) = jest.fn();
@@ -975,6 +982,8 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
         (<any>markQuestionAsAnswered) = jest.fn();
         (<any>isPresenterOrOrganizer) = jest.fn();
         (<any>conversationDataService.getConversationData) = jest.fn();
+        process.env.MicrosoftAppId = 'random';
+        (<any>getMicrosoftAppPassword) = jest.fn();
         (<any>verifyUserFromConversationId) = jest.fn();
     });
 
@@ -1649,6 +1658,8 @@ describe('test get /:conversationId/activesessions api', () => {
         initializeRouter(conversationDataService);
 
         (<any>conversationDataService.getConversationData) = jest.fn();
+        process.env.MicrosoftAppId = 'random';
+        (<any>getMicrosoftAppPassword) = jest.fn();
         (<any>verifyUserFromConversationId) = jest.fn();
 
         const mockEnsureAuthenticated = (req, res, next) => {

@@ -63,6 +63,8 @@ const httpTrigger: AzureFunction = async function (
 
     // Check if user is part of conversation.
     const isValidUser: Boolean = await verifyUserFromConversationId(
+      process.env.MicrosoftAppId,
+      process.env.MicrosoftAppPassword,
       conversationId,
       conversation.serviceUrl,
       conversation.tenantId,

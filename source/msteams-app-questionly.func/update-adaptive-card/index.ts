@@ -20,6 +20,11 @@ import {
 } from "msteams-app-questionly.data";
 import { IDataEvent } from "msteams-app-questionly.common";
 
+let adapter = new BotFrameworkAdapter({
+  appId: process.env.MicrosoftAppId.toString(),
+  appPassword: process.env.MicrosoftAppPassword.toString(),
+});
+
 const activityFunction: AzureFunction = async function (
   context: Context
 ): Promise<void> {
@@ -28,8 +33,8 @@ const activityFunction: AzureFunction = async function (
   const serviceUrl: string = context.bindings.name.serviceUrl;
   const eventData: IDataEvent = context.bindings.name.eventData;
   const isSessionEnded = eventData.type === DataEventType.qnaSessionEndedEvent;
-  const adapter: BotFrameworkAdapter =
-    context.bindings.name.botFrameworkAdapter;
+  // Adapter is injected as dependency for UTs.
+  adapter = context.bindings.name.botFrameworkAdapter ?? adapter;
 
   // Fetch adaptive card and activity id for card refresh.
   const result = await getUpdatedMainCard(

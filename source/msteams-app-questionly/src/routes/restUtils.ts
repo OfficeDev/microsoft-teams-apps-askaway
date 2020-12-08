@@ -94,7 +94,14 @@ export const ensureUserIsPartOfConversation = async (
     conversationData: IConversation,
     userId: string
 ): Promise<boolean> => {
+    if (process.env.MicrosoftAppId === undefined) {
+        exceptionLogger('MicrosoftAppId missing in app settings.');
+        throw new Error('MicrosoftAppId missing in app settings.');
+    }
+
     const isUserPartOfConversation = await verifyUserFromConversationId(
+        process.env.MicrosoftAppId?.toString(),
+        await getMicrosoftAppPassword(),
         conversationData.id,
         conversationData.serviceUrl,
         conversationData.tenantId,
