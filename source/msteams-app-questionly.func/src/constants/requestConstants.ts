@@ -1,3 +1,3 @@
-export const authorizationHeaderConstant: string = "authorization";
-export const aadObjectIdParameterConstant: string = "oid";
-export const userIdParameterConstant: string = "userId";
+export const authorizationHeaderConstant = "authorization";
+export const aadObjectIdParameterConstant = "oid";
+export const userIdParameterConstant = "userId";

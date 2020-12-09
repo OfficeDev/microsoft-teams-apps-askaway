@@ -1,5 +1,5 @@
 export class QnASessionLimitExhaustedError extends Error {
-  code: string | undefined;
+  code: string;
 
   constructor(message: string) {
     super(message);

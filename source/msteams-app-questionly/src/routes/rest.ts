@@ -1,7 +1,6 @@
 import Express from 'express';
 import {
     IConversationDataService,
-    IConversation,
     qnaSessionDataService,
     IUser,
     IQnASession_populated,
@@ -44,8 +43,8 @@ const isDefined = (param: string): boolean => {
 router.get('/:conversationId/sessions/:sessionId', async (req, res) => {
     const user: any = req.user;
     const userId = user._id;
-    const conversationId: string = req.params['conversationId'];
-    const conversationData: IConversation = await conversationDataService.getConversationData(
+    const conversationId = req.params['conversationId'];
+    const conversationData = await conversationDataService.getConversationData(
         conversationId
     );
 
@@ -67,8 +66,8 @@ router.get('/:conversationId/sessions', async (req, res) => {
     try {
         const user: any = req.user;
         const userId = user._id;
-        const conversationId: string = req.params['conversationId'];
-        const conversationData: IConversation = await conversationDataService.getConversationData(
+        const conversationId = req.params['conversationId'];
+        const conversationData = await conversationDataService.getConversationData(
             conversationId
         );
 
@@ -108,8 +107,8 @@ router.get('/:conversationId/me', async (req, res) => {
         const user: any = req.user;
         const userId = user._id;
 
-        const conversationId: string = req.params['conversationId'];
-        const conversation: IConversation = await conversationDataService.getConversationData(
+        const conversationId = req.params['conversationId'];
+        const conversation = await conversationDataService.getConversationData(
             conversationId
         );
         const tenantId = conversation.tenantId;
@@ -153,8 +152,8 @@ router.post(
 
             const user: IUser = <IUser>req.user;
             const userId = user._id;
-            const conversationId: string = req.params['conversationId'];
-            const conversationData: IConversation = await conversationDataService.getConversationData(
+            const conversationId = req.params['conversationId'];
+            const conversationData = await conversationDataService.getConversationData(
                 conversationId
             );
 
@@ -204,11 +203,11 @@ router.patch('/:conversationId/sessions/:sessionId', async (req, res) => {
         }
 
         const user: IUser = <IUser>req.user;
-        const sessionId: string = req.params['sessionId'];
-        const conversationId: string = req.params['conversationId'];
+        const sessionId = req.params['sessionId'];
+        const conversationId = req.params['conversationId'];
 
         if (action === 'end') {
-            const conversationData: IConversation = await conversationDataService.getConversationData(
+            const conversationData = await conversationDataService.getConversationData(
                 conversationId
             );
 
@@ -334,11 +333,11 @@ router.patch(
             }
 
             const user: IUser = <IUser>req.user;
-            const sessionId: string = req.params['sessionId'];
-            const conversationId: string = req.params['conversationId'];
-            const questionId: string = req.params['questionId'];
+            const sessionId = req.params['sessionId'];
+            const conversationId = req.params['conversationId'];
+            const questionId = req.params['questionId'];
 
-            const conversationData: IConversation = await conversationDataService.getConversationData(
+            const conversationData = await conversationDataService.getConversationData(
                 conversationId
             );
 
@@ -416,8 +415,8 @@ router.get('/:conversationId/activesessions', async (req, res) => {
     try {
         const user: any = req.user;
         const userId = user._id;
-        const conversationId: string = req.params['conversationId'];
-        const conversationData: IConversation = await conversationDataService.getConversationData(
+        const conversationId = req.params['conversationId'];
+        const conversationData = await conversationDataService.getConversationData(
             conversationId
         );
 

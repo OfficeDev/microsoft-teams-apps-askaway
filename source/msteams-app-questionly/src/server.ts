@@ -69,7 +69,7 @@ express.use(morgan('tiny'));
 express.use(compression());
 
 async function setupDBConection() {
-    const mongoDBConnectionString: string = await getMongoURI();
+    const mongoDBConnectionString = await getMongoURI();
     // initiate database
     await initiateConnection(mongoDBConnectionString);
 }
