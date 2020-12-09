@@ -119,10 +119,10 @@ test("can create qna session", async () => {
     data.isChannel
   );
 
-  expect(result.qnaSessionId).toBeTruthy();
-  expect(result.hostId).toBe(data.userAadObjId);
+  expect(result._id).toBeTruthy();
+  expect(result.hostId._id).toBe(data.userAadObjId);
 
-  const qnaSessionDoc = await QnASession.findById(result.qnaSessionId);
+  const qnaSessionDoc = await QnASession.findById(result._id);
 
   expect(qnaSessionDoc).not.toBeNull();
   const doc = (<IQnASession>qnaSessionDoc).toObject();
@@ -141,9 +141,10 @@ test("can create qna session", async () => {
   };
 
   expect(doc.isActive).toBe(true);
+  expect(doc.dataEventVersion).toBe(0);
   expect(expectedData).toEqual(data);
 
-  await QnASession.remove({ _id: result.qnaSessionId });
+  await QnASession.remove({ _id: result._id });
 
   return;
 });
@@ -417,7 +418,9 @@ test("create new user", async () => {
     sampleUserAADObjId1,
     sampleUserName1
   );
-  expect(data).toBe(true);
+  expect(data).toBeDefined();
+  expect(data.userName).toEqual(sampleUserName1);
+  expect(data.id).toEqual(sampleUserAADObjId1);
 });
 
 test("update existing user", async () => {
@@ -426,11 +429,13 @@ test("update existing user", async () => {
     sampleUserAADObjId1,
     randomString
   );
-  expect(data).toBe(true);
+  expect(data).toBeDefined();
+  expect(data.userName).toEqual(randomString);
+  expect(data.id).toEqual(sampleUserAADObjId1);
 });
 
 test("new question with existing user in existing QnA session", async () => {
-  const questionId = await questionDataService.createQuestion(
+  const question = await questionDataService.createQuestion(
     testQnASession._id,
     testUser._id,
     testUser.userName,
@@ -438,26 +443,26 @@ test("new question with existing user in existing QnA session", async () => {
     sampleConversationId
   );
 
-  expect(questionId).toBeDefined();
-  const doc: any = await Question.findById(questionId);
+  expect(question).toBeDefined();
+  const doc: any = await Question.findById(question.id);
   expect(doc).not.toBeNull();
-  expect(doc._id).toEqual(questionId);
+  expect(doc.id).toEqual(question.id);
   expect(doc.toObject().content).toEqual(sampleQuestionContent);
 });
 
 test("new question with new user in existing QnA session", async () => {
-  const questionId = await questionDataService.createQuestion(
+  const question = await questionDataService.createQuestion(
     testQnASession._id,
     sampleUserAADObjId4,
     sampleUserName4,
     sampleQuestionContent,
     sampleConversationId
   );
-  expect(questionId).toBeDefined();
+  expect(question.id).toBeDefined();
 
-  const doc: any = await Question.findById(questionId);
+  const doc: any = await Question.findById(question.id);
   expect(doc).not.toBeNull();
-  expect(doc._id).toEqual(questionId);
+  expect(doc.id).toEqual(question.id);
   expect(doc.toObject().content).toEqual(sampleQuestionContent);
 });
 
@@ -515,15 +520,15 @@ test("upvote question that has not been upvoted yet with existing user", async (
 
   await newQuestion.save();
 
-  const questionUpvoted = await questionDataService.updateUpvote(
+  const response = await questionDataService.updateUpvote(
     newQuestion._id,
     testUserUpvoting._id,
     testUserUpvoting.userName
   );
 
-  expect(questionUpvoted.voters).toContain(testUserUpvoting._id);
+  expect(response.question.voters).toContain(testUserUpvoting._id);
 
-  await Question.remove(questionUpvoted);
+  await Question.remove(response.question);
   await User.remove(testUserUpvoting);
 });
 
@@ -538,28 +543,28 @@ test("upvote question that has already been upvoted with existing user", async (
 
   await newQuestion.save();
 
-  let questionUpvoted = await questionDataService.updateUpvote(
+  let response = await questionDataService.updateUpvote(
     newQuestion._id,
     testUserUpvoting._id,
     testUserUpvoting.userName
   );
 
-  expect(questionUpvoted.voters).toContain(testUserUpvoting._id);
+  expect(response.question.voters).toContain(testUserUpvoting._id);
 
-  questionUpvoted = await questionDataService.updateUpvote(
+  response = await questionDataService.updateUpvote(
     newQuestion._id,
     testUserUpvoting._id,
     testUserUpvoting.userName
   );
 
-  expect(questionUpvoted.voters).not.toContain(testUserUpvoting._id);
+  expect(response.question.voters).not.toContain(testUserUpvoting._id);
 
   expect(
-    questionUpvoted.voters.filter((userId) => userId === testUserUpvoting._id)
+    response.question.voters.filter((userId) => userId === testUserUpvoting._id)
       .length
   ).toEqual(0);
 
-  await Question.remove(questionUpvoted);
+  await Question.remove(response.question);
   await User.remove(testUserUpvoting);
 });
 
@@ -574,15 +579,15 @@ test("upvote question with new user not in database", async () => {
 
   await newQuestion.save();
 
-  const questionUpvoted = await questionDataService.updateUpvote(
+  const response = await questionDataService.updateUpvote(
     newQuestion._id,
     "134679",
     "New User Junior"
   );
 
-  expect(questionUpvoted.voters).toContain("134679");
+  expect(response.question.voters).toContain("134679");
 
-  await Question.remove(questionUpvoted);
+  await Question.remove(response.question);
   await User.remove(testUserUpvoting);
 });
 
@@ -700,15 +705,12 @@ test("checking if inactive QnA is currently active", async () => {
     data.isChannel
   );
 
-  await qnaSessionDataService.endQnASession(
-    result.qnaSessionId,
-    sampleConversationId
-  );
+  await qnaSessionDataService.endQnASession(result._id, sampleConversationId);
 
-  const isActive = await qnaSessionDataService.isActiveQnA(result.qnaSessionId);
+  const isActive = await qnaSessionDataService.isActiveQnA(result._id);
   expect(isActive).toEqual(false);
 
-  await QnASession.remove({ _id: result.qnaSessionId });
+  await QnASession.remove({ _id: result._id });
 });
 
 test("get all ama sessions", async () => {

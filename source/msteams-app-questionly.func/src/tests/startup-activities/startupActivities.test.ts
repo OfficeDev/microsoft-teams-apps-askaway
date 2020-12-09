@@ -1,5 +1,4 @@
-import { BotFrameworkAdapter, ConversationAccount } from "botbuilder";
-import { getConversationData, setActivityId } from "../../utils/dbUtility";
+import { getConversationData } from "../../utils/dbUtility";
 import { activityMockContext } from "../mocks/testContext";
 import httpFunction from "./../../../startup-activities/index";
 

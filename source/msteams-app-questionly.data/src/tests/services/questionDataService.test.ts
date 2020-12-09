@@ -438,3 +438,16 @@ test("mark question as answered - already answered question", async () => {
   expect(question.id).toEqual(testQuestion.id);
   expect(question.isAnswered).toBeTruthy();
 });
+
+test("create question for not active session", async () => {
+  testSession = await createDummyQnASession(false);
+  await expect(
+    questionDataService.createQuestion(
+      testSession.id,
+      testUserId,
+      testUserName,
+      "dummy",
+      testConversationId
+    )
+  ).rejects.toThrow(`QnA Session is not active`);
+});

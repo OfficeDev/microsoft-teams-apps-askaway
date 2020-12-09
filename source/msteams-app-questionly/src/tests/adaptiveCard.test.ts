@@ -361,6 +361,15 @@ describe('empty leaderboard tests', () => {
                                 qnaSessionId: sampleQnASessionID,
                             },
                         },
+                        {
+                            id: 'confirmEndQnA',
+                            type: 'Action.Submit',
+                            title: genericStrings('endSession'),
+                            data: {
+                                id: 'confirmEndQnA',
+                                qnaSessionId: sampleQnASessionID,
+                            },
+                        },
                     ],
                 },
             ],
@@ -1410,6 +1419,15 @@ describe('non-empty leaderboard tests', () => {
                                 qnaSessionId: '456',
                             },
                         },
+                        {
+                            id: 'confirmEndQnA',
+                            type: 'Action.Submit',
+                            title: genericStrings('endSession'),
+                            data: {
+                                id: 'confirmEndQnA',
+                                qnaSessionId: '456',
+                            },
+                        },
                     ],
                 },
             ],
@@ -1575,6 +1593,15 @@ describe('non-empty leaderboard tests', () => {
                             title: leaderboardStrings('refresh'),
                             data: {
                                 id: 'refreshLeaderboard',
+                                qnaSessionId: '456',
+                            },
+                        },
+                        {
+                            id: 'confirmEndQnA',
+                            type: 'Action.Submit',
+                            title: genericStrings('endSession'),
+                            data: {
+                                id: 'confirmEndQnA',
                                 qnaSessionId: '456',
                             },
                         },
@@ -1745,6 +1772,15 @@ describe('non-empty leaderboard tests', () => {
                             title: leaderboardStrings('refresh'),
                             data: {
                                 id: 'refreshLeaderboard',
+                                qnaSessionId: '456',
+                            },
+                        },
+                        {
+                            id: 'confirmEndQnA',
+                            type: 'Action.Submit',
+                            title: genericStrings('endSession'),
+                            data: {
+                                id: 'confirmEndQnA',
                                 qnaSessionId: '456',
                             },
                         },

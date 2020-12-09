@@ -14,7 +14,6 @@ export const endQnAButton: () => ISubmitAction = () =>
             id: 'confirmEndQnA',
             qnaSessionId: '${qnaId}',
         },
-        $when: '${isUserHost}',
     };
 
 export const refreshButton: () => ISubmitAction = () =>

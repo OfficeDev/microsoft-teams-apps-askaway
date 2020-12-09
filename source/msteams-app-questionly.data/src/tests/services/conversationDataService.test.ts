@@ -38,7 +38,7 @@ test("Create conversation document without meeting id", async () => {
   expect(doc.toObject().serviceUrl).toEqual(sampleServiceUrl);
   expect(doc.toObject().tenantId).toEqual(sampleTenantId);
 
-  await Conversation.remove({ _id: sampleConversationId });
+  await Conversation.deleteOne({ _id: sampleConversationId });
 });
 
 test("Create conversation document with meeting id", async () => {
@@ -56,7 +56,7 @@ test("Create conversation document with meeting id", async () => {
   expect(doc.toObject().tenantId).toEqual(sampleTenantId);
   expect(doc.toObject().meetingId).toEqual(sampleMeetingId);
 
-  await Conversation.remove({ _id: sampleConversationId });
+  await Conversation.deleteOne({ _id: sampleConversationId });
 });
 
 test("Create duplicate conversation document", async () => {
@@ -77,7 +77,7 @@ test("Create duplicate conversation document", async () => {
     )
   ).rejects.toThrow();
 
-  await Conversation.remove({ _id: sampleConversationId });
+  await Conversation.deleteOne({ _id: sampleConversationId });
 });
 
 test("Delete conversation document", async () => {
@@ -115,7 +115,7 @@ test("Get conversation document without meeting id", async () => {
   expect(conversation.serviceUrl).toEqual(sampleServiceUrl);
   expect(conversation.tenantId).toEqual(sampleTenantId);
 
-  await Conversation.remove({ _id: sampleConversationId });
+  await Conversation.deleteOne({ _id: sampleConversationId });
 });
 
 test("Get conversation document with meeting id", async () => {
@@ -139,7 +139,7 @@ test("Get conversation document with meeting id", async () => {
   expect(conversation.tenantId).toEqual(sampleTenantId);
   expect(conversation.meetingId).toEqual(sampleMeetingId);
 
-  await Conversation.remove({ _id: sampleConversationId });
+  await Conversation.deleteOne({ _id: sampleConversationId });
 });
 
 test("Get conversation document when it does not exist", async () => {

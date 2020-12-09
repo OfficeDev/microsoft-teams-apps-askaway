@@ -1,5 +1,5 @@
 import { BotFrameworkAdapter, ConversationAccount } from "botbuilder";
-import { verifyUserFromConversationId } from "../index";
+import { verifyUserFromConversationId } from "../conversationUtility";
 
 const sampleConversationId = "sampleConversationId";
 const sampleServiceUrl = "sampleServiceUrl";
@@ -7,11 +7,10 @@ const sampleTenantId = "sampleTenantId";
 const sampleuserId = "sampleuserId";
 const testAdapter: BotFrameworkAdapter = new BotFrameworkAdapter();
 let testConversationReference: any;
+const sampleAppId = "random";
+const sampleAppPassword = "random";
 
 beforeAll(() => {
-  process.env.MicrosoftAppId = "random";
-  process.env.MicrosoftAppPassword = "random";
-
   (<any>BotFrameworkAdapter) = jest.fn();
   testAdapter.continueConversation = jest.fn();
   (<any>BotFrameworkAdapter).mockImplementation(() => {
@@ -41,6 +40,8 @@ test("test verify user from conversation id", async () => {
   (<any>testAdapter.continueConversation).mockImplementationOnce(() => {});
 
   let res = await verifyUserFromConversationId(
+    sampleAppId,
+    sampleAppPassword,
     sampleConversationId,
     sampleServiceUrl,
     sampleTenantId,
@@ -50,8 +51,8 @@ test("test verify user from conversation id", async () => {
   expect(res).toBeTruthy();
   expect(BotFrameworkAdapter).toBeCalledTimes(1);
   expect(BotFrameworkAdapter).toBeCalledWith({
-    appId: process.env.MicrosoftAppId?.toString(),
-    appPassword: process.env.MicrosoftAppPassword?.toString(),
+    appId: sampleAppId,
+    appPassword: sampleAppPassword,
   });
   expect(testAdapter.continueConversation).toBeCalledTimes(1);
   expect(testAdapter.continueConversation).toBeCalledWith(
@@ -68,6 +69,8 @@ test("test verify user from conversation id when user is not part of the convers
   });
 
   let res = await verifyUserFromConversationId(
+    sampleAppId,
+    sampleAppPassword,
     sampleConversationId,
     sampleServiceUrl,
     sampleTenantId,
@@ -77,8 +80,8 @@ test("test verify user from conversation id when user is not part of the convers
   expect(res).not.toBeTruthy();
   expect(BotFrameworkAdapter).toBeCalledTimes(1);
   expect(BotFrameworkAdapter).toBeCalledWith({
-    appId: process.env.MicrosoftAppId?.toString(),
-    appPassword: process.env.MicrosoftAppPassword?.toString(),
+    appId: sampleAppId,
+    appPassword: sampleAppPassword,
   });
   expect(testAdapter.continueConversation).toBeCalledTimes(1);
   expect(testAdapter.continueConversation).toBeCalledWith(
@@ -95,6 +98,8 @@ test("test verify user from conversation id - continueConversation throws error 
 
   await expect(
     verifyUserFromConversationId(
+      sampleAppId,
+      sampleAppPassword,
       sampleConversationId,
       sampleServiceUrl,
       sampleTenantId,
@@ -104,8 +109,8 @@ test("test verify user from conversation id - continueConversation throws error 
 
   expect(BotFrameworkAdapter).toBeCalledTimes(1);
   expect(BotFrameworkAdapter).toBeCalledWith({
-    appId: process.env.MicrosoftAppId?.toString(),
-    appPassword: process.env.MicrosoftAppPassword?.toString(),
+    appId: sampleAppId,
+    appPassword: sampleAppPassword,
   });
   expect(testAdapter.continueConversation).toBeCalledTimes(1);
   expect(testAdapter.continueConversation).toBeCalledWith(

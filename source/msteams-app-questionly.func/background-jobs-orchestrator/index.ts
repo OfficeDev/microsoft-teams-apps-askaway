@@ -4,6 +4,12 @@
  */
 
 import * as df from "durable-functions";
+import moment = require("moment");
+import {
+  isCardRefreshNeededForQuestionEvent,
+  isQnaStartedOrEndedEvent,
+  isValidParam,
+} from "../src/utils/requestUtility";
 import { ifNumber } from "../src/utils/typeUtility";
 
 // Retry option for notification bubble activity
@@ -31,58 +37,123 @@ const orchestrator = df.orchestrator(function* (context) {
     );
   }
 
+  // Conversation id from bot flow sometimes contain messageid
+  const conversationId = context.bindingData.input.conversationId.split(";")[0];
+
   try {
     // Get conversation data before triggering any background job
+
+    const startupActivityInput = {
+      conversationId: conversationId,
+    };
+
     const conversation = yield context.df.callActivity(
       "startup-activities",
-      context.bindingData.input.conversationId
+      startupActivityInput
     );
     if (conversation === undefined) {
       context.log.error(
-        `Could not find conversation data for conversation id ${context.bindingData.input.conversationId}`
+        `Could not find conversation data for conversation id ${conversationId}`
       );
       return;
     }
 
-    // Create input object data with all the parameters required for background jobs.
-    const inputData = {
+    const broadcastActivityInput = {
+      conversationId: conversationId,
+      eventData: context.bindingData.input.eventData,
+    };
+
+    const notificationBubbleActivityInput = {
+      conversationId: conversationId,
+      eventData: context.bindingData.input.eventData,
       serviceUrl: conversation.serviceUrl,
-      conversationId: context.bindingData.input.conversationId,
+    };
+
+    const updateAdaptivecardActivityInput = {
+      conversationId: conversationId,
+      eventData: context.bindingData.input.eventData,
+      serviceUrl: conversation.serviceUrl,
       qnaSessionId: context.bindingData.input.qnaSessionId,
-      activityId: context.bindingData.input.cardData?.activityId,
-      card: context.bindingData.input.cardData?.card,
     };
 
     const parallelTasks = [];
 
-    // Broadcast events to all clients from a meeting.
-    parallelTasks.push(
-      context.df.callActivityWithRetry(
-        "broadcast-message",
-        broadcastActivityRetryOption,
-        context.bindingData.input
-      )
-    );
+    // Broadcast activity and notification bubble activities are only required in meeting context.
+    if (isValidParam(conversation.meetingId)) {
+      // Broadcast events to all clients from a meeting.
+      parallelTasks.push(
+        context.df.callActivityWithRetry(
+          "broadcast-message",
+          broadcastActivityRetryOption,
+          broadcastActivityInput
+        )
+      );
 
-    // Send notification bubble activity.
-    parallelTasks.push(
-      context.df.callActivityWithRetry(
-        "send-notification-bubble",
-        notificationBubbleActivityRetryOption,
-        inputData
-      )
-    );
+      // Send notification bubble activity.
+      parallelTasks.push(
+        context.df.callActivityWithRetry(
+          "send-notification-bubble",
+          notificationBubbleActivityRetryOption,
+          notificationBubbleActivityInput
+        )
+      );
+    }
 
-    // Update adaptive card activity.
-    parallelTasks.push(
-      context.df.callActivityWithRetry(
-        "update-adaptive-card",
-        broadcastUpdateCardOption,
-        inputData
-      )
-    );
+    if (isQnaStartedOrEndedEvent(context.bindingData.input.eventData)) {
+      // Update adaptive card activity.
+      parallelTasks.push(
+        context.df.callActivityWithRetry(
+          "update-adaptive-card",
+          broadcastUpdateCardOption,
+          updateAdaptivecardActivityInput
+        )
+      );
+    }
 
-    yield context.df.Task.all(parallelTasks);
+    if (parallelTasks.length != 0) {
+      yield context.df.Task.all(parallelTasks);
+    }
+
+    // Adaptive card does not need update for question marked as answered event.
+    if (
+      isCardRefreshNeededForQuestionEvent(context.bindingData.input.eventData)
+    ) {
+      const scheduleAdaptiveCardActivityInput = {
+        qnaSessionId: context.bindingData.input.qnaSessionId,
+      };
+
+      const result: {
+        scheduleNow: Boolean;
+        scheduleLater: Boolean;
+      } = yield context.df.callActivity(
+        "schedule-adaptive-card",
+        scheduleAdaptiveCardActivityInput
+      );
+
+      if (result.scheduleNow) {
+        yield context.df.callActivityWithRetry(
+          "update-adaptive-card",
+          broadcastUpdateCardOption,
+          updateAdaptivecardActivityInput
+        );
+      } else if (result.scheduleLater) {
+        const maxWaitTimeForAdaptiveCardRefreshInMs = ifNumber(
+          process.env.MaxWaitTimeForAdaptiveCardRefreshInMs,
+          5000
+        );
+
+        const nextSchedule = moment
+          .utc(context.df.currentUtcDateTime)
+          .add(maxWaitTimeForAdaptiveCardRefreshInMs, "ms");
+
+        yield context.df.createTimer(nextSchedule.toDate());
+        yield context.df.callActivityWithRetry(
+          "update-adaptive-card",
+          broadcastUpdateCardOption,
+          updateAdaptivecardActivityInput
+        );
+      }
+    }
   } catch (error) {
     context.log.error(
       error,

@@ -7,22 +7,20 @@ class UserDataService {
    * Otherwise, if user doesn't exist, will create new user with provided parameters.
    * @param userAadObjId - AAD Object Id of user
    * @param userTeamsName - Name of user on Teams
-   * @returns Returns true if user was successfully created or updated
+   * @returns Returns created or updated user document
    * @throws Error thrown when database fails to find and create or update the specified user
    */
-  public async getUserOrCreate(
+  public getUserOrCreate(
     userAadObjId: string,
     userTeamsName: string
-  ): Promise<boolean> {
-    await retryWrapper(() =>
+  ): Promise<IUser> {
+    return retryWrapper(() =>
       User.findByIdAndUpdate(
         userAadObjId,
         { $set: { _id: userAadObjId, userName: userTeamsName } },
-        { upsert: true }
+        { upsert: true, new: true }
       )
     );
-
-    return true;
   }
 
   /**
@@ -32,9 +30,7 @@ class UserDataService {
    * @throws Error thrown when database fails to find and create or update the specified user
    */
   public async getUser(userAadObjId: IUser): Promise<IUser> {
-    const user: IUser = await retryWrapper<IUser>(() =>
-      User.findById(userAadObjId)
-    );
+    const user = await retryWrapper<IUser>(() => User.findById(userAadObjId));
     if (user === undefined) throw new Error("User not found");
     return user;
   }

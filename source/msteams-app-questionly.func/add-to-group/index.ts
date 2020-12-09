@@ -1,10 +1,13 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 import { userIdParameterConstant } from "../src/constants/requestConstants";
-import { verifyUserFromConversationId } from "msteams-app-questionly.conversation.utility";
+import { verifyUserFromConversationId } from "msteams-app-questionly.common";
 import { authenticateRequest } from "../src/services/authService";
 import { signalRUtility } from "../src/utils/signalRUtility";
 import { IConversation } from "msteams-app-questionly.data";
-import { getConversationData } from "../src/utils/dbUtility";
+import {
+  getConversationData,
+  initiateDBConnection,
+} from "../src/utils/dbUtility";
 import {
   createBadRequestResponse,
   createInternalServerErrorResponse,
@@ -50,6 +53,9 @@ const httpTrigger: AzureFunction = async function (
       return;
     }
 
+    // Initiate db connection if not initiated already.
+    await initiateDBConnection();
+
     const userId: string = req[userIdParameterConstant];
     const conversation: IConversation = await getConversationData(
       conversationId
@@ -57,6 +63,8 @@ const httpTrigger: AzureFunction = async function (
 
     // Check if user is part of conversation.
     const isValidUser: Boolean = await verifyUserFromConversationId(
+      process.env.MicrosoftAppId,
+      process.env.MicrosoftAppPassword,
       conversationId,
       conversation.serviceUrl,
       conversation.tenantId,

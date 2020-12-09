@@ -4,19 +4,28 @@ import {
     IConversation,
     qnaSessionDataService,
     IUser,
-    questionDataService,
     IQnASession_populated,
 } from 'msteams-app-questionly.data';
-import { verifyUserFromConversationId } from 'msteams-app-questionly.conversation.utility';
 import { exceptionLogger } from 'src/util/exceptionTracking';
 import {
     processQnASesssionsDataForMeetingTab,
+    patchActionForQuestion,
+    getHostUserId,
+    ensureUserIsPartOfConversation,
+} from 'src/routes/restUtils';
+import {
     getParticipantRole,
     isPresenterOrOrganizer,
-    patchActionForQuestion,
-    formResponseWhenUserIsNotPartOfConversation,
-    getHostUserId,
-} from 'src/routes/restUtils';
+} from 'src/util/meetingsUtility';
+import { StatusCodes } from 'http-status-codes';
+import {
+    downvoteQuestion,
+    endQnASession,
+    markQuestionAsAnswered,
+    startQnASession,
+    submitNewQuestion,
+    upvoteQuestion,
+} from 'src/controller';
 
 export const router = Express.Router();
 let conversationDataService: IConversationDataService;
@@ -40,15 +49,9 @@ router.get('/:conversationId/sessions/:sessionId', async (req, res) => {
         conversationId
     );
 
-    const isUserPartOfConversation: boolean = await verifyUserFromConversationId(
-        conversationId,
-        conversationData.serviceUrl,
-        conversationData.tenantId,
-        userId
-    );
-
-    if (!isUserPartOfConversation) {
-        formResponseWhenUserIsNotPartOfConversation(res);
+    if (
+        !(await ensureUserIsPartOfConversation(res, conversationData, userId))
+    ) {
         return;
     }
 
@@ -69,15 +72,13 @@ router.get('/:conversationId/sessions', async (req, res) => {
             conversationId
         );
 
-        const isUserPartOfConversation: boolean = await verifyUserFromConversationId(
-            conversationId,
-            conversationData.serviceUrl,
-            conversationData.tenantId,
-            userId
-        );
-
-        if (!isUserPartOfConversation) {
-            formResponseWhenUserIsNotPartOfConversation(res);
+        if (
+            !(await ensureUserIsPartOfConversation(
+                res,
+                conversationData,
+                userId
+            ))
+        ) {
             return;
         }
 
@@ -86,7 +87,7 @@ router.get('/:conversationId/sessions', async (req, res) => {
         );
 
         if (qnaSessionsData.length === 0) {
-            res.statusCode = 204;
+            res.statusCode = StatusCodes.NO_CONTENT;
         } else {
             qnaSessionResponse = await processQnASesssionsDataForMeetingTab(
                 qnaSessionsData
@@ -94,7 +95,7 @@ router.get('/:conversationId/sessions', async (req, res) => {
         }
     } catch (err) {
         exceptionLogger(err);
-        res.statusCode = 500;
+        res.statusCode = StatusCodes.INTERNAL_SERVER_ERROR;
         qnaSessionResponse = err.message;
     }
     res.send(qnaSessionResponse);
@@ -129,8 +130,7 @@ router.get('/:conversationId/me', async (req, res) => {
         );
     } catch (err) {
         exceptionLogger(err);
-        res.statusCode = 500;
-        res.send(err.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(err.message);
     }
 
     res.send(userRole);
@@ -145,8 +145,9 @@ router.post(
             const questionContent: string = req.body.questionContent;
 
             if (!isDefined(questionContent)) {
-                res.statusCode = 400;
-                res.send('questionContent is missing in the request');
+                res.status(StatusCodes.BAD_REQUEST).send(
+                    'questionContent is missing in the request'
+                );
                 return;
             }
 
@@ -157,34 +158,36 @@ router.post(
                 conversationId
             );
 
-            const isUserPartOfConversation: boolean = await verifyUserFromConversationId(
-                conversationId,
-                conversationData.serviceUrl,
-                conversationData.tenantId,
-                userId
-            );
-
-            if (!isUserPartOfConversation) {
-                formResponseWhenUserIsNotPartOfConversation(res);
+            if (
+                !(await ensureUserIsPartOfConversation(
+                    res,
+                    conversationData,
+                    userId
+                ))
+            ) {
                 return;
             }
 
-            response = await questionDataService.createQuestion(
+            const result = await submitNewQuestion(
                 req.params['sessionId'],
                 user._id,
                 user.userName,
                 questionContent,
-                req.params['conversationId']
+                conversationId
             );
+
+            if (result.isOk()) {
+                response = { questionId: result.value._id };
+            } else {
+                throw result.value;
+            }
         } catch (err) {
             exceptionLogger(err);
-            res.statusCode = 500;
-            res.send(err.message);
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(err.message);
             return;
         }
 
-        res.statusCode = 201;
-        res.send(response);
+        res.status(StatusCodes.CREATED).send(response);
     }
 );
 
@@ -194,8 +197,9 @@ router.patch('/:conversationId/sessions/:sessionId', async (req, res) => {
         const action: string = req.body.action;
 
         if (!isDefined(action)) {
-            res.statusCode = 400;
-            res.send('patch action is missing in the request');
+            res.status(StatusCodes.BAD_REQUEST).send(
+                'patch action is missing in the request'
+            );
             return;
         }
 
@@ -203,43 +207,38 @@ router.patch('/:conversationId/sessions/:sessionId', async (req, res) => {
         const sessionId: string = req.params['sessionId'];
         const conversationId: string = req.params['conversationId'];
 
-        if (action === 'close') {
+        if (action === 'end') {
             const conversationData: IConversation = await conversationDataService.getConversationData(
                 conversationId
             );
 
-            if (
-                conversationData.meetingId !== undefined &&
-                isPresenterOrOrganizer(
-                    conversationData.meetingId,
-                    user._id,
-                    conversationData.tenantId,
-                    conversationData.serviceUrl
-                )
-            ) {
-                await qnaSessionDataService.endQnASession(
-                    sessionId,
-                    conversationId
+            if (!conversationData.meetingId) {
+                res.status(StatusCodes.BAD_REQUEST).send(
+                    `meeting does not exist for provided conversation id ${conversationId}`
                 );
-            } else {
-                res.statusCode = 403;
-                return res.send(
-                    'Only a Presenter or an Organizer can update session.'
-                );
+                return;
             }
+            await endQnASession(
+                sessionId,
+                user._id,
+                conversationId,
+                conversationData.tenantId,
+                conversationData.serviceUrl,
+                conversationData.meetingId
+            );
         } else {
-            res.statusCode = 400;
-            return res.send(`action ${action} is not supported`);
+            res.status(StatusCodes.BAD_REQUEST).send(
+                `action ${action} is not supported`
+            );
+            return;
         }
     } catch (err) {
         exceptionLogger(err);
-        res.statusCode = 500;
-        res.send(err.message);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(err.message);
         return;
     }
 
-    res.statusCode = 204;
-    res.send();
+    res.status(StatusCodes.NO_CONTENT).send();
 });
 
 // Create a new qna session
@@ -248,9 +247,11 @@ router.post('/:conversationId/sessions', async (req, res) => {
     if (req.user !== undefined) {
         user = req.user;
     } else {
-        res.statusCode = 500;
         exceptionLogger(new Error('User details could not be found.'));
-        return res.send('User details could not be found.');
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(
+            'User details could not be found.'
+        );
+        return;
     }
 
     if (
@@ -260,8 +261,7 @@ router.post('/:conversationId/sessions', async (req, res) => {
         !isDefined(req.body.scopeId) ||
         !isDefined(req.body.isChannel)
     ) {
-        res.statusCode = 400;
-        res.send(
+        res.status(StatusCodes.BAD_REQUEST).send(
             `One or more parameters missing in the request payload. Check if title, description, scopeId, and isChannel are provided.`
         );
         return;
@@ -277,27 +277,8 @@ router.post('/:conversationId/sessions', async (req, res) => {
         const tenantId = conversationData.tenantId;
         const meetingId = conversationData.meetingId;
 
-        // check if the user/participant is either presenter or organizer.
-        if (meetingId !== undefined) {
-            const canCreateQnASession = isPresenterOrOrganizer(
-                meetingId,
-                user._id,
-                tenantId,
-                serviceUrl
-            );
-
-            if (!canCreateQnASession) {
-                res.statusCode = 400;
-                exceptionLogger(
-                    new Error(
-                        'Only a Presenter or an Organizer can create new QnA Session.'
-                    )
-                );
-                return res.send(
-                    'Only a Presenter or an Organizer can create new QnA Session.'
-                );
-            }
-        } else {
+        // Throw error if meeting id is not defined.
+        if (!meetingId) {
             throw new Error(
                 `meeting does not exist for provided conversation id ${conversationId}`
             );
@@ -309,7 +290,7 @@ router.post('/:conversationId/sessions', async (req, res) => {
             serviceUrl
         );
 
-        response = await qnaSessionDataService.createQnASession(
+        const session = await startQnASession(
             req.body.title,
             req.body.description,
             user.userName,
@@ -319,12 +300,16 @@ router.post('/:conversationId/sessions', async (req, res) => {
             tenantId,
             req.body.scopeId,
             hostUserId,
-            req.body.isChannel
+            req.body.isChannel,
+            serviceUrl,
+            meetingId
         );
+
+        response = { qnaSessionId: session._id };
     } catch (error) {
-        res.statusCode = 500;
         exceptionLogger(error);
-        res.send(error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error.message);
+        return;
     }
     res.send(response);
 });
@@ -337,12 +322,14 @@ router.patch(
             const action: string = req.body.action;
 
             if (!isDefined(action)) {
-                res.statusCode = 400;
-                res.send('patch action is missing in the request');
+                res.status(StatusCodes.BAD_REQUEST).send(
+                    'patch action is missing in the request'
+                );
                 return;
             } else if (!patchActionForQuestion.includes(action.trim())) {
-                res.statusCode = 400;
-                res.send(`action ${action} is not supported`);
+                res.status(StatusCodes.BAD_REQUEST).send(
+                    `action ${action} is not supported`
+                );
                 return;
             }
 
@@ -355,22 +342,18 @@ router.patch(
                 conversationId
             );
 
-            let isUserPartOfConversation: boolean;
-
             if (action === 'upvote') {
-                isUserPartOfConversation = await verifyUserFromConversationId(
-                    conversationId,
-                    conversationData.serviceUrl,
-                    conversationData.tenantId,
-                    user._id
-                );
-
-                if (!isUserPartOfConversation) {
-                    formResponseWhenUserIsNotPartOfConversation(res);
+                if (
+                    !(await ensureUserIsPartOfConversation(
+                        res,
+                        conversationData,
+                        user._id
+                    ))
+                ) {
                     return;
                 }
 
-                await questionDataService.upVoteQuestion(
+                await upvoteQuestion(
                     conversationId,
                     sessionId,
                     questionId,
@@ -378,19 +361,17 @@ router.patch(
                     user.userName
                 );
             } else if (action === 'downvote') {
-                isUserPartOfConversation = await verifyUserFromConversationId(
-                    conversationId,
-                    conversationData.serviceUrl,
-                    conversationData.tenantId,
-                    user._id
-                );
-
-                if (!isUserPartOfConversation) {
-                    formResponseWhenUserIsNotPartOfConversation(res);
+                if (
+                    !(await ensureUserIsPartOfConversation(
+                        res,
+                        conversationData,
+                        user._id
+                    ))
+                ) {
                     return;
                 }
 
-                await questionDataService.downVoteQuestion(
+                await downvoteQuestion(
                     conversationId,
                     sessionId,
                     questionId,
@@ -406,27 +387,26 @@ router.patch(
                         conversationData.serviceUrl
                     )
                 ) {
-                    await questionDataService.markQuestionAsAnswered(
+                    await markQuestionAsAnswered(
                         conversationId,
                         sessionId,
-                        questionId
+                        questionId,
+                        user._id
                     );
                 } else {
-                    res.statusCode = 403;
-                    return res.send(
+                    res.status(StatusCodes.FORBIDDEN).send(
                         'Only a Presenter or an Organizer can mark question as answered.'
                     );
+                    return;
                 }
             }
         } catch (err) {
             exceptionLogger(err);
-            res.statusCode = 500;
-            res.send(err.message);
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(err.message);
             return;
         }
 
-        res.statusCode = 204;
-        res.send();
+        res.status(StatusCodes.NO_CONTENT).send();
     }
 );
 
@@ -441,15 +421,13 @@ router.get('/:conversationId/activesessions', async (req, res) => {
             conversationId
         );
 
-        const isUserPartOfConversation: boolean = await verifyUserFromConversationId(
-            conversationId,
-            conversationData.serviceUrl,
-            conversationData.tenantId,
-            userId
-        );
-
-        if (!isUserPartOfConversation) {
-            formResponseWhenUserIsNotPartOfConversation(res);
+        if (
+            !(await ensureUserIsPartOfConversation(
+                res,
+                conversationData,
+                userId
+            ))
+        ) {
             return;
         }
 
@@ -457,7 +435,7 @@ router.get('/:conversationId/activesessions', async (req, res) => {
             conversationId
         );
         if (activeSessions.length === 0) {
-            res.statusCode = 204;
+            res.statusCode = StatusCodes.NO_CONTENT;
         } else {
             response = await processQnASesssionsDataForMeetingTab(
                 activeSessions
@@ -465,8 +443,8 @@ router.get('/:conversationId/activesessions', async (req, res) => {
         }
     } catch (error) {
         exceptionLogger(error);
-        res.statusCode = 500;
-        res.send(error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error.message);
+        return;
     }
     res.send(response);
 });

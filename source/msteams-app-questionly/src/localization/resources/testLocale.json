@@ -51,7 +51,9 @@
         "taskSubmit": "taskSubmit",
         "leaderboard": "leaderboard",
         "conversationInvalid": "conversationInvalid",
-        "qnasessionlimitexhausted": "qnasessionlimitexhausted"
+        "qnasessionlimitexhaustedError": "qnasessionlimitexhaustedError",
+        "qnasessionCreationError": "qnasessionCreationError",
+        "insufficientPermissionsToCreateOrEndQnASessionError": "insufficientPermissionsToCreateOrEndQnASessionError"
     },
     "generic": {
         "submit": "submit",

@@ -10,6 +10,8 @@ const memberNotFoundInConversationError: string =
 
 /**
  * Verifies if the user is a member of conversation.
+ * @param botAppId - Microsoft bot id.
+ * @param botPassword: Microsoft bot password.
  * @param conversationId: conversationId.
  * @param serviceUrl: service url.
  * @param tenantId: tenat id.
@@ -18,6 +20,8 @@ const memberNotFoundInConversationError: string =
  * @throws - Throws any excpetion occured during function flow.
  */
 export const verifyUserFromConversationId = async (
+  botAppId: string,
+  botPassword: string,
   conversationId: string,
   serviceUrl: string,
   tenantId: string,
@@ -39,8 +43,8 @@ export const verifyUserFromConversationId = async (
     };
 
     const adapter: BotFrameworkAdapter = new BotFrameworkAdapter({
-      appId: process.env.MicrosoftAppId?.toString(),
-      appPassword: process.env.MicrosoftAppPassword?.toString(),
+      appId: botAppId,
+      appPassword: botPassword,
     });
 
     await adapter.continueConversation(

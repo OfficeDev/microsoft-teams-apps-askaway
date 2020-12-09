@@ -43,3 +43,76 @@ Key vault resource should contain following secrets:
 `AvatarKey`
 
 Read more on how to configure key vault [here](https://docs.microsoft.com/en-us/azure/key-vault/general/assign-access-policy-portal).
+
+Following env variables are needed to run service layer project:
+
+```
+AzureAd_ClientId="{{AzureAd_ClientId}}"
+AzureAd_ApplicationIdUri="{{AzureAd_ApplicationIdUri}}"
+AzureAd_Metadata_Endpoint="https://login.microsoftonline.com/TENANT_ID/v2.0/.well-known/openid-configuration"
+AzureAd_ValidIssuers="https://login.microsoftonline.com/TENANT_ID/v2.0,https://sts.windows.net/TENANT_ID/"
+TenantId={{TenantId}}"
+MicrosoftAppId="{{MicrosoftAppId}}"
+HostName="{{ngrokId}}.ngrok.io"
+KeyVaultName="{{KeyVaultName}}"
+MongoDbUri="{{MongoDbUri}}"
+ApplicationInsightsInstrumentationKey="{{ApplicationInsightsInstrumentationKey}}"
+MicrosoftAppPassword="{{MicrosoftAppPassword}}"
+AvatarKey="{{AvatarKey}}"
+debugMode="true"
+ASKAWAYTAB_APP_URI="{{ASKAWAYTAB_APP_URI}}"
+NumberOfActiveAMASessions=1
+BackgroundJobUri="http://localhost:7071/api/background-Job"
+BackgroundFunctionKey=""
+SignalRFunctionBaseUrl="http://localhost:7071"
+```
+
+local.settings.json for azure function layer:
+
+```
+{
+  "IsEncrypted": false,
+  "Values": {
+    "WEBSITE_NODE_DEFAULT_VERSION": "~12",
+    "AzureWebJobsStorage": "{{AzureWebJobsStorage}}",
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "APPINSIGHTS_INSTRUMENTATIONKEY": "{{APPINSIGHTS_INSTRUMENTATIONKEY}}",
+    "AzureAd_ApplicationIdUri": "{{AzureAd_ApplicationIdUri}}",
+    "AzureAd_ValidIssuers": "https://login.microsoftonline.com/TENANT_ID/v2.0,https://sts.windows.net/TENANT_ID/",
+    "TenantId": "{{TenantId}}",
+    "AzureSignalRConnectionString": "{{AzureSignalRConnectionString}}",
+    "MicrosoftAppId": "{{MicrosoftAppId}}",
+    "MicrosoftAppPassword": "{{MicrosoftAppPassword}}",
+    "MongoDbUri": "{{MongoDbUri}}",
+    "AppId": "{{ManifestAppId}}",
+    "NotificationBubblePageUrl": "{{NotificationBubblePageUrl}}",
+    "NotificationBubbleActivityRetryInterval": 2000,
+    "NotificationBubbleActivityRetryAttemptCount": 1,
+    "BroadcastActivityRetryInterval": 1000,
+    "BroadcastActivityRetryAttemptCount": 2,
+    "MaxWaitTimeForAdaptiveCardRefreshInMs": 5000,
+    "AvatarKey": "{{AvatarKey}}",
+    "HostName": "{{HostName}}"
+  },
+  "Host": {
+    "LocalHttpPort": 7071,
+    "CORS": "http://localhost:8080,https://azure-samples.github.io",
+    "CORSCredentials": true
+  }
+}
+
+```
+
+To run project locally, run azure function project first
+
+```
+cd source\msteams-app-questionly.func
+npm run start
+```
+
+Then run service layer project
+
+```
+cd source\msteams-app-questionly
+gulp serve
+```
