@@ -6,4 +6,5 @@ import { PreventIframe } from 'express-msteams-host';
 @PreventIframe('/askAwayTab/index.html')
 @PreventIframe('/askAwayTab/config.html')
 @PreventIframe('/askAwayTab/remove.html')
+@PreventIframe('/askAwayTab/createsession.html')
 export class AskAwayTab {}

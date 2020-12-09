@@ -53,12 +53,10 @@
             }
             .btn-create-session {
                 display: flex;
-                font-size: 14px;
-                line-height: 20px;
                 text-align: center;
-                span {
-                    color: #fff;
-                }
+                width: 120px;
+                height: 45px;
+                border-radius: 2px;
             }
         }
         .ui-input,
@@ -83,6 +81,14 @@
             left: 50%;
             transform: translate(-50%, -50%);
             position: absolute;
+        }
+    }
+    .menuHeader {
+        svg {
+            fill: #ffffff;
+        }
+        .ui-menu__item__submenu {
+            border: none;
         }
     }
 }

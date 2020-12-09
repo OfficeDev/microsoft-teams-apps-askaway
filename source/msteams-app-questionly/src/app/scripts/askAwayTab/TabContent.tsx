@@ -2,6 +2,7 @@
 import './index.scss';
 import * as React from 'react';
 import { Flex, Text, Button, Image } from '@fluentui/react-northstar';
+import { AddIcon, RetryIcon } from '@fluentui/react-icons-northstar';
 // tslint:disable-next-line:no-relative-imports
 import HttpService from './shared/HttpService';
 import * as microsoftTeams from '@microsoft/teams-js';
@@ -29,72 +30,6 @@ export class TabContent extends React.Component<
         )
             .then((response: any) => {})
             .catch((error) => {});
-    }
-
-    private adaptiveCardTemplate() {
-        return {
-            $schema: 'https://adaptivecards.io/schemas/adaptive-card.json',
-            type: 'AdaptiveCard',
-            version: '1.3',
-            body: [
-                {
-                    type: 'ColumnSet',
-                    columns: [
-                        {
-                            type: 'Column',
-                            width: 2,
-                            items: [
-                                {
-                                    type: 'Container',
-                                    items: [
-                                        {
-                                            type: 'TextBlock',
-                                            text: 'Title name',
-                                            wrap: true,
-                                        },
-                                        {
-                                            type: 'Input.Text',
-                                            id: 'title',
-                                            placeholder:
-                                                'Connect with explore interns',
-                                            validation: {
-                                                necessity: 'Required',
-                                                errorMessage:
-                                                    'Title is required*',
-                                            },
-                                        },
-                                        {
-                                            type: 'TextBlock',
-                                            text: 'Description',
-                                            wrap: true,
-                                        },
-                                        {
-                                            type: 'Input.Text',
-                                            id: 'description',
-                                            placeholder:
-                                                'Ask these upcoming interns anything! Life, work and anything you are interested!',
-                                            isMultiline: true,
-                                            validation: {
-                                                necessity: 'Required',
-                                                errorMessage:
-                                                    'Description is required*',
-                                            },
-                                        },
-                                    ],
-                                },
-                            ],
-                        },
-                    ],
-                },
-            ],
-            actions: [
-                {
-                    id: 'submit',
-                    type: 'Action.Submit',
-                    title: 'Create',
-                },
-            ],
-        };
     }
 
     private successModel() {
@@ -170,7 +105,8 @@ export class TabContent extends React.Component<
             // title: 'Microsoft Corporation',
             fallbackUrl: '',
             appId: process.env.MicrosoftAppId,
-            card: this.adaptiveCardTemplate(),
+            // card: this.adaptiveCardTemplate(),
+            url: `https://${process.env.HostName}/askAwayTab/createsession.html`,
         };
 
         let submitHandler = (err: any, result: any) => {
@@ -220,10 +156,8 @@ export class TabContent extends React.Component<
 
         microsoftTeams.tasks.startTask(taskInfo, submitHandler);
     }
-    /**
-     * The render() method to create the UI of the tab
-     */
-    public render() {
+
+    private crateNewSessionLayout() {
         return (
             <Flex hAlign="center" vAlign="center" className="screen">
                 <Image
@@ -253,6 +187,47 @@ export class TabContent extends React.Component<
                     </Button>
                 </Flex.Item>
             </Flex>
+        );
+    }
+
+    /**
+     * Show Tab Header Design Part
+     */
+    private tabHeader() {
+        return (
+            <div>
+                <Flex gap="gap.large" className="screen">
+                    <Button text>
+                        <RetryIcon xSpacing="after" />
+                        <Button.Content>Refresh</Button.Content>
+                    </Button>
+                    <Button icon text>
+                        <AddIcon outline xSpacing="after" />
+                        <Button.Content>Create a new session</Button.Content>
+                    </Button>
+                    <Button text>
+                        <Image
+                            alt="image"
+                            src={require('./../../web/assets/switch.png')}
+                        />
+                        <Button.Content>
+                            Switch to different sessions
+                        </Button.Content>
+                    </Button>
+                </Flex>
+            </div>
+        );
+    }
+
+    /**
+     * The render() method to create the UI of the tab
+     */
+    public render() {
+        return (
+            <React.Fragment>
+                {this.tabHeader()}
+                {this.crateNewSessionLayout()}
+            </React.Fragment>
         );
     }
 }

@@ -2,6 +2,7 @@
 import './index.scss';
 // tslint:disable-next-line:no-relative-imports
 import { MeetingPanel } from './MeetingPanel';
+// tslint:disable-next-line:no-relative-imports
 import { TabContent } from './TabContent';
 import * as React from 'react';
 import { Provider } from '@fluentui/react-northstar';
@@ -46,8 +47,10 @@ export class AskAwayTab extends msteamsReactBaseComponent<
         });
     }
 
-    public async componentWillMount() {
-        this.updateTheme(this.getQueryVariable('theme'));
+    /**
+     * Initialize teams plugin
+     */
+    async initializeTeams() {
         if (await this.inTeams()) {
             microsoftTeams.initialize();
             microsoftTeams.registerOnThemeChangeHandler(this.updateTheme);
@@ -92,6 +95,11 @@ export class AskAwayTab extends msteamsReactBaseComponent<
                 entityId: 'This is not hosted in Microsoft Teams',
             });
         }
+    }
+
+    public async componentWillMount() {
+        this.updateTheme(this.getQueryVariable('theme'));
+        await this.initializeTeams();
     }
 
     /**
