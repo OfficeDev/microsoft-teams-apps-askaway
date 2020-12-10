@@ -150,6 +150,7 @@ export class CreateSession extends msteamsReactBaseComponent<
                         <Text content="Description*" size="small" />
                         <TextArea
                             fluid
+                            styles={{ marginTop: '0.25rem' }}
                             placeholder="Type a description"
                             onKeyUp={(e) =>
                                 this.validateCreateSessionField(

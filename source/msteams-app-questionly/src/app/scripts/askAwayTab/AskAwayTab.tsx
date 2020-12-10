@@ -11,6 +11,8 @@ import msteamsReactBaseComponent, {
 } from 'msteams-react-base-component';
 import * as microsoftTeams from '@microsoft/teams-js';
 import * as jwt from 'jsonwebtoken';
+// tslint:disable-next-line:no-relative-imports
+import { CONST } from './../askAwayTab/shared/ConfigVariables';
 /**
  * State for the askAwayTabTab React component
  */
@@ -108,15 +110,11 @@ export class AskAwayTab extends msteamsReactBaseComponent<
     public render() {
         return (
             <Provider theme={this.state.theme}>
-                {this.state.frameContext === 'sidePanel' && (
-                    <React.Fragment>
-                        <MeetingPanel teamsData={this.state.teamContext} />
-                    </React.Fragment>
+                {this.state.frameContext === CONST.FC_SIDEPANEL && (
+                    <MeetingPanel teamsData={this.state.teamContext} />
                 )}
-                {this.state.frameContext === 'content' && (
-                    <React.Fragment>
-                        <TabContent teamsData={this.state.teamContext} />
-                    </React.Fragment>
+                {this.state.frameContext === CONST.FC_CONTENT && (
+                    <TabContent teamsData={this.state.teamContext} />
                 )}
             </Provider>
         );

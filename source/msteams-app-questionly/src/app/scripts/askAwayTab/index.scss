@@ -40,30 +40,36 @@
         position: absolute;
     }
 }
+.sidepanel-form {
+    display: flex;
+    flex-direction: column;
+    .form-grid {
+        margin-top: 0.5rem;
+        margin-bottom: 0rem;
+        span {
+            font-size: 12px;
+            line-height: 16px;
+        }
+        .btn-create-session {
+            text-align: center;
+            height: 2rem;
+            position: absolute;
+            right: 2rem;
+            bottom: 2rem;
+            width: 120px;
+            border-radius: 2px;
+        }
+    }
+    .ui-input,
+    .ui-textarea {
+        margin-top: 0.25rem;
+        font-size: 14px;
+    }
+}
 .meeting-panel {
-    .sidepanel-form {
-        display: flex;
-        flex-direction: column;
-        .form-grid {
-            margin-top: 0.5rem;
-            margin-bottom: 0rem;
-            span {
-                font-size: 12px;
-                line-height: 16px;
-            }
-            .btn-create-session {
-                display: flex;
-                text-align: center;
-                width: 120px;
-                height: 45px;
-                border-radius: 2px;
-            }
-        }
-        .ui-input,
-        .ui-textarea {
-            margin-top: 0.25rem;
-            font-size: 14px;
-        }
+    .button {
+        top: 67%;
+        position: absolute;
     }
     .no-question {
         .text-caption-panel {

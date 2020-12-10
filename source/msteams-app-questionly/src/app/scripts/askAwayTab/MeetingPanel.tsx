@@ -88,106 +88,29 @@ export class MeetingPanel extends React.Component<
             });
     }
 
-    /**
-     * on submit create a new session
-     * @param e
-     */
-    private onSubmitCreateSession(e) {
-        e.preventDefault();
-        this.setState({ showLoader: true });
-        const inputData = this.state.input;
-        this.validateCreateSession(inputData);
-        if (inputData && inputData['title'] && inputData['description']) {
-            const createSessionData = {
-                title: inputData['title'],
-                description: inputData['description'],
-                scopeId: this.props.teamsData.chatId,
-                // hostUserId: '',
-                isChannel: false,
-            };
-            HttpService.post(
-                `/conversations/${this.props.teamsData.chatId}/sessions`,
-                createSessionData
-            )
-                .then((response: any) => {
-                    if (
-                        response &&
-                        response['data'] &&
-                        response['data']['qnaSessionId']
-                    ) {
-                        this.setState({
-                            activeSessionData: response.data,
-                        });
-                    }
-                    this.setState({ showLoader: false });
-                })
-                .catch((error) => {
-                    this.setState({ showLoader: false });
-                });
-        }
-    }
-
-    /**
-     * Append the value to Input Fields
-     * @param e
-     * @param key
-     */
-    private appendInput = (e, key) => {
-        const i = this.state;
-        i.input[key] = e.target.value;
-        this.setState(i);
-    };
-
-    /**
-     * Validate the input field
-     * @param input
-     * @param field
-     */
-    private validateCreateSessionField(input, field) {
-        const errorInput = this.state;
-        errorInput['error'][field] = true;
-        if (input) {
-            errorInput['error'][field] = false;
-        }
-        this.setState(errorInput);
-    }
-
-    /**
-     * Validate Create Sesion Form
-     */
-    private validateCreateSession(inputData) {
-        const errorInput = this.state;
-        errorInput['error']['isTitle'] = false;
-        errorInput['error']['isDescription'] = false;
-        if (!inputData['title']) {
-            errorInput['error']['isTitle'] = true;
-        }
-        if (!inputData['description']) {
-            errorInput['error']['isDescription'] = true;
-        }
-        this.setState(errorInput);
-    }
-
     private onShowTaskModule() {
         let taskInfo: any = {
             // title: 'Microsoft Corporation',
             fallbackUrl: '',
             appId: process.env.MicrosoftAppId,
             // card: this.adaptiveCardTemplate(),
-            url: `https://${process.env.HostName}/askAwayTab/createsession.html`,
+            url: `https://${process.env.HostName}/askAwayTab/createsession.html?theme=${this.props.teamsData.theme}`,
         };
 
         let submitHandler = (err: any, result: any) => {
-            if (result && result['title'] && result['description']) {
+            result = JSON.parse(result);
+            if (result) {
+                const stateInput = this.state;
+                stateInput.input.title = result['title'];
+                stateInput.input.description = result['description'];
+                this.setState(stateInput);
                 const createSessionData = {
-                    title: result['title'],
-                    description: result['description'],
                     scopeId: this.props.teamsData.chatId,
                     isChannel: false,
                 };
                 HttpService.post(
                     `/conversations/${this.props.teamsData.chatId}/sessions`,
-                    createSessionData
+                    { ...this.state.input, ...createSessionData }
                 )
                     .then((response: any) => {
                         if (
@@ -196,6 +119,9 @@ export class MeetingPanel extends React.Component<
                             response['data']['qnaSessionId']
                         ) {
                             this.showAlertModel(true);
+                            this.setState({
+                                activeSessionData: response['data'],
+                            });
                         } else {
                             this.showAlertModel(false);
                         }
@@ -290,27 +216,31 @@ export class MeetingPanel extends React.Component<
         };
     }
 
-    private crateNewSessionLayout() {
+    private noQuestionDesign(text) {
         return (
-            <Flex hAlign="center" vAlign="center" className="screen">
+            <div className="no-question">
                 <Image
                     className="create-session"
                     alt="image"
+                    styles={{ width: '17rem' }}
                     src={require('./../../web/assets/create_session.png')}
                 />
                 <Flex.Item align="center">
-                    <Text
-                        className="text-caption"
-                        content="Welcome to Ask Away! We’re glad you’re here."
-                    />
+                    <Text className="text-caption-panel" content={text} />
                 </Flex.Item>
+            </div>
+        );
+    }
+
+    private crateNewSessionLayout() {
+        return (
+            <Flex hAlign="center" vAlign="center">
+                {this.noQuestionDesign(
+                    'Welcome! Click the button below to start a new session'
+                )}
                 <Flex.Item align="center">
-                    <Button
-                        primary
-                        className="button"
-                        onClick={this.onShowTaskModule}
-                    >
-                        <Button.Content>Create an ask away</Button.Content>
+                    <Button className="button" onClick={this.onShowTaskModule}>
+                        <Button.Content>Create a new session</Button.Content>
                     </Button>
                 </Flex.Item>
             </Flex>
@@ -388,20 +318,9 @@ export class MeetingPanel extends React.Component<
             <React.Fragment>
                 {this.showMenubar(sessionTitle)}
                 <Flex hAlign="center" vAlign="center">
-                    <div className="no-question">
-                        <Image
-                            className="create-session"
-                            alt="image"
-                            styles={{ width: '17rem' }}
-                            src={require('./../../web/assets/create_session.png')}
-                        />
-                        <Flex.Item align="center">
-                            <Text
-                                className="text-caption-panel"
-                                content="Welcome! No questions posted yet. Type a question to start!"
-                            />
-                        </Flex.Item>
-                    </div>
+                    {this.noQuestionDesign(
+                        'Welcome! No questions posted yet. Type a question to start!'
+                    )}
                     <div
                         style={{
                             position: 'absolute',
