@@ -57,13 +57,6 @@ export class AskAwayTab extends msteamsReactBaseComponent<
             microsoftTeams.initialize();
             microsoftTeams.registerOnThemeChangeHandler(this.updateTheme);
             microsoftTeams.getContext((context) => {
-                this.setState({
-                    frameContext: context['frameContext'],
-                });
-                microsoftTeams.appInitialization.notifySuccess();
-                this.setState({
-                    entityId: context.entityId,
-                });
                 this.updateTheme(context.theme);
                 microsoftTeams.authentication.getAuthToken({
                     successCallback: (token: string) => {
@@ -74,6 +67,8 @@ export class AskAwayTab extends msteamsReactBaseComponent<
                         microsoftTeams.appInitialization.notifySuccess();
                         this.setState({
                             token: token,
+                            entityId: context.entityId,
+                            frameContext: context.frameContext,
                             channelId: context.channelId,
                             chatId: context.chatId,
                             userId: context.userObjectId,

@@ -52,12 +52,16 @@
         }
         .btn-create-session {
             text-align: center;
-            height: 2rem;
+            height: 32px;
             position: absolute;
             right: 2rem;
             bottom: 2rem;
-            width: 120px;
+            width: 96px;
             border-radius: 2px;
+            .ui-button__content {
+                font-size: 14px;
+                line-height: 20px;
+            }
         }
     }
     .ui-input,
