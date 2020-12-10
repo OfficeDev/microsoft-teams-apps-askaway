@@ -29,7 +29,7 @@ beforeEach(() => {
 });
 
 test("tests authenticateRequest", async () => {
-  const testUserId: string = "testUserId";
+  const testUserId = "testUserId";
   (<any>verifyAzureToken).mockImplementationOnce(() => {
     var decoded = {};
     decoded[aadObjectIdParameterConstant] = testUserId;

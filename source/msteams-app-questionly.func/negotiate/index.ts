@@ -11,7 +11,7 @@ const httpTrigger: AzureFunction = async function (
   connectionInfo: any
 ) {
   try {
-    const isAuthenticRequest: Boolean = await authenticateRequest(context, req);
+    const isAuthenticRequest = await authenticateRequest(context, req);
 
     if (isAuthenticRequest) {
       context.res.json(connectionInfo);

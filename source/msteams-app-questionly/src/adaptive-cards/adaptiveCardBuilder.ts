@@ -378,7 +378,7 @@ export const getPersonImage = async (
         index: random.int(0, 13),
     };
 
-    const avatarKey: string | undefined = await getAvatarKey();
+    const avatarKey = await getAvatarKey();
 
     if (!avatarKey)
         return `https://${process.env.HostName}/images/anon_avatar.png`;

@@ -46,7 +46,7 @@ const httpTrigger: AzureFunction = async function (
     }
 
     // Authenticate the request.
-    const isAuthenticRequest: Boolean = await authenticateRequest(context, req);
+    const isAuthenticRequest = await authenticateRequest(context, req);
 
     if (!isAuthenticRequest) {
       createUnauthorizedErrorResponse(context);
@@ -62,7 +62,7 @@ const httpTrigger: AzureFunction = async function (
     );
 
     // Check if user is part of conversation.
-    const isValidUser: Boolean = await verifyUserFromConversationId(
+    const isValidUser = await verifyUserFromConversationId(
       process.env.MicrosoftAppId,
       process.env.MicrosoftAppPassword,
       conversationId,

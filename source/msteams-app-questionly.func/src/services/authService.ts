@@ -35,7 +35,7 @@ export const getValidIssuers = (): string[] => {
     ","
   );
 
-  const tenantId: string = getTenantId();
+  const tenantId = getTenantId();
 
   validIssuers = validIssuerFromSettings.map((issuer) => {
     return issuer.replace("TENANT_ID", tenantId).trim();
@@ -71,7 +71,7 @@ export const authenticateRequest = async (
   context: Context,
   req: HttpRequest
 ): Promise<Boolean> => {
-  const token: string = req.headers[authorizationHeaderConstant];
+  const token = req.headers[authorizationHeaderConstant];
 
   if (token === null || token === undefined) {
     return false;

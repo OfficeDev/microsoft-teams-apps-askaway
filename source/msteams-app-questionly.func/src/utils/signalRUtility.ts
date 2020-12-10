@@ -9,11 +9,11 @@ import { hubName } from "../constants/signalRConstants";
 class SignalRUtility {
   private _accessKey: string;
   private _endPoint: string;
-  private _connectionStringPropertySeparator: string = ";";
-  private _connectionStringKeyValueSeparator: string = "=";
-  private _endpointProperty: string = "endpoint";
-  private _accessKeyProperty: string = "accesskey";
-  private _signalRAddToGroupRestApi: string =
+  private _connectionStringPropertySeparator = ";";
+  private _connectionStringKeyValueSeparator = "=";
+  private _endpointProperty = "endpoint";
+  private _accessKeyProperty = "accesskey";
+  private _signalRAddToGroupRestApi =
     "end_point/api/v1/hubs/hub_name/groups/group_name/connections/connection_id";
 
   /**
@@ -34,7 +34,7 @@ class SignalRUtility {
     connectionId: string,
     groupName: string
   ): Promise<void> => {
-    const restApi: string = this._signalRAddToGroupRestApi
+    const restApi = this._signalRAddToGroupRestApi
       .replace("end_point", this._endPoint)
       .replace("hub_name", hubName)
       .replace("group_name", groupName)
@@ -43,7 +43,7 @@ class SignalRUtility {
     const config: AxiosRequestConfig = axios.defaults;
     config.headers["Accept"] = "application/json";
     config.headers["Content-Type"] = "application/json";
-    const accessToken: string = this._getSignalRAccessToken(restApi);
+    const accessToken = this._getSignalRAccessToken(restApi);
     config.headers["Authorization"] = `Bearer ${accessToken}`;
 
     await axios.put(restApi, null, config);
@@ -55,7 +55,7 @@ class SignalRUtility {
    * @returns - SignalR access token.
    */
   private _getSignalRAccessToken = (restApi: string): string => {
-    const exp: number = moment(new Date()).add(5, "minute").valueOf() / 1000;
+    const exp = moment(new Date()).add(5, "minute").valueOf() / 1000;
 
     var payload: object = {
       aud: restApi,
@@ -77,15 +77,15 @@ class SignalRUtility {
     signalRConnectionString =
       signalRConnectionString ??
       process.env.AzureSignalRConnectionString.toString();
-    const signalRConnectionStringProperties: string[] = signalRConnectionString.split(
+    const signalRConnectionStringProperties = signalRConnectionString.split(
       this._connectionStringPropertySeparator
     );
 
     signalRConnectionStringProperties.forEach((property) => {
-      const keyValuePair: string[] = property.split(
+      const keyValuePair = property.split(
         this._connectionStringKeyValueSeparator
       );
-      const key: string = keyValuePair[0];
+      const key = keyValuePair[0];
 
       if (key.toLowerCase() === this._endpointProperty.toLowerCase()) {
         // Value may contain "=", we don't want to split value further.

@@ -42,11 +42,11 @@ export const requestPolicyHelper = (
         factories.push(signingPolicy(credentials));
     }
 
-    const userAgentHeaderName: string = getValueOrFunctionResult(
+    const userAgentHeaderName = getValueOrFunctionResult(
         options.userAgentHeaderName,
         getDefaultUserAgentHeaderName
     );
-    const userAgentHeaderValue: string = getValueOrFunctionResult(
+    const userAgentHeaderValue = getValueOrFunctionResult(
         options.userAgent,
         getDefaultUserAgentValue
     );

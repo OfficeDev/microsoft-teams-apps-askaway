@@ -497,7 +497,7 @@ test("get existing QnA session", async () => {
 });
 
 test("get existing QnA session not belonging to provided conversation", async () => {
-  const randomConversationId: string = "random";
+  const randomConversationId = "random";
   await qnaSessionDataService
     .isExistingQnASession(testQnASession._id, randomConversationId)
     .catch((error) => {
@@ -645,7 +645,7 @@ test("ending existing qna with a few questions", async () => {
 });
 
 test("ending qna from different conversation", async () => {
-  const randomConversationId: string = "random";
+  const randomConversationId = "random";
   await qnaSessionDataService
     .endQnASession(testQnASession._id, randomConversationId)
     .catch((error) => {
