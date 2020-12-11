@@ -45,7 +45,7 @@ export class AskAwayTabConfig extends msteamsReactBaseComponent<
                         websiteUrl:
                             host +
                             '/askAwayTab/?name={loginHint}&tenant={tid}&group={groupId}&theme={theme}',
-                        suggestedDisplayName: 'askAway Tab',
+                        suggestedDisplayName: 'AskAway',
                         removeUrl:
                             host + '/askAwayTab/remove.html?theme={theme}',
                         entityId: this.state.value,
@@ -55,10 +55,6 @@ export class AskAwayTabConfig extends msteamsReactBaseComponent<
             );
         } else {
         }
-    }
-
-    constructor(props) {
-        super(props);
     }
 
     public render() {

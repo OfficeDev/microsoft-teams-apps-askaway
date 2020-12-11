@@ -1,6 +1,7 @@
 // tslint:disable-next-line:no-relative-imports
 import './index.scss';
 import * as React from 'react';
+import { withTranslation, WithTranslation } from 'react-i18next';
 import { Flex, Text, Button, Image } from '@fluentui/react-northstar';
 import { AddIcon, RetryIcon } from '@fluentui/react-icons-northstar';
 // tslint:disable-next-line:no-relative-imports
@@ -11,12 +12,10 @@ export interface TabContentProps {
 }
 export interface TabContentState {}
 
-export class TabContent extends React.Component<
-    TabContentProps,
-    TabContentState
-> {
+class TabContent extends React.Component<TabContentProps, TabContentState> {
     constructor(props) {
         super(props);
+        console.log('props', props.t('ValueTitle'));
         this.onShowTaskModule = this.onShowTaskModule.bind(this);
     }
 
@@ -102,10 +101,8 @@ export class TabContent extends React.Component<
 
     private onShowTaskModule() {
         let taskInfo: any = {
-            // title: 'Microsoft Corporation',
             fallbackUrl: '',
             appId: process.env.MicrosoftAppId,
-            // card: this.adaptiveCardTemplate(),
             url: `https://${process.env.HostName}/askAwayTab/createsession.html`,
         };
 
@@ -146,7 +143,6 @@ export class TabContent extends React.Component<
      */
     private showAlertModel(isSuccess = false) {
         let taskInfo: any = {
-            // title: 'Microsoft Corporation',
             fallbackUrl: '',
             appID: process.env.MicrosoftAppId,
             card: isSuccess ? this.successModel() : this.failureModel(),
@@ -231,3 +227,5 @@ export class TabContent extends React.Component<
         );
     }
 }
+// tslint:disable-next-line:export-name
+export default withTranslation()(TabContent);

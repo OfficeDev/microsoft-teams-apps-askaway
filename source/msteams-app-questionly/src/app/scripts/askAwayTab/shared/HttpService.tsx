@@ -5,15 +5,15 @@ import { getBaseUrl } from './ConfigVariables';
 export class HttpService {
     /**
      * Get Method
-     * @param url
-     * @param handleError
-     * @param needAuthorizationHeader
-     * @param config
+     * @param url - `url` is the server URL that will be used for the request
+     * @param handleError - handles the failure case
+     * @param needAuthorizationHeader - to set the token in the header if it is required
+     * @param config - `config` is the config that was provided to `axios` for the request
      */
     public async get<T = any, R = AxiosResponse<T>>(
         url: string,
-        handleError: boolean = true,
-        needAuthorizationHeader: boolean = true,
+        handleError = true,
+        needAuthorizationHeader = true,
         config?: AxiosRequestConfig
     ): Promise<R> {
         try {
@@ -33,13 +33,13 @@ export class HttpService {
 
     /**
      * Delete Method
-     * @param url
-     * @param handleError
-     * @param config
+     * @param url - `url` is the server URL that will be used for the request
+     * @param handleError - handles the failure case
+     * @param config -`config` is the config that was provided to `axios` for the request
      */
     public async delete<T = any, R = AxiosResponse<T>>(
         url: string,
-        handleError: boolean = true,
+        handleError = true,
         config?: AxiosRequestConfig
     ): Promise<R> {
         try {
@@ -57,15 +57,15 @@ export class HttpService {
 
     /**
      * Post Method
-     * @param url
-     * @param data
-     * @param handleError
-     * @param config
+     * @param url - `url` is the server URL that will be used for the request
+     * @param data -`data` is the data to be sent as the request body. Only applicable for request methods 'PUT', 'POST', and 'PATCH'
+     * @param handleError - handles the failure case
+     * @param config - `config` is the config that was provided to `axios` for the request
      */
     public async post<T = any, R = AxiosResponse<T>>(
         url: string,
         data?: any,
-        handleError: boolean = true,
+        handleError = true,
         config?: AxiosRequestConfig
     ): Promise<R> {
         try {
@@ -83,15 +83,15 @@ export class HttpService {
 
     /**
      * Put Method
-     * @param url
-     * @param data
-     * @param handleError
-     * @param config
+     * @param url - `url` is the server URL that will be used for the request
+     * @param data - `data` is the data to be sent as the request body. Only applicable for request methods 'PUT', 'POST', and 'PATCH'
+     * @param handleError - handles the failure case
+     * @param config - `config` is the config that was provided to `axios` for the request
      */
     public async put<T = any, R = AxiosResponse<T>>(
         url: string,
         data?: any,
-        handleError: boolean = true,
+        handleError = true,
         config?: AxiosRequestConfig
     ): Promise<R> {
         try {

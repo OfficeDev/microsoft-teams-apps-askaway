@@ -24,7 +24,6 @@ describe('AskAwayTab Component', () => {
         const divResult = component.containsMatchingElement(
             <h3>This is react tab!</h3>
         );
-
         expect(divResult).toBeTruthy();
     });
 });

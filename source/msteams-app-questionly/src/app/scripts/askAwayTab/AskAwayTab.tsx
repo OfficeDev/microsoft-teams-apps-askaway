@@ -1,16 +1,17 @@
 // tslint:disable-next-line:no-relative-imports
 import './index.scss';
 // tslint:disable-next-line:no-relative-imports
-import { MeetingPanel } from './MeetingPanel';
+import MeetingPanel from './MeetingPanel';
 // tslint:disable-next-line:no-relative-imports
-import { TabContent } from './TabContent';
+import TabContent from './TabContent';
 import * as React from 'react';
 import { Provider } from '@fluentui/react-northstar';
 import msteamsReactBaseComponent, {
     ITeamsBaseComponentState,
 } from 'msteams-react-base-component';
 import * as microsoftTeams from '@microsoft/teams-js';
-import * as jwt from 'jsonwebtoken';
+// tslint:disable-next-line:no-relative-imports
+import i18next from './../askAwayTab/shared/i18next';
 // tslint:disable-next-line:no-relative-imports
 import { CONST } from './../askAwayTab/shared/ConfigVariables';
 /**
@@ -18,7 +19,6 @@ import { CONST } from './../askAwayTab/shared/ConfigVariables';
  */
 export interface IAskAwayTabState extends ITeamsBaseComponentState {
     entityId?: string;
-    name?: string;
     error?: string;
     token?: string;
     channelId?: string;
@@ -44,9 +44,22 @@ export class AskAwayTab extends msteamsReactBaseComponent<
     constructor(props) {
         super(props);
         microsoftTeams.initialize();
-        microsoftTeams.getContext((context) => {
-            this.setState({ teamContext: context });
-        });
+    }
+
+    public async componentWillMount() {
+        this.updateTheme(this.getQueryVariable('theme'));
+        await this.initializeTeams();
+    }
+
+    /**
+     * Get Locale Language Code
+     * @param locale - Get teams locale and set it i18next
+     */
+    private setLocaleCode(locale) {
+        if (locale) {
+            locale = locale.split('-');
+            i18next.changeLanguage(locale[0].toLowerCase());
+        }
     }
 
     /**
@@ -57,13 +70,11 @@ export class AskAwayTab extends msteamsReactBaseComponent<
             microsoftTeams.initialize();
             microsoftTeams.registerOnThemeChangeHandler(this.updateTheme);
             microsoftTeams.getContext((context) => {
+                // Set Language for Localization
+                this.setLocaleCode(context.locale);
                 this.updateTheme(context.theme);
                 microsoftTeams.authentication.getAuthToken({
                     successCallback: (token: string) => {
-                        const decoded: { [key: string]: any } = jwt.decode(
-                            token
-                        ) as { [key: string]: any };
-                        this.setState({ name: decoded!.name });
                         microsoftTeams.appInitialization.notifySuccess();
                         this.setState({
                             token: token,
@@ -72,7 +83,8 @@ export class AskAwayTab extends msteamsReactBaseComponent<
                             channelId: context.channelId,
                             chatId: context.chatId,
                             userId: context.userObjectId,
-                            meetingId: context['meetingId'],
+                            meetingId: context.meetingId,
+                            teamContext: context,
                         });
                     },
                     failureCallback: (message: string) => {
@@ -92,11 +104,6 @@ export class AskAwayTab extends msteamsReactBaseComponent<
                 entityId: 'This is not hosted in Microsoft Teams',
             });
         }
-    }
-
-    public async componentWillMount() {
-        this.updateTheme(this.getQueryVariable('theme'));
-        await this.initializeTeams();
     }
 
     /**

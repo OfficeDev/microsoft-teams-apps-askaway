@@ -1,6 +1,7 @@
 // tslint:disable-next-line:no-relative-imports
 import './index.scss';
 import * as React from 'react';
+import { withTranslation, WithTranslation } from 'react-i18next';
 // tslint:disable-next-line:no-relative-imports
 import HttpService from './shared/HttpService';
 import * as microsoftTeams from '@microsoft/teams-js';
@@ -9,9 +10,7 @@ import {
     Text,
     Button,
     Image,
-    Form,
     Input,
-    TextArea,
     FlexItem,
     SendIcon,
     Loader,
@@ -43,7 +42,7 @@ export interface MeetingPanelState {
     };
 }
 
-export class MeetingPanel extends React.Component<
+class MeetingPanel extends React.Component<
     MeetingPanelProps,
     MeetingPanelState
 > {
@@ -88,6 +87,9 @@ export class MeetingPanel extends React.Component<
             });
     }
 
+    /**
+     * Display Create AMA session form
+     */
     private onShowTaskModule() {
         let taskInfo: any = {
             // title: 'Microsoft Corporation',
@@ -135,9 +137,11 @@ export class MeetingPanel extends React.Component<
         microsoftTeams.tasks.startTask(taskInfo, submitHandler);
     }
 
+    /**
+     * Display's success and failure screens for AMA session
+     */
     private showAlertModel(isSuccess = false) {
         let taskInfo: any = {
-            // title: 'Microsoft Corporation',
             fallbackUrl: '',
             appID: process.env.MicrosoftAppId,
             card: isSuccess ? this.successModel() : this.failureModel(),
@@ -148,6 +152,9 @@ export class MeetingPanel extends React.Component<
         microsoftTeams.tasks.startTask(taskInfo, submitHandler);
     }
 
+    /**
+     * Display's success screen when AMA session is successfully created
+     */
     private successModel() {
         return {
             $schema: 'https://adaptivecards.io/schemas/adaptive-card.json',
@@ -178,6 +185,9 @@ export class MeetingPanel extends React.Component<
         };
     }
 
+    /**
+     * display's failure screen when creating AMA session is unsuccessful
+     */
     private failureModel() {
         return {
             $schema: 'https://adaptivecards.io/schemas/adaptive-card.json',
@@ -216,6 +226,9 @@ export class MeetingPanel extends React.Component<
         };
     }
 
+    /**
+     * Show this screen when no questions posted
+     */
     private noQuestionDesign(text) {
         return (
             <div className="no-question">
@@ -232,6 +245,9 @@ export class MeetingPanel extends React.Component<
         );
     }
 
+    /**
+     * Landing page for meeting panel
+     */
     private crateNewSessionLayout() {
         return (
             <Flex hAlign="center" vAlign="center">
@@ -287,7 +303,6 @@ export class MeetingPanel extends React.Component<
                     styles={{
                         fontSize: '18px',
                         lineHeight: '21px',
-                        color: '#ffffff',
                     }}
                     content={sessionTitle}
                     size="medium"
@@ -330,7 +345,6 @@ export class MeetingPanel extends React.Component<
                     >
                         <Input
                             fluid
-                            as="div"
                             placeholder="Type a question here"
                             icon={<SendIcon />}
                         />
@@ -361,3 +375,6 @@ export class MeetingPanel extends React.Component<
         );
     }
 }
+
+// tslint:disable-next-line:export-name
+export default withTranslation()(MeetingPanel);

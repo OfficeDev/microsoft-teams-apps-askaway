@@ -55,13 +55,13 @@ export class CreateSession extends msteamsReactBaseComponent<
 
     /**
      * Append the value to Input Fields
-     * @param e
-     * @param key
+     * @param e - event
+     * @param key - state key value
      */
     private appendInput = (e, key) => {
-        const i = this.state;
-        i.input[key] = e.target.value;
-        this.setState(i);
+        const inputValues = this.state;
+        inputValues.input[key] = e.target.value;
+        this.setState(inputValues);
     };
 
     /**
@@ -106,15 +106,6 @@ export class CreateSession extends msteamsReactBaseComponent<
     private showCreateSessionForm() {
         return (
             <Flex column>
-                {/* <Text
-                    styles={{
-                        fontSize: '14px',
-                        lineHeight: '20px',
-                        color: '#ffffff',
-                    }}
-                    content="Create a new session"
-                    size="medium"
-                /> */}
                 <Form
                     // tslint:disable-next-line:react-this-binding-issue
                     onSubmit={(e) => this.onSubmitCreateSession(e)}

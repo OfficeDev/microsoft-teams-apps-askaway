@@ -4,6 +4,7 @@
 
 import * as React from 'react';
 import { shallow, configure } from 'enzyme';
+import { Text } from '@fluentui/react-northstar';
 import enzymeToJson from 'enzyme-to-json';
 // tslint:disable-next-line:no-relative-imports
 import { AskAwayTabConfig } from '../AskAwayTabConfig';
@@ -22,7 +23,7 @@ describe('AskAwayTabConfig Component', () => {
     it('should render the tab', () => {
         const component = shallow(<AskAwayTabConfig />);
         const divResult = component.containsMatchingElement(
-            <h3>Please click Save to get started!</h3>
+            <Text content="Select save to finish adding ask away to the meeting" />
         );
 
         expect(divResult).toBeTruthy();
