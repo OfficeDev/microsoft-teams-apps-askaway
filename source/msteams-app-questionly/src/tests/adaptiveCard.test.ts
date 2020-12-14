@@ -838,8 +838,8 @@ describe('main card', () => {
         );
         const mainCardData = extractMainCardData(result);
 
-        expect(mainCardData.isOk()).toBe(true);
-        expect(mainCardData.value).toEqual(result.msTeams.entities[0].data);
+        expect(mainCardData).toBeDefined();
+        expect(mainCardData).toEqual(result.msTeams.entities[0].data);
     });
 
     describe('recently asked questions string', () => {

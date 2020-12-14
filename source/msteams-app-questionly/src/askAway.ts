@@ -27,7 +27,6 @@ import { exceptionLogger } from 'src/util/exceptionTracking';
 import { IConversationDataService } from 'msteams-app-questionly.data';
 import { ConversationType } from 'src/enums/ConversationType';
 import { getMeetingIdFromContext } from 'src/util/meetingsUtility';
-import { Result, err, ok } from 'src/util/resultWrapper';
 
 const NULL_RESPONSE: any = null;
 /**
@@ -134,7 +133,9 @@ export class AskAway extends TeamsActivityHandler {
                     taskModuleRequest.data.qnaSessionId,
                     context.activity.conversation.id
                 );
-                if (result.isErr()) return result.value;
+                if (!result.isConversationIdValid && result.errorCard) {
+                    return result.errorCard;
+                }
             }
         } catch (error) {
             exceptionLogger(
@@ -173,8 +174,8 @@ export class AskAway extends TeamsActivityHandler {
                     taskModuleRequest.data.qnaSessionId,
                     context.activity.conversation.id
                 );
-                if (result.isErr()) {
-                    return result.value;
+                if (!result.isConversationIdValid && result.errorCard) {
+                    return result.errorCard;
                 }
             }
         } catch (error) {
@@ -239,22 +240,24 @@ export class AskAway extends TeamsActivityHandler {
         }
         ================================================================================================================================*/
 
-        const leaderboard = await controller.generateLeaderboard(
-            taskModuleRequest.data.qnaSessionId,
-            <string>context.activity.from.aadObjectId,
-            taskModuleRequest.context
-                ? <string>taskModuleRequest.context.theme
-                : 'default'
-        );
-
-        return leaderboard.isOk()
-            ? this._buildTaskModuleContinueResponse(
-                  leaderboard.value,
-                  leaderboardStrings('taskModuleTitle')
-              )
-            : this._buildTaskModuleContinueResponse(
-                  controller.getErrorCard(errorStrings('leaderboard'))
-              );
+        try {
+            const leaderboard = await controller.generateLeaderboard(
+                taskModuleRequest.data.qnaSessionId,
+                <string>context.activity.from.aadObjectId,
+                taskModuleRequest.context
+                    ? <string>taskModuleRequest.context.theme
+                    : 'default'
+            );
+            return this._buildTaskModuleContinueResponse(
+                leaderboard,
+                leaderboardStrings('taskModuleTitle')
+            );
+        } catch (error) {
+            exceptionLogger(error);
+            return this._buildTaskModuleContinueResponse(
+                controller.getErrorCard(errorStrings('leaderboard'))
+            );
+        }
     };
 
     private async handleTeamsTaskModuleFetchAskQuestion(
@@ -297,23 +300,25 @@ export class AskAway extends TeamsActivityHandler {
         const userName = user.name;
         const questionContent = <string>taskModuleRequest.data.usertext;
 
-        if (questionContent == null || questionContent.trim() === '')
+        if (questionContent == null || questionContent.trim() === '') {
             return this.handleTeamsTaskModuleResubmitQuestion(qnaSessionId, '');
+        }
 
-        const status = await controller.submitNewQuestion(
-            qnaSessionId,
-            userAADObjId,
-            userName,
-            questionContent,
-            context.activity.conversation.id
-        );
-
-        if (!status.isOk())
+        try {
+            await controller.submitNewQuestion(
+                qnaSessionId,
+                userAADObjId,
+                userName,
+                questionContent,
+                context.activity.conversation.id
+            );
+        } catch (error) {
+            exceptionLogger(error);
             return this.handleTeamsTaskModuleResubmitQuestion(
                 qnaSessionId,
                 questionContent
             );
-
+        }
         return NULL_RESPONSE;
     }
 
@@ -321,22 +326,25 @@ export class AskAway extends TeamsActivityHandler {
         context: TurnContext,
         taskModuleRequest: TaskModuleRequest
     ): Promise<TaskModuleResponse> => {
-        const updatedLeaderboard = await controller.updateUpvote(
-            taskModuleRequest.data.qnaSessionId,
-            taskModuleRequest.data.questionId,
-            <string>context.activity.from.aadObjectId,
-            context.activity.from.name,
-            context.activity.conversation.id,
-            taskModuleRequest.context
-                ? <string>taskModuleRequest.context.theme
-                : 'default'
-        );
+        try {
+            const updatedLeaderboard = await controller.updateUpvote(
+                taskModuleRequest.data.qnaSessionId,
+                taskModuleRequest.data.questionId,
+                <string>context.activity.from.aadObjectId,
+                context.activity.from.name,
+                context.activity.conversation.id,
+                taskModuleRequest.context
+                    ? <string>taskModuleRequest.context.theme
+                    : 'default'
+            );
 
-        return updatedLeaderboard.isOk()
-            ? this._buildTaskModuleContinueResponse(updatedLeaderboard.value)
-            : this._buildTaskModuleContinueResponse(
-                  controller.getErrorCard(errorStrings('upvoting'))
-              );
+            return this._buildTaskModuleContinueResponse(updatedLeaderboard);
+        } catch (error) {
+            exceptionLogger(error);
+            return this._buildTaskModuleContinueResponse(
+                controller.getErrorCard(errorStrings('upvoting'))
+            );
+        }
     };
 
     private async handleTeamsTaskModuleSubmitConfirmEndQnA(
@@ -457,12 +465,10 @@ export class AskAway extends TeamsActivityHandler {
         );
         let cardData: Partial<MainCardData>;
 
-        if (cardDataResponse.isOk()) cardData = cardDataResponse.value;
+        if (cardDataResponse) cardData = cardDataResponse;
         else {
             exceptionLogger(
-                new Error(
-                    'Unable to extract maincard data' + cardDataResponse.value
-                )
+                new Error('Unable to extract maincard data' + cardDataResponse)
             );
             cardData = { title: '', description: '' };
         }
@@ -488,14 +494,12 @@ export class AskAway extends TeamsActivityHandler {
             // true if conversation is a reply chain
             context.activity.conversation.id = conversationId.split(';')[0];
 
-        if (cardDataResponse.isOk()) cardData = cardDataResponse.value;
+        if (cardDataResponse) cardData = cardDataResponse;
         else {
             // this error will create a broken experience for the user and so
             // the QnA session will not be created.
             exceptionLogger(
-                new Error(
-                    'Unable to extract maincard data' + cardDataResponse.value
-                )
+                new Error('Unable to extract maincard data' + cardDataResponse)
             );
             return NULL_RESPONSE;
         }
@@ -624,12 +628,12 @@ export class AskAway extends TeamsActivityHandler {
 
     private _extractMainCardFromActivityPreview = (
         action: MessagingExtensionAction
-    ): Result<MainCardData, null> => {
+    ): MainCardData | null => {
         if (
             !action.botActivityPreview ||
             !action.botActivityPreview[0].attachments
         )
-            return err(null);
+            return null;
         const attachments = action.botActivityPreview[0].attachments;
         return extractMainCardData(attachments[0].content);
     };
@@ -637,30 +641,38 @@ export class AskAway extends TeamsActivityHandler {
     private _checkConversationValid = async (
         qnaSessionId: string,
         conversationId: string
-    ): Promise<Result<boolean, TaskModuleResponse>> => {
-        const conversationIdValid = await controller.validateConversationId(
-            qnaSessionId,
-            conversationId
-        );
+    ): Promise<{
+        isConversationIdValid: boolean;
+        errorCard: TaskModuleResponse | undefined;
+    }> => {
+        try {
+            const conversationIdValid = await controller.validateConversationId(
+                qnaSessionId,
+                conversationId
+            );
 
-        if (conversationIdValid.isOk()) {
-            if (!conversationIdValid.value)
-                return err(
-                    this._buildTaskModuleContinueResponse(
+            if (!conversationIdValid) {
+                return {
+                    isConversationIdValid: false,
+                    errorCard: this._buildTaskModuleContinueResponse(
                         controller.getErrorCard(
                             errorStrings('conversationInvalid')
                         )
-                    )
-                );
-        } else {
-            return err(
-                this._buildTaskModuleContinueResponse(
+                    ),
+                };
+            }
+        } catch (error) {
+            exceptionLogger(error);
+            return {
+                isConversationIdValid: false,
+                errorCard: this._buildTaskModuleContinueResponse(
                     controller.getErrorCard(errorStrings('taskSubmit'))
-                )
-            );
+                ),
+            };
         }
-
-        // conversation id valid
-        return ok(true);
+        return {
+            isConversationIdValid: true,
+            errorCard: undefined,
+        };
     };
 }

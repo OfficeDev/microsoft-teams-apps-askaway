@@ -175,11 +175,7 @@ router.post(
                 conversationId
             );
 
-            if (result.isOk()) {
-                response = { questionId: result.value._id };
-            } else {
-                throw result.value;
-            }
+            response = { questionId: result._id };
         } catch (err) {
             exceptionLogger(err);
             res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(err.message);
