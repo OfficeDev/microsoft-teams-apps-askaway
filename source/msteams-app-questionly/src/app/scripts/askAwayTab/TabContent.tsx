@@ -3,6 +3,7 @@ import './index.scss';
 import * as React from 'react';
 import { withTranslation, WithTranslation } from 'react-i18next';
 import { Flex, Text, Button, Image } from '@fluentui/react-northstar';
+import { SwitchIcon } from './../askAwayTab/shared/Icons/SwitchIcon';
 import { AddIcon, RetryIcon } from '@fluentui/react-icons-northstar';
 // tslint:disable-next-line:no-relative-imports
 import HttpService from './shared/HttpService';
@@ -197,15 +198,12 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                         <RetryIcon xSpacing="after" />
                         <Button.Content>Refresh</Button.Content>
                     </Button>
-                    <Button icon text>
+                    <Button text>
                         <AddIcon outline xSpacing="after" />
                         <Button.Content>Create a new session</Button.Content>
                     </Button>
                     <Button text>
-                        <Image
-                            alt="image"
-                            src={require('./../../web/assets/switch.png')}
-                        />
+                        <SwitchIcon outline xSpacing="after" />
                         <Button.Content>
                             Switch to different sessions
                         </Button.Content>
