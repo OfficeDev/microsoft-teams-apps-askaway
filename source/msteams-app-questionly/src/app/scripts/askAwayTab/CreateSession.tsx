@@ -186,7 +186,7 @@ export class CreateSession extends msteamsReactBaseComponent<
         return (
             <Provider theme={this.state.theme}>
                 <React.Fragment>
-                    <div style={{ padding: '1rem 2rem' }}>
+                    <div className="create-session-form">
                         {this.showCreateSessionForm()}
                     </div>
                 </React.Fragment>
