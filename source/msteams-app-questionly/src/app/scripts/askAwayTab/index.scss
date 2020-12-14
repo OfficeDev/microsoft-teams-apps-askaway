@@ -1,0 +1,103 @@
+.screen {
+    background-color: #f3f2f1;
+    .askaway-tab-added {
+        top: 30%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        position: absolute;
+    }
+    .create-session {
+        top: 30%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        position: absolute;
+    }
+    .text-configtab-caption {
+        font-size: 18px;
+        line-height: 24px;
+        color: #252423;
+        font-weight: bold;
+        top: 55%;
+        position: absolute;
+    }
+    .text-caption {
+        font-size: 18px;
+        line-height: 24px;
+        color: #252423;
+        font-weight: bold;
+        top: 52%;
+        position: absolute;
+    }
+    .text-subcaption {
+        font-size: 14px;
+        line-height: 20px;
+        color: #000000;
+        top: 58%;
+        position: absolute;
+    }
+    .button {
+        top: 67%;
+        position: absolute;
+    }
+}
+.sidepanel-form {
+    display: flex;
+    flex-direction: column;
+    .form-grid {
+        margin-top: 0.5rem;
+        margin-bottom: 0rem;
+        span {
+            font-size: 12px;
+            line-height: 16px;
+        }
+        .btn-create-session {
+            text-align: center;
+            height: 32px;
+            position: absolute;
+            right: 2rem;
+            bottom: 2rem;
+            width: 96px;
+            border-radius: 2px;
+            .ui-button__content {
+                font-size: 14px;
+                line-height: 20px;
+            }
+        }
+    }
+    .ui-input,
+    .ui-textarea {
+        margin-top: 0.25rem;
+        font-size: 14px;
+    }
+}
+.meeting-panel {
+    .button {
+        top: 67%;
+        position: absolute;
+    }
+    .no-question {
+        .text-caption-panel {
+            font-size: 12px;
+            line-height: 16px;
+            top: 52%;
+            position: absolute;
+            text-align: center;
+            width: 70%;
+            left: 17%;
+        }
+        .create-session {
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            position: absolute;
+        }
+    }
+    .menuHeader {
+        svg {
+            fill: #ffffff;
+        }
+        .ui-menu__item__submenu {
+            border: none;
+        }
+    }
+}
