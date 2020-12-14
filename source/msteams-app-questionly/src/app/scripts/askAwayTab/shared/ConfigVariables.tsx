@@ -5,6 +5,8 @@ export const getBaseUrl = (): string => {
 
 // [Constant Values]
 export const CONST = Object.freeze({
-    FC_SIDEPANEL: 'sidePanel',
-    FC_CONTENT: 'content',
+    TAB_FRAME_CONTEXT: {
+        FC_SIDEPANEL: 'sidePanel',
+        FC_CONTENT: 'content',
+    },
 });
