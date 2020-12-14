@@ -1,6 +1,8 @@
 // tslint:disable-next-line:no-relative-imports
 import './index.scss';
 // tslint:disable-next-line:no-relative-imports
+import Helper from './shared/Helper';
+// tslint:disable-next-line:no-relative-imports
 import MeetingPanel from './MeetingPanel';
 // tslint:disable-next-line:no-relative-imports
 import TabContent from './TabContent';
@@ -32,6 +34,7 @@ export interface IAskAwayTabState extends ITeamsBaseComponentState {
 /**
  * Properties for the askAwayTabTab React component
  */
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IAskAwayTabProps {}
 
 /**
@@ -52,17 +55,6 @@ export class AskAwayTab extends msteamsReactBaseComponent<
     }
 
     /**
-     * Get Locale Language Code
-     * @param locale - Get teams locale and set it i18next
-     */
-    private setLocaleCode(locale) {
-        if (locale) {
-            locale = locale.split('-');
-            i18next.changeLanguage(locale[0].toLowerCase());
-        }
-    }
-
-    /**
      * Initialize teams plugin
      */
     async initializeTeams() {
@@ -71,7 +63,7 @@ export class AskAwayTab extends msteamsReactBaseComponent<
             microsoftTeams.registerOnThemeChangeHandler(this.updateTheme);
             microsoftTeams.getContext((context) => {
                 // Set Language for Localization
-                this.setLocaleCode(context.locale);
+                Helper.setI18nextLocale(i18next, context.locale);
                 this.updateTheme(context.theme);
                 microsoftTeams.authentication.getAuthToken({
                     successCallback: (token: string) => {
@@ -112,10 +104,12 @@ export class AskAwayTab extends msteamsReactBaseComponent<
     public render() {
         return (
             <Provider theme={this.state.theme}>
-                {this.state.frameContext === CONST.FC_SIDEPANEL && (
+                {this.state.frameContext ===
+                    CONST.TAB_FRAME_CONTEXT.FC_SIDEPANEL && (
                     <MeetingPanel teamsData={this.state.teamContext} />
                 )}
-                {this.state.frameContext === CONST.FC_CONTENT && (
+                {this.state.frameContext ===
+                    CONST.TAB_FRAME_CONTEXT.FC_CONTENT && (
                     <TabContent teamsData={this.state.teamContext} />
                 )}
             </Provider>
