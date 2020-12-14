@@ -1,7 +1,7 @@
 // tslint:disable-next-line:no-relative-imports
 import './index.scss';
+// tslint:disable-next-line:no-relative-imports
 import * as React from 'react';
-import { withTranslation, WithTranslation } from 'react-i18next';
 // tslint:disable-next-line:no-relative-imports
 import HttpService from './shared/HttpService';
 import * as microsoftTeams from '@microsoft/teams-js';
@@ -41,7 +41,6 @@ export interface MeetingPanelState {
         isDescription: boolean;
     };
 }
-
 class MeetingPanel extends React.Component<
     MeetingPanelProps,
     MeetingPanelState
@@ -92,11 +91,9 @@ class MeetingPanel extends React.Component<
      */
     private onShowTaskModule() {
         let taskInfo: any = {
-            // title: 'Microsoft Corporation',
             fallbackUrl: '',
             appId: process.env.MicrosoftAppId,
-            // card: this.adaptiveCardTemplate(),
-            url: `https://${process.env.HostName}/askAwayTab/createsession.html?theme=${this.props.teamsData.theme}`,
+            url: `https://${process.env.HostName}/askAwayTab/createsession.html?theme=${this.props.teamsData.theme}&locale=${this.props.teamsData.locale}`,
         };
 
         let submitHandler = (err: any, result: any) => {
@@ -146,10 +143,7 @@ class MeetingPanel extends React.Component<
             appID: process.env.MicrosoftAppId,
             card: isSuccess ? this.successModel() : this.failureModel(),
         };
-
-        let submitHandler = (err: any, result: any) => {};
-
-        microsoftTeams.tasks.startTask(taskInfo, submitHandler);
+        microsoftTeams.tasks.startTask(taskInfo);
     }
 
     /**
@@ -375,6 +369,4 @@ class MeetingPanel extends React.Component<
         );
     }
 }
-
-// tslint:disable-next-line:export-name
-export default withTranslation()(MeetingPanel);
+export default MeetingPanel;
