@@ -155,7 +155,7 @@ export const setActivityId = async (
         await qnaSessionDataService.updateActivityId(qnaSessionId, activityId);
     } catch (error) {
         exceptionLogger(error);
-        throw new Error(error);
+        throw error;
     }
 };
 

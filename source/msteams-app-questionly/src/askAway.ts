@@ -129,12 +129,16 @@ export class AskAway extends TeamsActivityHandler {
         // following if statement.
         try {
             if (process.env.debugMode !== 'true') {
-                const result = await this._checkConversationValid(
+                const conversationIdValid = await controller.validateConversationId(
                     taskModuleRequest.data.qnaSessionId,
                     context.activity.conversation.id
                 );
-                if (!result.isConversationIdValid && result.errorCard) {
-                    return result.errorCard;
+                if (!conversationIdValid) {
+                    return this._buildTaskModuleContinueResponse(
+                        controller.getErrorCard(
+                            errorStrings('conversationInvalid')
+                        )
+                    );
                 }
             }
         } catch (error) {
@@ -170,12 +174,16 @@ export class AskAway extends TeamsActivityHandler {
         // following if statement.
         try {
             if (process.env.debugMode !== 'true') {
-                const result = await this._checkConversationValid(
+                const conversationIdValid = await controller.validateConversationId(
                     taskModuleRequest.data.qnaSessionId,
                     context.activity.conversation.id
                 );
-                if (!result.isConversationIdValid && result.errorCard) {
-                    return result.errorCard;
+                if (!conversationIdValid) {
+                    return this._buildTaskModuleContinueResponse(
+                        controller.getErrorCard(
+                            errorStrings('conversationInvalid')
+                        )
+                    );
                 }
             }
         } catch (error) {
@@ -632,47 +640,11 @@ export class AskAway extends TeamsActivityHandler {
         if (
             !action.botActivityPreview ||
             !action.botActivityPreview[0].attachments
-        )
+        ) {
             return null;
+        }
+
         const attachments = action.botActivityPreview[0].attachments;
         return extractMainCardData(attachments[0].content);
-    };
-
-    private _checkConversationValid = async (
-        qnaSessionId: string,
-        conversationId: string
-    ): Promise<{
-        isConversationIdValid: boolean;
-        errorCard: TaskModuleResponse | undefined;
-    }> => {
-        try {
-            const conversationIdValid = await controller.validateConversationId(
-                qnaSessionId,
-                conversationId
-            );
-
-            if (!conversationIdValid) {
-                return {
-                    isConversationIdValid: false,
-                    errorCard: this._buildTaskModuleContinueResponse(
-                        controller.getErrorCard(
-                            errorStrings('conversationInvalid')
-                        )
-                    ),
-                };
-            }
-        } catch (error) {
-            exceptionLogger(error);
-            return {
-                isConversationIdValid: false,
-                errorCard: this._buildTaskModuleContinueResponse(
-                    controller.getErrorCard(errorStrings('taskSubmit'))
-                ),
-            };
-        }
-        return {
-            isConversationIdValid: true,
-            errorCard: undefined,
-        };
     };
 }
