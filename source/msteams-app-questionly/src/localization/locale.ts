@@ -1,5 +1,5 @@
 import i18next from 'i18next';
-import * as enStrings from 'src/localization/resources/en.json';
+import enStrings from 'src/localization/resources/en.json';
 import { exceptionLogger } from 'src/util/exceptionTracking';
 
 export interface Strings {
@@ -81,7 +81,10 @@ export interface StartQnA {
     taskModuleTitleEdit: string;
 }
 
-export const initLocalization = (testing = false, testStrings?: Strings) => {
+export const initLocalization = async (
+    testing = false,
+    testStrings?: Strings
+) => {
     const config = {
         language: process.env.Language ? process.env.Language : 'en',
         fallbackLanguage: process.env.FallbackLanguage
@@ -121,7 +124,7 @@ export const initLocalization = (testing = false, testStrings?: Strings) => {
         };
 
     // Setup localization
-    return i18next.init({
+    await i18next.init({
         lng: testStrings ? 'test' : config.language,
         fallbackLng: config.fallbackLanguage,
         debug: config.debug,
