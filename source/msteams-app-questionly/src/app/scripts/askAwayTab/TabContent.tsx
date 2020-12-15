@@ -5,11 +5,14 @@ import { withTranslation, WithTranslation } from 'react-i18next';
 import { Flex, Text, Button, Image } from '@fluentui/react-northstar';
 import { SwitchIcon } from './../askAwayTab/shared/Icons/SwitchIcon';
 import { AddIcon, RetryIcon } from '@fluentui/react-icons-northstar';
-// tslint:disable-next-line:no-relative-imports
-import HttpService from './shared/HttpService';
 import * as microsoftTeams from '@microsoft/teams-js';
+import { ApplicationInsights } from '@microsoft/applicationinsights-web';
+import { HttpService } from './shared/HttpService';
+
 export interface TabContentProps {
     teamsData: any;
+    httpService: HttpService;
+    appInsights: ApplicationInsights;
 }
 export interface TabContentState {}
 
@@ -25,11 +28,12 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
     }
 
     private getActiveSession() {
-        HttpService.get(
-            `/conversations/${this.props.teamsData.chatId}/activesessions`
-        )
+        this.props.httpService
+            .get(`/conversations/${this.props.teamsData.chatId}/activesessions`)
             .then((response: any) => {})
-            .catch((error) => {});
+            .catch((error) => {
+                // TODO: handle this gracefully.
+            });
     }
 
     private successModel() {
@@ -115,10 +119,11 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                     scopeId: this.props.teamsData.chatId,
                     isChannel: false,
                 };
-                HttpService.post(
-                    `/conversations/${this.props.teamsData.chatId}/sessions`,
-                    createSessionData
-                )
+                this.props.httpService
+                    .post(
+                        `/conversations/${this.props.teamsData.chatId}/sessions`,
+                        createSessionData
+                    )
                     .then((response: any) => {
                         if (
                             response &&
