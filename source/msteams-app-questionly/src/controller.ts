@@ -2,7 +2,7 @@
 import * as adaptiveCardBuilder from 'src/adaptive-cards/adaptiveCardBuilder'; // To populate adaptive cards
 import { ok, err, Result } from 'src/util/resultWrapper';
 import { AdaptiveCard } from 'adaptivecards';
-import { exceptionLogger } from 'src/util/exceptionTracking';
+import { exceptionLogger, trackCreateQnASessionEvent } from 'src/util/exceptionTracking';
 import jimp from 'jimp';
 import { join } from 'path';
 import {
@@ -101,6 +101,14 @@ export const startQnASession = async (
         hostUserId,
         isChannel
     );
+
+    trackCreateQnASessionEvent({
+        qnaSessionId: response._id,
+        tenantId: tenantId,
+        hostUserId: hostUserId,
+        isChannel: isChannel,
+        meetingId: meetingId,
+    });
 
     await triggerBackgroundJobForQnaSessionCreatedEvent(response);
 
