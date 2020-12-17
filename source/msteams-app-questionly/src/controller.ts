@@ -2,7 +2,7 @@
 import * as adaptiveCardBuilder from 'src/adaptive-cards/adaptiveCardBuilder'; // To populate adaptive cards
 import { ok, err, Result } from 'src/util/resultWrapper';
 import { AdaptiveCard } from 'adaptivecards';
-import { exceptionLogger, trackCreateQnASessionEvent } from 'src/util/exceptionTracking';
+import { exceptionLogger, trackCreateQnASessionEvent, trackCreateQuestionEvent } from 'src/util/exceptionTracking';
 import jimp from 'jimp';
 import { join } from 'path';
 import {
@@ -108,6 +108,7 @@ export const startQnASession = async (
         hostUserId: hostUserId,
         isChannel: isChannel,
         meetingId: meetingId,
+        conversationId: conversationId
     });
 
     await triggerBackgroundJobForQnaSessionCreatedEvent(response);
@@ -208,6 +209,12 @@ export const submitNewQuestion = async (
             questionContent,
             conversationId
         );
+
+        trackCreateQuestionEvent({
+            questionId: question._id,
+            qnaSessionId: qnaSessionId,
+            conversationId: conversationId
+        });
 
         triggerBackgroundJobForQuestionPostedEvent(
             conversationId,

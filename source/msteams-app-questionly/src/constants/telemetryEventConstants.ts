@@ -6,3 +6,8 @@
  * Create a QnA session event
  */
 export const CreateQnASessionEvent = 'CreateQnASession';
+
+/**
+ * Create question event
+ */
+export const CreateQuestionEvent = 'CreateQuestion';
