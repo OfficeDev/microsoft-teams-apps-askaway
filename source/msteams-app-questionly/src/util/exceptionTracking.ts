@@ -1,5 +1,5 @@
 import * as appInsights from 'applicationinsights';
-import { CreateQnASessionEvent, CreateQuestionEvent } from 'src/constants/telemetryEventConstants';
+import { TelemetryEvents } from 'src/constants/telemetryEventConstants';
 import { getApplicationInsightsInstrumentationKeyURI } from 'src/util/keyvault';
 
 export let aiClient;
@@ -33,19 +33,19 @@ export const exceptionLogger = (error: Error | string) => {
     }
 };
 
-export const trackCreateQnASessionEvent = (properties: any) => {
+export const trackCreateQnASessionEvent = (properties: { [key: string]: any }) => {
     if (process.env.debugMode !== 'true') {
         aiClient.trackEvent({
-            name: CreateQnASessionEvent,
+            name: TelemetryEvents.CreateQnASessionEvent,
             properties: properties
         });
     }
 };
 
-export const trackCreateQuestionEvent = (properties: any) => {
+export const trackCreateQuestionEvent = (properties: { [key: string]: any }) => {
     if (process.env.debugMode !== 'true') {
         aiClient.trackEvent({
-            name: CreateQuestionEvent,
+            name: TelemetryEvents.CreateQuestionEvent,
             properties: properties
         });
     }

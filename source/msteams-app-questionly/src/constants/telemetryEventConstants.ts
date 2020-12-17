@@ -1,13 +1,7 @@
 /**
- * This file contains list of all events that are logged at server-side.
+ * List of events that are logged at server-side.
  */
-
-/**
- * Create a QnA session event
- */
-export const CreateQnASessionEvent = 'CreateQnASession';
-
-/**
- * Create question event
- */
-export const CreateQuestionEvent = 'CreateQuestion';
+export const TelemetryEvents = {
+    CreateQnASessionEvent: 'QnASessionCreated',
+    CreateQuestionEvent: 'QuestionCreated'
+}

@@ -103,7 +103,7 @@ export const startQnASession = async (
     );
 
     trackCreateQnASessionEvent({
-        qnaSessionId: response._id,
+        qnaSessionId: response?._id,
         tenantId: tenantId,
         hostUserId: hostUserId,
         isChannel: isChannel,
@@ -211,9 +211,10 @@ export const submitNewQuestion = async (
         );
 
         trackCreateQuestionEvent({
-            questionId: question._id,
+            questionId: question?._id,
             qnaSessionId: qnaSessionId,
-            conversationId: conversationId
+            conversationId: conversationId,
+            userAadObjId: userAadObjId,
         });
 
         triggerBackgroundJobForQuestionPostedEvent(
