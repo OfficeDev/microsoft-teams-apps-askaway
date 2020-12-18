@@ -71,13 +71,13 @@ export const authenticateRequest = async (
   context: Context,
   req: HttpRequest
 ): Promise<Boolean> => {
-  const token = req.headers[authorizationHeaderConstant];
+  const token = req.query[authorizationHeaderConstant];
 
-  if (token === null || token === undefined) {
+  if (!token) {
     return false;
   }
 
-  const options: VerifyOptions = getVerifyOptions();
+  const options = getVerifyOptions();
 
   try {
     const decoded = await verifyAzureToken(token, options);

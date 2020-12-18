@@ -19,7 +19,6 @@ export interface TabContentState {}
 class TabContent extends React.Component<TabContentProps, TabContentState> {
     constructor(props) {
         super(props);
-        console.log('props', props.t('ValueTitle'));
         this.onShowTaskModule = this.onShowTaskModule.bind(this);
     }
 

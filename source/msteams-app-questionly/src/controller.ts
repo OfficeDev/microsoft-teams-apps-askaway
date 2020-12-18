@@ -10,9 +10,13 @@ import {
     qnaSessionDataService,
     questionDataService,
     IQnASession_populated,
+    IConversation,
 } from 'msteams-app-questionly.data';
 import { isPresenterOrOrganizer } from 'src/util/meetingsUtility';
-import { InsufficientPermissionsToCreateOrEndQnASessionError } from 'src/errors/insufficientPermissionsToCreateOrEndQnASessionError';
+import {
+    UnauthorizedAccessError,
+    UnauthorizedAccessErrorCode,
+} from 'src/errors/unauthorizedAccessError';
 import {
     triggerBackgroundJobForQnaSessionCreatedEvent,
     triggerBackgroundJobForQnaSessionEndedEvent,
@@ -81,8 +85,8 @@ export const startQnASession = async (
                 serviceURL
             ))
         ) {
-            throw new InsufficientPermissionsToCreateOrEndQnASessionError(
-                'Only a Presenter or an Organizer can create new QnA Session.'
+            throw new UnauthorizedAccessError(
+                UnauthorizedAccessErrorCode.InsufficientPermissionsToCreateOrEndQnASession
             );
         }
     }
@@ -209,29 +213,44 @@ export const submitNewQuestion = async (
 
 /**
  * Marks question as answered and triggers background job.
- * @param conversationId - conversation id.
+ * @param conversationData - conversation document.
+ * @param meetingId - meeting id.
  * @param qnaSessionId - qnasession id.
  * @param questionId - question id.
  * @param aadObjectId - aad object id of user who marked question as answered.
  */
 export const markQuestionAsAnswered = async (
-    conversationId: string,
+    conversationData: IConversation,
+    meetingId: string,
     qnaSessionId: string,
     questionId: string,
     aadObjectId: string
 ) => {
-    await questionDataService.markQuestionAsAnswered(
-        conversationId,
-        qnaSessionId,
-        questionId
-    );
+    if (
+        await isPresenterOrOrganizer(
+            meetingId,
+            aadObjectId,
+            conversationData.tenantId,
+            conversationData.serviceUrl
+        )
+    ) {
+        await questionDataService.markQuestionAsAnswered(
+            conversationData.id,
+            qnaSessionId,
+            questionId
+        );
 
-    await triggerBackgroundJobForQuestionMarkedAsAnsweredEvent(
-        conversationId,
-        questionId,
-        qnaSessionId,
-        aadObjectId
-    );
+        await triggerBackgroundJobForQuestionMarkedAsAnsweredEvent(
+            conversationData.id,
+            questionId,
+            qnaSessionId,
+            aadObjectId
+        );
+    } else {
+        throw new UnauthorizedAccessError(
+            UnauthorizedAccessErrorCode.InsufficientPermissionsToMarkQuestionAsAnswered
+        );
+    }
 };
 
 /**
@@ -389,8 +408,8 @@ export const endQnASession = async (
             serviceURL
         );
         if (!canEndQnASession) {
-            throw new InsufficientPermissionsToCreateOrEndQnASessionError(
-                'Only a Presenter or an Organizer can end Q & A Session.'
+            throw new UnauthorizedAccessError(
+                UnauthorizedAccessErrorCode.InsufficientPermissionsToCreateOrEndQnASession
             );
         }
     } else {

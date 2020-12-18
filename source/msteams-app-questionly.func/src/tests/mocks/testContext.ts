@@ -1,5 +1,6 @@
 import { Context, Logger } from "@azure/functions";
 import { DataEventType } from "msteams-app-questionly.common";
+import { StatusCodes } from "http-status-codes";
 
 const getMockLogger = (): Logger => {
   let logger = function (...args: any[]) {} as Logger;
@@ -23,7 +24,7 @@ export const triggerMockContext: Context = {
   },
   traceContext: null,
   res: {
-    status: 200,
+    status: StatusCodes.OK,
     body: {},
     json: jest.fn(),
   },
@@ -60,7 +61,7 @@ export const activityMockContext: Context = {
   },
   traceContext: null,
   res: {
-    status: 200,
+    status: StatusCodes.OK,
     body: {},
     json: jest.fn(),
   },

@@ -2,7 +2,6 @@
 
 Generate a Microsoft Teams application.
 
-
 TODO: Add your documentation here
 
 ## Getting started with Microsoft Teams Apps development
@@ -13,8 +12,8 @@ Head on over to [Microsoft Teams official documentation](https://developer.micro
 
 All required source code are located in the `./src` folder - split into two parts
 
--   `app` for the application
--   `manifest` for the Microsoft Teams app manifest
+- `app` for the application
+- `manifest` for the Microsoft Teams app manifest
 
 For further details se the [Yo Teams wiki for the project structure](https://github.com/PnP/generator-teams/wiki/Project-Structure)
 
@@ -96,8 +95,8 @@ To use ngrok, it is recommended to use the `gulp ngrok-serve` command, which wil
 
 You can use the following flags for the `serve`, `ngrok-serve` and build commands:
 
--   `--no-linting` - skips the linting of Typescript during build to improve build times
--   `--debug` - builds in debug mode
+- `--no-linting` - skips the linting of Typescript during build to improve build times
+- `--debug` - builds in debug mode
 
 ## Deploying to Azure using Git
 

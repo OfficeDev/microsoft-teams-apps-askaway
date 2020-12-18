@@ -15,7 +15,10 @@ import {
     TeamsInfo,
 } from 'botbuilder';
 import { verifyUserFromConversationId } from 'msteams-app-questionly.common';
-import { Response } from 'express';
+import { UserIsNotPartOfConversationError } from 'src/errors/userIsNotPartOfConversationError';
+import { ConversationDoesNotBelongToMeetingChatError } from 'src/errors/conversationDoesNotBelongToMeetingChatError';
+import { Request } from 'express';
+import { ParameterMissingInRequestError } from 'src/errors/parameterMissingInRequestError';
 
 /**
  * Gets questions data and user data for each active qna sessions, process them and returns an array of detailed qna sessions.
@@ -84,16 +87,56 @@ export const processQnASesssionsDataForMeetingTab = async (
 };
 
 /**
- * Ensures if user is part of the conversation, if not sends `403` response back.
- * @param res - Response.
+ * Checks if a given parameter is a valid string.
+ * @param param - parameter.
+ * @returns - true if parameter is a valid string.
+ */
+const isValidStringParameter = (param: string | undefined | null): boolean => {
+    return param !== undefined && param !== null && param !== '';
+};
+
+/**
+ * Ensures if conversation belongs to meeting chat.
+ * @param conversationData - Conversation data.
+ */
+export const ensureConversationBelongsToMeetingChat = (
+    conversationData: IConversation
+) => {
+    if (!isValidStringParameter(conversationData.meetingId)) {
+        throw new ConversationDoesNotBelongToMeetingChatError();
+    }
+};
+
+/**
+ * Returns parameter from request body if present else throws error.
+ * @param req - request
+ * @param parameterName - parameter name
+ * @returns - parameter value from request.
+ * @throws - throws error is valid parameter is not present in the request.
+ */
+export const getAndEnsureRequestBodyContainsParameter = (
+    req: Request,
+    parameterName: string
+): string => {
+    if (!isValidStringParameter(req.body[parameterName])) {
+        throw new ParameterMissingInRequestError(parameterName);
+    }
+
+    return req.body[parameterName];
+};
+
+/**
+ * Ensures if user is part of the meeting conversation.
  * @param conversationData - Conversation data.
  * @param userId - Aad object id of user.
+ * @throws - error if user is not part of the conversation.
  */
-export const ensureUserIsPartOfConversation = async (
-    res: Response,
+export const ensureUserIsPartOfMeetingConversation = async (
     conversationData: IConversation,
     userId: string
-): Promise<boolean> => {
+): Promise<void> => {
+    ensureConversationBelongsToMeetingChat(conversationData);
+
     if (process.env.MicrosoftAppId === undefined) {
         exceptionLogger('MicrosoftAppId missing in app settings.');
         throw new Error('MicrosoftAppId missing in app settings.');
@@ -109,10 +152,8 @@ export const ensureUserIsPartOfConversation = async (
     );
 
     if (!isUserPartOfConversation) {
-        formResponseWhenUserIsNotPartOfConversation(res);
+        throw new UserIsNotPartOfConversationError();
     }
-
-    return isUserPartOfConversation;
 };
 
 export const patchActionForQuestion = ['upvote', 'downvote', 'markAnswered'];

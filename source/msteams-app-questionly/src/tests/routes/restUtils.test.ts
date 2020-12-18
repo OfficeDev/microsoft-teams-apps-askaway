@@ -3,14 +3,24 @@ import { BotFrameworkAdapter } from 'botbuilder';
 import {
     questionDataService,
     userDataService,
+    IConversation,
 } from 'msteams-app-questionly.data';
 
 import {
     processQnASesssionsDataForMeetingTab,
     getTeamMemberId,
     getMemberInfo,
+    getAndEnsureRequestBodyContainsParameter,
+    ensureUserIsPartOfMeetingConversation,
 } from 'src/routes/restUtils';
 import { getMicrosoftAppPassword } from 'src/util/keyvault';
+
+import { Request } from 'express';
+import { ParameterMissingInRequestError } from 'src/errors/parameterMissingInRequestError';
+import { errorMessages } from 'src/errors/errorMessages';
+import { ConversationDoesNotBelongToMeetingChatError } from 'src/errors/conversationDoesNotBelongToMeetingChatError';
+import { verifyUserFromConversationId } from 'msteams-app-questionly.common';
+import { UserIsNotPartOfConversationError } from 'src/errors/userIsNotPartOfConversationError';
 
 const sampleUserId = 'sampleUserId';
 const sampleServiceUrl = 'sampleServiceUrl';
@@ -229,5 +239,170 @@ describe('test getHostUserId', () => {
                 new Error('Could not get member info for teams user')
             );
         });
+    });
+});
+
+describe('tests getAndEnsureRequestBodyContainsParameter', () => {
+    // tslint:disable-next-line
+    const request = {
+        path: '/api/conversations',
+    } as Request;
+
+    it('parameter not present in request body', async () => {
+        request.body = {};
+        const testParamName = 'testParamName';
+
+        try {
+            getAndEnsureRequestBodyContainsParameter(request, testParamName);
+        } catch (error) {
+            expect(error instanceof ParameterMissingInRequestError);
+            expect(error.message).toEqual(
+                errorMessages.ParameterMissingInRequestErrorMessage.replace(
+                    '{0}',
+                    testParamName
+                )
+            );
+        }
+    });
+
+    it('parameter is null in request body', async () => {
+        const testParamName = 'testParamName';
+
+        request.body = {
+            testParamName: null,
+        };
+
+        try {
+            getAndEnsureRequestBodyContainsParameter(request, testParamName);
+        } catch (error) {
+            expect(error instanceof ParameterMissingInRequestError);
+            expect(error.message).toEqual(
+                errorMessages.ParameterMissingInRequestErrorMessage.replace(
+                    '{0}',
+                    testParamName
+                )
+            );
+        }
+    });
+
+    it('parameter is empty string in request body', async () => {
+        const testParamName = 'testParamName';
+
+        request.body = {
+            testParamName: '',
+        };
+
+        try {
+            getAndEnsureRequestBodyContainsParameter(request, testParamName);
+        } catch (error) {
+            expect(error instanceof ParameterMissingInRequestError);
+            expect(error.message).toEqual(
+                errorMessages.ParameterMissingInRequestErrorMessage.replace(
+                    '{0}',
+                    testParamName
+                )
+            );
+        }
+    });
+
+    it('valid parameter is present in request body', async () => {
+        const testParamName = 'testParamName';
+
+        request.body = {
+            testParamName: 'test',
+        };
+
+        expect(
+            getAndEnsureRequestBodyContainsParameter(request, testParamName)
+        ).toEqual('test');
+    });
+});
+
+describe('tests ensureUserIsPartOfMeetingConversation', () => {
+    beforeAll(() => {
+        process.env.MicrosoftAppId = 'random';
+        (<any>getMicrosoftAppPassword) = jest.fn();
+        (<any>verifyUserFromConversationId) = jest.fn();
+    });
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
+    it('conversation not part of meeting', async () => {
+        // tslint:disable-next-line
+        const conversationData = {
+            id: 'test',
+            serviceUrl: 'testserviceUrl',
+            tenantId: 'testTenant',
+        } as IConversation;
+
+        try {
+            await ensureUserIsPartOfMeetingConversation(
+                conversationData,
+                'testUserId'
+            );
+        } catch (error) {
+            expect(
+                error instanceof ConversationDoesNotBelongToMeetingChatError
+            );
+            expect(error.message).toEqual(
+                errorMessages.ConversationDoesNotBelongToMeetingChatErrorMessage
+            );
+        }
+
+        expect(<any>getMicrosoftAppPassword).toBeCalledTimes(0);
+        expect(<any>verifyUserFromConversationId).toBeCalledTimes(0);
+    });
+
+    it('user is not part of conversation', async () => {
+        // tslint:disable-next-line
+        const conversationData = {
+            id: 'test',
+            serviceUrl: 'testserviceUrl',
+            tenantId: 'testTenant',
+            meetingId: 'testMeetingId',
+        } as IConversation;
+
+        (<any>verifyUserFromConversationId).mockImplementationOnce(() => {
+            return false;
+        });
+
+        try {
+            await ensureUserIsPartOfMeetingConversation(
+                conversationData,
+                'testUserId'
+            );
+        } catch (error) {
+            expect(error instanceof UserIsNotPartOfConversationError);
+            expect(error.message).toEqual(
+                errorMessages.UserIsNotPartOfConversationErrorMessage
+            );
+        }
+
+        expect(<any>getMicrosoftAppPassword).toBeCalledTimes(1);
+        expect(<any>verifyUserFromConversationId).toBeCalledTimes(1);
+    });
+
+    it('user is part of meeting conversation', async () => {
+        // tslint:disable-next-line
+        const conversationData = {
+            id: 'test',
+            serviceUrl: 'testserviceUrl',
+            tenantId: 'testTenant',
+            meetingId: 'testMeetingId',
+        } as IConversation;
+
+        (<any>verifyUserFromConversationId).mockImplementationOnce(() => {
+            return true;
+        });
+
+        await ensureUserIsPartOfMeetingConversation(
+            conversationData,
+            'testUserId'
+        );
+
+        expect(<any>getMicrosoftAppPassword).toBeCalledTimes(1);
+        expect(<any>verifyUserFromConversationId).toBeCalledTimes(1);
     });
 });
