@@ -9,7 +9,7 @@ import { exceptionLogger } from 'src/util/exceptionTracking';
 import {
     processQnASesssionsDataForMeetingTab,
     patchActionForQuestion,
-    getHostUserId,
+    getTeamMemberId,
     ensureUserIsPartOfConversation,
 } from 'src/routes/restUtils';
 import {
@@ -213,13 +213,17 @@ router.patch('/:conversationId/sessions/:sessionId', async (req, res) => {
                 );
                 return;
             }
+            const endedByUserId = await getTeamMemberId(user._id, conversationId, conversationData.serviceUrl);
+
             await endQnASession(
                 sessionId,
                 user._id,
                 conversationId,
                 conversationData.tenantId,
                 conversationData.serviceUrl,
-                conversationData.meetingId
+                conversationData.meetingId,
+                user.userName,
+                endedByUserId
             );
         } else {
             res.status(StatusCodes.BAD_REQUEST).send(
@@ -279,7 +283,7 @@ router.post('/:conversationId/sessions', async (req, res) => {
             );
         }
 
-        const hostUserId = await getHostUserId(
+        const hostUserId = await getTeamMemberId(
             user._id,
             conversationId,
             serviceUrl

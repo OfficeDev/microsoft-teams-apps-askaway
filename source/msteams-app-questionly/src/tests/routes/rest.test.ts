@@ -8,7 +8,7 @@ import {
 } from 'msteams-app-questionly.data';
 import {
     processQnASesssionsDataForMeetingTab,
-    getHostUserId,
+    getTeamMemberId,
 } from 'src/routes/restUtils';
 import { generateUniqueId } from 'adaptivecards';
 import {
@@ -397,7 +397,7 @@ describe('test post conversations/:conversationId/sessions api', () => {
         initializeRouter(conversationDataService);
 
         (<any>isPresenterOrOrganizer) = jest.fn();
-        (<any>getHostUserId) = jest.fn();
+        (<any>getTeamMemberId) = jest.fn();
         (<any>qnaSessionDataService.createQnASession) = jest.fn();
         (<any>conversationDataService.getConversationData) = jest.fn();
     });
@@ -419,7 +419,7 @@ describe('test post conversations/:conversationId/sessions api', () => {
         (<any>isPresenterOrOrganizer).mockImplementationOnce(() => {
             return true;
         });
-        (<any>getHostUserId).mockImplementationOnce(() => {
+        (<any>getTeamMemberId).mockImplementationOnce(() => {
             return sampleHostUserId;
         });
         (<any>qnaSessionDataService.createQnASession).mockImplementationOnce(
@@ -444,7 +444,7 @@ describe('test post conversations/:conversationId/sessions api', () => {
         expect(result.status).toBe(StatusCodes.OK);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(isPresenterOrOrganizer).toBeCalledTimes(1);
-        expect(getHostUserId).toBeCalledTimes(1);
+        expect(getTeamMemberId).toBeCalledTimes(1);
         expect(qnaSessionDataService.createQnASession).toBeCalledTimes(1);
     });
 
@@ -462,7 +462,7 @@ describe('test post conversations/:conversationId/sessions api', () => {
         (<any>isPresenterOrOrganizer).mockImplementationOnce(() => {
             return true;
         });
-        (<any>getHostUserId).mockImplementationOnce(() => {
+        (<any>getTeamMemberId).mockImplementationOnce(() => {
             return sampleHostUserId;
         });
         (<any>qnaSessionDataService.createQnASession).mockImplementationOnce(
@@ -483,7 +483,7 @@ describe('test post conversations/:conversationId/sessions api', () => {
         expect(result.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(isPresenterOrOrganizer).toBeCalledTimes(1);
-        expect(getHostUserId).toBeCalledTimes(1);
+        expect(getTeamMemberId).toBeCalledTimes(1);
         expect(qnaSessionDataService.createQnASession).toBeCalledTimes(1);
     });
 
@@ -498,7 +498,7 @@ describe('test post conversations/:conversationId/sessions api', () => {
                 meetingId: sampleMeetingId,
             };
         });
-        (<any>getHostUserId).mockImplementationOnce(() => {
+        (<any>getTeamMemberId).mockImplementationOnce(() => {
             throw testError;
         });
 
@@ -513,7 +513,7 @@ describe('test post conversations/:conversationId/sessions api', () => {
             });
         expect(result.status).toBe(500);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
-        expect(getHostUserId).toBeCalledTimes(1);
+        expect(getTeamMemberId).toBeCalledTimes(1);
         expect(qnaSessionDataService.createQnASession).toBeCalledTimes(0);
     });
 
@@ -537,7 +537,7 @@ describe('test post conversations/:conversationId/sessions api', () => {
         expect(result.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(isPresenterOrOrganizer).toBeCalledTimes(0);
-        expect(getHostUserId).toBeCalledTimes(0);
+        expect(getTeamMemberId).toBeCalledTimes(0);
         expect(qnaSessionDataService.createQnASession).toBeCalledTimes(0);
     });
 
@@ -1479,6 +1479,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
 
         (<any>endQnASession) = jest.fn();
         (<any>isPresenterOrOrganizer) = jest.fn();
+        (<any>getTeamMemberId) = jest.fn();
         (<any>conversationDataService.getConversationData) = jest.fn();
 
         // Rest endpoints
@@ -1554,7 +1555,9 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
                 meetingId: sampleMeetingId,
             };
         });
-
+        (<any>getTeamMemberId).mockImplementationOnce(() => {
+            return sampleHostUserId;
+        });
         (<any>endQnASession).mockImplementationOnce(() => {
             throw testError;
         });
@@ -1574,7 +1577,9 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
             sampleConversationId,
             sampleTenantId,
             sampleServiceUrl,
-            sampleMeetingId
+            sampleMeetingId,
+            testUserName,
+            sampleHostUserId
         );
         expect(
             <any>conversationDataService.getConversationData
@@ -1623,6 +1628,9 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
                 meetingId: sampleMeetingId,
             };
         });
+        (<any>getTeamMemberId).mockImplementationOnce(() => {
+            return sampleHostUserId;
+        });
 
         const result = await request(app)
             .patch(
@@ -1639,7 +1647,9 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
             sampleConversationId,
             sampleTenantId,
             sampleServiceUrl,
-            sampleMeetingId
+            sampleMeetingId,
+            testUserName,
+            sampleHostUserId
         );
         expect(
             <any>conversationDataService.getConversationData

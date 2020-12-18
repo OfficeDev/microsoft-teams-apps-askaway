@@ -403,7 +403,9 @@ export class AskAway extends TeamsActivityHandler {
                     context.activity.conversation.id,
                     conversation.tenantId,
                     context.activity.serviceUrl,
-                    meetingId
+                    meetingId,
+                    <string>context.activity.from.name,
+                    <string>context.activity.from.id
                 );
             } catch (error) {
                 exceptionLogger(error);

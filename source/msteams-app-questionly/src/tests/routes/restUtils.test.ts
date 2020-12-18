@@ -7,7 +7,7 @@ import {
 
 import {
     processQnASesssionsDataForMeetingTab,
-    getHostUserId,
+    getTeamMemberId,
     getMemberInfo,
 } from 'src/routes/restUtils';
 import { getMicrosoftAppPassword } from 'src/util/keyvault';
@@ -201,7 +201,7 @@ describe('test getHostUserId', () => {
                 id: sampleId,
             };
         });
-        const result = await getHostUserId(
+        const result = await getTeamMemberId(
             sampleUserId,
             sampleConversationId,
             sampleServiceUrl
@@ -220,7 +220,7 @@ describe('test getHostUserId', () => {
             return undefined;
         });
 
-        await getHostUserId(
+        await getTeamMemberId(
             sampleUserId,
             sampleConversationId,
             sampleServiceUrl

@@ -35,7 +35,10 @@ const getMainCard = async (
   ended?: boolean,
   topQuestionsData?: IQuestionPopulatedUser[],
   recentQuestionsData?: IQuestionPopulatedUser[],
-  totalQuestions?: number
+  totalQuestions?: number,
+  endedById?: string,
+  endedByName?: string,
+  endedByUserId?: string,
 ): Promise<IAdaptiveCard> => {
   const data = {
     title,
@@ -70,14 +73,25 @@ const getMainCard = async (
     (<any>_mainCard.body)[5].actions = [viewLeaderboardButton()]; // is an ActionSet
 
   // add at-mention data
-  _mainCard.msTeams.entities.push({
-    type: "mention",
-    text: `<at>${userName}</at>`,
-    mentioned: {
-      id: hostUserId,
-      name: userName,
-    },
-  });
+  if (ended) {
+    _mainCard.msTeams.entities.push({
+      type: "mention",
+      text: `<at>${endedByName}</at>`,
+      mentioned: {
+        id: endedByUserId,
+        name: endedByName,
+      },
+    });
+  } else {
+    _mainCard.msTeams.entities.push({
+      type: "mention",
+      text: `<at>${userName}</at>`,
+      mentioned: {
+        id: hostUserId,
+        name: userName,
+      },
+    });
+  }
 
   const _numQuestions = totalQuestions ? totalQuestions : 0;
   let mostRecentUser = "",
@@ -106,16 +120,20 @@ const getMainCard = async (
     $root: {
       title: title,
       description: description,
-      user: userName,
+      user: ended
+      ? endedByName
+      : userName,
       qnaId: qnaSessionId,
       topQuestions: topQuestionsData,
-      userId: aadObjectId,
+      userId: ended
+      ? endedById
+      : aadObjectId,
       data: data,
       leaderboardTitle: ended
         ? mainCardStrings("viewQuestions")
         : mainCardStrings("upvoteQuestions"),
       sessionDetails: ended
-        ? `**<at>${userName}</at>** ${mainCardStrings(
+        ? `**<at>${endedByName}</at>** ${mainCardStrings(
             "endedBy"
           )}. ${mainCardStrings("noMoreQuestions")}`
         : `**<at>${userName}</at>** ${mainCardStrings("initiatedBy")}`,
@@ -137,6 +155,7 @@ export const getUpdatedMainCard = async (
   const qnaSessionData = await qnaSessionDataService.getQnASessionData(
     qnaSessionId
   );
+  
   // eslint-disable-next-line prefer-const
   const {
     topQuestions,
@@ -156,7 +175,10 @@ export const getUpdatedMainCard = async (
       ended || !qnaSessionData.isActive,
       topQuestions,
       recentQuestions,
-      numQuestions
+      numQuestions,
+      qnaSessionData.endedById,
+      qnaSessionData.endedByName,
+      qnaSessionData.endedByUserId
     ),
     activityId: qnaSessionData.activityId,
   };

@@ -105,6 +105,10 @@ class QnASessionDataService {
           path: "hostId",
           modle: User,
         })
+        .populate({
+          path: "endedById",
+          modle: User,
+        })
         .exec()
     );
 
@@ -128,6 +132,9 @@ class QnASessionDataService {
       dateCreated: _qnaSessionData.dateTimeCreated,
       hostUserId: _qnaSessionData.hostUserId,
       isActive: _qnaSessionData.isActive,
+      endedById: _qnaSessionData.endedById?._id,
+      endedByName: _qnaSessionData.endedById?.userName,
+      endedByUserId: _qnaSessionData.endedByUserId
     };
   }
 
@@ -137,12 +144,22 @@ class QnASessionDataService {
    * @param conversationId - conversation id
    * @throws Error thrown when database fails to execute changes
    * */
-  public async endQnASession(qnaSessionId: string, conversationId: string) {
+  public async endQnASession(
+    qnaSessionId: string,
+    conversationId: string,
+    endedById: string,
+    endedByName: string,
+    endedByUserId: string,
+    ) {
     await this.isExistingQnASession(qnaSessionId, conversationId);
+    await this.userDataService.getUserOrCreate(
+      endedById,
+      endedByName
+    );
     const result = await retryWrapperForConcurrency(
       () =>
         QnASession.findByIdAndUpdate(qnaSessionId, {
-          $set: { isActive: false, dateTimeEnded: new Date() },
+          $set: { isActive: false, dateTimeEnded: new Date(), endedById: endedById, endedByName:endedByName, endedByUserId: endedByUserId },
         }).exec(),
       new ExponentialBackOff()
     );

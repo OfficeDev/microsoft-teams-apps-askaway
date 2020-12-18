@@ -122,7 +122,7 @@ export const formResponseWhenUserIsNotPartOfConversation = (res) => {
     res.send(`user is not part of the given conversationId`);
 };
 
-export const getHostUserId = async (
+export const getTeamMemberId = async (
     userId: string,
     conversationId: string,
     serviceUrl: string

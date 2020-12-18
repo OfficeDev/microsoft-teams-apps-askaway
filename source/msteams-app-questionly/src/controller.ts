@@ -366,7 +366,9 @@ export const endQnASession = async (
     conversationId: string,
     tenantId: string,
     serviceURL: string,
-    meetingId: string
+    meetingId: string,
+    userName: string,
+    endedByUserId: string
 ): Promise<void> => {
     const isActive = await qnaSessionDataService.isActiveQnA(qnaSessionId);
     if (!isActive) {
@@ -397,7 +399,7 @@ export const endQnASession = async (
         }
     }
 
-    await qnaSessionDataService.endQnASession(qnaSessionId, conversationId);
+    await qnaSessionDataService.endQnASession(qnaSessionId, conversationId, aadObjectId, userName, endedByUserId);
 
     await triggerBackgroundJobForQnaSessionEndedEvent(
         conversationId,
