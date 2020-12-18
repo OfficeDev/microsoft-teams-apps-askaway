@@ -111,7 +111,8 @@ export const startQnASession = async (
         hostUserId: hostUserId,
         isChannel: isChannel,
         meetingId: meetingId,
-        conversationId: conversationId
+        conversationId: conversationId,
+        title: title
     });
 
     await triggerBackgroundJobForQnaSessionCreatedEvent(response);
@@ -210,7 +211,7 @@ export const submitNewQuestion = async (
             questionId: question?._id,
             qnaSessionId: qnaSessionId,
             conversationId: conversationId,
-            userAadObjId: userAadObjId,
+            questionContent: questionContent
         });
 
         triggerBackgroundJobForQuestionPostedEvent(
