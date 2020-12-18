@@ -19,6 +19,7 @@ import * as acb from 'src/adaptive-cards/adaptiveCardBuilder';
 import {
     qnaSessionDataService,
     questionDataService,
+    IConversation,
 } from 'msteams-app-questionly.data';
 import { isPresenterOrOrganizer } from 'src/util/meetingsUtility';
 import {
@@ -485,19 +486,60 @@ test('is active qna', async () => {
     );
 });
 
-test('mark question as answered', async () => {
+test('mark question as answered api - user has sufficient permissions', async () => {
     (<any>triggerBackgroundJobForQuestionMarkedAsAnsweredEvent) = jest.fn();
     (<any>questionDataService.markQuestionAsAnswered) = jest.fn();
+    (<any>isPresenterOrOrganizer) = jest.fn();
+    (<any>isPresenterOrOrganizer).mockImplementationOnce(() => {
+        return true;
+    });
 
     await markQuestionAsAnswered(
-        sampleConversationId,
+        // tslint:disable-next-line
+        {
+            id: sampleConversationId,
+            serviceUrl: sampleServiceUrl,
+            tenantId: sampleTenantId,
+        } as IConversation,
+        sampleMeetingId,
         sampleQnASessionId,
         sampleQuestionId,
         sampleUserAADObjId1
     );
 
+    expect(<any>questionDataService.markQuestionAsAnswered).toBeCalledTimes(1);
     // Make sure background job is triggered.
     expect(
         <any>triggerBackgroundJobForQuestionMarkedAsAnsweredEvent
     ).toBeCalledTimes(1);
+});
+
+test('mark question as answered api - user does not have sufficient permissions', async () => {
+    (<any>triggerBackgroundJobForQuestionMarkedAsAnsweredEvent) = jest.fn();
+    (<any>questionDataService.markQuestionAsAnswered) = jest.fn();
+    (<any>isPresenterOrOrganizer) = jest.fn();
+    (<any>isPresenterOrOrganizer).mockImplementationOnce(() => {
+        return false;
+    });
+
+    await expect(
+        markQuestionAsAnswered(
+            // tslint:disable-next-line
+            {
+                id: sampleConversationId,
+                serviceUrl: sampleServiceUrl,
+                tenantId: sampleTenantId,
+            } as IConversation,
+            sampleMeetingId,
+            sampleQnASessionId,
+            sampleQuestionId,
+            sampleUserAADObjId1
+        )
+    ).rejects.toThrow();
+
+    expect(<any>questionDataService.markQuestionAsAnswered).toBeCalledTimes(0);
+    // Make sure background job is not triggered.
+    expect(
+        <any>triggerBackgroundJobForQuestionMarkedAsAnsweredEvent
+    ).toBeCalledTimes(0);
 });

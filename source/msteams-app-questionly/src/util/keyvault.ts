@@ -109,9 +109,7 @@ export const getMongoURI = async (): Promise<string> => {
  * @returns - Application Insights Instrumentation Key.
  * @throws - Error if error occurs while fetching secret from key vault.
  */
-export const getApplicationInsightsInstrumentationKeyURI = async (): Promise<
-    string
-> => {
+export const getApplicationInsightsInstrumentationKeyURI = async (): Promise<string> => {
     return await getSecretFromVault(
         applicationInsightsInstrumentationKeySecretName
     );

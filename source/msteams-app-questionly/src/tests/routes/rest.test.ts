@@ -23,9 +23,14 @@ import {
     getParticipantRole,
     isPresenterOrOrganizer,
 } from 'src/util/meetingsUtility';
-import { ok } from 'src/util/resultWrapper';
 import { verifyUserFromConversationId } from 'msteams-app-questionly.common';
 import { getMicrosoftAppPassword } from 'src/util/keyvault';
+import { restApiErrorMiddleware } from 'src/routes/restApiErrorMiddleware';
+import { errorMessages } from 'src/errors/errorMessages';
+import {
+    UnauthorizedAccessError,
+    UnauthorizedAccessErrorCode,
+} from 'src/errors/unauthorizedAccessError';
 
 let app: ExpressType;
 
@@ -62,6 +67,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId api', () => {
         };
         // Rest endpoints
         app.use('/api/conversations', mockEnsureAuthenticated, router);
+        app.use(restApiErrorMiddleware);
 
         (<any>verifyUserFromConversationId) = jest.fn();
         process.env.MicrosoftAppId = 'random';
@@ -140,6 +146,7 @@ describe('test conversations/:conversationId/sessions api', () => {
         };
         // Rest endpoints
         app.use('/api/conversations', mockEnsureAuthenticated, router);
+        app.use(restApiErrorMiddleware);
         (<any>qnaSessionDataService.getAllQnASessionData) = jest.fn();
         (<any>processQnASesssionsDataForMeetingTab) = jest.fn();
 
@@ -320,10 +327,11 @@ describe('test conversations/:conversationId/sessions api', () => {
         const result = await request(app).get(
             `/api/conversations/${sampleConversationId}/sessions`
         );
-        expect(result.status).toBe(StatusCodes.FORBIDDEN);
+
         expect(result.text).toEqual(
-            `user is not part of the given conversationId`
+            errorMessages.UserIsNotPartOfConversationErrorMessage
         );
+        expect(result.status).toBe(StatusCodes.FORBIDDEN);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(
             sampleConversationId
@@ -360,8 +368,8 @@ describe('test conversations/:conversationId/sessions api', () => {
         const result = await request(app).get(
             `/api/conversations/${sampleInvalidConversationId}/sessions`
         );
-        expect(result.status).toBe(StatusCodes.NO_CONTENT);
-        expect(result.noContent).toBe(true);
+        expect(result.status).toBe(StatusCodes.OK);
+        expect(JSON.parse(result.text)).toEqual([]);
         expect(processQnASesssionsDataForMeetingTab).toBeCalledTimes(0);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(
@@ -394,6 +402,7 @@ describe('test post conversations/:conversationId/sessions api', () => {
         };
         // Rest endpoints
         app.use('/api/conversations', mockEnsureAuthenticated, router);
+        app.use(restApiErrorMiddleware);
 
         initializeRouter(conversationDataService);
 
@@ -478,8 +487,6 @@ describe('test post conversations/:conversationId/sessions api', () => {
                 title: samplTtitle,
                 description: sampleDescription,
                 scopeId: sampleScopeId,
-                hostUserId: sampleHostId,
-                isChannel: true,
             });
         expect(result.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
@@ -581,6 +588,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
 
         // Rest endpoints
         app.use('/api/conversations', mockEnsureAuthenticated, router);
+        app.use(restApiErrorMiddleware);
     });
 
     beforeEach(() => {
@@ -596,7 +604,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
 
         expect(result.status).toBe(StatusCodes.BAD_REQUEST);
         expect(result.text).toEqual(
-            'questionContent is missing in the request'
+            "Parameter 'questionContent' is missing in the request"
         );
     });
 
@@ -611,7 +619,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
 
         expect(result.status).toBe(StatusCodes.BAD_REQUEST);
         expect(result.text).toEqual(
-            'questionContent is missing in the request'
+            "Parameter 'questionContent' is missing in the request"
         );
     });
 
@@ -626,7 +634,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
 
         expect(result.status).toBe(StatusCodes.BAD_REQUEST);
         expect(result.text).toEqual(
-            'questionContent is missing in the request'
+            "Parameter 'questionContent' is missing in the request"
         );
     });
 
@@ -683,7 +691,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
 
         expect(result.status).toBe(StatusCodes.FORBIDDEN);
         expect(result.text).toEqual(
-            `user is not part of the given conversationId`
+            errorMessages.UserIsNotPartOfConversationErrorMessage
         );
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(
@@ -744,9 +752,9 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
         const testSessionId = 'testId';
         const questionId = 'testQuestionId';
         const testQuestionContent = 'testQuestionContent';
-        const questionRes = ok({
+        const questionRes = {
             _id: questionId,
-        });
+        };
 
         const testConversation = {
             _id: sampleConversationId,
@@ -810,6 +818,7 @@ describe('test /conversations/:conversationId/me api', () => {
 
         // Rest endpoints
         app.use('/api/conversations', mockEnsureAuthenticated, router);
+        app.use(restApiErrorMiddleware);
     });
 
     beforeEach(() => {
@@ -913,7 +922,7 @@ describe('test /conversations/:conversationId/me api', () => {
 
         expect(result).toBeDefined();
         expect(result.text).toEqual(
-            `meeting does not exist for provided conversation id ${testConversation._id}`
+            errorMessages.ConversationDoesNotBelongToMeetingChatErrorMessage
         );
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(
@@ -976,6 +985,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
 
         // Rest endpoints
         app.use('/api/conversations', mockEnsureAuthenticated, router);
+        app.use(restApiErrorMiddleware);
 
         (<any>upvoteQuestion) = jest.fn();
         (<any>downvoteQuestion) = jest.fn();
@@ -1001,7 +1011,9 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
         );
 
         expect(result.status).toBe(StatusCodes.BAD_REQUEST);
-        expect(result.text).toEqual('patch action is missing in the request');
+        expect(result.text).toEqual(
+            "Parameter 'action' is missing in the request"
+        );
     });
 
     it('patch action as null in request', async () => {
@@ -1015,7 +1027,9 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
             .send({ action: null });
 
         expect(result.status).toBe(StatusCodes.BAD_REQUEST);
-        expect(result.text).toEqual('patch action is missing in the request');
+        expect(result.text).toEqual(
+            "Parameter 'action' is missing in the request"
+        );
     });
 
     it('patch action as empty string in request', async () => {
@@ -1029,7 +1043,9 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
             .send({ action: '' });
 
         expect(result.status).toBe(StatusCodes.BAD_REQUEST);
-        expect(result.text).toEqual('patch action is missing in the request');
+        expect(result.text).toEqual(
+            "Parameter 'action' is missing in the request"
+        );
     });
 
     it('invalid patch action in request', async () => {
@@ -1169,7 +1185,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
 
         expect(result.status).toBe(StatusCodes.FORBIDDEN);
         expect(result.text).toEqual(
-            `user is not part of the given conversationId`
+            errorMessages.UserIsNotPartOfConversationErrorMessage
         );
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(
@@ -1294,7 +1310,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
 
         expect(result.status).toBe(StatusCodes.FORBIDDEN);
         expect(result.text).toEqual(
-            `user is not part of the given conversationId`
+            errorMessages.UserIsNotPartOfConversationErrorMessage
         );
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(
@@ -1307,6 +1323,12 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
         const testSessionId = 'testId';
         const testQuestionId = 'q1';
         const testError: Error = new Error('test error');
+        const testConversationData = {
+            _id: sampleConversationId,
+            serviceUrl: sampleServiceUrl,
+            tenantId: sampleTenantId,
+            meetingId: sampleMeetingId,
+        };
 
         (<any>markQuestionAsAnswered).mockImplementationOnce(() => {
             throw testError;
@@ -1315,16 +1337,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
         (<any>(
             conversationDataService.getConversationData
         )).mockImplementationOnce(() => {
-            return {
-                _id: sampleConversationId,
-                serviceUrl: sampleServiceUrl,
-                tenantId: sampleTenantId,
-                meetingId: sampleMeetingId,
-            };
-        });
-
-        (<any>isPresenterOrOrganizer).mockImplementationOnce(() => {
-            return true;
+            return testConversationData;
         });
 
         const result = await request(app)
@@ -1337,17 +1350,11 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
         expect(result.text).toEqual(testError.message);
         expect(markQuestionAsAnswered).toBeCalledTimes(1);
         expect(markQuestionAsAnswered).toBeCalledWith(
-            sampleConversationId,
+            testConversationData,
+            sampleMeetingId,
             testSessionId,
             testQuestionId,
             testUserId
-        );
-        expect(isPresenterOrOrganizer).toBeCalledTimes(1);
-        expect(isPresenterOrOrganizer).toBeCalledWith(
-            sampleMeetingId,
-            testUserId,
-            sampleTenantId,
-            sampleServiceUrl
         );
         expect(
             <any>conversationDataService.getConversationData
@@ -1360,21 +1367,19 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
     it('markAnswered question action', async () => {
         const testSessionId = 'testId';
         const testQuestionId = 'q1';
+        const testConversationData = {
+            _id: sampleConversationId,
+            serviceUrl: sampleServiceUrl,
+            tenantId: sampleTenantId,
+            meetingId: sampleMeetingId,
+        };
 
         (<any>(
             conversationDataService.getConversationData
         )).mockImplementationOnce(() => {
-            return {
-                _id: sampleConversationId,
-                serviceUrl: sampleServiceUrl,
-                tenantId: sampleTenantId,
-                meetingId: sampleMeetingId,
-            };
+            return testConversationData;
         });
 
-        (<any>isPresenterOrOrganizer).mockImplementationOnce(() => {
-            return true;
-        });
         (<any>markQuestionAsAnswered).mockImplementationOnce(() => {
             return;
         });
@@ -1389,17 +1394,11 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
         expect(result.noContent).toBeTruthy();
         expect(markQuestionAsAnswered).toBeCalledTimes(1);
         expect(markQuestionAsAnswered).toBeCalledWith(
-            sampleConversationId,
+            testConversationData,
+            sampleMeetingId,
             testSessionId,
             testQuestionId,
             testUserId
-        );
-        expect(isPresenterOrOrganizer).toBeCalledTimes(1);
-        expect(isPresenterOrOrganizer).toBeCalledWith(
-            sampleMeetingId,
-            testUserId,
-            sampleTenantId,
-            sampleServiceUrl
         );
         expect(
             <any>conversationDataService.getConversationData
@@ -1424,8 +1423,10 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
             };
         });
 
-        (<any>isPresenterOrOrganizer).mockImplementationOnce(() => {
-            return false;
+        (<any>markQuestionAsAnswered).mockImplementationOnce(() => {
+            throw new UnauthorizedAccessError(
+                UnauthorizedAccessErrorCode.InsufficientPermissionsToMarkQuestionAsAnswered
+            );
         });
 
         const result = await request(app)
@@ -1437,13 +1438,6 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
         expect(result.status).toBe(StatusCodes.FORBIDDEN);
         expect(result.text).toEqual(
             'Only a Presenter or an Organizer can mark question as answered.'
-        );
-        expect(isPresenterOrOrganizer).toBeCalledTimes(1);
-        expect(isPresenterOrOrganizer).toBeCalledWith(
-            sampleMeetingId,
-            testUserId,
-            sampleTenantId,
-            sampleServiceUrl
         );
         expect(
             <any>conversationDataService.getConversationData
@@ -1484,6 +1478,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
 
         // Rest endpoints
         app.use('/api/conversations', mockEnsureAuthenticated, router);
+        app.use(restApiErrorMiddleware);
     });
 
     beforeEach(() => {
@@ -1498,7 +1493,9 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
         );
 
         expect(result.status).toBe(StatusCodes.BAD_REQUEST);
-        expect(result.text).toEqual('patch action is missing in the request');
+        expect(result.text).toEqual(
+            "Parameter 'action' is missing in the request"
+        );
     });
 
     it('patch action as null in request', async () => {
@@ -1511,7 +1508,9 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
             .send({ action: null });
 
         expect(result.status).toBe(StatusCodes.BAD_REQUEST);
-        expect(result.text).toEqual('patch action is missing in the request');
+        expect(result.text).toEqual(
+            "Parameter 'action' is missing in the request"
+        );
     });
 
     it('patch action as empty string in request', async () => {
@@ -1524,7 +1523,9 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
             .send({ action: '' });
 
         expect(result.status).toBe(StatusCodes.BAD_REQUEST);
-        expect(result.text).toEqual('patch action is missing in the request');
+        expect(result.text).toEqual(
+            "Parameter 'action' is missing in the request"
+        );
     });
 
     it('invalid patch action in request', async () => {
@@ -1671,6 +1672,7 @@ describe('test get /:conversationId/activesessions api', () => {
         };
         // Rest endpoints
         app.use('/api/conversations', mockEnsureAuthenticated, router);
+        app.use(restApiErrorMiddleware);
 
         (<any>qnaSessionDataService.getAllActiveQnASessionData) = jest.fn();
         (<any>processQnASesssionsDataForMeetingTab) = jest.fn();
@@ -1855,8 +1857,8 @@ describe('test get /:conversationId/activesessions api', () => {
         const result = await request(app).get(
             `/api/conversations/${sampleInvalidConversationId}/activesessions`
         );
-        expect(result.status).toBe(StatusCodes.NO_CONTENT);
-        expect(result.noContent).toBe(true);
+        expect(result.status).toBe(StatusCodes.OK);
+        expect(JSON.parse(result.text)).toEqual([]);
         expect(processQnASesssionsDataForMeetingTab).toBeCalledTimes(0);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(
@@ -1888,7 +1890,7 @@ describe('test get /:conversationId/activesessions api', () => {
         );
         expect(result.status).toBe(StatusCodes.FORBIDDEN);
         expect(result.text).toEqual(
-            `user is not part of the given conversationId`
+            errorMessages.UserIsNotPartOfConversationErrorMessage
         );
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(

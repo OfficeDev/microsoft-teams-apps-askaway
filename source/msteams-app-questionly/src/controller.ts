@@ -1,6 +1,5 @@
 // Middleman file to allow for communication between the bot, database, and adaptive card builder.
 import * as adaptiveCardBuilder from 'src/adaptive-cards/adaptiveCardBuilder'; // To populate adaptive cards
-import { ok, err, Result } from 'src/util/resultWrapper';
 import { AdaptiveCard } from 'adaptivecards';
 import { exceptionLogger, trackCreateQnASessionEvent, trackCreateQuestionEvent } from 'src/util/exceptionTracking';
 import jimp from 'jimp';
@@ -11,9 +10,13 @@ import {
     qnaSessionDataService,
     questionDataService,
     IQnASession_populated,
+    IConversation,
 } from 'msteams-app-questionly.data';
 import { isPresenterOrOrganizer } from 'src/util/meetingsUtility';
-import { InsufficientPermissionsToCreateOrEndQnASessionError } from 'src/errors/insufficientPermissionsToCreateOrEndQnASessionError';
+import {
+    UnauthorizedAccessError,
+    UnauthorizedAccessErrorCode,
+} from 'src/errors/unauthorizedAccessError';
 import {
     triggerBackgroundJobForQnaSessionCreatedEvent,
     triggerBackgroundJobForQnaSessionEndedEvent,
@@ -82,8 +85,8 @@ export const startQnASession = async (
                 serviceURL
             ))
         ) {
-            throw new InsufficientPermissionsToCreateOrEndQnASessionError(
-                'Only a Presenter or an Organizer can create new QnA Session.'
+            throw new UnauthorizedAccessError(
+                UnauthorizedAccessErrorCode.InsufficientPermissionsToCreateOrEndQnASession
             );
         }
     }
@@ -126,7 +129,7 @@ export const generateLeaderboard = async (
     qnaSessionId: string,
     aadObjectId: string,
     theme: string
-): Promise<Result<AdaptiveCard, Error>> => {
+): Promise<AdaptiveCard> => {
     try {
         const questionData: IQuestionPopulatedUser[] = await questionDataService.getQuestionData(
             qnaSessionId
@@ -138,19 +141,17 @@ export const generateLeaderboard = async (
         const isActiveQnA = await qnaSessionDataService.isActiveQnA(
             qnaSessionId
         );
-        return ok(
-            await adaptiveCardBuilder.generateLeaderboard(
-                questionData,
-                aadObjectId,
-                qnaSessionId,
-                isHost,
-                isActiveQnA,
-                theme
-            )
+        return await adaptiveCardBuilder.generateLeaderboard(
+            questionData,
+            aadObjectId,
+            qnaSessionId,
+            isHost,
+            isActiveQnA,
+            theme
         );
     } catch (error) {
         exceptionLogger(error);
-        return err(new Error('Retrieving Leaderboard Failed.'));
+        throw new Error('Retrieving Leaderboard Failed.');
     }
 };
 
@@ -164,15 +165,10 @@ export const setActivityId = async (
     activityId: string
 ) => {
     try {
-        return ok(
-            await qnaSessionDataService.updateActivityId(
-                qnaSessionId,
-                activityId
-            )
-        );
+        await qnaSessionDataService.updateActivityId(qnaSessionId, activityId);
     } catch (error) {
         exceptionLogger(error);
-        return err(error);
+        throw error;
     }
 };
 
@@ -200,7 +196,7 @@ export const submitNewQuestion = async (
     userName: string,
     questionContent: string,
     conversationId: string
-): Promise<Result<IQuestion, Error>> => {
+): Promise<IQuestion> => {
     try {
         const question: IQuestion = await questionDataService.createQuestion(
             qnaSessionId,
@@ -224,38 +220,53 @@ export const submitNewQuestion = async (
             userAadObjId
         );
 
-        return ok(question);
+        return question;
     } catch (error) {
         exceptionLogger(error);
-        return err(Error('Failed to submit new question'));
+        throw new Error('Failed to submit new question');
     }
 };
 
 /**
  * Marks question as answered and triggers background job.
- * @param conversationId - conversation id.
+ * @param conversationData - conversation document.
+ * @param meetingId - meeting id.
  * @param qnaSessionId - qnasession id.
  * @param questionId - question id.
  * @param aadObjectId - aad object id of user who marked question as answered.
  */
 export const markQuestionAsAnswered = async (
-    conversationId: string,
+    conversationData: IConversation,
+    meetingId: string,
     qnaSessionId: string,
     questionId: string,
     aadObjectId: string
 ) => {
-    await questionDataService.markQuestionAsAnswered(
-        conversationId,
-        qnaSessionId,
-        questionId
-    );
+    if (
+        await isPresenterOrOrganizer(
+            meetingId,
+            aadObjectId,
+            conversationData.tenantId,
+            conversationData.serviceUrl
+        )
+    ) {
+        await questionDataService.markQuestionAsAnswered(
+            conversationData.id,
+            qnaSessionId,
+            questionId
+        );
 
-    await triggerBackgroundJobForQuestionMarkedAsAnsweredEvent(
-        conversationId,
-        questionId,
-        qnaSessionId,
-        aadObjectId
-    );
+        await triggerBackgroundJobForQuestionMarkedAsAnsweredEvent(
+            conversationData.id,
+            questionId,
+            qnaSessionId,
+            aadObjectId
+        );
+    } else {
+        throw new UnauthorizedAccessError(
+            UnauthorizedAccessErrorCode.InsufficientPermissionsToMarkQuestionAsAnswered
+        );
+    }
 };
 
 /**
@@ -331,7 +342,7 @@ export const updateUpvote = async (
     name: string,
     conversationId: string,
     theme: string
-): Promise<Result<AdaptiveCard, Error>> => {
+): Promise<AdaptiveCard> => {
     try {
         const response = await questionDataService.updateUpvote(
             questionId,
@@ -362,7 +373,7 @@ export const updateUpvote = async (
         );
     } catch (error) {
         exceptionLogger(error);
-        return err(Error('Failed to upvote question.'));
+        throw new Error('Failed to upvote question.');
     }
 };
 
@@ -411,8 +422,8 @@ export const endQnASession = async (
             serviceURL
         );
         if (!canEndQnASession) {
-            throw new InsufficientPermissionsToCreateOrEndQnASessionError(
-                'Only a Presenter or an Organizer can end Q & A Session.'
+            throw new UnauthorizedAccessError(
+                UnauthorizedAccessErrorCode.InsufficientPermissionsToCreateOrEndQnASession
             );
         }
     } else {
@@ -454,18 +465,16 @@ export const getResubmitQuestionCard = (
 export const isHost = async (
     qnaSessionId: string,
     userAadObjId: string
-): Promise<Result<boolean, Error>> => {
+): Promise<boolean> => {
     try {
         const result = await qnaSessionDataService.isHost(
             qnaSessionId,
             userAadObjId
         );
-        return ok(result);
+        return result;
     } catch (error) {
         exceptionLogger(error);
-        return err(
-            Error('Failed to check if user is host for this QnA session')
-        );
+        throw new Error('Failed to check if user is host for this QnA session');
     }
 };
 
@@ -506,19 +515,19 @@ export const generateInitialsImage = async (
 export const validateConversationId = async (
     qnaSessionId: string,
     conversationId: string
-): Promise<Result<boolean, Error>> => {
+): Promise<boolean> => {
     try {
         const qnaSessionData = await qnaSessionDataService.getQnASessionData(
             qnaSessionId
         );
-        return ok(
+        return (
             qnaSessionData.conversationId.split(';')[0] ===
-                conversationId.split(';')[0]
+            conversationId.split(';')[0]
         );
     } catch (error) {
         exceptionLogger(error);
-        return err(
-            new Error('Unable to validate conversationId of incoming request')
+        throw new Error(
+            'Unable to validate conversationId of incoming request'
         );
     }
 };
@@ -527,14 +536,12 @@ export const validateConversationId = async (
  * Calls database to check if current QnA session is active
  * @param qnaSessionId - id of the current QnA session
  */
-export const isActiveQnA = async (
-    qnaSessionId: string
-): Promise<Result<boolean, Error>> => {
+export const isActiveQnA = async (qnaSessionId: string): Promise<boolean> => {
     try {
         const result = await qnaSessionDataService.isActiveQnA(qnaSessionId);
-        return ok(result);
+        return result;
     } catch (error) {
         exceptionLogger(error);
-        return err(Error('Failed to check if QnA session is active'));
+        throw new Error('Failed to check if QnA session is active');
     }
 };

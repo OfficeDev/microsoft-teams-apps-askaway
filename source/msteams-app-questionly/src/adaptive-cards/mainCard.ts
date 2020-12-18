@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/tslint/config */
 import { IAdaptiveCard } from 'adaptivecards';
-import { err, ok, Result } from 'src/util/resultWrapper';
 import { ISubmitAction } from 'adaptivecards/lib/schema';
 import { exceptionLogger } from 'src/util/exceptionTracking';
 import { mainCardStrings } from 'src/localization/locale';
@@ -219,14 +218,12 @@ const actions = () => [
  * Extracts injected data from the master card
  * @param card - the master card
  */
-export const extractMainCardData = (
-    card: IAdaptiveCard
-): Result<MainCardData, null> => {
+export const extractMainCardData = (card: IAdaptiveCard): MainCardData => {
     try {
         if (!card.body) throw Error('Non-existent card body');
-        return ok(card.msTeams.entities[0].data);
+        return card.msTeams.entities[0].data;
     } catch (error) {
         exceptionLogger(error);
-        return err(error);
+        throw error;
     }
 };

@@ -20,6 +20,7 @@
         "@babel/preset-env": "^7.10.2",
         "@babel/preset-typescript": "^7.10.1",
         "@fluentui/react-northstar": "^0.51.2",
+        "@microsoft/signalr": "^5.0.0",
         "@microsoft/applicationinsights-react-js": "^3.0.5",
         "@microsoft/applicationinsights-web": "^2.5.10",
         "@microsoft/teams-js": "^1.8.0",

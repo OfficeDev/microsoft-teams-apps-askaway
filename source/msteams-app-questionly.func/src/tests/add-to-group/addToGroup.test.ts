@@ -8,6 +8,8 @@ import {
   initiateDBConnection,
   getConversationData,
 } from "../../utils/dbUtility";
+import { StatusCodes } from "http-status-codes";
+
 jest.mock("../../services/authService");
 jest.mock("../../utils/signalRUtility");
 jest.mock("msteams-app-questionly.common");
@@ -43,7 +45,7 @@ beforeEach(() => {
 test("tests add to group function for bad request: connectionId missing", async () => {
   delete request.body.connectionId;
   await httpTrigger(triggerMockContext, request);
-  expect(triggerMockContext.res.status).toBe(400);
+  expect(triggerMockContext.res.status).toBe(StatusCodes.BAD_REQUEST);
   expect(triggerMockContext.res.body).toBe(
     "Parameter connectionId is missing."
   );
@@ -52,7 +54,7 @@ test("tests add to group function for bad request: connectionId missing", async 
 test("tests add to group function for bad request: conversationId missing", async () => {
   delete request.body.conversationId;
   await httpTrigger(triggerMockContext, request);
-  expect(triggerMockContext.res.status).toBe(400);
+  expect(triggerMockContext.res.status).toBe(StatusCodes.BAD_REQUEST);
   expect(triggerMockContext.res.body).toBe(
     "Parameter conversationId is missing."
   );
@@ -65,7 +67,7 @@ test("tests add to group function for authorization error", async () => {
 
   await httpTrigger(triggerMockContext, request);
   expect(authenticateRequest).toBeCalledTimes(1);
-  expect(triggerMockContext.res.status).toBe(401);
+  expect(triggerMockContext.res.status).toBe(StatusCodes.UNAUTHORIZED);
   expect(triggerMockContext.res.body).toBe("Unauthorized");
 });
 
@@ -77,7 +79,7 @@ test("tests add to group function for exception from from auth function", async 
   await httpTrigger(triggerMockContext, request);
 
   expect(authenticateRequest).toBeCalledTimes(1);
-  expect(triggerMockContext.res.status).toBe(500);
+  expect(triggerMockContext.res.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
   expect(triggerMockContext.res.body).toBe(null);
   expect(triggerMockContext.log.error).toBeCalledTimes(1);
   expect(triggerMockContext.log.error).toBeCalledWith(testError);
@@ -99,7 +101,7 @@ test("tests add to group function: conversation document is not present", async 
   expect(authenticateRequest).toBeCalledTimes(1);
   expect(initiateDBConnection).toBeCalledTimes(1);
 
-  expect(triggerMockContext.res.status).toBe(500);
+  expect(triggerMockContext.res.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
   expect(triggerMockContext.res.body).toBe(null);
   expect(triggerMockContext.log.error).toBeCalledTimes(1);
   expect(triggerMockContext.log.error).toBeCalledWith(testError);
@@ -133,7 +135,7 @@ test("tests add to group function: user not part of conversation", async () => {
     testConversation.tenantId,
     testUserId
   );
-  expect(triggerMockContext.res.status).toBe(401);
+  expect(triggerMockContext.res.status).toBe(StatusCodes.UNAUTHORIZED);
   expect(triggerMockContext.res.body).toBe("Unauthorized");
 });
 
@@ -165,7 +167,7 @@ test("tests add to group function: exception from verifyUserFromConversationId",
     testConversation.tenantId,
     testUserId
   );
-  expect(triggerMockContext.res.status).toBe(500);
+  expect(triggerMockContext.res.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
   expect(triggerMockContext.res.body).toBe(null);
   expect(triggerMockContext.log.error).toBeCalledTimes(1);
   expect(triggerMockContext.log.error).toBeCalledWith(testError);
@@ -203,7 +205,7 @@ test("tests add to group function: exception from addConnectionToGroup", async (
     testConversation.tenantId,
     testUserId
   );
-  expect(triggerMockContext.res.status).toBe(500);
+  expect(triggerMockContext.res.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
   expect(triggerMockContext.res.body).toBe(null);
   expect(triggerMockContext.log.error).toBeCalledTimes(1);
   expect(triggerMockContext.log.error).toBeCalledWith(testError);
@@ -242,6 +244,6 @@ test("tests add to group function: positive test case", async () => {
     testConversation.tenantId,
     testUserId
   );
-  expect(triggerMockContext.res.status).toBe(200);
+  expect(triggerMockContext.res.status).toBe(StatusCodes.OK);
   expect(triggerMockContext.log.error).not.toBeCalled();
 });
