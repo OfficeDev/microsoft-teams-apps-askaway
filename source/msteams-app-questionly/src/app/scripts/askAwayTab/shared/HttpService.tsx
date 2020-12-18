@@ -108,6 +108,32 @@ export class HttpService {
     }
 
     /**
+     * Patch Method
+     * @param url - `url` is the server URL that will be used for the request
+     * @param data - `data` is the data to be sent as the request body. Only applicable for request methods 'PUT', 'POST', and 'PATCH'
+     * @param handleError - handles the failure case
+     * @param config - `config` is the config that was provided to `axios` for the request
+     */
+    public async patch<T = any, R = AxiosResponse<T>>(
+        url: string,
+        data?: any,
+        handleError = true,
+        config?: AxiosRequestConfig
+    ): Promise<R> {
+        try {
+            config = await this.setupAuthorizationHeader(config);
+            return await axios.patch(getBaseUrl() + url, data, config);
+        } catch (error) {
+            if (handleError) {
+                this.handleError(error);
+                throw error;
+            } else {
+                throw error;
+            }
+        }
+    }
+
+    /**
      * Handle Error case
      * @param error
      */

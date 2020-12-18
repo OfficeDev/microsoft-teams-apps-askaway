@@ -24,6 +24,8 @@ import {
     LeaveIcon,
     RetryIcon,
 } from '@fluentui/react-icons-northstar';
+const EmptySessionImage = require('./../../web/assets/create_session.png');
+// const EndSessionImage =  require('./../../web/assets/end_session.png');
 
 export interface MeetingPanelProps {
     teamsData: any;
@@ -47,7 +49,6 @@ class MeetingPanel extends React.Component<
 > {
     constructor(props) {
         super(props);
-        this.onShowTaskModule = this.onShowTaskModule.bind(this);
         this.state = {
             activeSessionData: null,
             showLoader: true,
@@ -60,18 +61,23 @@ class MeetingPanel extends React.Component<
                 isDescription: false,
             },
         };
+        this.onShowTaskModule = this.onShowTaskModule.bind(this);
     }
 
     componentDidMount() {
         this.getActiveSession();
     }
 
+    forceUpdateHandler = () => {
+        window.location.reload();
+    };
+
     /**
      * To Identify Active Session
      */
     private getActiveSession() {
         HttpService.get(
-            `/conversations/${this.props.teamsData.chatId}/sessions`
+            `/conversations/${this.props.teamsData.chatId}/activesessions`
         )
             .then((response: any) => {
                 if (response && response.data && response.data.length > 0) {
@@ -85,6 +91,31 @@ class MeetingPanel extends React.Component<
                 this.setState({ showLoader: false });
             });
     }
+
+    /**
+     * To End the active session
+     */
+    endActiveSession = (e) => {
+        if (
+            this.state.activeSessionData &&
+            this.state.activeSessionData.sessionId !== undefined
+        ) {
+            this.setState({ showLoader: true });
+            HttpService.patch(
+                `/conversations/${this.props.teamsData.chatId}/sessions/${this.state.activeSessionData.sessionId}`,
+                { action: 'end' }
+            )
+                .then((response: any) => {
+                    this.setState({
+                        showLoader: false,
+                        activeSessionData: null,
+                    });
+                })
+                .catch((error) => {
+                    this.setState({ showLoader: false });
+                });
+        }
+    };
 
     /**
      * Display Create AMA session form
@@ -118,9 +149,7 @@ class MeetingPanel extends React.Component<
                             response['data']['qnaSessionId']
                         ) {
                             this.showAlertModel(true);
-                            this.setState({
-                                activeSessionData: response['data'],
-                            });
+                            this.getActiveSession();
                         } else {
                             this.showAlertModel(false);
                         }
@@ -223,14 +252,15 @@ class MeetingPanel extends React.Component<
     /**
      * Show this screen when no questions posted
      */
-    private noQuestionDesign(text) {
+    private noQuestionDesign(image, text) {
+        console.log('image12324', image);
         return (
             <div className="no-question">
                 <Image
                     className="create-session"
                     alt="image"
                     styles={{ width: '17rem' }}
-                    src={require('./../../web/assets/create_session.png')}
+                    src={image}
                 />
                 <Flex.Item align="center">
                     <Text className="text-caption-panel" content={text} />
@@ -246,11 +276,12 @@ class MeetingPanel extends React.Component<
         return (
             <Flex hAlign="center" vAlign="center">
                 {this.noQuestionDesign(
-                    'Welcome! Click the button below to start a new session'
+                    EmptySessionImage,
+                    'Ready to field questions?'
                 )}
                 <Flex.Item align="center">
                     <Button className="button" onClick={this.onShowTaskModule}>
-                        <Button.Content>Create a new session</Button.Content>
+                        <Button.Content>Start a Q&A session</Button.Content>
                     </Button>
                 </Flex.Item>
             </Flex>
@@ -261,7 +292,7 @@ class MeetingPanel extends React.Component<
      * Meeting panel header
      */
     // tslint:disable-next-line:max-func-body-length
-    private showMenubar(sessionTitle) {
+    showMenubar = (sessionTitle) => {
         const menuItems: ShorthandCollection<MenuItemProps> = [
             {
                 icon: (
@@ -279,11 +310,13 @@ class MeetingPanel extends React.Component<
                         {
                             key: '5',
                             content: 'Refresh session',
+                            onClick: this.forceUpdateHandler,
                             icon: <RetryIcon outline />,
                         },
                         {
                             key: '8',
                             content: 'End session',
+                            onClick: this.endActiveSession,
                             icon: <LeaveIcon outline />,
                         },
                     ],
@@ -314,12 +347,12 @@ class MeetingPanel extends React.Component<
                 </FlexItem>
             </Flex>
         );
-    }
+    };
 
     /**
      * When No question posted yets
      */
-    private postQuestions() {
+    postQuestions = () => {
         const sessionTitle = this.state.input.title
             ? this.state.input.title
             : this.state.activeSessionData.title;
@@ -328,7 +361,8 @@ class MeetingPanel extends React.Component<
                 {this.showMenubar(sessionTitle)}
                 <Flex hAlign="center" vAlign="center">
                     {this.noQuestionDesign(
-                        'Welcome! No questions posted yet. Type a question to start!'
+                        EmptySessionImage,
+                        'Q & A session is live...Ask away!'
                     )}
                     <div
                         style={{
@@ -346,7 +380,7 @@ class MeetingPanel extends React.Component<
                 </Flex>
             </React.Fragment>
         );
-    }
+    };
 
     /**
      * The render() method to create the UI of the meeting panel
