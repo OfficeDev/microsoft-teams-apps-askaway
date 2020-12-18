@@ -11,9 +11,9 @@ import { errorStrings } from "../../constants/errorStrings";
 jest.mock("azure-ad-jwt-lite");
 
 const mockRequest: HttpRequest = {
-  headers: { authorizationHeaderConstant: "testToken" },
+  headers: null,
   url: null,
-  query: null,
+  query: { authorizationHeaderConstant: "testToken" },
   params: null,
   method: null,
 };
@@ -25,7 +25,7 @@ beforeEach(() => {
   process.env.AzureAd_ValidIssuers =
     "https://login.microsoftonline.com/TENANT_ID/v2.0,https://sts.windows.net/TENANT_ID/";
   process.env.TenantId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
-  mockRequest.headers[authorizationHeaderConstant] = "test";
+  mockRequest.query[authorizationHeaderConstant] = "test";
 });
 
 test("tests authenticateRequest", async () => {

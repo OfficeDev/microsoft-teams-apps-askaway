@@ -24,7 +24,7 @@
   },
   "Host": {
     "LocalHttpPort": 7071,
-    "CORS": "http://localhost:8080,https://azure-samples.github.io",
+    "CORS": "http://localhost:3007,https://{{ngrokhost}}.ngrok.io",
     "CORSCredentials": true
   }
 }

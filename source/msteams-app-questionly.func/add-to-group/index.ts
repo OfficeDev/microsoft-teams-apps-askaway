@@ -15,6 +15,7 @@ import {
 } from "../src/utils/responseUtility";
 import { isValidParam } from "../src/utils/requestUtility";
 import { errorStrings } from "../src/constants/errorStrings";
+import { StatusCodes } from "http-status-codes";
 
 const httpTrigger: AzureFunction = async function (
   context: Context,
@@ -82,9 +83,9 @@ const httpTrigger: AzureFunction = async function (
     } catch (error) {
       context.log.error(error);
 
-      if (error?.response?.status === 404) {
+      if (error?.response?.status === StatusCodes.NOT_FOUND) {
         context.res = {
-          status: 404,
+          status: StatusCodes.NOT_FOUND,
           body: error["message"],
         };
       } else {
@@ -95,7 +96,7 @@ const httpTrigger: AzureFunction = async function (
     }
 
     context.res = {
-      status: 200,
+      status: StatusCodes.OK,
     };
   } catch (error) {
     context.log.error(error);

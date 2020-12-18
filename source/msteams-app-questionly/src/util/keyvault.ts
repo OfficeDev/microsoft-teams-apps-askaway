@@ -18,7 +18,7 @@ let keyVaultSecretClient: SecretClient;
 /**
  * Initialize memory cache and secret client for key vault.
  */
-export const initKeyVault = async () => {
+export const initKeyVault = () => {
     memCache = new memoryCache.Cache();
 
     const credential = new DefaultAzureCredential();

@@ -1,11 +1,17 @@
-import Express from 'express';
-import * as http from 'http';
-import morgan from 'morgan';
 import debug from 'debug';
-import compression from 'compression';
 import { config as dotenvConfig } from 'dotenv';
-import { join } from 'path';
+import Express from 'express';
+import { Express as ExpressType } from 'express-serve-static-core';
 
+// Initialize debug logging module
+const log = debug('msteams');
+
+log(`Initializing Microsoft Teams Express hosted App...`);
+
+// Initialize dotenv, to use .env file settings if existing.
+dotenvConfig();
+
+// The import of components has to be done AFTER the dotenv config.
 import {
     initiateAppInsights,
     exceptionLogger,
@@ -16,88 +22,79 @@ import {
     initiateConnection,
 } from 'msteams-app-questionly.data';
 import { getMongoURI, initKeyVault } from 'src/util/keyvault';
-import { setupBot } from 'src/util/botSetup';
-import { setupClientApp } from 'src/util/clientAppSetup';
-import { setupRestApis } from 'src/util/restApiSetup';
+import { setupBot } from 'src/util/setupBot';
+import { setupClientApp } from 'src/util/setupClientApp';
+import { setupRestApis } from 'src/util/setupRestApis';
 import { initBackgroundJobSetup } from 'src/background-job/backgroundJobTrigger';
-
-// Initialize debug logging module
-const log = debug('msteams');
-
-log(`Initializing Microsoft Teams Express hosted App...`);
-
-// Initialize dotenv, to use .env file settings if existing
-dotenvConfig();
-
-// Initialize key vault
-initKeyVault();
-
-// Set up app insights
-initiateAppInsights();
-
-// initiate background job setup.
-initBackgroundJobSetup();
-
-// The import of components has to be done AFTER the dotenv config
 import { initLocalization } from 'src/localization/locale';
+import { setupWebServerApp, startWebServer } from 'src/util/webServerUtility';
 
-// initialize localization
-initLocalization();
-
-// Create the Express webserver
-const express = Express();
-const port = process.env.port || process.env.PORT || 3007;
-
-// Inject the raw request body onto the request object
-express.use(
-    Express.json({
-        verify: (req, res, buf: Buffer): void => {
-            (<any>req).rawBody = buf.toString();
-        },
-    })
-);
-
-express.use(Express.urlencoded({ extended: true }));
-
-// Add serving of static files
-express.use(Express.static(join(__dirname, 'public')));
-
-// Add simple logging
-express.use(morgan('tiny'));
-
-// Add compression - uncomment to remove compression
-express.use(compression());
-
+/**
+ * Establishes DB connection.
+ */
 async function setupDBConection() {
     const mongoDBConnectionString = await getMongoURI();
     // initiate database
     await initiateConnection(mongoDBConnectionString);
 }
 
-async function setupApp() {
+/**
+ * Initialize key vault, localization, DB connection etc.
+ */
+async function initializeSupportingModules() {
+    // Initialize key vault
+    initKeyVault();
+
+    // Set up app insights
+    await initiateAppInsights();
+
+    // Initialize localization
+    await initLocalization();
+
+    // Initiate background job setup.
+    await initBackgroundJobSetup();
+
+    // Establish db connection.
+    await setupDBConection();
+}
+
+/**
+ * Setup bot routes, client app routes and rest api routes on the app.
+ * @param express - express app.
+ */
+async function setupRoutes(express: ExpressType) {
     const conversationDataService: IConversationDataService = new ConversationDataService();
-    // setup bot
+    // Setup bot.
     await setupBot(express, conversationDataService);
 
-    // setup client app
+    // Setup client app.
     setupClientApp(express);
 
-    // setup rest apis
+    // Setup rest apis.
     setupRestApis(express, conversationDataService);
 }
 
-setupDBConection().catch((error) => {
+/**
+ * Initialize necessary modules and start the webserver.
+ */
+async function startup() {
+    // Initialize key vault, localization, db connection etc.
+    await initializeSupportingModules();
+
+    const express = Express();
+
+    // Set up necessary middlewares on the express app.
+    setupWebServerApp(express);
+
+    // Configure and register necessary routes on the express app.
+    await setupRoutes(express);
+
+    // Start the web server.
+    startWebServer(express);
+}
+
+startup().catch((error) => {
+    log('Error starting web app!');
     exceptionLogger(error);
-});
-
-setupApp().catch((error) => {
-    exceptionLogger(error);
-});
-
-// Set the port
-express.set('port', port);
-
-// Start the webserver
-http.createServer(express).listen(port, () => {
-    log(`Server running on ${port}`);
+    throw error;
 });
