@@ -11,7 +11,6 @@ import {
     getStartQnACard,
     validateConversationId,
 } from 'src/Controller';
-import { ok, err } from 'src/util/resultWrapper';
 import { errorStrings, initLocalization } from 'src/localization/locale';
 import { ConversationDataService } from 'msteams-app-questionly.data';
 import { getMeetingIdFromContext } from 'src/util/meetingsUtility';
@@ -295,7 +294,7 @@ describe('handle submit question', () => {
         };
 
         (<any>submitNewQuestion).mockImplementationOnce(() => {
-            return ok(true);
+            return true;
         });
 
         expect(
@@ -330,7 +329,7 @@ describe('handle submit question', () => {
         };
 
         (<any>submitNewQuestion).mockImplementation(() => {
-            return ok(true);
+            return true;
         });
 
         expect(
@@ -362,7 +361,7 @@ describe('handle submit question', () => {
         };
 
         (<any>submitNewQuestion).mockImplementation(() => {
-            return err(true);
+            throw new Error();
         });
 
         expect(
@@ -404,7 +403,9 @@ test('handle submit upvote', async () => {
         },
         context: null,
     };
-    (<any>updateUpvote).mockImplementation(() => err(true));
+    (<any>updateUpvote).mockImplementation(() => {
+        throw new Error();
+    });
     await handler.handleTeamsTaskModuleSubmitUpvote(context, taskModuleRequest);
 
     expect(updateUpvote).toBeCalledTimes(1);
@@ -454,7 +455,7 @@ test('handle submit end qna', async () => {
             qnaSessionId: 'qnaSessionId',
         },
     };
-    (<any>endQnASession).mockImplementation(() => ok(true));
+    (<any>endQnASession).mockImplementation(() => true);
     await handler.handleTeamsTaskModuleSubmitEndQnA(taskModuleRequest, context);
 
     expect(endQnASession).toBeCalledTimes(1);
@@ -470,7 +471,7 @@ test('handle submit end qna', async () => {
 
 test('bot message preview send', async () => {
     const handler = <any>new AskAway(new ConversationDataService());
-    handler._extractMainCardFromActivityPreview = jest.fn(() => ok(cardData));
+    handler._extractMainCardFromActivityPreview = jest.fn(() => cardData);
     const sampleMeetingId = 'sampleMeetingId';
     (<any>getMeetingIdFromContext) = jest.fn();
     (<any>getMeetingIdFromContext).mockImplementationOnce(() => {
@@ -503,7 +504,7 @@ test('bot message preview send', async () => {
         description: 'card description',
     };
 
-    (<any>startQnASession).mockImplementation(() => ok(true));
+    (<any>startQnASession).mockImplementation(() => true);
 
     await handler.handleTeamsMessagingExtensionBotMessagePreviewSend(
         context,

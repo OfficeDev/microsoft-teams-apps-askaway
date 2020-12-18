@@ -23,7 +23,6 @@ import {
     getParticipantRole,
     isPresenterOrOrganizer,
 } from 'src/util/meetingsUtility';
-import { ok } from 'src/util/resultWrapper';
 import { verifyUserFromConversationId } from 'msteams-app-questionly.common';
 import { getMicrosoftAppPassword } from 'src/util/keyvault';
 import { restApiErrorMiddleware } from 'src/routes/restApiErrorMiddleware';
@@ -753,9 +752,9 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
         const testSessionId = 'testId';
         const questionId = 'testQuestionId';
         const testQuestionContent = 'testQuestionContent';
-        const questionRes = ok({
+        const questionRes = {
             _id: questionId,
-        });
+        };
 
         const testConversation = {
             _id: sampleConversationId,

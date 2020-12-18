@@ -182,15 +182,11 @@ router.post(
                 conversationId
             );
 
-            if (result.isOk()) {
-                res.status(StatusCodes.CREATED).send({
-                    questionId: result.value._id,
-                });
+            res.status(StatusCodes.CREATED).send({
+                questionId: result._id,
+            });
 
-                return;
-            } else {
-                throw result.value;
-            }
+            return;
         } catch (error) {
             next(error);
         }
