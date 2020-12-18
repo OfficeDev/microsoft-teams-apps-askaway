@@ -122,6 +122,32 @@ export class HttpService {
     }
 
     /**
+     * Returns auth token.
+     */
+    public async getAuthToken(): Promise<string> {
+        microsoftTeams.initialize();
+
+        return new Promise<string>((resolve, reject) => {
+            const authTokenRequest = {
+                successCallback: (token: string) => {
+                    resolve(token);
+                },
+                failureCallback: (error: string) => {
+                    // When the getAuthToken function returns a "resourceRequiresConsent" error,
+                    // it means Azure AD needs the user's consent before issuing a token to the app.
+                    // The following code redirects the user to the "Sign in" page where the user can grant the consent.
+                    // Right now, the app redirects to the consent page for any error.
+                    console.error('Error from getAuthToken: ', error);
+                    // window.location.href = `/signin?locale=${i18n.language}`;
+                    reject(error);
+                },
+                resources: [],
+            };
+            microsoftTeams.authentication.getAuthToken(authTokenRequest);
+        });
+    }
+
+    /**
      * Handle Error case
      * @param error
      */
@@ -150,30 +176,12 @@ export class HttpService {
     private async setupAuthorizationHeader(
         config?: AxiosRequestConfig
     ): Promise<AxiosRequestConfig> {
-        microsoftTeams.initialize();
+        const authToken = await this.getAuthToken();
+        if (!config) {
+            config = axios.defaults;
+        }
 
-        return new Promise<AxiosRequestConfig>((resolve, reject) => {
-            const authTokenRequest = {
-                successCallback: (token: string) => {
-                    if (!config) {
-                        config = axios.defaults;
-                    }
-                    console.log('token', token);
-                    config.headers['Authorization'] = `Bearer ${token}`;
-                    // config.headers["Accept-Language"] = i18n.language;
-                    resolve(config);
-                },
-                failureCallback: (error: string) => {
-                    // When the getAuthToken function returns a "resourceRequiresConsent" error,
-                    // it means Azure AD needs the user's consent before issuing a token to the app.
-                    // The following code redirects the user to the "Sign in" page where the user can grant the consent.
-                    // Right now, the app redirects to the consent page for any error.
-                    console.error('Error from getAuthToken: ', error);
-                    // window.location.href = `/signin?locale=${i18n.language}`;
-                },
-                resources: [],
-            };
-            microsoftTeams.authentication.getAuthToken(authTokenRequest);
-        });
+        config.headers['Authorization'] = `Bearer ${authToken}`;
+        return config;
     }
 }

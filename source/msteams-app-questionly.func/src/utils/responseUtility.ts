@@ -1,4 +1,5 @@
 import { Context } from "@azure/functions";
+import { StatusCodes } from "http-status-codes";
 
 /**
  * Forms 401 Unauthorized response.
@@ -6,7 +7,7 @@ import { Context } from "@azure/functions";
  */
 export const createUnauthorizedErrorResponse = (context: Context): void => {
   context.res = {
-    status: 401,
+    status: StatusCodes.UNAUTHORIZED,
     body: "Unauthorized",
   };
 };
@@ -21,7 +22,7 @@ export const createBadRequestResponse = (
   error: string
 ): void => {
   context.res = {
-    status: 400,
+    status: StatusCodes.BAD_REQUEST,
     body: error,
   };
 };
@@ -32,7 +33,7 @@ export const createBadRequestResponse = (
  */
 export const createInternalServerErrorResponse = (context: Context): void => {
   context.res = {
-    status: 500,
+    status: StatusCodes.INTERNAL_SERVER_ERROR,
     body: null,
   };
 };
