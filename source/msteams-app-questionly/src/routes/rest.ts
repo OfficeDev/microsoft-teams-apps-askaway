@@ -5,17 +5,15 @@ import {
     IUser,
     IQnASession_populated,
 } from 'msteams-app-questionly.data';
-import { exceptionLogger } from 'src/util/exceptionTracking';
 import {
     processQnASesssionsDataForMeetingTab,
     patchActionForQuestion,
     getHostUserId,
-    ensureUserIsPartOfConversation,
+    ensureUserIsPartOfMeetingConversation,
+    ensureConversationBelongsToMeetingChat,
+    getAndEnsureRequestBodyContainsParameter,
 } from 'src/routes/restUtils';
-import {
-    getParticipantRole,
-    isPresenterOrOrganizer,
-} from 'src/util/meetingsUtility';
+import { getParticipantRole } from 'src/util/meetingsUtility';
 import { StatusCodes } from 'http-status-codes';
 import {
     downvoteQuestion,
@@ -25,6 +23,7 @@ import {
     submitNewQuestion,
     upvoteQuestion,
 } from 'src/controller';
+import { createResponseForBadRequest } from 'src/routes/responseUtility';
 
 export const router = Express.Router();
 let conversationDataService: IConversationDataService;
@@ -35,137 +34,145 @@ export const initializeRouter = (
     conversationDataService = _conversationDataService;
 };
 
-const isDefined = (param: string): boolean => {
-    return param !== '' && param !== undefined && param != null;
-};
-
 // Get session details
-router.get('/:conversationId/sessions/:sessionId', async (req, res) => {
-    const user: any = req.user;
-    const userId = user._id;
-    const conversationId = req.params['conversationId'];
-    const conversationData = await conversationDataService.getConversationData(
-        conversationId
-    );
-
-    if (
-        !(await ensureUserIsPartOfConversation(res, conversationData, userId))
-    ) {
-        return;
-    }
-
-    // This logic will be improved as part of rest api TASK 1211744, this is a boilerplate code.
-    res.send(
-        await qnaSessionDataService.getQnASessionData(req.params['sessionId'])
-    );
-});
-
-// Get all sessions
-router.get('/:conversationId/sessions', async (req, res) => {
-    let qnaSessionResponse;
-    try {
-        const user: any = req.user;
-        const userId = user._id;
-        const conversationId = req.params['conversationId'];
-        const conversationData = await conversationDataService.getConversationData(
-            conversationId
-        );
-
-        if (
-            !(await ensureUserIsPartOfConversation(
-                res,
-                conversationData,
-                userId
-            ))
-        ) {
-            return;
-        }
-
-        const qnaSessionsData: IQnASession_populated[] = await qnaSessionDataService.getAllQnASessionData(
-            conversationId
-        );
-
-        if (qnaSessionsData.length === 0) {
-            res.statusCode = StatusCodes.NO_CONTENT;
-        } else {
-            qnaSessionResponse = await processQnASesssionsDataForMeetingTab(
-                qnaSessionsData
-            );
-        }
-    } catch (err) {
-        exceptionLogger(err);
-        res.statusCode = StatusCodes.INTERNAL_SERVER_ERROR;
-        qnaSessionResponse = err.message;
-    }
-    res.send(qnaSessionResponse);
-});
-
-// Get user information
-router.get('/:conversationId/me', async (req, res) => {
-    let userRole;
-    try {
-        const user: any = req.user;
-        const userId = user._id;
-
-        const conversationId = req.params['conversationId'];
-        const conversation = await conversationDataService.getConversationData(
-            conversationId
-        );
-        const tenantId = conversation.tenantId;
-        const serviceUrl = conversation.serviceUrl;
-        const meetingId = conversation.meetingId;
-
-        if (meetingId === undefined) {
-            throw new Error(
-                `meeting does not exist for provided conversation id ${conversationId}`
-            );
-        }
-
-        userRole = await getParticipantRole(
-            meetingId,
-            userId,
-            tenantId,
-            serviceUrl
-        );
-    } catch (err) {
-        exceptionLogger(err);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(err.message);
-    }
-
-    res.send(userRole);
-});
-
-// Post a question
-router.post(
-    '/:conversationId/sessions/:sessionId/questions',
-    async (req, res) => {
-        let response;
+router.get(
+    '/:conversationId/sessions/:sessionId',
+    async (
+        req: Express.Request,
+        res: Express.Response,
+        next: Express.NextFunction
+    ) => {
         try {
-            const questionContent: string = req.body.questionContent;
-
-            if (!isDefined(questionContent)) {
-                res.status(StatusCodes.BAD_REQUEST).send(
-                    'questionContent is missing in the request'
-                );
-                return;
-            }
-
-            const user: IUser = <IUser>req.user;
+            const user: any = req.user;
             const userId = user._id;
             const conversationId = req.params['conversationId'];
             const conversationData = await conversationDataService.getConversationData(
                 conversationId
             );
 
-            if (
-                !(await ensureUserIsPartOfConversation(
-                    res,
-                    conversationData,
-                    userId
-                ))
-            ) {
+            await ensureUserIsPartOfMeetingConversation(
+                conversationData,
+                userId
+            );
+
+            // This logic will be improved as part of rest api TASK 1211744, this is a boilerplate code.
+            res.send(
+                await qnaSessionDataService.getQnASessionData(
+                    req.params['sessionId']
+                )
+            );
+        } catch (error) {
+            next(error);
+        }
+    }
+);
+
+// Get all sessions
+router.get(
+    '/:conversationId/sessions',
+    async (
+        req: Express.Request,
+        res: Express.Response,
+        next: Express.NextFunction
+    ) => {
+        try {
+            const user = <IUser>req.user;
+            const userId = user._id;
+            const conversationId = req.params['conversationId'];
+            const conversationData = await conversationDataService.getConversationData(
+                conversationId
+            );
+
+            await ensureUserIsPartOfMeetingConversation(
+                conversationData,
+                userId
+            );
+
+            const qnaSessionsData: IQnASession_populated[] = await qnaSessionDataService.getAllQnASessionData(
+                conversationId
+            );
+
+            if (qnaSessionsData.length === 0) {
+                res.status(StatusCodes.OK).send([]);
+
+                return;
+            } else {
+                res.send(
+                    await processQnASesssionsDataForMeetingTab(qnaSessionsData)
+                );
+
                 return;
             }
+        } catch (error) {
+            next(error);
+        }
+    }
+);
+
+// Get user information
+router.get(
+    '/:conversationId/me',
+    async (
+        req: Express.Request,
+        res: Express.Response,
+        next: Express.NextFunction
+    ) => {
+        try {
+            const user: any = req.user;
+            const userId = user._id;
+
+            const conversationId = req.params['conversationId'];
+            const conversation = await conversationDataService.getConversationData(
+                conversationId
+            );
+
+            ensureConversationBelongsToMeetingChat(conversation);
+
+            const tenantId = conversation.tenantId;
+            const serviceUrl = conversation.serviceUrl;
+            // `ensureConversationBelongsToMeetingChat` makes sure meeting id is available.
+            const meetingId = <string>conversation.meetingId;
+
+            const userRole = await getParticipantRole(
+                meetingId,
+                userId,
+                tenantId,
+                serviceUrl
+            );
+
+            res.send(userRole);
+        } catch (error) {
+            next(error);
+        }
+    }
+);
+
+// Post a question
+router.post(
+    '/:conversationId/sessions/:sessionId/questions',
+    async (
+        req: Express.Request,
+        res: Express.Response,
+        next: Express.NextFunction
+    ) => {
+        try {
+            const questionContent = getAndEnsureRequestBodyContainsParameter(
+                req,
+                'questionContent'
+            );
+
+            const user: IUser = <IUser>req.user;
+            const userId = user._id;
+            const conversationId = req.params['conversationId'];
+
+            const conversationData = await conversationDataService.getConversationData(
+                conversationId
+            );
+
+            await ensureUserIsPartOfMeetingConversation(
+                conversationData,
+                userId
+            );
 
             const result = await submitNewQuestion(
                 req.params['sessionId'],
@@ -175,154 +182,148 @@ router.post(
                 conversationId
             );
 
-            response = { questionId: result._id };
-        } catch (err) {
-            exceptionLogger(err);
-            res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(err.message);
-            return;
-        }
+            res.status(StatusCodes.CREATED).send({
+                questionId: result._id,
+            });
 
-        res.status(StatusCodes.CREATED).send(response);
+            return;
+        } catch (error) {
+            next(error);
+        }
     }
 );
 
 // Update ama session
-router.patch('/:conversationId/sessions/:sessionId', async (req, res) => {
-    try {
-        const action: string = req.body.action;
-
-        if (!isDefined(action)) {
-            res.status(StatusCodes.BAD_REQUEST).send(
-                'patch action is missing in the request'
+router.patch(
+    '/:conversationId/sessions/:sessionId',
+    async (
+        req: Express.Request,
+        res: Express.Response,
+        next: Express.NextFunction
+    ) => {
+        try {
+            const action = getAndEnsureRequestBodyContainsParameter(
+                req,
+                'action'
             );
-            return;
+
+            const user: IUser = <IUser>req.user;
+            const sessionId = req.params['sessionId'];
+            const conversationId = req.params['conversationId'];
+
+            if (action === 'end') {
+                const conversationData = await conversationDataService.getConversationData(
+                    conversationId
+                );
+
+                ensureConversationBelongsToMeetingChat(conversationData);
+
+                await endQnASession(
+                    sessionId,
+                    user._id,
+                    conversationId,
+                    conversationData.tenantId,
+                    conversationData.serviceUrl,
+                    // `ensureConversationBelongsToMeetingChat` makes sure meeting id is available
+                    <string>conversationData.meetingId
+                );
+            } else {
+                createResponseForBadRequest(
+                    res,
+                    `action ${action} is not supported`
+                );
+                return;
+            }
+
+            res.status(StatusCodes.NO_CONTENT).send();
+        } catch (error) {
+            next(error);
         }
+    }
+);
 
-        const user: IUser = <IUser>req.user;
-        const sessionId = req.params['sessionId'];
-        const conversationId = req.params['conversationId'];
+// Create a new qna session
+router.post(
+    '/:conversationId/sessions',
+    async (
+        req: Express.Request,
+        res: Express.Response,
+        next: Express.NextFunction
+    ) => {
+        try {
+            const user = <IUser>req.user;
+            const sessionTitle = getAndEnsureRequestBodyContainsParameter(
+                req,
+                'title'
+            );
+            const sessionDescription = getAndEnsureRequestBodyContainsParameter(
+                req,
+                'description'
+            );
+            const scopeId = getAndEnsureRequestBodyContainsParameter(
+                req,
+                'scopeId'
+            );
+            // Rest APIs will be triggered from meeting group chat only
+            const isChannel = false;
 
-        if (action === 'end') {
+            const conversationId = req.params['conversationId'];
             const conversationData = await conversationDataService.getConversationData(
                 conversationId
             );
 
-            if (!conversationData.meetingId) {
-                res.status(StatusCodes.BAD_REQUEST).send(
-                    `meeting does not exist for provided conversation id ${conversationId}`
-                );
-                return;
-            }
-            await endQnASession(
-                sessionId,
+            ensureConversationBelongsToMeetingChat(conversationData);
+
+            const serviceUrl = conversationData.serviceUrl;
+            const tenantId = conversationData.tenantId;
+            const meetingId = conversationData.meetingId;
+
+            const hostUserId = await getHostUserId(
                 user._id,
                 conversationId,
-                conversationData.tenantId,
-                conversationData.serviceUrl,
-                conversationData.meetingId
+                serviceUrl
             );
-        } else {
-            res.status(StatusCodes.BAD_REQUEST).send(
-                `action ${action} is not supported`
+
+            const session = await startQnASession(
+                sessionTitle,
+                sessionDescription,
+                user.userName,
+                user._id,
+                '',
+                conversationId,
+                tenantId,
+                scopeId,
+                hostUserId,
+                isChannel,
+                serviceUrl,
+                // `ensureConversationBelongsToMeetingChat` makes sure meeting id is available
+                <string>meetingId
             );
-            return;
+
+            res.send({ qnaSessionId: session._id });
+        } catch (error) {
+            next(error);
         }
-    } catch (err) {
-        exceptionLogger(err);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(err.message);
-        return;
     }
-
-    res.status(StatusCodes.NO_CONTENT).send();
-});
-
-// Create a new qna session
-router.post('/:conversationId/sessions', async (req, res) => {
-    let user;
-    if (req.user !== undefined) {
-        user = req.user;
-    } else {
-        exceptionLogger(new Error('User details could not be found.'));
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(
-            'User details could not be found.'
-        );
-        return;
-    }
-
-    if (
-        !isDefined(req.body) ||
-        !isDefined(req.body.title) ||
-        !isDefined(req.body.description) ||
-        !isDefined(req.body.scopeId) ||
-        !isDefined(req.body.isChannel)
-    ) {
-        res.status(StatusCodes.BAD_REQUEST).send(
-            `One or more parameters missing in the request payload. Check if title, description, scopeId, and isChannel are provided.`
-        );
-        return;
-    }
-
-    const conversationId = req.params['conversationId'];
-    let response;
-    try {
-        const conversationData = await conversationDataService.getConversationData(
-            conversationId
-        );
-        const serviceUrl = conversationData.serviceUrl;
-        const tenantId = conversationData.tenantId;
-        const meetingId = conversationData.meetingId;
-
-        // Throw error if meeting id is not defined.
-        if (!meetingId) {
-            throw new Error(
-                `meeting does not exist for provided conversation id ${conversationId}`
-            );
-        }
-
-        const hostUserId = await getHostUserId(
-            user._id,
-            conversationId,
-            serviceUrl
-        );
-
-        const session = await startQnASession(
-            req.body.title,
-            req.body.description,
-            user.userName,
-            user._id,
-            '',
-            conversationId,
-            tenantId,
-            req.body.scopeId,
-            hostUserId,
-            req.body.isChannel,
-            serviceUrl,
-            meetingId
-        );
-
-        response = { qnaSessionId: session._id };
-    } catch (error) {
-        exceptionLogger(error);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error.message);
-        return;
-    }
-    res.send(response);
-});
+);
 
 // Update question
 router.patch(
     '/:conversationId/sessions/:sessionId/questions/:questionId',
-    async (req, res) => {
+    async (
+        req: Express.Request,
+        res: Express.Response,
+        next: Express.NextFunction
+    ) => {
         try {
-            const action: string = req.body.action;
+            const action = getAndEnsureRequestBodyContainsParameter(
+                req,
+                'action'
+            );
 
-            if (!isDefined(action)) {
-                res.status(StatusCodes.BAD_REQUEST).send(
-                    'patch action is missing in the request'
-                );
-                return;
-            } else if (!patchActionForQuestion.includes(action.trim())) {
-                res.status(StatusCodes.BAD_REQUEST).send(
+            if (!patchActionForQuestion.includes(action.trim())) {
+                createResponseForBadRequest(
+                    res,
                     `action ${action} is not supported`
                 );
                 return;
@@ -338,15 +339,10 @@ router.patch(
             );
 
             if (action === 'upvote') {
-                if (
-                    !(await ensureUserIsPartOfConversation(
-                        res,
-                        conversationData,
-                        user._id
-                    ))
-                ) {
-                    return;
-                }
+                await ensureUserIsPartOfMeetingConversation(
+                    conversationData,
+                    user._id
+                );
 
                 await upvoteQuestion(
                     conversationId,
@@ -356,15 +352,10 @@ router.patch(
                     user.userName
                 );
             } else if (action === 'downvote') {
-                if (
-                    !(await ensureUserIsPartOfConversation(
-                        res,
-                        conversationData,
-                        user._id
-                    ))
-                ) {
-                    return;
-                }
+                await ensureUserIsPartOfMeetingConversation(
+                    conversationData,
+                    user._id
+                );
 
                 await downvoteQuestion(
                     conversationId,
@@ -373,73 +364,60 @@ router.patch(
                     user._id
                 );
             } else if (action === 'markAnswered') {
-                if (
-                    conversationData.meetingId !== undefined &&
-                    isPresenterOrOrganizer(
-                        conversationData.meetingId,
-                        user._id,
-                        conversationData.tenantId,
-                        conversationData.serviceUrl
-                    )
-                ) {
-                    await markQuestionAsAnswered(
-                        conversationId,
-                        sessionId,
-                        questionId,
-                        user._id
-                    );
-                } else {
-                    res.status(StatusCodes.FORBIDDEN).send(
-                        'Only a Presenter or an Organizer can mark question as answered.'
-                    );
-                    return;
-                }
-            }
-        } catch (err) {
-            exceptionLogger(err);
-            res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(err.message);
-            return;
-        }
+                ensureConversationBelongsToMeetingChat(conversationData);
 
-        res.status(StatusCodes.NO_CONTENT).send();
+                await markQuestionAsAnswered(
+                    conversationData,
+                    // `ensureConversationBelongsToMeetingChat` makes sure meeting id is available
+                    <string>conversationData.meetingId,
+                    sessionId,
+                    questionId,
+                    user._id
+                );
+            }
+
+            res.status(StatusCodes.NO_CONTENT).send();
+        } catch (error) {
+            next(error);
+        }
     }
 );
 
 // Get all active ama sessions
-router.get('/:conversationId/activesessions', async (req, res) => {
-    let response;
-    try {
-        const user: any = req.user;
-        const userId = user._id;
-        const conversationId = req.params['conversationId'];
-        const conversationData = await conversationDataService.getConversationData(
-            conversationId
-        );
+router.get(
+    '/:conversationId/activesessions',
+    async (
+        req: Express.Request,
+        res: Express.Response,
+        next: Express.NextFunction
+    ) => {
+        try {
+            const user: any = req.user;
+            const userId = user._id;
+            const conversationId = req.params['conversationId'];
+            const conversationData = await conversationDataService.getConversationData(
+                conversationId
+            );
 
-        if (
-            !(await ensureUserIsPartOfConversation(
-                res,
+            await ensureUserIsPartOfMeetingConversation(
                 conversationData,
                 userId
-            ))
-        ) {
-            return;
-        }
-
-        const activeSessions: IQnASession_populated[] = await qnaSessionDataService.getAllActiveQnASessionData(
-            conversationId
-        );
-        if (activeSessions.length === 0) {
-            res.statusCode = StatusCodes.NO_CONTENT;
-        } else {
-            response = await processQnASesssionsDataForMeetingTab(
-                activeSessions
             );
+
+            const activeSessions: IQnASession_populated[] = await qnaSessionDataService.getAllActiveQnASessionData(
+                conversationId
+            );
+            if (activeSessions.length === 0) {
+                res.status(StatusCodes.OK).send([]);
+                return;
+            } else {
+                res.send(
+                    await processQnASesssionsDataForMeetingTab(activeSessions)
+                );
+                return;
+            }
+        } catch (error) {
+            next(error);
         }
-    } catch (error) {
-        exceptionLogger(error);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error.message);
-        return;
     }
-    res.send(response);
-});
+);
