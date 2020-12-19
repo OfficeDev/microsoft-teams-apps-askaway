@@ -29,6 +29,8 @@ export interface CreateSessionState extends ITeamsBaseComponentState {
     };
 }
 
+export interface CreateSessionProps {}
+
 export class CreateSession extends msteamsReactBaseComponent<
     CreateSessionProps,
     CreateSessionState
@@ -36,7 +38,7 @@ export class CreateSession extends msteamsReactBaseComponent<
     constructor(props) {
         super(props);
         this.state = {
-            theme: '',
+            theme: {},
             input: {
                 title: '',
                 description: '',
@@ -104,6 +106,7 @@ export class CreateSession extends msteamsReactBaseComponent<
     }
 
     private showCreateSessionForm() {
+        console.log('##############################\n\n');
         return (
             <Flex column>
                 <Form

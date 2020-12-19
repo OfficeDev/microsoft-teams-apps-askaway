@@ -8,9 +8,9 @@ import enzymeToJson from 'enzyme-to-json';
 import { Header } from '@fluentui/react-northstar';
 // tslint:disable-next-line:no-relative-imports
 import { AskAwayTabRemove } from '../AskAwayTabRemove';
-import enzymeAdapterReact16 from 'enzyme-adapter-react-16';
+import Adapter from 'enzyme-adapter-react-16';
 
-configure({ adapter: new enzymeAdapterReact16() });
+configure({ adapter: new Adapter() });
 
 describe('AskAwayTabRemove Component', () => {
     // Snapshot Test Sample

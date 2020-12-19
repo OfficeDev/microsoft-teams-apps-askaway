@@ -1,0 +1,1 @@
+module.exports = {'fadfgs': 'afadfad'};
