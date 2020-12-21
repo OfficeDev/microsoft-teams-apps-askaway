@@ -235,13 +235,13 @@ export const markQuestionAsAnswered = async (
         )
     ) {
         await questionDataService.markQuestionAsAnswered(
-            conversationData.id,
+            conversationData._id,
             qnaSessionId,
             questionId
         );
 
         await triggerBackgroundJobForQuestionMarkedAsAnsweredEvent(
-            conversationData.id,
+            conversationData._id,
             questionId,
             qnaSessionId,
             aadObjectId
@@ -337,14 +337,14 @@ export const updateUpvote = async (
         if (response.upvoted) {
             await triggerBackgroundJobForQuestionUpvotedEvent(
                 conversationId,
-                response.question.id,
+                response.question._id,
                 qnaSessionId,
                 aadObjectId
             );
         } else {
             await triggerBackgroundJobForQuestionDownvotedEvent(
                 conversationId,
-                response.question.id,
+                response.question._id,
                 qnaSessionId,
                 aadObjectId
             );

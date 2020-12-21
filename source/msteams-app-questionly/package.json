@@ -56,7 +56,6 @@
         "memory-cache": "^0.2.0",
         "moment": "^2.27.0",
         "morgan": "1.9.1",
-        "msteams-app-questionly.data": "file:../msteams-app-questionly.data",
         "msteams-react-base-component": "^2.1.0",
         "passport-azure-ad": "^4.3.0",
         "pretty-quick": "^2.0.1",
