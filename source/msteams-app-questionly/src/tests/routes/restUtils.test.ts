@@ -8,7 +8,7 @@ import {
 
 import {
     processQnASesssionsDataForMeetingTab,
-    getTeamMemberId,
+    getTeamsMemberId,
     getMemberInfo,
     getAndEnsureRequestBodyContainsParameter,
     ensureUserIsPartOfMeetingConversation,
@@ -211,7 +211,7 @@ describe('test getHostUserId', () => {
                 id: sampleId,
             };
         });
-        const result = await getTeamMemberId(
+        const result = await getTeamsMemberId(
             sampleUserId,
             sampleConversationId,
             sampleServiceUrl
@@ -230,7 +230,7 @@ describe('test getHostUserId', () => {
             return undefined;
         });
 
-        await getTeamMemberId(
+        await getTeamsMemberId(
             sampleUserId,
             sampleConversationId,
             sampleServiceUrl

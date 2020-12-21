@@ -158,12 +158,7 @@ export const ensureUserIsPartOfMeetingConversation = async (
 
 export const patchActionForQuestion = ['upvote', 'downvote', 'markAnswered'];
 
-export const formResponseWhenUserIsNotPartOfConversation = (res) => {
-    res.statusCode = 403;
-    res.send(`user is not part of the given conversationId`);
-};
-
-export const getTeamMemberId = async (
+export const getTeamsMemberId = async (
     userId: string,
     conversationId: string,
     serviceUrl: string

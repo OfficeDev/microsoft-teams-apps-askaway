@@ -8,7 +8,7 @@ import {
 import {
     processQnASesssionsDataForMeetingTab,
     patchActionForQuestion,
-    getTeamMemberId,
+    getTeamsMemberId,
     ensureUserIsPartOfMeetingConversation,
     ensureConversationBelongsToMeetingChat,
     getAndEnsureRequestBodyContainsParameter,
@@ -218,7 +218,7 @@ router.patch(
 
                 ensureConversationBelongsToMeetingChat(conversationData);
 
-                const endedByUserId = await getTeamMemberId(user._id, conversationId, conversationData.serviceUrl);
+                const endedByUserId = await getTeamsMemberId(user._id, conversationId, conversationData.serviceUrl);
 
                 await endQnASession(
                     sessionId,
@@ -282,7 +282,7 @@ router.post(
             const tenantId = conversationData.tenantId;
             const meetingId = conversationData.meetingId;
 
-            const hostUserId = await getTeamMemberId(
+            const hostUserId = await getTeamsMemberId(
                 user._id,
                 conversationId,
                 serviceUrl
