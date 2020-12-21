@@ -158,6 +158,12 @@ export const ensureUserIsPartOfMeetingConversation = async (
 
 export const patchActionForQuestion = ['upvote', 'downvote', 'markAnswered'];
 
+/**
+ * Get teams member id from teams member info.  
+ * @param userId - AAD user id.
+ * @param conversationId - conversation id
+ * @param serviceUrl - service url.
+ */
 export const getTeamsMemberId = async (
     userId: string,
     conversationId: string,
