@@ -109,18 +109,18 @@ test("can create qna session", async () => {
     isChannel: true,
   };
 
-  const result = await qnaSessionDataService.createQnASession(
-    data.title,
-    data.description,
-    data.userName,
-    data.userAadObjId,
-    data.activityId,
-    data.conversationId,
-    data.tenantId,
-    data.scopeId,
-    data.hostUserId,
-    data.isChannel
-  );
+  const result = await qnaSessionDataService.createQnASession({
+    title: data.title,
+    description: data.description,
+    userName: data.userName,
+    userAadObjectId: data.userAadObjId,
+    activityId: data.activityId,
+    conversationId: data.conversationId,
+    tenantId: data.tenantId,
+    scopeId: data.scopeId,
+    hostUserId: data.hostUserId,
+    isChannel: data.isChannel,
+  });
 
   expect(result._id).toBeTruthy();
   expect(result.hostId._id).toBe(data.userAadObjId);
@@ -701,18 +701,18 @@ test("checking if inactive QnA is currently active", async () => {
     isChannel: true,
   };
 
-  const result = await qnaSessionDataService.createQnASession(
-    data.title,
-    data.description,
-    data.userName,
-    data.userAadObjId,
-    data.activityId,
-    data.conversationId,
-    data.tenantId,
-    data.scopeId,
-    data.hostUserId,
-    data.isChannel
-  );
+  const result = await qnaSessionDataService.createQnASession({
+    title: data.title,
+    description: data.description,
+    userName: data.userName,
+    userAadObjectId: data.userAadObjId,
+    activityId: data.activityId,
+    conversationId: data.conversationId,
+    tenantId: data.tenantId,
+    scopeId: data.scopeId,
+    hostUserId: data.hostUserId,
+    isChannel: data.isChannel,
+  });
 
   await qnaSessionDataService.endQnASession(result._id, sampleConversationId, sampleEndedById, sampleEndedByName, sampleEndedByUserId);
 

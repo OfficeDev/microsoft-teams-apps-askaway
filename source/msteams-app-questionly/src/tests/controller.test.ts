@@ -101,33 +101,33 @@ test('start qna session in channel', async () => {
 
     (<any>triggerBackgroundJobForQnaSessionCreatedEvent) = jest.fn();
 
-    await startQnASession(
-        sampleTitle,
-        sampleDescription,
-        sampleUserName,
-        sampleUserAADObjId1,
-        sampleActivityId,
-        sampleConversationId,
-        sampleTenantId,
-        sampleScopeId,
-        sampleHostUserId,
-        true,
-        sampleServiceUrl,
-        ''
-    );
+    await startQnASession({
+        title: sampleTitle,
+        description: sampleDescription,
+        userName: sampleUserName,
+        userAadObjectId: sampleUserAADObjId1,
+        activityId: sampleActivityId,
+        conversationId: sampleConversationId,
+        tenantId: sampleTenantId,
+        scopeId: sampleScopeId,
+        hostUserId: sampleHostUserId,
+        isChannel: true,
+        serviceUrl: sampleServiceUrl,
+        meetingId: '',
+    });
     expect(qnaSessionDataService.createQnASession).toBeCalledTimes(1);
-    expect(qnaSessionDataService.createQnASession).toBeCalledWith(
-        sampleTitle,
-        sampleDescription,
-        sampleUserName,
-        sampleUserAADObjId1,
-        sampleActivityId,
-        sampleConversationId,
-        sampleTenantId,
-        sampleScopeId,
-        sampleHostUserId,
-        true
-    );
+    expect(qnaSessionDataService.createQnASession).toBeCalledWith({
+        title: sampleTitle,
+        description: sampleDescription,
+        userName: sampleUserName,
+        userAadObjectId: sampleUserAADObjId1,
+        activityId: sampleActivityId,
+        conversationId: sampleConversationId,
+        tenantId: sampleTenantId,
+        scopeId: sampleScopeId,
+        hostUserId: sampleHostUserId,
+        isChannel: true,
+    });
     // Make sure background job is triggered.
     expect(<any>triggerBackgroundJobForQnaSessionCreatedEvent).toBeCalledTimes(
         1
@@ -148,33 +148,33 @@ test('start qna session in group chat', async () => {
 
     (<any>triggerBackgroundJobForQnaSessionCreatedEvent) = jest.fn();
 
-    await startQnASession(
-        sampleTitle,
-        sampleDescription,
-        sampleUserName,
-        sampleUserAADObjId1,
-        sampleActivityId,
-        sampleConversationId,
-        sampleTenantId,
-        sampleScopeId,
-        sampleHostUserId,
-        false,
-        sampleServiceUrl,
-        sampleMeetingId
-    );
+    await startQnASession({
+        title: sampleTitle,
+        description: sampleDescription,
+        userName: sampleUserName,
+        userAadObjectId: sampleUserAADObjId1,
+        activityId: sampleActivityId,
+        conversationId: sampleConversationId,
+        tenantId: sampleTenantId,
+        scopeId: sampleScopeId,
+        hostUserId: sampleHostUserId,
+        isChannel: false,
+        serviceUrl: sampleServiceUrl,
+        meetingId: sampleMeetingId,
+    });
     expect(qnaSessionDataService.createQnASession).toBeCalledTimes(1);
-    expect(qnaSessionDataService.createQnASession).toBeCalledWith(
-        sampleTitle,
-        sampleDescription,
-        sampleUserName,
-        sampleUserAADObjId1,
-        sampleActivityId,
-        sampleConversationId,
-        sampleTenantId,
-        sampleScopeId,
-        sampleHostUserId,
-        false
-    );
+    expect(qnaSessionDataService.createQnASession).toBeCalledWith({
+        title: sampleTitle,
+        description: sampleDescription,
+        userName: sampleUserName,
+        userAadObjectId: sampleUserAADObjId1,
+        activityId: sampleActivityId,
+        conversationId: sampleConversationId,
+        tenantId: sampleTenantId,
+        scopeId: sampleScopeId,
+        hostUserId: sampleHostUserId,
+        isChannel: false,
+    });
 
     // Make sure background job is triggered.
     expect(<any>triggerBackgroundJobForQnaSessionCreatedEvent).toBeCalledTimes(
@@ -195,20 +195,20 @@ test('start qna session in meeting for attendee', async () => {
     );
     (<any>triggerBackgroundJobForQnaSessionCreatedEvent) = jest.fn();
     await expect(
-        startQnASession(
-            sampleTitle,
-            sampleDescription,
-            sampleUserName,
-            sampleUserAADObjId1,
-            sampleActivityId,
-            sampleConversationId,
-            sampleTenantId,
-            sampleScopeId,
-            sampleHostUserId,
-            false,
-            sampleServiceUrl,
-            sampleMeetingId
-        )
+        startQnASession({
+            title: sampleTitle,
+            description: sampleDescription,
+            userName: sampleUserName,
+            userAadObjectId: sampleUserAADObjId1,
+            activityId: sampleActivityId,
+            conversationId: sampleConversationId,
+            tenantId: sampleTenantId,
+            scopeId: sampleScopeId,
+            hostUserId: sampleHostUserId,
+            isChannel: false,
+            serviceUrl: sampleServiceUrl,
+            meetingId: sampleMeetingId,
+        })
     ).rejects.toThrow();
     expect(qnaSessionDataService.createQnASession).toBeCalledTimes(0);
 

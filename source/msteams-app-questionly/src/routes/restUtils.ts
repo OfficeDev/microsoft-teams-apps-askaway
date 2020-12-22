@@ -145,7 +145,7 @@ export const ensureUserIsPartOfMeetingConversation = async (
     const isUserPartOfConversation = await verifyUserFromConversationId(
         process.env.MicrosoftAppId?.toString(),
         await getMicrosoftAppPassword(),
-        conversationData.id,
+        conversationData._id,
         conversationData.serviceUrl,
         conversationData.tenantId,
         userId
