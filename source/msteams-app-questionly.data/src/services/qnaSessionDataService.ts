@@ -103,11 +103,11 @@ class QnASessionDataService {
       QnASession.findById(qnaSessionId)
         .populate({
           path: "hostId",
-          modle: User,
+          model: User,
         })
         .populate({
           path: "endedById",
-          modle: User,
+          model: User,
         })
         .exec()
     );
@@ -134,7 +134,7 @@ class QnASessionDataService {
       isActive: _qnaSessionData.isActive,
       endedById: _qnaSessionData.endedById?._id,
       endedByName: _qnaSessionData.endedById?.userName,
-      endedByUserId: _qnaSessionData.endedByUserId
+      endedByUserId: _qnaSessionData.endedByUserId,
     };
   }
 
@@ -149,17 +149,20 @@ class QnASessionDataService {
     conversationId: string,
     endedById: string,
     endedByName: string,
-    endedByUserId: string,
-    ) {
+    endedByUserId: string
+  ) {
     await this.isExistingQnASession(qnaSessionId, conversationId);
-    await this.userDataService.getUserOrCreate(
-      endedById,
-      endedByName
-    );
+    await this.userDataService.getUserOrCreate(endedById, endedByName);
     const result = await retryWrapperForConcurrency(
       () =>
         QnASession.findByIdAndUpdate(qnaSessionId, {
-          $set: { isActive: false, dateTimeEnded: new Date(), endedById: endedById, endedByName:endedByName, endedByUserId: endedByUserId },
+          $set: {
+            isActive: false,
+            dateTimeEnded: new Date(),
+            endedById: endedById,
+            endedByName: endedByName,
+            endedByUserId: endedByUserId,
+          },
         }).exec(),
       new ExponentialBackOff()
     );
