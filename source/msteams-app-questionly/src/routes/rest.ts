@@ -284,21 +284,21 @@ router.post(
                 serviceUrl
             );
 
-            const session = await startQnASession(
-                sessionTitle,
-                sessionDescription,
-                user.userName,
-                user._id,
-                '',
-                conversationId,
-                tenantId,
-                scopeId,
-                hostUserId,
-                isChannel,
-                serviceUrl,
+            const session = await startQnASession({
+                title: sessionTitle,
+                description: sessionDescription,
+                userName: user.userName,
+                userAadObjectId: user._id,
+                activityId: '',
+                conversationId: conversationId,
+                tenantId: tenantId,
+                scopeId: scopeId,
+                hostUserId: hostUserId,
+                isChannel: isChannel,
+                serviceUrl: serviceUrl,
                 // `ensureConversationBelongsToMeetingChat` makes sure meeting id is available
-                <string>meetingId
-            );
+                meetingId: <string>meetingId,
+            });
 
             res.send({ qnaSessionId: session._id });
         } catch (error) {
