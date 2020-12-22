@@ -1,7 +1,11 @@
 // Middleman file to allow for communication between the bot, database, and adaptive card builder.
 import * as adaptiveCardBuilder from 'src/adaptive-cards/adaptiveCardBuilder'; // To populate adaptive cards
 import { AdaptiveCard } from 'adaptivecards';
-import { exceptionLogger, trackCreateQnASessionEvent, trackCreateQuestionEvent } from 'src/util/exceptionTracking';
+import {
+    exceptionLogger,
+    trackCreateQnASessionEvent,
+    trackCreateQuestionEvent,
+} from 'src/util/exceptionTracking';
 import jimp from 'jimp';
 import { join } from 'path';
 import {
@@ -108,12 +112,12 @@ export const startQnASession = async (sessionParameters: {
 
     trackCreateQnASessionEvent({
         qnaSessionId: response?._id,
-        tenantId: tenantId,
-        hostUserId: hostUserId,
-        isChannel: isChannel,
-        meetingId: meetingId,
-        conversationId: conversationId,
-        title: title
+        tenantId: sessionParameters.tenantId,
+        hostUserId: sessionParameters.hostUserId,
+        isChannel: sessionParameters.isChannel,
+        meetingId: sessionParameters.meetingId,
+        conversationId: sessionParameters.conversationId,
+        title: sessionParameters.title,
     });
 
     await triggerBackgroundJobForQnaSessionCreatedEvent(response);
@@ -212,7 +216,7 @@ export const submitNewQuestion = async (
             questionId: question?._id,
             qnaSessionId: qnaSessionId,
             conversationId: conversationId,
-            questionContent: questionContent
+            questionContent: questionContent,
         });
 
         triggerBackgroundJobForQuestionPostedEvent(
