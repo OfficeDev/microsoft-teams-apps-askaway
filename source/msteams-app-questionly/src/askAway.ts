@@ -27,6 +27,7 @@ import { exceptionLogger } from 'src/util/exceptionTracking';
 import { IConversationDataService } from 'msteams-app-questionly.data';
 import { ConversationType } from 'src/enums/ConversationType';
 import { getMeetingIdFromContext } from 'src/util/meetingsUtility';
+import { TelemetryExceptions } from 'src/constants/telemetryConstants';
 
 const NULL_RESPONSE: any = null;
 /**
@@ -143,7 +144,14 @@ export class AskAway extends TeamsActivityHandler {
             }
         } catch (error) {
             exceptionLogger(
-                new Error(`Check Conversation Validation Failed: ${error}`)
+                new Error(`Check Conversation Validation Failed: ${error}`),
+                {
+                    conversationId: context.activity.conversation.id,
+                    qnaSessionId: taskModuleRequest.data.qnaSessionId,
+                    userAadObjectId: <string>context.activity.from.aadObjectId,
+                    fileName: module.id,
+                    name: TelemetryExceptions.ConversationValidationFailed,
+                }
             );
             return this.handleTeamsTaskModuleFetchError();
         }
@@ -188,7 +196,14 @@ export class AskAway extends TeamsActivityHandler {
             }
         } catch (error) {
             exceptionLogger(
-                new Error(`Check Conversation Validation Failed: ${error}`)
+                new Error(`Check Conversation Validation Failed: ${error}`),
+                {
+                    conversationId: context.activity.conversation.id,
+                    qnaSessionId: taskModuleRequest.data.qnaSessionId,
+                    userAadObjectId: <string>context.activity.from.aadObjectId,
+                    fileName: module.id,
+                    name: TelemetryExceptions.ConversationValidationFailed,
+                }
             );
             return this.handleTeamsTaskModuleFetchError();
         }
@@ -261,7 +276,13 @@ export class AskAway extends TeamsActivityHandler {
                 leaderboardStrings('taskModuleTitle')
             );
         } catch (error) {
-            exceptionLogger(error);
+            exceptionLogger(error, {
+                conversationId: context.activity.conversation.id,
+                qnaSessionId: taskModuleRequest.data.qnaSessionId,
+                userAadObjectId: <string>context.activity.from.aadObjectId,
+                fileName: module.id,
+                name: TelemetryExceptions.ViewLeaderboardFailed,
+            });
             return this._buildTaskModuleContinueResponse(
                 controller.getErrorCard(errorStrings('leaderboard'))
             );
@@ -307,6 +328,7 @@ export class AskAway extends TeamsActivityHandler {
         const userAADObjId = <string>user.aadObjectId;
         const userName = user.name;
         const questionContent = <string>taskModuleRequest.data.usertext;
+        const conversationId = context.activity.conversation.id;
 
         if (questionContent == null || questionContent.trim() === '') {
             return this.handleTeamsTaskModuleResubmitQuestion(qnaSessionId, '');
@@ -318,10 +340,17 @@ export class AskAway extends TeamsActivityHandler {
                 userAADObjId,
                 userName,
                 questionContent,
-                context.activity.conversation.id
+                conversationId
             );
         } catch (error) {
-            exceptionLogger(error);
+            exceptionLogger(error, {
+                conversationId: conversationId,
+                qnaSessionId: qnaSessionId,
+                questionContent: questionContent,
+                userAADObjId: userAADObjId,
+                fileName: module.id,
+                name: TelemetryExceptions.CreateQuestionFailed,
+            });
             return this.handleTeamsTaskModuleResubmitQuestion(
                 qnaSessionId,
                 questionContent
@@ -348,7 +377,14 @@ export class AskAway extends TeamsActivityHandler {
 
             return this._buildTaskModuleContinueResponse(updatedLeaderboard);
         } catch (error) {
-            exceptionLogger(error);
+            exceptionLogger(error, {
+                conversationId: context.activity.conversation.id,
+                qnaSessionId: taskModuleRequest.data.qnaSessionId,
+                questionId: taskModuleRequest.data.questionId,
+                userAADObjId: <string>context.activity.from.aadObjectId,
+                fileName: module.id,
+                name: TelemetryExceptions.VoteQuestionFailed,
+            });
             return this._buildTaskModuleContinueResponse(
                 controller.getErrorCard(errorStrings('upvoting'))
             );
@@ -406,22 +442,19 @@ export class AskAway extends TeamsActivityHandler {
                     meetingId
                 );
             } catch (error) {
-                exceptionLogger(error);
+                exceptionLogger(error, {
+                    conversationId: context.activity.conversation.id,
+                    qnaSessionId: qnaSessionId,
+                    tenantId: conversation.tenantId,
+                    userAADObjId: <string>context.activity.from.aadObjectId,
+                    fileName: module.id,
+                    name: TelemetryExceptions.EndQnASessionFailed,
+                });
                 return this.handleTeamsTaskModuleSubmitError();
             }
         }
 
         return NULL_RESPONSE;
-    }
-
-    private handleTeamsTaskModuleInsufficientPermissionsError(): TaskModuleResponse {
-        return this._buildTaskModuleContinueResponse(
-            controller.getErrorCard(
-                errorStrings(
-                    'insufficientPermissionsToCreateOrEndQnASessionError'
-                )
-            )
-        );
     }
 
     private handleTeamsTaskModuleSubmitError(): TaskModuleResponse {
@@ -495,7 +528,11 @@ export class AskAway extends TeamsActivityHandler {
         let cardData: MainCardData | { title: string; description: string };
 
         // if starting QnA from reply chain, update conversation id so that card is sent to channel as a new conversation
-        const conversationId = context.activity.conversation.id;
+        const conversationId = context.activity.conversation.id,
+            conversation = context.activity.conversation,
+            tenantId = conversation.tenantId,
+            userAadObjectId = <string>context.activity.from.aadObjectId;
+
         if (conversationId.match('messageid') !== null)
             // true if conversation is a reply chain
             context.activity.conversation.id = conversationId.split(';')[0];
@@ -505,18 +542,22 @@ export class AskAway extends TeamsActivityHandler {
             // this error will create a broken experience for the user and so
             // the QnA session will not be created.
             exceptionLogger(
-                new Error('Unable to extract maincard data' + cardDataResponse)
+                new Error('Unable to extract maincard data' + cardDataResponse),
+                {
+                    tenantId: tenantId,
+                    conversationId: conversationId,
+                    userAadObjectId: userAadObjectId,
+                    fileName: module.id,
+                    name: TelemetryExceptions.CreateQnASessionFailed,
+                }
             );
             return NULL_RESPONSE;
         }
 
-        const conversation = context.activity.conversation;
         const title = cardData.title,
             description = cardData.description,
             userName = context.activity.from.name,
-            userAadObjectId = <string>context.activity.from.aadObjectId,
             activityId = '',
-            tenantId = conversation.tenantId,
             isChannel =
                 conversation.conversationType === ConversationType.Channel,
             hostUserId = context.activity.from.id,
@@ -542,7 +583,13 @@ export class AskAway extends TeamsActivityHandler {
                 meetingId: meetingId,
             });
         } catch (error) {
-            exceptionLogger(error);
+            exceptionLogger(error, {
+                tenantId: tenantId,
+                conversationId: conversationId,
+                userAadObjectId: userAadObjectId,
+                fileName: module.id,
+                name: TelemetryExceptions.CreateQnASessionFailed,
+            });
             if (error.code === 'QnASessionLimitExhaustedError') {
                 await context.sendActivity(
                     MessageFactory.text(

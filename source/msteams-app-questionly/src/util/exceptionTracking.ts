@@ -1,5 +1,5 @@
 import * as appInsights from 'applicationinsights';
-import { TelemetryEvents } from 'src/constants/telemetryEventConstants';
+import { TelemetryEvents } from 'src/constants/telemetryConstants';
 import { getApplicationInsightsInstrumentationKeyURI } from 'src/util/keyvault';
 
 export let aiClient;
@@ -24,29 +24,39 @@ export const initiateAppInsights = async () => {
     aiClient = appInsights.defaultClient;
 };
 
-export const exceptionLogger = (error: Error | string) => {
+export const exceptionLogger = (
+    error: Error | string,
+    properties?: { [key: string]: any }
+) => {
     if (process.env.debugMode === 'true') {
         // eslint-disable-next-line no-console
         console.error(error);
     } else {
-        aiClient.trackException({ exception: error });
-    }
-};
-
-export const trackCreateQnASessionEvent = (properties: { [key: string]: any }) => {
-    if (process.env.debugMode !== 'true') {
-        aiClient.trackEvent({
-            name: TelemetryEvents.CreateQnASessionEvent,
-            properties: properties
+        aiClient.trackException({
+            exception: error,
+            properties: properties,
         });
     }
 };
 
-export const trackCreateQuestionEvent = (properties: { [key: string]: any }) => {
+export const trackCreateQnASessionEvent = (properties: {
+    [key: string]: any;
+}) => {
+    if (process.env.debugMode !== 'true') {
+        aiClient.trackEvent({
+            name: TelemetryEvents.CreateQnASessionEvent,
+            properties: properties,
+        });
+    }
+};
+
+export const trackCreateQuestionEvent = (properties: {
+    [key: string]: any;
+}) => {
     if (process.env.debugMode !== 'true') {
         aiClient.trackEvent({
             name: TelemetryEvents.CreateQuestionEvent,
-            properties: properties
+            properties: properties,
         });
     }
 };
