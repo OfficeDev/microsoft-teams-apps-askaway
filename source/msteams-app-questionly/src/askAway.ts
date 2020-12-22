@@ -454,9 +454,7 @@ export class AskAway extends TeamsActivityHandler {
     //          ANCHOR Bot Framework messaging extension method overrides         //
     // -------------------------------------------------------------------------- //
 
-    async handleTeamsMessagingExtensionFetchTask(): Promise<
-        MessagingExtensionActionResponse
-    > {
+    async handleTeamsMessagingExtensionFetchTask(): Promise<MessagingExtensionActionResponse> {
         // commandId: 'startQnA'
         return this._buildTaskModuleContinueResponse(
             controller.getStartQnACard(),

@@ -31,6 +31,7 @@ export interface MeetingPanelProps {
     teamsData: any;
     httpService: HttpService;
     appInsights: ApplicationInsights;
+    helper: any;
 }
 
 export interface MeetingPanelState {
@@ -70,6 +71,9 @@ class MeetingPanel extends React.Component<
         this.getActiveSession();
     }
 
+    /**
+     * To reload the panel on click
+     */
     forceUpdateHandler = () => {
         window.location.reload();
     };
@@ -78,9 +82,8 @@ class MeetingPanel extends React.Component<
      * To Identify Active Session
      */
     private getActiveSession() {
-        HttpService.get(
-            `/conversations/${this.props.teamsData.chatId}/activesessions`
-        )
+        this.props.httpService
+            .get(`/conversations/${this.props.teamsData.chatId}/activesessions`)
             .then((response: any) => {
                 if (response && response.data && response.data.length > 0) {
                     this.setState({
@@ -98,15 +101,13 @@ class MeetingPanel extends React.Component<
      * To End the active session
      */
     endActiveSession = (e) => {
-        if (
-            this.state.activeSessionData &&
-            this.state.activeSessionData.sessionId !== undefined
-        ) {
+        if (this.state?.activeSessionData?.sessionId) {
             this.setState({ showLoader: true });
-            HttpService.patch(
-                `/conversations/${this.props.teamsData.chatId}/sessions/${this.state.activeSessionData.sessionId}`,
-                { action: 'end' }
-            )
+            this.props.httpService
+                .patch(
+                    `/conversations/${this.props.teamsData.chatId}/sessions/${this.state.activeSessionData.sessionId}`,
+                    { action: 'end' }
+                )
                 .then((response: any) => {
                     this.setState({
                         showLoader: false,
@@ -255,8 +256,7 @@ class MeetingPanel extends React.Component<
     /**
      * Show this screen when no questions posted
      */
-    private noQuestionDesign(image, text) {
-        console.log('image12324', image);
+    private noQuestionDesign(image: string, text: string) {
         return (
             <div className="no-question">
                 <Image

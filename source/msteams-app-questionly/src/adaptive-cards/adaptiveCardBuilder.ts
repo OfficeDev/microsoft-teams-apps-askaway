@@ -206,7 +206,7 @@ export const generateLeaderboard = async (
 
     questionData = await Promise.all(
         questionData.map(async (question) => {
-            const questionObject = question.toObject();
+            const questionObject = <any>question.toObject();
             questionObject.upvotes = questionObject.voters.length;
             questionObject.upvotable =
                 aadObjectId !== questionObject.userId._id;
