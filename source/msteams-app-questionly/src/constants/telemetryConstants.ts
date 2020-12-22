@@ -16,4 +16,9 @@ export const TelemetryExceptions = {
     VoteQuestionFailed: 'VoteQuestionFailed',
     ConversationValidationFailed: 'ConversationValidationFailed',
     ViewLeaderboardFailed: 'ViewLeaderboardFailed',
+    TriggerBackgroundJobFailed: 'TriggerBackgroundJobFailed',
+    RestApiCallFailed: 'RestApiCallFailed',
+    GetParticipantRoleFailed: 'GetParticipantRoleFailed',
+    GetTeamsMemberIdFailed: 'GetTeamsMemberIdFailed',
+    SetUpBotFailed: 'SetUpBotFailed',
 };

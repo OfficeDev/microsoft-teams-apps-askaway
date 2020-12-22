@@ -9,6 +9,8 @@ import {
     createResponseForForbiddenAccess,
     createResponseForInternalServerError,
 } from 'src/routes/responseUtility';
+import { IUser } from 'msteams-app-questionly.data';
+import { TelemetryExceptions } from 'src/constants/telemetryConstants';
 
 /**
  * Error handling middleware for rest APIs
@@ -24,7 +26,16 @@ export const restApiErrorMiddleware = (
     next: NextFunction
 ) => {
     // More details will be logged as part of server side telemetry story.
-    exceptionLogger(`Error occured in ${request.path}, error: ${error}`);
+    const user = <IUser>request.user;
+    exceptionLogger(error, {
+        path: request.path,
+        conversationId: request.params['conversationId'],
+        qnaSessionId: request.params['sessionId'],
+        questionId: request.params['questionId'],
+        userAadObjectId: user?._id,
+        fileName: module.id,
+        name: TelemetryExceptions.RestApiCallFailed,
+    });
 
     if (
         error instanceof UnauthorizedAccessError ||

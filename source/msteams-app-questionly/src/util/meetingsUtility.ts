@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { TurnContext } from 'botbuilder';
 import { MicrosoftAppCredentials } from 'botframework-connector';
+import { TelemetryExceptions } from 'src/constants/telemetryConstants';
 import { ParticipantRoles } from 'src/enums/ParticipantRoles';
 import { exceptionLogger } from 'src/util/exceptionTracking';
 import { getMicrosoftAppPassword } from 'src/util/keyvault';
@@ -48,7 +49,13 @@ export const getParticipantRole = async (
         );
         role = result.data.meeting.role;
     } catch (error) {
-        exceptionLogger(error);
+        exceptionLogger(error, {
+            tenantId: tenantId,
+            meetingId: meetingId,
+            userId: userId,
+            fileName: module.id,
+            name: TelemetryExceptions.GetParticipantRoleFailed,
+        });
         throw new Error('Error while getting participant role.');
     }
 

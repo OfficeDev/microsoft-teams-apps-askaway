@@ -13,6 +13,7 @@ import {
     createQuestionUpvotedEvent,
 } from 'src/background-job/events/dataEventUtility';
 import { StatusCodes } from 'http-status-codes';
+import { TelemetryExceptions } from 'src/constants/telemetryConstants';
 
 const axiosConfig: AxiosRequestConfig = axios.defaults;
 let backgroundJobUri: string;
@@ -173,6 +174,11 @@ const triggerBackgroundJob = async (
             );
         }
     } catch (error) {
-        exceptionLogger(error);
+        exceptionLogger(error, {
+            conversationId: conversationId,
+            qnaSessionId: qnaSessionId,
+            fileName: module.id,
+            name: TelemetryExceptions.TriggerBackgroundJobFailed,
+        });
     }
 };

@@ -19,6 +19,7 @@ import { UserIsNotPartOfConversationError } from 'src/errors/userIsNotPartOfConv
 import { ConversationDoesNotBelongToMeetingChatError } from 'src/errors/conversationDoesNotBelongToMeetingChatError';
 import { Request } from 'express';
 import { ParameterMissingInRequestError } from 'src/errors/parameterMissingInRequestError';
+import { TelemetryExceptions } from 'src/constants/telemetryConstants';
 
 /**
  * Gets questions data and user data for each active qna sessions, process them and returns an array of detailed qna sessions.
@@ -61,13 +62,7 @@ export const processQnASesssionsDataForMeetingTab = async (
             }
         }
 
-        let hostUser;
-        try {
-            hostUser = await userDataService.getUser(qnaSessionData.hostId);
-        } catch (err) {
-            exceptionLogger(err);
-            throw err;
-        }
+        const hostUser = await userDataService.getUser(qnaSessionData.hostId);
 
         const qnaSessionDataObject = {
             sessionId: qnaSessionData.id,
@@ -187,7 +182,12 @@ export const getHostUserId = async (
         }
         throw new Error('Could not get member info for teams user');
     } catch (error) {
-        exceptionLogger(error);
+        exceptionLogger(error, {
+            conversationId: conversationId,
+            userAadObjectId: userId,
+            fileName: module.id,
+            name: TelemetryExceptions.GetTeamsMemberIdFailed,
+        });
         throw error;
     }
 };
