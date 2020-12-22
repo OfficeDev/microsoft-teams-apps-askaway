@@ -7,6 +7,8 @@
 import { AzureFunction, Context } from "@azure/functions";
 import { IAdaptiveCard } from "adaptivecards";
 import {
+  Activity,
+  ActivityTypes,
   BotFrameworkAdapter,
   CardFactory,
   ConversationAccount,
@@ -19,6 +21,11 @@ import {
   questionDataService,
 } from "msteams-app-questionly.data";
 import { IDataEvent } from "msteams-app-questionly.common";
+import {
+  height,
+  width,
+  title,
+} from "../src/constants/notificationBubbleConstants";
 
 let adapter = new BotFrameworkAdapter({
   appId: process.env.MicrosoftAppId.toString(),
@@ -33,6 +40,7 @@ const activityFunction: AzureFunction = async function (
   const serviceUrl: string = context.bindings.name.serviceUrl;
   const eventData: IDataEvent = context.bindings.name.eventData;
   const isSessionEnded = eventData.type === DataEventType.qnaSessionEndedEvent;
+  const meetingId = context.bindings.name.meetingId;
   // Adapter is injected as dependency for UTs.
   adapter = context.bindings.name.botFrameworkAdapter ?? adapter;
 
@@ -56,12 +64,31 @@ const activityFunction: AzureFunction = async function (
 
     if (eventData.type === DataEventType.qnaSessionCreatedEvent) {
       let resource;
+
+      const activity = {
+        type: ActivityTypes.Message,
+        attachments: [CardFactory.adaptiveCard(card)],
+      } as Activity;
+
+      if (meetingId) {
+        const appId = process.env.AppId.toString();
+        const notificationBubblePageUrl = process.env.NotificationBubblePageUrl.toString();
+
+        // If it's a meeting chat, send notification bubble as well.
+        activity.channelData = {
+          notification: {
+            alertInMeeting: true,
+            externalResourceUrl: `${encodeURIComponent(
+              `https://teams.microsoft.com/l/bubble/${appId}?url=${notificationBubblePageUrl}&height=${height}&width=${width}&title=${title}`
+            )}`,
+          },
+        };
+      }
+
       await adapter.continueConversation(
         conversationReference,
         async (context) => {
-          resource = await context.sendActivity({
-            attachments: [CardFactory.adaptiveCard(card)],
-          });
+          resource = await context.sendActivity(activity);
         }
       );
       if (resource !== undefined) {
