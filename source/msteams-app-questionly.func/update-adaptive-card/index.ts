@@ -70,17 +70,33 @@ const activityFunction: AzureFunction = async function (
         attachments: [CardFactory.adaptiveCard(card)],
       } as Activity;
 
+      // If it's a meeting chat, send notification bubble as well.
       if (meetingId) {
         const appId = process.env.AppId.toString();
-        const notificationBubblePageUrl = process.env.NotificationBubblePageUrl.toString();
+        const hostUserName: string = eventData.data.hostUser.name;
+        const sessionTitle: string = eventData.data.title;
 
-        // If it's a meeting chat, send notification bubble as well.
+        const notificationBubblePageUrlWithParams = new URL(
+          process.env.NotificationBubblePageUrl
+        );
+
+        notificationBubblePageUrlWithParams.searchParams.append(
+          "username",
+          hostUserName
+        );
+
+        notificationBubblePageUrlWithParams.searchParams.append(
+          "title",
+          sessionTitle
+        );
+
+        const encodedNotificationBubblePageUrlWithParam = encodeURIComponent(
+          notificationBubblePageUrlWithParams.href
+        );
         activity.channelData = {
           notification: {
             alertInMeeting: true,
-            externalResourceUrl: `${encodeURIComponent(
-              `https://teams.microsoft.com/l/bubble/${appId}?url=${notificationBubblePageUrl}&height=${height}&width=${width}&title=${title}`
-            )}`,
+            externalResourceUrl: `https://teams.microsoft.com/l/bubble/${appId}?url=${encodedNotificationBubblePageUrlWithParam}&height=${height}&width=${width}&title=${title}`,
           },
         };
       }

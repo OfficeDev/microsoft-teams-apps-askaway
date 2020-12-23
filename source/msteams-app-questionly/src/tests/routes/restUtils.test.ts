@@ -114,25 +114,25 @@ describe('test process QnA sesssions for meeting tab', () => {
         expect(result[0].title).toEqual(testQnAData1.title);
         expect(result[0].numberOfQuestions).toEqual(2);
         expect(result[0].isActive).toEqual(testQnAData1.isActive);
-        expect(result[0].hostUser.id).toEqual(user1.id);
+        expect(result[0].hostUser.id).toEqual(user1._id);
         expect(result[0].hostUser.name).toEqual(user1.userName);
-        expect(result[0].users.length).toEqual(2);
-        expect(result[0].users[0].name).toEqual(user1.userName);
-        expect(result[0].users[1].name).toEqual(user2.userName);
-        expect(result[0].users[0]._id).toEqual(user1.id);
-        expect(result[0].users[1]._id).toEqual(user2.id);
-        expect(result[0].questions[0].qnaSessionId).toEqual(
+        expect(result[0].users?.length).toEqual(2);
+        expect(result[0].users?.[0].name).toEqual(user1.userName);
+        expect(result[0].users?.[1].name).toEqual(user2.userName);
+        expect(result[0].users?.[0].id).toEqual(user1._id);
+        expect(result[0].users?.[1].id).toEqual(user2._id);
+        expect(result[0].questions?.[0].qnaSessionId).toEqual(
             question2.qnaSessionId
         );
-        expect(result[0].questions[1].qnaSessionId).toEqual(
+        expect(result[0].questions?.[1].qnaSessionId).toEqual(
             question1.qnaSessionId
         );
         expect(result[1].title).toEqual(testQnAData2.title);
         expect(result[1].numberOfQuestions).toEqual(0);
         expect(result[1].isActive).toEqual(testQnAData2.isActive);
-        expect(result[1].hostUser.id).toEqual(user2.id);
+        expect(result[1].hostUser.id).toEqual(user2._id);
         expect(result[1].hostUser.name).toEqual(user2.userName);
-        expect(result[1].users.length).toEqual(0);
+        expect(result[1].users?.length).toEqual(0);
         expect(questionDataService.getQuestionData).toBeCalledTimes(2);
         expect(userDataService.getUser).toBeCalledTimes(2);
     });

@@ -1,5 +1,5 @@
 import i18next from 'i18next';
-import enStrings from 'src/localization/resources/en.json';
+import enJson from 'src/localization/resources/en.json';
 import { exceptionLogger } from 'src/util/exceptionTracking';
 
 export interface Strings {
@@ -90,7 +90,7 @@ export const initLocalization = async (
         fallbackLanguage: process.env.FallbackLanguage
             ? process.env.FallbackLanguage
             : 'en',
-        defaultStrings: enStrings,
+        defaultStrings: enJson,
         debug: false,
     };
 

@@ -3,5 +3,5 @@
  */
 export const TelemetryEvents = {
     CreateQnASessionEvent: 'QnASessionCreated',
-    CreateQuestionEvent: 'QuestionCreated'
-}
+    CreateQuestionEvent: 'QuestionCreated',
+};
