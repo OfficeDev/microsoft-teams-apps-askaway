@@ -514,7 +514,7 @@ export class AskAway extends TeamsActivityHandler {
         const title = cardData.title,
             description = cardData.description,
             userName = context.activity.from.name,
-            userAadObjId = <string>context.activity.from.aadObjectId,
+            userAadObjectId = <string>context.activity.from.aadObjectId,
             activityId = '',
             tenantId = conversation.tenantId,
             isChannel =
@@ -527,20 +527,20 @@ export class AskAway extends TeamsActivityHandler {
             meetingId = await getMeetingIdFromContext(context);
 
         try {
-            await controller.startQnASession(
-                title,
-                description,
-                userName,
-                userAadObjId,
-                activityId,
-                context.activity.conversation.id,
-                tenantId,
-                scopeId,
-                hostUserId,
-                isChannel,
-                serviceURL,
-                meetingId
-            );
+            await controller.startQnASession({
+                title: title,
+                description: description,
+                userName: userName,
+                userAadObjectId: userAadObjectId,
+                activityId: activityId,
+                conversationId: context.activity.conversation.id,
+                tenantId: tenantId,
+                scopeId: scopeId,
+                hostUserId: hostUserId,
+                isChannel: isChannel,
+                serviceUrl: serviceURL,
+                meetingId: meetingId,
+            });
         } catch (error) {
             exceptionLogger(error);
             if (error.code === 'QnASessionLimitExhaustedError') {

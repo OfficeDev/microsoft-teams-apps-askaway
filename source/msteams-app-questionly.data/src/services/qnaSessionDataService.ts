@@ -21,33 +21,34 @@ class QnASessionDataService {
 
   /**
    * Creates initial QnA session document and stores it in the database
-   * @param title - title of QnA
-   * @param description - description of QnA
-   * @param userName - name of the user who created the QnA
-   * @param userAadObjId - AAD Object Id of the user who created the QnA
-   * @param activityId - id of the master card message used for proactive updating
-   * @param tenantId - id of tenant the bot is running on.
-   * @param scopeId - channel id or group chat id
-   * @param hostUserId - MS Teams Id of user who created the QnA (used for at-mentions)
-   * @param isChannel - whether the QnA session was started in a channel or group chat
+   * @param sessionParameters - object with parameters needed in order to create a session
+   * title - title of QnA
+   * description - description of QnA
+   * userName - name of the user who created the QnA
+   * userAadObjId - AAD Object Id of the user who created the QnA
+   * activityId - id of the master card message used for proactive updating
+   * tenantId - id of tenant the bot is running on.
+   * scopeId - channel id or group chat id
+   * hostUserId - MS Teams Id of user who created the QnA (used for at-mentions)
+   * isChannel - whether the QnA session was started in a channel or group chat
    */
-  public async createQnASession(
-    title: string,
-    description: string,
-    userName: string,
-    userAadObjId: string,
-    activityId: string,
-    conversationId: string,
-    tenantId: string,
-    scopeId: string,
-    hostUserId: string,
-    isChannel: boolean
-  ): Promise<IQnASession_populated> {
+  public async createQnASession(sessionParameters: {
+    title: string;
+    description: string;
+    userName: string;
+    userAadObjectId: string;
+    activityId: string;
+    conversationId: string;
+    tenantId: string;
+    scopeId: string;
+    hostUserId: string;
+    isChannel: boolean;
+  }): Promise<IQnASession_populated> {
     if (process.env.NumberOfActiveAMASessions === undefined) {
       throw new Error("Number of active sessions missing in the settings");
     }
     const currentActiveSessions = await this.getNumberOfActiveSessions(
-      conversationId
+      sessionParameters.conversationId
     );
     if (
       currentActiveSessions >= Number(process.env.NumberOfActiveAMASessions)
@@ -58,22 +59,22 @@ class QnASessionDataService {
     }
 
     const hostUser: IUser = await this.userDataService.getUserOrCreate(
-      userAadObjId,
-      userName
+      sessionParameters.userAadObjectId,
+      sessionParameters.userName
     );
 
     const qnaSession = new QnASession({
-      title: title,
-      description: description,
-      hostId: userAadObjId,
-      activityId: activityId,
-      conversationId: conversationId,
-      tenantId: tenantId,
+      title: sessionParameters.title,
+      description: sessionParameters.description,
+      hostId: sessionParameters.userAadObjectId,
+      activityId: sessionParameters.activityId,
+      conversationId: sessionParameters.conversationId,
+      tenantId: sessionParameters.tenantId,
       isActive: true,
-      hostUserId: hostUserId,
+      hostUserId: sessionParameters.hostUserId,
       scope: {
-        scopeId: scopeId,
-        isChannel: isChannel,
+        scopeId: sessionParameters.scopeId,
+        isChannel: sessionParameters.isChannel,
       },
       dataEventVersion: 0,
     });

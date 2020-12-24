@@ -24,6 +24,7 @@ import {
 } from '@fluentui/react-icons-northstar';
 import { ApplicationInsights } from '@microsoft/applicationinsights-web';
 import { HttpService } from './shared/HttpService';
+import { SignalRLifecycle } from './signalR/SignalRLifecycle';
 
 const EmptySessionImage = require('./../../web/assets/create_session.png');
 // const EndSessionImage =  require('./../../web/assets/end_session.png');
@@ -151,7 +152,7 @@ class MeetingPanel extends React.Component<
                         if (
                             response &&
                             response['data'] &&
-                            response['data']['qnaSessionId']
+                            response['data']['sessionId']
                         ) {
                             this.showAlertModel(true);
                             this.getActiveSession();
@@ -354,6 +355,34 @@ class MeetingPanel extends React.Component<
     };
 
     /**
+     * This function is triggered on events from signalR connection.
+     * @param dataEvent - event received.
+     */
+    private updateEvent = (dataEvent: any) => {
+        switch (dataEvent.type) {
+            case 'qnaSessionCreatedEvent': {
+                // Check if `activeSessionData` is not populated already with right session data.
+                // This can happen for user who has created the session.
+                if (
+                    this.state.activeSessionData?.sessionId !==
+                    dataEvent.data.sessionId
+                ) {
+                    this.setState({
+                        activeSessionData: dataEvent.data,
+                    });
+                }
+                break;
+            }
+            case 'qnaSessionEndedEvent': {
+                this.setState({
+                    activeSessionData: null,
+                });
+                break;
+            }
+        }
+    };
+
+    /**
      * When No question posted yets
      */
     postQuestions = () => {
@@ -390,19 +419,27 @@ class MeetingPanel extends React.Component<
      * The render() method to create the UI of the meeting panel
      */
     public render() {
-        const stateVal = this.state;
-        if (stateVal.showLoader)
-            return <Loader label="Loading Meeting Information" />;
         return (
             <React.Fragment>
-                <div className="meeting-panel">
-                    {!stateVal.activeSessionData && (
-                        <div>{this.crateNewSessionLayout()}</div>
-                    )}
-                    {stateVal.activeSessionData && (
-                        <div>{this.postQuestions()}</div>
-                    )}
-                </div>
+                <SignalRLifecycle
+                    conversationId={this.props.teamsData.chatId}
+                    updateEvent={this.updateEvent}
+                    httpService={this.props.httpService}
+                    appInsights={this.props.appInsights}
+                />
+                {this.state.showLoader && (
+                    <Loader label="Loading Meeting Information" />
+                )}
+                {!this.state.showLoader && (
+                    <div className="meeting-panel">
+                        {!this.state.activeSessionData && (
+                            <div>{this.crateNewSessionLayout()}</div>
+                        )}
+                        {this.state.activeSessionData && (
+                            <div>{this.postQuestions()}</div>
+                        )}
+                    </div>
+                )}
             </React.Fragment>
         );
     }

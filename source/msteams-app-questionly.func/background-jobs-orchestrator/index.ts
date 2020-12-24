@@ -12,10 +12,10 @@ import {
 } from "../src/utils/requestUtility";
 import { ifNumber } from "../src/utils/typeUtility";
 
-// Retry option for notification bubble activity
-const notificationBubbleActivityRetryOption: df.RetryOptions = new df.RetryOptions(
-  ifNumber(process.env.NotificationBubbleActivityRetryInterval, 2000),
-  ifNumber(process.env.NotificationBubbleActivityRetryAttemptCount, 1)
+// Retry option for startup activity
+const startupActivityRetryOption: df.RetryOptions = new df.RetryOptions(
+  ifNumber(process.env.StartupActivityRetryInterval, 1000),
+  ifNumber(process.env.StartupActivityRetryAttemptCount, 1)
 );
 
 // Retry option for broadcast message activity
@@ -42,16 +42,16 @@ const orchestrator = df.orchestrator(function* (context) {
 
   try {
     // Get conversation data before triggering any background job
-
     const startupActivityInput = {
       conversationId: conversationId,
     };
 
-    const conversation = yield context.df.callActivity(
+    const conversation = yield context.df.callActivityWithRetry(
       "startup-activities",
+      startupActivityRetryOption,
       startupActivityInput
     );
-    if (conversation === undefined) {
+    if (conversation === undefined && !context.df.isReplaying) {
       context.log.error(
         `Could not find conversation data for conversation id ${conversationId}`
       );
@@ -63,22 +63,17 @@ const orchestrator = df.orchestrator(function* (context) {
       eventData: context.bindingData.input.eventData,
     };
 
-    const notificationBubbleActivityInput = {
-      conversationId: conversationId,
-      eventData: context.bindingData.input.eventData,
-      serviceUrl: conversation.serviceUrl,
-    };
-
     const updateAdaptivecardActivityInput = {
       conversationId: conversationId,
       eventData: context.bindingData.input.eventData,
       serviceUrl: conversation.serviceUrl,
       qnaSessionId: context.bindingData.input.qnaSessionId,
+      meetingId: conversation.meetingId,
     };
 
     const parallelTasks = [];
 
-    // Broadcast activity and notification bubble activities are only required in meeting context.
+    // Broadcast activity is only required in meeting context.
     if (isValidParam(conversation.meetingId)) {
       // Broadcast events to all clients from a meeting.
       parallelTasks.push(
@@ -86,15 +81,6 @@ const orchestrator = df.orchestrator(function* (context) {
           "broadcast-message",
           broadcastActivityRetryOption,
           broadcastActivityInput
-        )
-      );
-
-      // Send notification bubble activity.
-      parallelTasks.push(
-        context.df.callActivityWithRetry(
-          "send-notification-bubble",
-          notificationBubbleActivityRetryOption,
-          notificationBubbleActivityInput
         )
       );
     }

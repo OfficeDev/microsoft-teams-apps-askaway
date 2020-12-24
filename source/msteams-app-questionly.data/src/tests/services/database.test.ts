@@ -106,18 +106,18 @@ test("can create qna session", async () => {
     isChannel: true,
   };
 
-  const result = await qnaSessionDataService.createQnASession(
-    data.title,
-    data.description,
-    data.userName,
-    data.userAadObjId,
-    data.activityId,
-    data.conversationId,
-    data.tenantId,
-    data.scopeId,
-    data.hostUserId,
-    data.isChannel
-  );
+  const result = await qnaSessionDataService.createQnASession({
+    title: data.title,
+    description: data.description,
+    userName: data.userName,
+    userAadObjectId: data.userAadObjId,
+    activityId: data.activityId,
+    conversationId: data.conversationId,
+    tenantId: data.tenantId,
+    scopeId: data.scopeId,
+    hostUserId: data.hostUserId,
+    isChannel: data.isChannel,
+  });
 
   expect(result._id).toBeTruthy();
   expect(result.hostId._id).toBe(data.userAadObjId);
@@ -221,7 +221,7 @@ test("retrieve most recent/top questions with three questions", async () => {
   ];
 
   const _sleep = (ms) =>
-    new Promise((resolve) => setTimeout(() => resolve(), ms));
+    new Promise<void>((resolve) => setTimeout(() => resolve(), ms));
   questions[1] = await new Question(questions[1]).save();
   await _sleep(50);
   questions[0] = await new Question(questions[0]).save();
@@ -279,7 +279,7 @@ test("retrieve most top questions with no votes should be most recent questions"
   ];
 
   const _sleep = (ms) =>
-    new Promise((resolve) => setTimeout(() => resolve(), ms));
+    new Promise<void>((resolve) => setTimeout(() => resolve(), ms));
   questions[1] = await new Question(questions[1]).save();
   await _sleep(50);
   questions[0] = await new Question(questions[0]).save();
@@ -336,7 +336,7 @@ test("retrieve most top questions with some votes should be most recent question
   ];
 
   const _sleep = (ms) =>
-    new Promise((resolve) => setTimeout(() => resolve(), ms));
+    new Promise<void>((resolve) => setTimeout(() => resolve(), ms));
   questions[1] = await new Question(questions[1]).save();
   await _sleep(50);
   questions[0] = await new Question(questions[0]).save();
@@ -692,18 +692,18 @@ test("checking if inactive QnA is currently active", async () => {
     isChannel: true,
   };
 
-  const result = await qnaSessionDataService.createQnASession(
-    data.title,
-    data.description,
-    data.userName,
-    data.userAadObjId,
-    data.activityId,
-    data.conversationId,
-    data.tenantId,
-    data.scopeId,
-    data.hostUserId,
-    data.isChannel
-  );
+  const result = await qnaSessionDataService.createQnASession({
+    title: data.title,
+    description: data.description,
+    userName: data.userName,
+    userAadObjectId: data.userAadObjId,
+    activityId: data.activityId,
+    conversationId: data.conversationId,
+    tenantId: data.tenantId,
+    scopeId: data.scopeId,
+    hostUserId: data.hostUserId,
+    isChannel: data.isChannel,
+  });
 
   await qnaSessionDataService.endQnASession(result._id, sampleConversationId);
 

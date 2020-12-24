@@ -12,7 +12,6 @@ import msteamsReactBaseComponent, {
     ITeamsBaseComponentState,
 } from 'msteams-react-base-component';
 import * as microsoftTeams from '@microsoft/teams-js';
-import { SignalRLifecycle } from './signalR/SignalRLifecycle';
 // tslint:disable-next-line:no-relative-imports
 import i18next from './../askAwayTab/shared/i18next';
 // tslint:disable-next-line:no-relative-imports
@@ -117,31 +116,11 @@ export class AskAwayTab extends msteamsReactBaseComponent<
     }
 
     /**
-     * This function is triggered on events from signalR connection.
-     * @param dataEvent - event received.
-     */
-    private updateEvent = (dataEvent: any) => {
-        // TODO: this is a place holder code for handling actual events.
-        // This needs to be updated as part of Task:1353795.
-        this.setState({ dataEvent: dataEvent });
-    };
-
-    /**
      * The render() method to create the UI of the tab
      */
     public render() {
         return (
             <Provider theme={this.state.theme}>
-                {this.state.chatId && (
-                    <React.Fragment>
-                        <SignalRLifecycle
-                            conversationId={this.state.chatId}
-                            updateEvent={this.updateEvent}
-                            httpService={this.httpService}
-                            appInsights={telemetryService.appInsights}
-                        />
-                    </React.Fragment>
-                )}
                 {this.state.dataEvent && <h1>{this.state.dataEvent.type}</h1>}
                 {this.state.frameContext ===
                     CONST.TAB_FRAME_CONTEXT.FC_SIDEPANEL && (
