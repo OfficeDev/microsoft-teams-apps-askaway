@@ -9,4 +9,9 @@ export const CONST = Object.freeze({
         FC_SIDEPANEL: 'sidePanel',
         FC_CONTENT: 'content',
     },
+    TAB_QUESTIONS: {
+        PENDING: 'pendingQuestions',
+        ANSWERED: 'answeredQuestions',
+        ACTIVE_INDEX: 0,
+    },
 });

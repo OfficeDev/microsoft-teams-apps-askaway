@@ -150,6 +150,7 @@ export class AskAwayTab extends msteamsReactBaseComponent<
                         httpService={this.httpService}
                         appInsights={telemetryService.appInsights}
                         helper={Helper}
+                        constValue={CONST}
                     />
                 )}
                 {this.state.frameContext ===
@@ -159,6 +160,7 @@ export class AskAwayTab extends msteamsReactBaseComponent<
                         httpService={this.httpService}
                         appInsights={telemetryService.appInsights}
                         helper={Helper}
+                        constValue={CONST}
                     />
                 )}
             </Provider>

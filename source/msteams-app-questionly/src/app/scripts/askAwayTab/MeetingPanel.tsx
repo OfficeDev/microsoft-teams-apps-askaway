@@ -16,14 +16,20 @@ import {
     menuAsToolbarBehavior,
     ShorthandCollection,
     MenuItemProps,
+    Form,
+    tabListBehavior,
+    Card,
+    Avatar,
 } from '@fluentui/react-northstar';
 import {
     MoreIcon,
     LeaveIcon,
     RetryIcon,
+    LikeIcon,
 } from '@fluentui/react-icons-northstar';
 import { ApplicationInsights } from '@microsoft/applicationinsights-web';
 import { HttpService } from './shared/HttpService';
+// import e from 'express';
 
 const EmptySessionImage = require('./../../web/assets/create_session.png');
 // const EndSessionImage =  require('./../../web/assets/end_session.png');
@@ -32,18 +38,23 @@ export interface MeetingPanelProps {
     httpService: HttpService;
     appInsights: ApplicationInsights;
     helper: any;
+    constValue: any;
 }
-
 export interface MeetingPanelState {
     activeSessionData: any;
     showLoader: boolean;
     input: {
         title: string;
         description: string;
+        postQuestion: any;
     };
     error: {
         isTitle: boolean;
         isDescription: boolean;
+    };
+    liveTab: {
+        selectedTab: string;
+        defaultActiveIndex: number;
     };
 }
 class MeetingPanel extends React.Component<
@@ -54,14 +65,19 @@ class MeetingPanel extends React.Component<
         super(props);
         this.state = {
             activeSessionData: null,
-            showLoader: true,
+            showLoader: false,
             input: {
                 title: '',
                 description: '',
+                postQuestion: '',
             },
             error: {
                 isTitle: false,
                 isDescription: false,
+            },
+            liveTab: {
+                selectedTab: props.constValue.TAB_QUESTIONS.PENDING,
+                defaultActiveIndex: props.constValue.TAB_QUESTIONS.ACTIVE_INDEX,
             },
         };
         this.onShowTaskModule = this.onShowTaskModule.bind(this);
@@ -75,16 +91,19 @@ class MeetingPanel extends React.Component<
      * To reload the panel on click
      */
     forceUpdateHandler = () => {
-        window.location.reload();
+        // window.location.reload();
+        this.getActiveSession();
     };
 
     /**
      * To Identify Active Session
      */
     private getActiveSession() {
+        this.setState({ showLoader: true });
         this.props.httpService
             .get(`/conversations/${this.props.teamsData.chatId}/activesessions`)
             .then((response: any) => {
+                console.log('res-active-session', response);
                 if (response && response.data && response.data.length > 0) {
                     this.setState({
                         activeSessionData: response.data[0],
@@ -99,6 +118,7 @@ class MeetingPanel extends React.Component<
 
     /**
      * To End the active session
+     * @param e - event
      */
     endActiveSession = (e) => {
         if (this.state?.activeSessionData?.sessionId) {
@@ -353,20 +373,204 @@ class MeetingPanel extends React.Component<
     };
 
     /**
+     * on Submit the questions
+     * @param e
+     */
+    submitQuestions(e) {
+        if (e) {
+            this.props.httpService
+                .post(
+                    `/conversations/${this.props.teamsData.chatId}/sessions/${this.state.activeSessionData.sessionId}/questions`,
+                    { questionContent: this.state.input.postQuestion }
+                )
+                .then((response: any) => {
+                    console.log('resp', response);
+                    if (response && response.status === 201) {
+                        const stateValue = this.state;
+                        stateValue.input.postQuestion = '';
+                        this.setState(stateValue);
+                        this.getActiveSession();
+                    }
+                })
+                .catch((error) => {});
+        }
+    }
+
+    getLiveTabPendingQ = () => {
+        this.setState({
+            liveTab: {
+                ...this.state.liveTab,
+                selectedTab: this.props.constValue.TAB_QUESTIONS.PENDING,
+            },
+        });
+    };
+
+    getLiveTabAnsweredQ = () => {
+        this.setState({
+            liveTab: {
+                ...this.state.liveTab,
+                selectedTab: this.props.constValue.TAB_QUESTIONS.ANSWERED,
+            },
+        });
+    };
+
+    private liveQuestionsPending(questions) {
+        return (
+            <div>
+                {questions.map((q, index) => {
+                    return (
+                        <div key={q.index}>
+                            <Card
+                                aria-roledescription="card avatar"
+                                styles={{ width: '100%', padding: '0.5rem' }}
+                            >
+                                <Card.Header fitted>
+                                    <Flex gap="gap.small">
+                                        <Avatar
+                                            size={'smaller'}
+                                            name={q.userId.userName}
+                                        />
+                                        <Flex>
+                                            <Text
+                                                styles={{
+                                                    fontSize: '12px',
+                                                    lineHeight: '20px',
+                                                }}
+                                                content={q.userId.userName}
+                                                weight="regular"
+                                            />
+                                            <Flex
+                                                vAlign="center"
+                                                styles={{
+                                                    position: 'absolute',
+                                                    top: '0.3rem',
+                                                    right: '1rem',
+                                                }}
+                                            >
+                                                <Button
+                                                    onClick={(e) =>
+                                                        this.onClickPendingQLikeBtn(
+                                                            e,
+                                                            q
+                                                        )
+                                                    }
+                                                    icon={<LikeIcon />}
+                                                    styles={{
+                                                        minWidth: '1rem',
+                                                    }}
+                                                    iconOnly
+                                                    text
+                                                    title=""
+                                                />
+                                                <Text content={0} />
+                                            </Flex>
+                                        </Flex>
+                                    </Flex>
+                                </Card.Header>
+                                <Card.Body>
+                                    <Text
+                                        content={q.content}
+                                        styles={{
+                                            fontSize: '14px',
+                                            lineHeight: '20px',
+                                            marginTop: '0.75rem',
+                                        }}
+                                    />
+                                </Card.Body>
+                            </Card>
+                        </div>
+                    );
+                })}
+            </div>
+        );
+    }
+
+    /**
+     * On click pending like button
+     * @param e - event
+     * @param q - pending question data
+     */
+    private onClickPendingQLikeBtn(e, q) {
+        if (e) {
+            this.props.httpService
+                .patch(
+                    `/conversations/${this.props.teamsData.chatId}/sessions/${this.state.activeSessionData.sessionId}/questions/${q['_id']}`,
+                    { action: 'upvote' }
+                )
+                .then((response: any) => {
+                    console.log('resp', response);
+                })
+                .catch((error) => {});
+        }
+    }
+
+    private liveQuestionsMenu(stateVal) {
+        console.log('getLiveTabSelected', this.state.liveTab.selectedTab);
+        const items = [
+            {
+                key: this.props.constValue.TAB_QUESTIONS.PENDING,
+                content: 'Pending questions',
+                onClick: this.getLiveTabPendingQ,
+            },
+            {
+                key: this.props.constValue.TAB_QUESTIONS.ANSWERED,
+                content: 'Answered questions',
+                onClick: this.getLiveTabAnsweredQ,
+            },
+        ];
+        return (
+            <React.Fragment>
+                <Menu
+                    defaultActiveIndex={stateVal.liveTab.defaultActiveIndex}
+                    items={items}
+                    primary
+                    underlined
+                    accessibility={tabListBehavior}
+                    aria-label="Today's events"
+                    styles={{ borderBottom: 'none' }}
+                />
+            </React.Fragment>
+        );
+    }
+
+    private liveQuestionsAnswered(answers) {
+        return <p>Answered content</p>;
+    }
+
+    /**
      * When No question posted yets
      */
-    postQuestions = () => {
-        const sessionTitle = this.state.input.title
-            ? this.state.input.title
-            : this.state.activeSessionData.title;
+    postQuestions = (stateVal) => {
+        const sessionTitle = stateVal.input.title
+            ? stateVal.input.title
+            : stateVal.activeSessionData.title;
+        console.log('stateVal', stateVal);
         return (
             <React.Fragment>
                 {this.showMenubar(sessionTitle)}
-                <Flex hAlign="center" vAlign="center">
-                    {this.noQuestionDesign(
-                        EmptySessionImage,
-                        'Q & A session is live...Ask away!'
+                {stateVal.activeSessionData.questions &&
+                    stateVal.activeSessionData.questions.length > 0 && (
+                        <React.Fragment>
+                            {this.liveQuestionsMenu(stateVal)}
+                            {stateVal.liveTab.selectedTab ===
+                            this.props.constValue.TAB_QUESTIONS.PENDING
+                                ? this.liveQuestionsPending(
+                                      stateVal.activeSessionData.questions
+                                  )
+                                : this.liveQuestionsAnswered(
+                                      stateVal.activeSessionData
+                                  )}
+                            {/* {(stateVal.liveTab.defaultActiveIndex === 0 || stateVal.liveTab.selectedTab === this.props.constValue.TAB_QUESTIONS.PENDING) && (this.liveQuestionsPending(stateVal.activeSessionData.questions))}
+                    {(stateVal.liveTab.selectedTab === this.props.constValue.TAB_QUESTIONS.ANSWERED) && (this.liveQuestionsAnswered(stateVal.activeSessionData))} */}
+                        </React.Fragment>
                     )}
+                <Flex hAlign="center" vAlign="center">
+                    {stateVal.activeSessionData.questions &&
+                        stateVal.activeSessionData.questions.length === 0 &&
+                        this.noQuestionDesign(
+                            EmptySessionImage,
+                            'Q & A session is live...Ask away!'
+                        )}
                     <div
                         style={{
                             position: 'absolute',
@@ -374,16 +578,34 @@ class MeetingPanel extends React.Component<
                             width: '100%',
                         }}
                     >
-                        <Input
-                            fluid
-                            placeholder="Type a question here"
-                            icon={<SendIcon />}
-                        />
+                        <Form>
+                            <Input
+                                fluid
+                                as="div"
+                                onChange={(e) => this.appendInput(e)}
+                                placeholder="Type a question here"
+                                icon={
+                                    <SendIcon
+                                        onClick={(e) => this.submitQuestions(e)}
+                                    />
+                                }
+                                value={stateVal.input.postQuestion}
+                            />
+                        </Form>
                     </div>
                 </Flex>
             </React.Fragment>
         );
     };
+
+    appendInput(e) {
+        const state = {
+            input: {
+                postQuestion: e.target.value,
+            },
+        };
+        this.props.helper.appendInput(this, state);
+    }
 
     /**
      * The render() method to create the UI of the meeting panel
@@ -399,7 +621,7 @@ class MeetingPanel extends React.Component<
                         <div>{this.crateNewSessionLayout()}</div>
                     )}
                     {stateVal.activeSessionData && (
-                        <div>{this.postQuestions()}</div>
+                        <div>{this.postQuestions(stateVal)}</div>
                     )}
                 </div>
             </React.Fragment>
