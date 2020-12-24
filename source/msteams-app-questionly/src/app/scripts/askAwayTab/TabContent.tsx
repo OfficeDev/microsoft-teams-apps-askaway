@@ -13,6 +13,8 @@ export interface TabContentProps {
     teamsData: any;
     httpService: HttpService;
     appInsights: ApplicationInsights;
+    helper: any;
+    constValue: any;
 }
 export interface TabContentState {}
 
