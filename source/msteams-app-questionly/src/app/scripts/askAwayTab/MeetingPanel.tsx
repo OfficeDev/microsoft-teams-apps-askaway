@@ -75,7 +75,8 @@ class MeetingPanel extends React.Component<
      * To reload the panel on click
      */
     forceUpdateHandler = () => {
-        window.location.reload();
+        // window.location.reload();
+        this.getActiveSession();
     };
 
     /**
