@@ -29,8 +29,9 @@ import {
     triggerBackgroundJobForQuestionPostedEvent,
     triggerBackgroundJobForQuestionUpvotedEvent,
 } from 'src/background-job/backgroundJobTrigger';
+import * as maincardBuilder from 'msteams-app-questionly.common';
 
-export const getMainCard = adaptiveCardBuilder.getMainCard;
+export const getMainCard = maincardBuilder.getMainCard;
 export const getStartQnACard = adaptiveCardBuilder.getStartQnACard;
 export const getErrorCard = adaptiveCardBuilder.getErrorCard;
 
@@ -473,11 +474,7 @@ export const isHost = async (
     userAadObjId: string
 ): Promise<boolean> => {
     try {
-        const result = await qnaSessionDataService.isHost(
-            qnaSessionId,
-            userAadObjId
-        );
-        return result;
+        return await qnaSessionDataService.isHost(qnaSessionId, userAadObjId);
     } catch (error) {
         exceptionLogger(error);
         throw new Error('Failed to check if user is host for this QnA session');
@@ -544,8 +541,7 @@ export const validateConversationId = async (
  */
 export const isActiveQnA = async (qnaSessionId: string): Promise<boolean> => {
     try {
-        const result = await qnaSessionDataService.isActiveQnA(qnaSessionId);
-        return result;
+        return await qnaSessionDataService.isActiveQnA(qnaSessionId);
     } catch (error) {
         exceptionLogger(error);
         throw new Error('Failed to check if QnA session is active');

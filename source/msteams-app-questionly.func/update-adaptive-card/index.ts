@@ -14,8 +14,10 @@ import {
   ConversationAccount,
   ConversationReference,
 } from "botbuilder";
-import { DataEventType } from "msteams-app-questionly.common";
-import { getUpdatedMainCard } from "../src/adaptive-card/mainCardBuilder";
+import {
+  DataEventType,
+  getUpdatedMainCard,
+} from "msteams-app-questionly.common";
 import {
   qnaSessionDataService,
   questionDataService,
@@ -49,7 +51,8 @@ const activityFunction: AzureFunction = async function (
     qnaSessionDataService,
     questionDataService,
     qnaSessionId,
-    isSessionEnded
+    isSessionEnded,
+    process.env.AvatarKey
   );
   const card: IAdaptiveCard = result.card;
 

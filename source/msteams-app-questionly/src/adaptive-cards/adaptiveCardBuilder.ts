@@ -5,142 +5,16 @@ import * as ACData from 'adaptivecards-templating';
 import random from 'random';
 import seedrandom from 'seedrandom';
 import * as jwt from 'jsonwebtoken';
-
-import { mainCard, viewLeaderboardButton } from 'src/adaptive-cards/mainCard';
 import { startQnACard } from 'src/adaptive-cards/startQnACard';
 import { endQnAConfirmationCard } from 'src/adaptive-cards/endQnAConfirmationCard';
-
 import {
     leaderboardCard,
     leaderboardEmptyCard,
 } from 'src/adaptive-cards/leaderboardCard';
-
 import { newQuestionCard } from 'src/adaptive-cards/newQuestionCard';
-
 import { errorCard } from 'src/adaptive-cards/errorCard';
-import { mainCardStrings } from 'src/localization/locale';
-import { clone } from 'lodash';
-
 import { getAvatarKey } from 'src/util/keyvault';
 import { IQuestionPopulatedUser } from 'msteams-app-questionly.data';
-
-/**
- * Creates the QnA Master Card
- * @param title - title of QnA
- * @param description - description of QnA
- * @param userName - name of the user who created the QnA session
- * @param qnaSessionId - document database id of the QnA session
- * @param aadObjectId - Id of the user who created the QnA session
- * @param hostUserId - MS Teams Id of user who created the QnA (used for at-mentions)
- * @param ended - whether the QnA session has ended or not
- * @param topQuestionsData - array of questions to display under `Top Questions`
- * @param recentQuestionsData - array of questions sorted by most recently asked first
- * @param totalQuestions - number of questions asked so far in session
- * @returns The QnA Master Card
- */
-export const getMainCard = async (
-    title: string,
-    description: string,
-    userName: string,
-    qnaSessionId: string,
-    aadObjectId: string,
-    hostUserId: string,
-    ended?: boolean,
-    topQuestionsData?: IQuestionPopulatedUser[],
-    recentQuestionsData?: IQuestionPopulatedUser[],
-    totalQuestions?: number
-): Promise<IAdaptiveCard> => {
-    const data = {
-        title,
-        description,
-        userName,
-        qnaSessionId,
-        aadObjectId,
-        ended,
-    };
-
-    const _processQuestions = async (questions: IQuestionPopulatedUser[]) =>
-        await Promise.all(
-            questions.map(async (question: IQuestionPopulatedUser) => {
-                const questionObject = <any>clone(question);
-                questionObject.userId.picture = await getPersonImage(
-                    questionObject.userId.userName,
-                    question.userId._id
-                );
-                questionObject.upvotes = questionObject.voters.length;
-                questionObject.upvotable =
-                    aadObjectId !== questionObject.userId._id;
-                return questionObject;
-            })
-        );
-
-    topQuestionsData = topQuestionsData
-        ? await _processQuestions(topQuestionsData)
-        : [];
-
-    const _mainCard = mainCard();
-    if (ended)
-        // remove `Ask a Question` and `End QnA` buttons
-        (<any>_mainCard.body)[5].actions = [viewLeaderboardButton()]; // is an ActionSet
-
-    // add at-mention data
-    _mainCard.msTeams.entities.push({
-        type: 'mention',
-        text: `<at>${userName}</at>`,
-        mentioned: {
-            id: hostUserId,
-            name: userName,
-        },
-    });
-
-    const _numQuestions = totalQuestions ? totalQuestions : 0;
-    let mostRecentUser = '',
-        nextMostRecentUser = '',
-        recentlyAskedString = '';
-
-    if (recentQuestionsData && _numQuestions > 3) {
-        mostRecentUser = recentQuestionsData[0].userId.userName;
-        for (const item of recentQuestionsData) {
-            if (item.userId.userName === mostRecentUser) continue;
-            nextMostRecentUser = item.userId.userName;
-            break;
-        }
-        recentlyAskedString = `${mostRecentUser} ${mainCardStrings(
-            'recentlyAskedAQuestion'
-        )}`;
-        if (nextMostRecentUser)
-            recentlyAskedString = `${mostRecentUser}, and ${nextMostRecentUser} ${mainCardStrings(
-                'recentlyAskedQuestions'
-            )}`;
-    }
-
-    // it is not wrapped around by _adaptiveCard() because it will remove
-    // the `msTeams` property from the master card.
-    return new ACData.Template(_mainCard).expand({
-        $root: {
-            title: title,
-            description: description,
-            user: userName,
-            qnaId: qnaSessionId,
-            topQuestions: topQuestionsData,
-            userId: aadObjectId,
-            data: data,
-            leaderboardTitle: ended
-                ? mainCardStrings('viewQuestions')
-                : mainCardStrings('upvoteQuestions'),
-            sessionDetails: ended
-                ? `**<at>${userName}</at>** ${mainCardStrings(
-                      'endedBy'
-                  )}. ${mainCardStrings('noMoreQuestions')}`
-                : `**<at>${userName}</at>** ${mainCardStrings('initiatedBy')}`,
-            recentlyAsked: recentlyAskedString
-                ? `${recentlyAskedString} (${_numQuestions} ${mainCardStrings(
-                      'totalQuestions'
-                  )})`
-                : '',
-        },
-    });
-};
 
 /**
  * @returns The adaptive card used to collect data to create the QnA session

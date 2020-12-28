@@ -15,7 +15,6 @@ import {
 } from 'botbuilder';
 import * as controller from 'src/controller';
 import { AdaptiveCard } from 'adaptivecards';
-import { extractMainCardData, MainCardData } from 'src/adaptive-cards/mainCard';
 import {
     endQnAStrings,
     askQuestionStrings,
@@ -25,6 +24,10 @@ import {
 } from 'src/localization/locale';
 import { exceptionLogger } from 'src/util/exceptionTracking';
 import { IConversationDataService } from 'msteams-app-questionly.data';
+import {
+    extractMainCardData,
+    MainCardData,
+} from 'msteams-app-questionly.common';
 import { ConversationType } from 'src/enums/ConversationType';
 import { getMeetingIdFromContext } from 'src/util/meetingsUtility';
 

@@ -2,8 +2,10 @@ import { BotFrameworkAdapter, ConversationAccount } from "botbuilder";
 import { qnaSessionDataService } from "msteams-app-questionly.data";
 import { activityMockContext } from "../mocks/testContext";
 import httpFunction from "./../../../update-adaptive-card/index";
-import { DataEventType } from "msteams-app-questionly.common";
-import { getUpdatedMainCard } from "../../adaptive-card/mainCardBuilder";
+import {
+  DataEventType,
+  getUpdatedMainCard,
+} from "msteams-app-questionly.common";
 import { AdaptiveCard } from "adaptivecards";
 
 const sampleServiceUrl = "sampleServiceUrl";
@@ -67,7 +69,8 @@ test("update adaptive card - post card for qnaSession started event", async () =
     expect.anything(),
     expect.anything(),
     sampleQnASessionId,
-    false
+    false,
+    undefined
   );
 
   expect(
@@ -93,7 +96,8 @@ test("update adaptive card - post card for qnaSession ended event", async () => 
     expect.anything(),
     expect.anything(),
     sampleQnASessionId,
-    true
+    true,
+    undefined
   );
 
   expect(
@@ -119,7 +123,8 @@ test("update adaptive card - post card for question related event", async () => 
     expect.anything(),
     expect.anything(),
     sampleQnASessionId,
-    false
+    false,
+    undefined
   );
 
   expect(
