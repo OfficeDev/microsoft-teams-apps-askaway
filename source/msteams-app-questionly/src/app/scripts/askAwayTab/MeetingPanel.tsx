@@ -88,14 +88,6 @@ class MeetingPanel extends React.Component<
     }
 
     /**
-     * To reload the panel on click
-     */
-    forceUpdateHandler = () => {
-        // window.location.reload();
-        this.getActiveSession();
-    };
-
-    /**
      * To Identify Active Session
      */
     private getActiveSession() {
@@ -173,7 +165,10 @@ class MeetingPanel extends React.Component<
                             response['data']['sessionId']
                         ) {
                             this.showAlertModel(true);
-                            this.getActiveSession();
+                            this.setState({
+                                activeSessionData: response.data,
+                            });
+                            console.log('state', this.state.activeSessionData);
                         } else {
                             this.showAlertModel(false);
                         }
@@ -333,7 +328,9 @@ class MeetingPanel extends React.Component<
                         {
                             key: '5',
                             content: 'Refresh session',
-                            onClick: this.forceUpdateHandler,
+                            onClick: () => {
+                                this.getActiveSession();
+                            },
                             icon: <RetryIcon outline />,
                         },
                         {
@@ -348,7 +345,7 @@ class MeetingPanel extends React.Component<
         ];
 
         return (
-            <Flex hAlign="start" vAlign="start">
+            <Flex vAlign="start">
                 <Text
                     styles={{
                         fontSize: '18px',
@@ -377,7 +374,7 @@ class MeetingPanel extends React.Component<
      * @param e
      */
     submitQuestions(e) {
-        if (e) {
+        if (e && this.state.input.postQuestion) {
             this.props.httpService
                 .post(
                     `/conversations/${this.props.teamsData.chatId}/sessions/${this.state.activeSessionData.sessionId}/questions`,
@@ -416,10 +413,13 @@ class MeetingPanel extends React.Component<
 
     private liveQuestionsPending(questions) {
         return (
-            <div>
+            <div className="question-card">
                 {questions.map((q, index) => {
                     return (
-                        <div key={q.index}>
+                        <div
+                            style={{ borderBottom: '1px solid #fff' }}
+                            key={q.index}
+                        >
                             <Card
                                 aria-roledescription="card avatar"
                                 styles={{ width: '100%', padding: '0.5rem' }}
@@ -580,6 +580,7 @@ class MeetingPanel extends React.Component<
                     stateVal.activeSessionData.questions.length > 0 && (
                         <React.Fragment>
                             {this.liveQuestionsMenu(stateVal)}
+
                             {stateVal.liveTab.selectedTab ===
                             this.props.constValue.TAB_QUESTIONS.PENDING
                                 ? this.liveQuestionsPending(
@@ -588,40 +589,46 @@ class MeetingPanel extends React.Component<
                                 : this.liveQuestionsAnswered(
                                       stateVal.activeSessionData
                                   )}
-                            {/* {(stateVal.liveTab.defaultActiveIndex === 0 || stateVal.liveTab.selectedTab === this.props.constValue.TAB_QUESTIONS.PENDING) && (this.liveQuestionsPending(stateVal.activeSessionData.questions))}
-                    {(stateVal.liveTab.selectedTab === this.props.constValue.TAB_QUESTIONS.ANSWERED) && (this.liveQuestionsAnswered(stateVal.activeSessionData))} */}
                         </React.Fragment>
                     )}
-                <Flex hAlign="center" vAlign="center">
-                    {stateVal.activeSessionData.questions &&
-                        stateVal.activeSessionData.questions.length === 0 &&
-                        this.noQuestionDesign(
-                            EmptySessionImage,
-                            'Q & A session is live...Ask away!'
-                        )}
-                    <div
-                        style={{
-                            position: 'absolute',
-                            bottom: '0.75rem',
-                            width: '100%',
-                        }}
-                    >
-                        <Form>
-                            <Input
-                                fluid
-                                as="div"
-                                onChange={(e) => this.appendInput(e)}
-                                placeholder="Type a question here"
-                                icon={
-                                    <SendIcon
-                                        onClick={(e) => this.submitQuestions(e)}
-                                    />
-                                }
-                                value={stateVal.input.postQuestion}
-                            />
-                        </Form>
-                    </div>
-                </Flex>
+
+                {stateVal.activeSessionData.questions &&
+                    stateVal.activeSessionData.questions.length === 0 &&
+                    this.noQuestionDesign(
+                        EmptySessionImage,
+                        'Q & A session is live...Ask away!'
+                    )}
+                <div
+                    style={{
+                        position: 'absolute',
+                        bottom: '0.75rem',
+                        width: '94%',
+                    }}
+                >
+                    <Card styles={{ padding: '0rem', width: '100%' }}>
+                        <Input
+                            styles={{ background: 'none' }}
+                            fluid
+                            as="div"
+                            onChange={(e) => this.appendInput(e)}
+                            placeholder="Type a question here"
+                            icon={
+                                <Button
+                                    icon={
+                                        <SendIcon
+                                            onClick={(e) =>
+                                                this.submitQuestions(e)
+                                            }
+                                        />
+                                    }
+                                    text
+                                    iconOnly
+                                />
+                            }
+                            value={stateVal.input.postQuestion}
+                        />
+                    </Card>
+                </div>
             </React.Fragment>
         );
     };
@@ -640,9 +647,9 @@ class MeetingPanel extends React.Component<
      */
     public render() {
         const stateVal = this.state;
-        if(stateVal.showLoader)
-            return  <Loader label="Loading Meeting Information" />
-        
+        if (stateVal.showLoader)
+            return <Loader label="Loading Meeting Information" />;
+
         return (
             <React.Fragment>
                 <SignalRLifecycle
@@ -651,16 +658,14 @@ class MeetingPanel extends React.Component<
                     httpService={this.props.httpService}
                     appInsights={this.props.appInsights}
                 />
-                {!this.state.showLoader && (
-                    <div className="meeting-panel">
-                        {!stateVal.activeSessionData && (
-                            <div>{this.crateNewSessionLayout()}</div>
-                        )}
-                        {stateVal.activeSessionData && (
-                            <div>{this.postQuestions(stateVal)}</div>
-                        )}
-                    </div>
-                )}
+                <div className="meeting-panel">
+                    {!stateVal.activeSessionData && (
+                        <div>{this.crateNewSessionLayout()}</div>
+                    )}
+                    {stateVal.activeSessionData && (
+                        <div>{this.postQuestions(stateVal)}</div>
+                    )}
+                </div>
             </React.Fragment>
         );
     }

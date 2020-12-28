@@ -120,7 +120,7 @@ export class AskAwayTab extends msteamsReactBaseComponent<
      */
     public render() {
         return (
-            <Provider theme={this.state.theme}>
+            <Provider style={{ background: 'unset' }} theme={this.state.theme}>
                 {this.state.dataEvent && <h1>{this.state.dataEvent.type}</h1>}
                 {this.state.frameContext ===
                     CONST.TAB_FRAME_CONTEXT.FC_SIDEPANEL && (
