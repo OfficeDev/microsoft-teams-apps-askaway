@@ -440,6 +440,7 @@ test('handle submit end qna', async () => {
             from: {
                 name: 'name',
                 aadObjectId: 'objId',
+                id: 'sampleId',
             },
             conversation: {
                 id: 'randomConvoId',
@@ -465,7 +466,9 @@ test('handle submit end qna', async () => {
         context.activity.conversation.id,
         context.activity.conversation.tenantId,
         context.activity.serviceUrl,
-        sampleMeetingId
+        sampleMeetingId,
+        context.activity.from.name,
+        context.activity.from.id
     );
 });
 
@@ -512,20 +515,20 @@ test('bot message preview send', async () => {
     );
 
     expect(startQnASession).toBeCalledTimes(1);
-    expect(startQnASession).toBeCalledWith(
-        cardData.title,
-        cardData.description,
-        context.activity.from.name,
-        context.activity.from.aadObjectId,
-        '',
-        context.activity.conversation.id,
-        context.activity.conversation.tenantId,
-        context.activity.conversation.id,
-        context.activity.from.id,
-        false,
-        context.activity.serviceUrl,
-        sampleMeetingId
-    );
+    expect(startQnASession).toBeCalledWith({
+        title: cardData.title,
+        description: cardData.description,
+        userName: context.activity.from.name,
+        userAadObjectId: context.activity.from.aadObjectId,
+        activityId: '',
+        conversationId: context.activity.conversation.id,
+        tenantId: context.activity.conversation.tenantId,
+        scopeId: context.activity.conversation.id,
+        hostUserId: context.activity.from.id,
+        isChannel: false,
+        serviceUrl: context.activity.serviceUrl,
+        meetingId: sampleMeetingId,
+    });
 });
 
 describe('messaging extension submit', () => {

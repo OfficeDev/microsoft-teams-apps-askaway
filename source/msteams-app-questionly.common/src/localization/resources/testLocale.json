@@ -1,0 +1,14 @@
+{
+  "mainCard": {
+    "initiatedBy": "initiatedBy",
+    "sessionEndedNoMoreQuestions": "sessionEndedNoMoreQuestions",
+    "topQuestions": "topQuestions",
+    "upvotes": "upvotes",
+    "askQuestion": "askQuestion",
+    "upvoteQuestions": "upvoteQuestions",
+    "viewQuestions": "viewQuestions",
+    "noQuestions": "noQuestions",
+    "recentlyAskedAQuestion": "recentlyAskedAQuestion",
+    "recentlyAskedQuestions": "recentlyAskedQuestions"
+  }
+}

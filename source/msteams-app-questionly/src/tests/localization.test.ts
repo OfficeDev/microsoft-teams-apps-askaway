@@ -6,7 +6,6 @@ import {
     initLocalization,
     errorStrings,
     Generic,
-    MainCard,
     StartQnA,
     EndQnA,
     Leaderboard,
@@ -15,7 +14,6 @@ import {
     leaderboardStrings,
     endQnAStrings,
     startQnAStrings,
-    mainCardStrings,
     genericStrings,
 } from 'src/localization/locale';
 import i18next from 'i18next';
@@ -24,7 +22,6 @@ const _stringFunctionsTest = (
     stringsObject:
         | Errors
         | Generic
-        | MainCard
         | Leaderboard
         | AskQuestion
         | StartQnA
@@ -54,10 +51,6 @@ describe('generic tests', () => {
 
     it('generic strings', () => {
         _stringFunctionsTest(_testStrings.generic, genericStrings);
-    });
-
-    it('mainCard strings', () => {
-        _stringFunctionsTest(_testStrings.mainCard, mainCardStrings);
     });
 
     it('startQnA strings', () => {
@@ -97,10 +90,6 @@ describe('importing new language', () => {
 
     it('generic strings', () => {
         _stringFunctionsTest(_testStrings.generic, genericStrings);
-    });
-
-    it('mainCard strings', () => {
-        _stringFunctionsTest(_testStrings.mainCard, mainCardStrings);
     });
 
     it('startQnA strings', () => {

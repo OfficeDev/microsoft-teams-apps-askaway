@@ -16,6 +16,7 @@ import {
     markQuestionAsAnswered,
 } from 'src/controller';
 import * as acb from 'src/adaptive-cards/adaptiveCardBuilder';
+import * as maincardBuilder from 'msteams-app-questionly.common';
 import {
     qnaSessionDataService,
     questionDataService,
@@ -49,6 +50,7 @@ const sampleMeetingId = 'meetingId';
 
 jest.mock('../adaptive-cards/adaptiveCardBuilder');
 jest.mock('msteams-app-questionly.data');
+jest.mock('msteams-app-questionly.common');
 
 beforeEach(() => {
     process.env.debugMode = 'true';
@@ -64,8 +66,8 @@ test('get main card', async () => {
         sampleUserAADObjId1,
         sampleHostUserId
     );
-    expect(acb.getMainCard).toBeCalledTimes(1);
-    expect(acb.getMainCard).toBeCalledWith(
+    expect(maincardBuilder.getMainCard).toBeCalledTimes(1);
+    expect(maincardBuilder.getMainCard).toBeCalledWith(
         sampleTitle,
         sampleDescription,
         sampleUserName,
@@ -101,33 +103,33 @@ test('start qna session in channel', async () => {
 
     (<any>triggerBackgroundJobForQnaSessionCreatedEvent) = jest.fn();
 
-    await startQnASession(
-        sampleTitle,
-        sampleDescription,
-        sampleUserName,
-        sampleUserAADObjId1,
-        sampleActivityId,
-        sampleConversationId,
-        sampleTenantId,
-        sampleScopeId,
-        sampleHostUserId,
-        true,
-        sampleServiceUrl,
-        ''
-    );
+    await startQnASession({
+        title: sampleTitle,
+        description: sampleDescription,
+        userName: sampleUserName,
+        userAadObjectId: sampleUserAADObjId1,
+        activityId: sampleActivityId,
+        conversationId: sampleConversationId,
+        tenantId: sampleTenantId,
+        scopeId: sampleScopeId,
+        hostUserId: sampleHostUserId,
+        isChannel: true,
+        serviceUrl: sampleServiceUrl,
+        meetingId: '',
+    });
     expect(qnaSessionDataService.createQnASession).toBeCalledTimes(1);
-    expect(qnaSessionDataService.createQnASession).toBeCalledWith(
-        sampleTitle,
-        sampleDescription,
-        sampleUserName,
-        sampleUserAADObjId1,
-        sampleActivityId,
-        sampleConversationId,
-        sampleTenantId,
-        sampleScopeId,
-        sampleHostUserId,
-        true
-    );
+    expect(qnaSessionDataService.createQnASession).toBeCalledWith({
+        title: sampleTitle,
+        description: sampleDescription,
+        userName: sampleUserName,
+        userAadObjectId: sampleUserAADObjId1,
+        activityId: sampleActivityId,
+        conversationId: sampleConversationId,
+        tenantId: sampleTenantId,
+        scopeId: sampleScopeId,
+        hostUserId: sampleHostUserId,
+        isChannel: true,
+    });
     // Make sure background job is triggered.
     expect(<any>triggerBackgroundJobForQnaSessionCreatedEvent).toBeCalledTimes(
         1
@@ -148,33 +150,33 @@ test('start qna session in group chat', async () => {
 
     (<any>triggerBackgroundJobForQnaSessionCreatedEvent) = jest.fn();
 
-    await startQnASession(
-        sampleTitle,
-        sampleDescription,
-        sampleUserName,
-        sampleUserAADObjId1,
-        sampleActivityId,
-        sampleConversationId,
-        sampleTenantId,
-        sampleScopeId,
-        sampleHostUserId,
-        false,
-        sampleServiceUrl,
-        sampleMeetingId
-    );
+    await startQnASession({
+        title: sampleTitle,
+        description: sampleDescription,
+        userName: sampleUserName,
+        userAadObjectId: sampleUserAADObjId1,
+        activityId: sampleActivityId,
+        conversationId: sampleConversationId,
+        tenantId: sampleTenantId,
+        scopeId: sampleScopeId,
+        hostUserId: sampleHostUserId,
+        isChannel: false,
+        serviceUrl: sampleServiceUrl,
+        meetingId: sampleMeetingId,
+    });
     expect(qnaSessionDataService.createQnASession).toBeCalledTimes(1);
-    expect(qnaSessionDataService.createQnASession).toBeCalledWith(
-        sampleTitle,
-        sampleDescription,
-        sampleUserName,
-        sampleUserAADObjId1,
-        sampleActivityId,
-        sampleConversationId,
-        sampleTenantId,
-        sampleScopeId,
-        sampleHostUserId,
-        false
-    );
+    expect(qnaSessionDataService.createQnASession).toBeCalledWith({
+        title: sampleTitle,
+        description: sampleDescription,
+        userName: sampleUserName,
+        userAadObjectId: sampleUserAADObjId1,
+        activityId: sampleActivityId,
+        conversationId: sampleConversationId,
+        tenantId: sampleTenantId,
+        scopeId: sampleScopeId,
+        hostUserId: sampleHostUserId,
+        isChannel: false,
+    });
 
     // Make sure background job is triggered.
     expect(<any>triggerBackgroundJobForQnaSessionCreatedEvent).toBeCalledTimes(
@@ -195,20 +197,20 @@ test('start qna session in meeting for attendee', async () => {
     );
     (<any>triggerBackgroundJobForQnaSessionCreatedEvent) = jest.fn();
     await expect(
-        startQnASession(
-            sampleTitle,
-            sampleDescription,
-            sampleUserName,
-            sampleUserAADObjId1,
-            sampleActivityId,
-            sampleConversationId,
-            sampleTenantId,
-            sampleScopeId,
-            sampleHostUserId,
-            false,
-            sampleServiceUrl,
-            sampleMeetingId
-        )
+        startQnASession({
+            title: sampleTitle,
+            description: sampleDescription,
+            userName: sampleUserName,
+            userAadObjectId: sampleUserAADObjId1,
+            activityId: sampleActivityId,
+            conversationId: sampleConversationId,
+            tenantId: sampleTenantId,
+            scopeId: sampleScopeId,
+            hostUserId: sampleHostUserId,
+            isChannel: false,
+            serviceUrl: sampleServiceUrl,
+            meetingId: sampleMeetingId,
+        })
     ).rejects.toThrow();
     expect(qnaSessionDataService.createQnASession).toBeCalledTimes(0);
 
@@ -358,7 +360,9 @@ test('end ama session', async () => {
             sampleConversationId,
             sampleTenantId,
             sampleServiceUrl,
-            ''
+            '',
+            sampleUserName,
+            sampleHostUserId
         )
     ).rejects.toThrow();
 
@@ -389,7 +393,9 @@ test('end ama session - meeting', async () => {
         sampleConversationId,
         sampleTenantId,
         sampleServiceUrl,
-        sampleMeetingId
+        sampleMeetingId,
+        sampleUserName,
+        sampleHostUserId
     );
     expect(qnaSessionDataService.isActiveQnA).toBeCalledTimes(1);
     expect(qnaSessionDataService.isActiveQnA).toBeCalledWith(
@@ -426,7 +432,9 @@ test('end ama session - meeting for attendee', async () => {
             sampleConversationId,
             sampleTenantId,
             sampleServiceUrl,
-            sampleMeetingId
+            sampleMeetingId,
+            sampleUserName,
+            sampleHostUserId
         )
     ).rejects.toThrow();
 

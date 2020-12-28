@@ -1,5 +1,5 @@
 // tslint:disable-next-line:no-relative-imports
-import './index.scss';
+import './../index.scss';
 import * as React from 'react';
 import {
     Provider,

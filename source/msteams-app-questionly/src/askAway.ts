@@ -15,7 +15,6 @@ import {
 } from 'botbuilder';
 import * as controller from 'src/controller';
 import { AdaptiveCard } from 'adaptivecards';
-import { extractMainCardData, MainCardData } from 'src/adaptive-cards/mainCard';
 import {
     endQnAStrings,
     askQuestionStrings,
@@ -25,6 +24,10 @@ import {
 } from 'src/localization/locale';
 import { exceptionLogger } from 'src/util/exceptionTracking';
 import { IConversationDataService } from 'msteams-app-questionly.data';
+import {
+    extractMainCardData,
+    MainCardData,
+} from 'msteams-app-questionly.common';
 import { ConversationType } from 'src/enums/ConversationType';
 import { getMeetingIdFromContext } from 'src/util/meetingsUtility';
 
@@ -403,7 +406,9 @@ export class AskAway extends TeamsActivityHandler {
                     context.activity.conversation.id,
                     conversation.tenantId,
                     context.activity.serviceUrl,
-                    meetingId
+                    meetingId,
+                    context.activity.from.name,
+                    context.activity.from.id
                 );
             } catch (error) {
                 exceptionLogger(error);
@@ -454,9 +459,7 @@ export class AskAway extends TeamsActivityHandler {
     //          ANCHOR Bot Framework messaging extension method overrides         //
     // -------------------------------------------------------------------------- //
 
-    async handleTeamsMessagingExtensionFetchTask(): Promise<
-        MessagingExtensionActionResponse
-    > {
+    async handleTeamsMessagingExtensionFetchTask(): Promise<MessagingExtensionActionResponse> {
         // commandId: 'startQnA'
         return this._buildTaskModuleContinueResponse(
             controller.getStartQnACard(),
@@ -516,7 +519,7 @@ export class AskAway extends TeamsActivityHandler {
         const title = cardData.title,
             description = cardData.description,
             userName = context.activity.from.name,
-            userAadObjId = <string>context.activity.from.aadObjectId,
+            userAadObjectId = <string>context.activity.from.aadObjectId,
             activityId = '',
             tenantId = conversation.tenantId,
             isChannel =
@@ -529,20 +532,20 @@ export class AskAway extends TeamsActivityHandler {
             meetingId = await getMeetingIdFromContext(context);
 
         try {
-            await controller.startQnASession(
-                title,
-                description,
-                userName,
-                userAadObjId,
-                activityId,
-                context.activity.conversation.id,
-                tenantId,
-                scopeId,
-                hostUserId,
-                isChannel,
-                serviceURL,
-                meetingId
-            );
+            await controller.startQnASession({
+                title: title,
+                description: description,
+                userName: userName,
+                userAadObjectId: userAadObjectId,
+                activityId: activityId,
+                conversationId: context.activity.conversation.id,
+                tenantId: tenantId,
+                scopeId: scopeId,
+                hostUserId: hostUserId,
+                isChannel: isChannel,
+                serviceUrl: serviceURL,
+                meetingId: meetingId,
+            });
         } catch (error) {
             exceptionLogger(error);
             if (error.code === 'QnASessionLimitExhaustedError') {
@@ -593,7 +596,7 @@ export class AskAway extends TeamsActivityHandler {
             username = context.activity.from.name,
             qnaSessionId = '',
             userId = <string>context.activity.from.aadObjectId,
-            hostUserId = <string>context.activity.from.id;
+            hostUserId = context.activity.from.id;
 
         if (!(title && description))
             return this._buildTaskModuleContinueResponse(

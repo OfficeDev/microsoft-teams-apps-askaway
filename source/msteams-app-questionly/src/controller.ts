@@ -1,7 +1,11 @@
 // Middleman file to allow for communication between the bot, database, and adaptive card builder.
 import * as adaptiveCardBuilder from 'src/adaptive-cards/adaptiveCardBuilder'; // To populate adaptive cards
 import { AdaptiveCard } from 'adaptivecards';
-import { exceptionLogger } from 'src/util/exceptionTracking';
+import {
+    exceptionLogger,
+    trackCreateQnASessionEvent,
+    trackCreateQuestionEvent,
+} from 'src/util/exceptionTracking';
 import jimp from 'jimp';
 import { join } from 'path';
 import {
@@ -25,8 +29,9 @@ import {
     triggerBackgroundJobForQuestionPostedEvent,
     triggerBackgroundJobForQuestionUpvotedEvent,
 } from 'src/background-job/backgroundJobTrigger';
+import * as maincardBuilder from 'msteams-app-questionly.common';
 
-export const getMainCard = adaptiveCardBuilder.getMainCard;
+export const getMainCard = maincardBuilder.getMainCard;
 export const getStartQnACard = adaptiveCardBuilder.getStartQnACard;
 export const getErrorCard = adaptiveCardBuilder.getErrorCard;
 
@@ -50,39 +55,40 @@ const avatarColors: string[] = [
 
 /**
  * Starts the QnA session
- * @param title - title of QnA
- * @param description - description of QnA
- * @param userName - name of the user who created the QnA
- * @param userAadObjId - AAD Object Id of the suer who created the QnA
- * @param activityId - id of the master card message used for proactive updating
- * @param tenantId - id of tenant the bot is running on.
- * @param scopeId - channel id or group chat id
- * @param hostUserId - MS Teams Id of user who created the QnA (used for at-mentions)
- * @param isChannel - whether the QnA session was started in a channel or group chat
- * @returns the master adaptive card
+ * @param sessionParameters - object with parameters needed in order to create a session
+ * title - title of QnA
+ * description - description of QnA
+ * userName - name of the user who created the QnA
+ * userAadObjId - AAD Object Id of the suer who created the QnA
+ * activityId - id of the master card message used for proactive updating
+ * tenantId - id of tenant the bot is running on.
+ * scopeId - channel id or group chat id
+ * hostUserId - MS Teams Id of user who created the QnA (used for at-mentions)
+ * isChannel - whether the QnA session was started in a channel or group chat
+ * @returns qna session document.
  */
-export const startQnASession = async (
-    title: string,
-    description: string,
-    userName: string,
-    userAadObjId: string,
-    activityId: string,
-    conversationId: string,
-    tenantId: string,
-    scopeId: string,
-    hostUserId: string,
-    isChannel: boolean,
-    serviceURL: string,
-    meetingId: string
-): Promise<IQnASession_populated> => {
+export const startQnASession = async (sessionParameters: {
+    title: string;
+    description: string;
+    userName: string;
+    userAadObjectId: string;
+    activityId: string;
+    conversationId: string;
+    tenantId: string;
+    scopeId: string;
+    hostUserId: string;
+    isChannel: boolean;
+    serviceUrl: string;
+    meetingId: string;
+}): Promise<IQnASession_populated> => {
     // Only a presenter or organizer can create a new QnA session in the meeting.
-    if (meetingId) {
+    if (sessionParameters.meetingId) {
         if (
             !(await isPresenterOrOrganizer(
-                meetingId,
-                userAadObjId,
-                tenantId,
-                serviceURL
+                sessionParameters.meetingId,
+                sessionParameters.userAadObjectId,
+                sessionParameters.tenantId,
+                sessionParameters.serviceUrl
             ))
         ) {
             throw new UnauthorizedAccessError(
@@ -92,18 +98,28 @@ export const startQnASession = async (
     }
 
     // save data to db
-    const response = await qnaSessionDataService.createQnASession(
-        title,
-        description,
-        userName,
-        userAadObjId,
-        activityId,
-        conversationId,
-        tenantId,
-        scopeId,
-        hostUserId,
-        isChannel
-    );
+    const response = await qnaSessionDataService.createQnASession({
+        title: sessionParameters.title,
+        description: sessionParameters.description,
+        userName: sessionParameters.userName,
+        userAadObjectId: sessionParameters.userAadObjectId,
+        activityId: sessionParameters.activityId,
+        conversationId: sessionParameters.conversationId,
+        tenantId: sessionParameters.tenantId,
+        scopeId: sessionParameters.scopeId,
+        hostUserId: sessionParameters.hostUserId,
+        isChannel: sessionParameters.isChannel,
+    });
+
+    trackCreateQnASessionEvent({
+        qnaSessionId: response?._id,
+        tenantId: sessionParameters.tenantId,
+        hostUserId: sessionParameters.hostUserId,
+        isChannel: sessionParameters.isChannel,
+        meetingId: sessionParameters.meetingId,
+        conversationId: sessionParameters.conversationId,
+        title: sessionParameters.title,
+    });
 
     await triggerBackgroundJobForQnaSessionCreatedEvent(response);
 
@@ -196,6 +212,13 @@ export const submitNewQuestion = async (
             questionContent,
             conversationId
         );
+
+        trackCreateQuestionEvent({
+            questionId: question?._id,
+            qnaSessionId: qnaSessionId,
+            conversationId: conversationId,
+            questionContent: questionContent,
+        });
 
         triggerBackgroundJobForQuestionPostedEvent(
             conversationId,
@@ -385,7 +408,9 @@ export const endQnASession = async (
     conversationId: string,
     tenantId: string,
     serviceURL: string,
-    meetingId: string
+    meetingId: string,
+    userName: string,
+    endedByUserId: string
 ): Promise<void> => {
     const isActive = await qnaSessionDataService.isActiveQnA(qnaSessionId);
     if (!isActive) {
@@ -416,7 +441,13 @@ export const endQnASession = async (
         }
     }
 
-    await qnaSessionDataService.endQnASession(qnaSessionId, conversationId);
+    await qnaSessionDataService.endQnASession(
+        qnaSessionId,
+        conversationId,
+        aadObjectId,
+        userName,
+        endedByUserId
+    );
 
     await triggerBackgroundJobForQnaSessionEndedEvent(
         conversationId,
@@ -451,11 +482,7 @@ export const isHost = async (
     userAadObjId: string
 ): Promise<boolean> => {
     try {
-        const result = await qnaSessionDataService.isHost(
-            qnaSessionId,
-            userAadObjId
-        );
-        return result;
+        return await qnaSessionDataService.isHost(qnaSessionId, userAadObjId);
     } catch (error) {
         exceptionLogger(error);
         throw new Error('Failed to check if user is host for this QnA session');
@@ -522,8 +549,7 @@ export const validateConversationId = async (
  */
 export const isActiveQnA = async (qnaSessionId: string): Promise<boolean> => {
     try {
-        const result = await qnaSessionDataService.isActiveQnA(qnaSessionId);
-        return result;
+        return await qnaSessionDataService.isActiveQnA(qnaSessionId);
     } catch (error) {
         exceptionLogger(error);
         throw new Error('Failed to check if QnA session is active');

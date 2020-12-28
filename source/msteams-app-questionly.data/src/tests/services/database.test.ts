@@ -27,6 +27,9 @@ const sampleTenantId = "11121";
 const sampleScopeId = "12311";
 const sampleQnASessionID = "5f160b862655575054393a0e";
 const sampleHostUserId = "5f160b862655575054393a0e";
+const sampleEndedById = "sampleEndedById";
+const sampleEndedByName = "sampleEndedByName";
+const sampleEndedByUserId = "sampleEndedByUserId";
 
 const createDummyQnASession = async () => {
   return await new QnASession({
@@ -106,18 +109,18 @@ test("can create qna session", async () => {
     isChannel: true,
   };
 
-  const result = await qnaSessionDataService.createQnASession(
-    data.title,
-    data.description,
-    data.userName,
-    data.userAadObjId,
-    data.activityId,
-    data.conversationId,
-    data.tenantId,
-    data.scopeId,
-    data.hostUserId,
-    data.isChannel
-  );
+  const result = await qnaSessionDataService.createQnASession({
+    title: data.title,
+    description: data.description,
+    userName: data.userName,
+    userAadObjectId: data.userAadObjId,
+    activityId: data.activityId,
+    conversationId: data.conversationId,
+    tenantId: data.tenantId,
+    scopeId: data.scopeId,
+    hostUserId: data.hostUserId,
+    isChannel: data.isChannel,
+  });
 
   expect(result._id).toBeTruthy();
   expect(result.hostId._id).toBe(data.userAadObjId);
@@ -221,7 +224,7 @@ test("retrieve most recent/top questions with three questions", async () => {
   ];
 
   const _sleep = (ms) =>
-    new Promise((resolve) => setTimeout(() => resolve(), ms));
+    new Promise<void>((resolve) => setTimeout(() => resolve(), ms));
   questions[1] = await new Question(questions[1]).save();
   await _sleep(50);
   questions[0] = await new Question(questions[0]).save();
@@ -279,7 +282,7 @@ test("retrieve most top questions with no votes should be most recent questions"
   ];
 
   const _sleep = (ms) =>
-    new Promise((resolve) => setTimeout(() => resolve(), ms));
+    new Promise<void>((resolve) => setTimeout(() => resolve(), ms));
   questions[1] = await new Question(questions[1]).save();
   await _sleep(50);
   questions[0] = await new Question(questions[0]).save();
@@ -336,7 +339,7 @@ test("retrieve most top questions with some votes should be most recent question
   ];
 
   const _sleep = (ms) =>
-    new Promise((resolve) => setTimeout(() => resolve(), ms));
+    new Promise<void>((resolve) => setTimeout(() => resolve(), ms));
   questions[1] = await new Question(questions[1]).save();
   await _sleep(50);
   questions[0] = await new Question(questions[0]).save();
@@ -593,7 +596,7 @@ test("upvote question with new user not in database", async () => {
 
 test("ending non-existing qna", async () => {
   await qnaSessionDataService
-    .endQnASession(sampleQnASessionID, sampleConversationId)
+    .endQnASession(sampleQnASessionID, sampleConversationId, sampleEndedById, sampleEndedByName, sampleEndedByUserId)
     .catch((error) => {
       expect(error).toEqual(new Error("QnA Session record not found"));
     });
@@ -602,7 +605,10 @@ test("ending non-existing qna", async () => {
 test("ending existing qna with no questions", async () => {
   await qnaSessionDataService.endQnASession(
     testQnASession._id,
-    sampleConversationId
+    sampleConversationId,
+    sampleEndedById,
+    sampleEndedByName,
+    sampleEndedByUserId
   );
 
   // get data
@@ -630,7 +636,10 @@ test("ending existing qna with a few questions", async () => {
 
   await qnaSessionDataService.endQnASession(
     testQnASession._id,
-    sampleConversationId
+    sampleConversationId,
+    sampleEndedById,
+    sampleEndedByName,
+    sampleEndedByUserId
   );
 
   // get data
@@ -647,7 +656,7 @@ test("ending existing qna with a few questions", async () => {
 test("ending qna from different conversation", async () => {
   const randomConversationId = "random";
   await qnaSessionDataService
-    .endQnASession(testQnASession._id, randomConversationId)
+    .endQnASession(testQnASession._id, randomConversationId, sampleEndedById, sampleEndedByName, sampleEndedByUserId)
     .catch((error) => {
       expect(error).toEqual(
         new Error(
@@ -692,20 +701,20 @@ test("checking if inactive QnA is currently active", async () => {
     isChannel: true,
   };
 
-  const result = await qnaSessionDataService.createQnASession(
-    data.title,
-    data.description,
-    data.userName,
-    data.userAadObjId,
-    data.activityId,
-    data.conversationId,
-    data.tenantId,
-    data.scopeId,
-    data.hostUserId,
-    data.isChannel
-  );
+  const result = await qnaSessionDataService.createQnASession({
+    title: data.title,
+    description: data.description,
+    userName: data.userName,
+    userAadObjectId: data.userAadObjId,
+    activityId: data.activityId,
+    conversationId: data.conversationId,
+    tenantId: data.tenantId,
+    scopeId: data.scopeId,
+    hostUserId: data.hostUserId,
+    isChannel: data.isChannel,
+  });
 
-  await qnaSessionDataService.endQnASession(result._id, sampleConversationId);
+  await qnaSessionDataService.endQnASession(result._id, sampleConversationId, sampleEndedById, sampleEndedByName, sampleEndedByUserId);
 
   const isActive = await qnaSessionDataService.isActiveQnA(result._id);
   expect(isActive).toEqual(false);

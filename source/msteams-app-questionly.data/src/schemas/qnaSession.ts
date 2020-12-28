@@ -74,6 +74,17 @@ const QnASessionSchema = new mongoose.Schema(
       type: Date,
       required: false,
     },
+    // AAD object id of user who ended QnA session
+    endedById: {
+      type: String,
+      ref: "User",
+      required: false,
+    },
+    // Teams id of user who ended QnA session
+    endedByUserId: {
+      type: String,
+      required: false,
+    }
   },
   { optimisticConcurrency: true }
 );
@@ -95,6 +106,7 @@ interface IQnASessionBase extends mongoose.Document {
   dataEventVersion: Number;
   dateTimeCardLastUpdated?: Date;
   dateTimeNextCardUpdateScheduled?: Date;
+  endedByUserId?: string;
 }
 
 /**
@@ -102,6 +114,7 @@ interface IQnASessionBase extends mongoose.Document {
  */
 export interface IQnASession extends IQnASessionBase {
   hostId: IUser["_id"];
+  endedById?: IUser["_id"];
 }
 
 /**
@@ -109,6 +122,7 @@ export interface IQnASession extends IQnASessionBase {
  */
 export interface IQnASession_populated extends IQnASessionBase {
   hostId: IUser;
+  endedById?: IUser;
 }
 
 /**

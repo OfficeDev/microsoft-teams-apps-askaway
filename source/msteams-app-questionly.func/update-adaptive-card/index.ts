@@ -7,18 +7,27 @@
 import { AzureFunction, Context } from "@azure/functions";
 import { IAdaptiveCard } from "adaptivecards";
 import {
+  Activity,
+  ActivityTypes,
   BotFrameworkAdapter,
   CardFactory,
   ConversationAccount,
   ConversationReference,
 } from "botbuilder";
-import { DataEventType } from "msteams-app-questionly.common";
-import { getUpdatedMainCard } from "../src/adaptive-card/mainCardBuilder";
+import {
+  DataEventType,
+  getUpdatedMainCard,
+} from "msteams-app-questionly.common";
 import {
   qnaSessionDataService,
   questionDataService,
 } from "msteams-app-questionly.data";
 import { IDataEvent } from "msteams-app-questionly.common";
+import {
+  height,
+  width,
+  title,
+} from "../src/constants/notificationBubbleConstants";
 
 let adapter = new BotFrameworkAdapter({
   appId: process.env.MicrosoftAppId.toString(),
@@ -33,6 +42,7 @@ const activityFunction: AzureFunction = async function (
   const serviceUrl: string = context.bindings.name.serviceUrl;
   const eventData: IDataEvent = context.bindings.name.eventData;
   const isSessionEnded = eventData.type === DataEventType.qnaSessionEndedEvent;
+  const meetingId = context.bindings.name.meetingId;
   // Adapter is injected as dependency for UTs.
   adapter = context.bindings.name.botFrameworkAdapter ?? adapter;
 
@@ -41,7 +51,8 @@ const activityFunction: AzureFunction = async function (
     qnaSessionDataService,
     questionDataService,
     qnaSessionId,
-    isSessionEnded
+    isSessionEnded,
+    process.env.AvatarKey
   );
   const card: IAdaptiveCard = result.card;
 
@@ -56,12 +67,47 @@ const activityFunction: AzureFunction = async function (
 
     if (eventData.type === DataEventType.qnaSessionCreatedEvent) {
       let resource;
+
+      const activity = {
+        type: ActivityTypes.Message,
+        attachments: [CardFactory.adaptiveCard(card)],
+      } as Activity;
+
+      // If it's a meeting chat, send notification bubble as well.
+      if (meetingId) {
+        const appId = process.env.AppId.toString();
+        const hostUserName: string = eventData.data.hostUser.name;
+        const sessionTitle: string = eventData.data.title;
+
+        const notificationBubblePageUrlWithParams = new URL(
+          process.env.NotificationBubblePageUrl
+        );
+
+        notificationBubblePageUrlWithParams.searchParams.append(
+          "username",
+          hostUserName
+        );
+
+        notificationBubblePageUrlWithParams.searchParams.append(
+          "title",
+          sessionTitle
+        );
+
+        const encodedNotificationBubblePageUrlWithParam = encodeURIComponent(
+          notificationBubblePageUrlWithParams.href
+        );
+        activity.channelData = {
+          notification: {
+            alertInMeeting: true,
+            externalResourceUrl: `https://teams.microsoft.com/l/bubble/${appId}?url=${encodedNotificationBubblePageUrlWithParam}&height=${height}&width=${width}&title=${title}`,
+          },
+        };
+      }
+
       await adapter.continueConversation(
         conversationReference,
         async (context) => {
-          resource = await context.sendActivity({
-            attachments: [CardFactory.adaptiveCard(card)],
-          });
+          resource = await context.sendActivity(activity);
         }
       );
       if (resource !== undefined) {
