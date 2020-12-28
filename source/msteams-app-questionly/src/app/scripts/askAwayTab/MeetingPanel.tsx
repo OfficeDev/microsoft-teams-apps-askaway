@@ -55,7 +55,7 @@ class MeetingPanel extends React.Component<
         super(props);
         this.state = {
             activeSessionData: null,
-            showLoader: true,
+            showLoader: false,
             input: {
                 title: '',
                 description: '',
@@ -73,17 +73,10 @@ class MeetingPanel extends React.Component<
     }
 
     /**
-     * To reload the panel on click
-     */
-    forceUpdateHandler = () => {
-        // window.location.reload();
-        this.getActiveSession();
-    };
-
-    /**
      * To Identify Active Session
      */
     private getActiveSession() {
+        this.setState({ showLoader: true });
         this.props.httpService
             .get(`/conversations/${this.props.teamsData.chatId}/activesessions`)
             .then((response: any) => {
@@ -155,7 +148,9 @@ class MeetingPanel extends React.Component<
                             response['data']['sessionId']
                         ) {
                             this.showAlertModel(true);
-                            this.getActiveSession();
+                            this.setState({
+                                activeSessionData: response.data,
+                            });
                         } else {
                             this.showAlertModel(false);
                         }
@@ -315,7 +310,9 @@ class MeetingPanel extends React.Component<
                         {
                             key: '5',
                             content: 'Refresh session',
-                            onClick: this.forceUpdateHandler,
+                            onClick: () => {
+                                this.getActiveSession();
+                            },
                             icon: <RetryIcon outline />,
                         },
                         {
