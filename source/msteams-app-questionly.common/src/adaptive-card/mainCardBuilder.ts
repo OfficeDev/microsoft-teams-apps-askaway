@@ -80,14 +80,25 @@ export const getMainCard = async (
     (<any>_mainCard.body)[5].actions = [viewLeaderboardButton()]; // is an ActionSet
 
   // add at-mention data
-  _mainCard.msTeams.entities.push({
-    type: "mention",
-    text: getAtMentionMarkDown(userName),
-    mentioned: {
-      id: hostUserId,
-      name: userName,
-    },
-  });
+  if (ended && endedByName) {
+    _mainCard.msTeams.entities.push({
+      type: "mention",
+      text: getAtMentionMarkDown(endedByName),
+      mentioned: {
+        id: endedByUserId,
+        name: endedByName,
+      },
+    });
+  } else {
+    _mainCard.msTeams.entities.push({
+      type: "mention",
+      text: getAtMentionMarkDown(userName),
+      mentioned: {
+        id: hostUserId,
+        name: userName,
+      },
+    });
+  }
 
   const _numQuestions = totalQuestions ? totalQuestions : 0;
   let mostRecentUser = "",
@@ -131,13 +142,14 @@ export const getMainCard = async (
       leaderboardTitle: ended
         ? mainCardStrings("viewQuestions")
         : mainCardStrings("upvoteQuestions"),
-      sessionDetails: ended
-        ? mainCardStrings("sessionEndedNoMoreQuestions", {
-            user: getAtMentionInBoldMarkDown(userName),
-          })
-        : mainCardStrings("initiatedBy", {
-            user: getAtMentionInBoldMarkDown(userName),
-          }),
+      sessionDetails:
+        ended && endedByName
+          ? mainCardStrings("sessionEndedNoMoreQuestions", {
+              user: getAtMentionInBoldMarkDown(endedByName),
+            })
+          : mainCardStrings("initiatedBy", {
+              user: getAtMentionInBoldMarkDown(userName),
+            }),
       recentlyAsked: recentlyAskedString,
     },
   });

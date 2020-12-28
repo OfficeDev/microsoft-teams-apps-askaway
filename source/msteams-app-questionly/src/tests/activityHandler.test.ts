@@ -440,7 +440,7 @@ test('handle submit end qna', async () => {
             from: {
                 name: 'name',
                 aadObjectId: 'objId',
-                id: 'sampleId'
+                id: 'sampleId',
             },
             conversation: {
                 id: 'randomConvoId',
