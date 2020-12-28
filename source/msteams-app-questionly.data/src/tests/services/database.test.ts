@@ -27,6 +27,9 @@ const sampleTenantId = "11121";
 const sampleScopeId = "12311";
 const sampleQnASessionID = "5f160b862655575054393a0e";
 const sampleHostUserId = "5f160b862655575054393a0e";
+const sampleEndedById = "sampleEndedById";
+const sampleEndedByName = "sampleEndedByName";
+const sampleEndedByUserId = "sampleEndedByUserId";
 
 const createDummyQnASession = async () => {
   return await new QnASession({
@@ -593,7 +596,7 @@ test("upvote question with new user not in database", async () => {
 
 test("ending non-existing qna", async () => {
   await qnaSessionDataService
-    .endQnASession(sampleQnASessionID, sampleConversationId)
+    .endQnASession(sampleQnASessionID, sampleConversationId, sampleEndedById, sampleEndedByName, sampleEndedByUserId)
     .catch((error) => {
       expect(error).toEqual(new Error("QnA Session record not found"));
     });
@@ -602,7 +605,10 @@ test("ending non-existing qna", async () => {
 test("ending existing qna with no questions", async () => {
   await qnaSessionDataService.endQnASession(
     testQnASession._id,
-    sampleConversationId
+    sampleConversationId,
+    sampleEndedById,
+    sampleEndedByName,
+    sampleEndedByUserId
   );
 
   // get data
@@ -630,7 +636,10 @@ test("ending existing qna with a few questions", async () => {
 
   await qnaSessionDataService.endQnASession(
     testQnASession._id,
-    sampleConversationId
+    sampleConversationId,
+    sampleEndedById,
+    sampleEndedByName,
+    sampleEndedByUserId
   );
 
   // get data
@@ -647,7 +656,7 @@ test("ending existing qna with a few questions", async () => {
 test("ending qna from different conversation", async () => {
   const randomConversationId = "random";
   await qnaSessionDataService
-    .endQnASession(testQnASession._id, randomConversationId)
+    .endQnASession(testQnASession._id, randomConversationId, sampleEndedById, sampleEndedByName, sampleEndedByUserId)
     .catch((error) => {
       expect(error).toEqual(
         new Error(
@@ -705,7 +714,7 @@ test("checking if inactive QnA is currently active", async () => {
     isChannel: data.isChannel,
   });
 
-  await qnaSessionDataService.endQnASession(result._id, sampleConversationId);
+  await qnaSessionDataService.endQnASession(result._id, sampleConversationId, sampleEndedById, sampleEndedByName, sampleEndedByUserId);
 
   const isActive = await qnaSessionDataService.isActiveQnA(result._id);
   expect(isActive).toEqual(false);

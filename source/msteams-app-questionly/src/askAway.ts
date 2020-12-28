@@ -406,7 +406,9 @@ export class AskAway extends TeamsActivityHandler {
                     context.activity.conversation.id,
                     conversation.tenantId,
                     context.activity.serviceUrl,
-                    meetingId
+                    meetingId,
+                    context.activity.from.name,
+                    context.activity.from.id
                 );
             } catch (error) {
                 exceptionLogger(error);
@@ -594,7 +596,7 @@ export class AskAway extends TeamsActivityHandler {
             username = context.activity.from.name,
             qnaSessionId = '',
             userId = <string>context.activity.from.aadObjectId,
-            hostUserId = <string>context.activity.from.id;
+            hostUserId = context.activity.from.id;
 
         if (!(title && description))
             return this._buildTaskModuleContinueResponse(

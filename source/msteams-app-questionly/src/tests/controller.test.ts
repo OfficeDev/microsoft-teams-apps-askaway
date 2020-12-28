@@ -360,7 +360,9 @@ test('end ama session', async () => {
             sampleConversationId,
             sampleTenantId,
             sampleServiceUrl,
-            ''
+            '',
+            sampleUserName,
+            sampleHostUserId
         )
     ).rejects.toThrow();
 
@@ -391,7 +393,9 @@ test('end ama session - meeting', async () => {
         sampleConversationId,
         sampleTenantId,
         sampleServiceUrl,
-        sampleMeetingId
+        sampleMeetingId,
+        sampleUserName,
+        sampleHostUserId
     );
     expect(qnaSessionDataService.isActiveQnA).toBeCalledTimes(1);
     expect(qnaSessionDataService.isActiveQnA).toBeCalledWith(
@@ -428,7 +432,9 @@ test('end ama session - meeting for attendee', async () => {
             sampleConversationId,
             sampleTenantId,
             sampleServiceUrl,
-            sampleMeetingId
+            sampleMeetingId,
+            sampleUserName,
+            sampleHostUserId
         )
     ).rejects.toThrow();
 

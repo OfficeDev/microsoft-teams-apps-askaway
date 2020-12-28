@@ -38,7 +38,10 @@ export const getMainCard = async (
   ended?: boolean,
   topQuestionsData?: IQuestionPopulatedUser[],
   recentQuestionsData?: IQuestionPopulatedUser[],
-  totalQuestions?: number
+  totalQuestions?: number,
+  endedById?: string,
+  endedByName?: string,
+  endedByUserId?: string
 ): Promise<IAdaptiveCard> => {
   // Initialize localization (this is no ops if it's already initialized).
   await initLocalization();
@@ -77,14 +80,25 @@ export const getMainCard = async (
     (<any>_mainCard.body)[5].actions = [viewLeaderboardButton()]; // is an ActionSet
 
   // add at-mention data
-  _mainCard.msTeams.entities.push({
-    type: "mention",
-    text: getAtMentionMarkDown(userName),
-    mentioned: {
-      id: hostUserId,
-      name: userName,
-    },
-  });
+  if (ended && endedByName) {
+    _mainCard.msTeams.entities.push({
+      type: "mention",
+      text: getAtMentionMarkDown(endedByName),
+      mentioned: {
+        id: endedByUserId,
+        name: endedByName,
+      },
+    });
+  } else {
+    _mainCard.msTeams.entities.push({
+      type: "mention",
+      text: getAtMentionMarkDown(userName),
+      mentioned: {
+        id: hostUserId,
+        name: userName,
+      },
+    });
+  }
 
   const _numQuestions = totalQuestions ? totalQuestions : 0;
   let mostRecentUser = "",
@@ -120,21 +134,22 @@ export const getMainCard = async (
     $root: {
       title: title,
       description: description,
-      user: userName,
+      user: ended ? endedByName : userName,
       qnaId: qnaSessionId,
       topQuestions: topQuestionsData,
-      userId: aadObjectId,
+      userId: ended ? endedById : aadObjectId,
       data: data,
       leaderboardTitle: ended
         ? mainCardStrings("viewQuestions")
         : mainCardStrings("upvoteQuestions"),
-      sessionDetails: ended
-        ? mainCardStrings("sessionEndedNoMoreQuestions", {
-            user: getAtMentionInBoldMarkDown(userName),
-          })
-        : mainCardStrings("initiatedBy", {
-            user: getAtMentionInBoldMarkDown(userName),
-          }),
+      sessionDetails:
+        ended && endedByName
+          ? mainCardStrings("sessionEndedNoMoreQuestions", {
+              user: getAtMentionInBoldMarkDown(endedByName),
+            })
+          : mainCardStrings("initiatedBy", {
+              user: getAtMentionInBoldMarkDown(userName),
+            }),
       recentlyAsked: recentlyAskedString,
     },
   });
@@ -174,6 +189,7 @@ export const getUpdatedMainCard = async (
   const qnaSessionData = await qnaSessionDataService.getQnASessionData(
     qnaSessionId
   );
+
   // eslint-disable-next-line prefer-const
   const {
     topQuestions,
@@ -194,7 +210,10 @@ export const getUpdatedMainCard = async (
       ended || !qnaSessionData.isActive,
       topQuestions,
       recentQuestions,
-      numQuestions
+      numQuestions,
+      qnaSessionData.endedById,
+      qnaSessionData.endedByName,
+      qnaSessionData.endedByUserId
     ),
     activityId: qnaSessionData.activityId,
   };
