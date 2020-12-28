@@ -24,6 +24,7 @@ import {
     upvoteQuestion,
 } from 'src/controller';
 import { createResponseForBadRequest } from 'src/routes/responseUtility';
+import { qnaSessionClientDataContract } from 'src/contracts/qnaSessionClientDataContract';
 
 export const router = Express.Router();
 let conversationDataService: IConversationDataService;
@@ -284,23 +285,34 @@ router.post(
                 serviceUrl
             );
 
-            const session = await startQnASession(
-                sessionTitle,
-                sessionDescription,
-                user.userName,
-                user._id,
-                '',
-                conversationId,
-                tenantId,
-                scopeId,
-                hostUserId,
-                isChannel,
-                serviceUrl,
+            const session = await startQnASession({
+                title: sessionTitle,
+                description: sessionDescription,
+                userName: user.userName,
+                userAadObjectId: user._id,
+                activityId: '',
+                conversationId: conversationId,
+                tenantId: tenantId,
+                scopeId: scopeId,
+                hostUserId: hostUserId,
+                isChannel: isChannel,
+                serviceUrl: serviceUrl,
                 // `ensureConversationBelongsToMeetingChat` makes sure meeting id is available
-                <string>meetingId
-            );
+                meetingId: <string>meetingId,
+            });
 
-            res.send({ qnaSessionId: session._id });
+            const response: qnaSessionClientDataContract = {
+                sessionId: session._id,
+                title: session.title,
+                isActive: session.isActive,
+                hostUser: { id: user._id, name: user.userName },
+                numberOfQuestions: 0,
+                dateTimeCreated: session.dateTimeCreated,
+                users: [],
+                questions: [],
+            };
+
+            res.send(response);
         } catch (error) {
             next(error);
         }

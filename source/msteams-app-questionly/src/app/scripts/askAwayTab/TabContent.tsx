@@ -1,7 +1,7 @@
 // tslint:disable-next-line:no-relative-imports
 import './index.scss';
 import * as React from 'react';
-import { withTranslation, WithTranslation } from 'react-i18next';
+import { withTranslation } from 'react-i18next';
 import { Flex, Text, Button, Image } from '@fluentui/react-northstar';
 import { SwitchIcon } from './../askAwayTab/shared/Icons/SwitchIcon';
 import { AddIcon, RetryIcon } from '@fluentui/react-icons-northstar';
@@ -129,7 +129,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                         if (
                             response &&
                             response['data'] &&
-                            response['data']['qnaSessionId']
+                            response['data']['sessionId']
                         ) {
                             this.showAlertModel(true);
                         } else {

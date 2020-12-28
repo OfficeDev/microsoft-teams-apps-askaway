@@ -19,16 +19,18 @@ import { UserIsNotPartOfConversationError } from 'src/errors/userIsNotPartOfConv
 import { ConversationDoesNotBelongToMeetingChatError } from 'src/errors/conversationDoesNotBelongToMeetingChatError';
 import { Request } from 'express';
 import { ParameterMissingInRequestError } from 'src/errors/parameterMissingInRequestError';
+import { qnaSessionClientDataContract } from 'src/contracts/qnaSessionClientDataContract';
 
 /**
  * Gets questions data and user data for each active qna sessions, process them and returns an array of detailed qna sessions.
  * @param qnaSessionDataArray - Array of qna sessions data
+ * @returns - qna session data array.
  */
 export const processQnASesssionsDataForMeetingTab = async (
     qnaSessionDataArray: IQnASession_populated[]
-) => {
+): Promise<qnaSessionClientDataContract[]> => {
     let qnaSessionData: IQnASession_populated;
-    const qnaSessionArrayForTab: any[] = [];
+    const qnaSessionArrayForTab: qnaSessionClientDataContract[] = [];
     for (let i = 0; i < qnaSessionDataArray.length; i++) {
         qnaSessionData = qnaSessionDataArray[i];
 
@@ -69,13 +71,13 @@ export const processQnASesssionsDataForMeetingTab = async (
             throw err;
         }
 
-        const qnaSessionDataObject = {
-            sessionId: qnaSessionData.id,
+        const qnaSessionDataObject: qnaSessionClientDataContract = {
+            sessionId: qnaSessionData._id,
             title: qnaSessionData.title,
             isActive: qnaSessionData.isActive,
             dateTimeCreated: qnaSessionData.dateTimeCreated,
             dateTimeEnded: qnaSessionData.dateTimeEnded,
-            hostUser: { id: hostUser.id, name: hostUser.userName },
+            hostUser: { id: hostUser._id, name: hostUser.userName },
             numberOfQuestions: questionData.length,
             questions: voteSortedQuestions,
             users: users,
