@@ -1,0 +1,14 @@
+{
+  "mainCard": {
+    "initiatedBy": "{{user}} started an Ask Away session.",
+    "sessionEndedNoMoreQuestions": "{{user}} ended the Ask Away session. No longer accepting questions.",
+    "topQuestions": "Top questions",
+    "upvotes": "Upvotes",
+    "askQuestion": "Ask a question",
+    "upvoteQuestions": "Upvote questions",
+    "viewQuestions": "View questions",
+    "noQuestions": "Be the first to ask a question.",
+    "recentlyAskedAQuestion": "{{user1}} recently asked a question ({{questionCount}} questions total)",
+    "recentlyAskedQuestions": "{{user1}}, and {{user2}} recently asked questions ({{questionCount}} questions total)"
+  }
+}

@@ -24,6 +24,7 @@ import {
     upvoteQuestion,
 } from 'src/controller';
 import { createResponseForBadRequest } from 'src/routes/responseUtility';
+import { qnaSessionClientDataContract } from 'src/contracts/qnaSessionClientDataContract';
 
 export const router = Express.Router();
 let conversationDataService: IConversationDataService;
@@ -218,7 +219,11 @@ router.patch(
 
                 ensureConversationBelongsToMeetingChat(conversationData);
 
-                const endedByUserId = await getTeamsMemberId(user._id, conversationId, conversationData.serviceUrl);
+                const endedByUserId = await getTeamsMemberId(
+                    user._id,
+                    conversationId,
+                    conversationData.serviceUrl
+                );
 
                 await endQnASession(
                     sessionId,
@@ -304,7 +309,18 @@ router.post(
                 meetingId: <string>meetingId,
             });
 
-            res.send({ qnaSessionId: session._id });
+            const response: qnaSessionClientDataContract = {
+                sessionId: session._id,
+                title: session.title,
+                isActive: session.isActive,
+                hostUser: { id: user._id, name: user.userName },
+                numberOfQuestions: 0,
+                dateTimeCreated: session.dateTimeCreated,
+                users: [],
+                questions: [],
+            };
+
+            res.send(response);
         } catch (error) {
             next(error);
         }

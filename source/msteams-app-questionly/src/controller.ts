@@ -1,7 +1,11 @@
 // Middleman file to allow for communication between the bot, database, and adaptive card builder.
 import * as adaptiveCardBuilder from 'src/adaptive-cards/adaptiveCardBuilder'; // To populate adaptive cards
 import { AdaptiveCard } from 'adaptivecards';
-import { exceptionLogger, trackCreateQnASessionEvent, trackCreateQuestionEvent } from 'src/util/exceptionTracking';
+import {
+    exceptionLogger,
+    trackCreateQnASessionEvent,
+    trackCreateQuestionEvent,
+} from 'src/util/exceptionTracking';
 import jimp from 'jimp';
 import { join } from 'path';
 import {
@@ -25,8 +29,9 @@ import {
     triggerBackgroundJobForQuestionPostedEvent,
     triggerBackgroundJobForQuestionUpvotedEvent,
 } from 'src/background-job/backgroundJobTrigger';
+import * as maincardBuilder from 'msteams-app-questionly.common';
 
-export const getMainCard = adaptiveCardBuilder.getMainCard;
+export const getMainCard = maincardBuilder.getMainCard;
 export const getStartQnACard = adaptiveCardBuilder.getStartQnACard;
 export const getErrorCard = adaptiveCardBuilder.getErrorCard;
 
@@ -108,12 +113,12 @@ export const startQnASession = async (sessionParameters: {
 
     trackCreateQnASessionEvent({
         qnaSessionId: response?._id,
-        tenantId: tenantId,
-        hostUserId: hostUserId,
-        isChannel: isChannel,
-        meetingId: meetingId,
-        conversationId: conversationId,
-        title: title
+        tenantId: sessionParameters.tenantId,
+        hostUserId: sessionParameters.hostUserId,
+        isChannel: sessionParameters.isChannel,
+        meetingId: sessionParameters.meetingId,
+        conversationId: sessionParameters.conversationId,
+        title: sessionParameters.title,
     });
 
     await triggerBackgroundJobForQnaSessionCreatedEvent(response);
@@ -212,7 +217,7 @@ export const submitNewQuestion = async (
             questionId: question?._id,
             qnaSessionId: qnaSessionId,
             conversationId: conversationId,
-            questionContent: questionContent
+            questionContent: questionContent,
         });
 
         triggerBackgroundJobForQuestionPostedEvent(
@@ -436,7 +441,13 @@ export const endQnASession = async (
         }
     }
 
-    await qnaSessionDataService.endQnASession(qnaSessionId, conversationId, aadObjectId, userName, endedByUserId);
+    await qnaSessionDataService.endQnASession(
+        qnaSessionId,
+        conversationId,
+        aadObjectId,
+        userName,
+        endedByUserId
+    );
 
     await triggerBackgroundJobForQnaSessionEndedEvent(
         conversationId,
@@ -471,11 +482,7 @@ export const isHost = async (
     userAadObjId: string
 ): Promise<boolean> => {
     try {
-        const result = await qnaSessionDataService.isHost(
-            qnaSessionId,
-            userAadObjId
-        );
-        return result;
+        return await qnaSessionDataService.isHost(qnaSessionId, userAadObjId);
     } catch (error) {
         exceptionLogger(error);
         throw new Error('Failed to check if user is host for this QnA session');
@@ -542,8 +549,7 @@ export const validateConversationId = async (
  */
 export const isActiveQnA = async (qnaSessionId: string): Promise<boolean> => {
     try {
-        const result = await qnaSessionDataService.isActiveQnA(qnaSessionId);
-        return result;
+        return await qnaSessionDataService.isActiveQnA(qnaSessionId);
     } catch (error) {
         exceptionLogger(error);
         throw new Error('Failed to check if QnA session is active');

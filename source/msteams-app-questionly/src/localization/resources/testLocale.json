@@ -1,23 +1,4 @@
 {
-    "mainCard": {
-        "updated": "updated",
-        "created": "created",
-        "initiatedBy": "initiatedBy",
-        "endedBy": "endedBy",
-        "topQuestions": "topQuestions",
-        "showRecentQuestions": "showRecentQuestions",
-        "recentQuestions": "recentQuestions",
-        "upvotes": "upvotes",
-        "askQuestion": "askQuestion",
-        "upvoteQuestions": "upvoteQuestions",
-        "viewQuestions": "viewQuestions",
-        "noMoreQuestions": "noMoreQuestions",
-        "noQuestions": "noQuestions",
-        "recentlyAskedAQuestion": "recentlyAskedAQuestion",
-        "recentlyAskedQuestions": "recentlyAskedQuestions",
-        "and": "and",
-        "totalQuestions": "totalQuestions"
-    },
     "leaderboard": {
         "taskModuleTitle": "taskModuleTitle",
         "yourQuestions": "yourQuestions",
@@ -60,7 +41,6 @@
         "preview": "preview",
         "cancel": "cancel",
         "endSession": "endSession",
-        "maxCharacters": "maxCharacters",
         "noQuestions": "noQuestions"
     }
 }

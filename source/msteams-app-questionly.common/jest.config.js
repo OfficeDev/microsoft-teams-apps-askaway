@@ -5,5 +5,6 @@ const path = require('path');
 module.exports = {
     "preset": "ts-jest",
     "testEnvironment": "node",
+    "testMatch": ["**/src/tests/**/*[.]test.[t]s?(x)"],
     "moduleNameMapper": pathsToModuleNameMapper(tsconfig.compilerOptions.paths, { prefix: `${path.resolve(__dirname, '.')}/`})
 };
