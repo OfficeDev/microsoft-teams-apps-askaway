@@ -3,11 +3,7 @@ import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 import { createBadRequestResponse } from "../src/utils/responseUtility";
 import { isValidParam } from "../src/utils/requestUtility";
 import { errorStrings } from "../src/constants/errorStrings";
-import { initLocalization } from "../src/localization/locale";
 import { initiateDBConnection } from "../src/utils/dbUtility";
-
-// Initialize localization for adaptive card.
-initLocalization();
 
 const httpStart: AzureFunction = async function (
   context: Context,

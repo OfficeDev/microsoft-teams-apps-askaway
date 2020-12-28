@@ -8,7 +8,7 @@ import {
 import {
     processQnASesssionsDataForMeetingTab,
     patchActionForQuestion,
-    getHostUserId,
+    getTeamsUserId,
     ensureUserIsPartOfMeetingConversation,
     ensureConversationBelongsToMeetingChat,
     getAndEnsureRequestBodyContainsParameter,
@@ -24,6 +24,7 @@ import {
     upvoteQuestion,
 } from 'src/controller';
 import { createResponseForBadRequest } from 'src/routes/responseUtility';
+import { qnaSessionClientDataContract } from 'src/contracts/qnaSessionClientDataContract';
 
 export const router = Express.Router();
 let conversationDataService: IConversationDataService;
@@ -218,6 +219,12 @@ router.patch(
 
                 ensureConversationBelongsToMeetingChat(conversationData);
 
+                const endedByUserId = await getTeamsUserId(
+                    user._id,
+                    conversationId,
+                    conversationData.serviceUrl
+                );
+
                 await endQnASession(
                     sessionId,
                     user._id,
@@ -225,7 +232,9 @@ router.patch(
                     conversationData.tenantId,
                     conversationData.serviceUrl,
                     // `ensureConversationBelongsToMeetingChat` makes sure meeting id is available
-                    <string>conversationData.meetingId
+                    <string>conversationData.meetingId,
+                    user.userName,
+                    endedByUserId
                 );
             } else {
                 createResponseForBadRequest(
@@ -278,7 +287,7 @@ router.post(
             const tenantId = conversationData.tenantId;
             const meetingId = conversationData.meetingId;
 
-            const hostUserId = await getHostUserId(
+            const hostUserId = await getTeamsUserId(
                 user._id,
                 conversationId,
                 serviceUrl
@@ -300,7 +309,18 @@ router.post(
                 meetingId: <string>meetingId,
             });
 
-            res.send({ qnaSessionId: session._id });
+            const response: qnaSessionClientDataContract = {
+                sessionId: session._id,
+                title: session.title,
+                isActive: session.isActive,
+                hostUser: { id: user._id, name: user.userName },
+                numberOfQuestions: 0,
+                dateTimeCreated: session.dateTimeCreated,
+                users: [],
+                questions: [],
+            };
+
+            res.send(response);
         } catch (error) {
             next(error);
         }

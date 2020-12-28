@@ -29,8 +29,9 @@ import {
     triggerBackgroundJobForQuestionPostedEvent,
     triggerBackgroundJobForQuestionUpvotedEvent,
 } from 'src/background-job/backgroundJobTrigger';
+import * as maincardBuilder from 'msteams-app-questionly.common';
 
-export const getMainCard = adaptiveCardBuilder.getMainCard;
+export const getMainCard = maincardBuilder.getMainCard;
 export const getStartQnACard = adaptiveCardBuilder.getStartQnACard;
 export const getErrorCard = adaptiveCardBuilder.getErrorCard;
 
@@ -407,7 +408,9 @@ export const endQnASession = async (
     conversationId: string,
     tenantId: string,
     serviceURL: string,
-    meetingId: string
+    meetingId: string,
+    userName: string,
+    endedByUserId: string
 ): Promise<void> => {
     const isActive = await qnaSessionDataService.isActiveQnA(qnaSessionId);
     if (!isActive) {
@@ -438,7 +441,13 @@ export const endQnASession = async (
         }
     }
 
-    await qnaSessionDataService.endQnASession(qnaSessionId, conversationId);
+    await qnaSessionDataService.endQnASession(
+        qnaSessionId,
+        conversationId,
+        aadObjectId,
+        userName,
+        endedByUserId
+    );
 
     await triggerBackgroundJobForQnaSessionEndedEvent(
         conversationId,
