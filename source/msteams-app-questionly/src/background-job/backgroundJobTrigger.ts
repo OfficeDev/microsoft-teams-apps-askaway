@@ -177,7 +177,7 @@ const triggerBackgroundJob = async (
         exceptionLogger(error, {
             conversationId: conversationId,
             qnaSessionId: qnaSessionId,
-            fileName: module.id,
+            filename: module.id,
             name: TelemetryExceptions.TriggerBackgroundJobFailed,
         });
     }

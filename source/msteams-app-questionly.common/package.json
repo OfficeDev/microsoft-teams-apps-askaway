@@ -10,6 +10,7 @@
   "dependencies": {
     "adaptivecards": "^2.5.0",
     "adaptivecards-templating": "^1.0.0-rc.0",
+    "applicationinsights": "^1.8.8",
     "botbuilder": "^4.10.4",
     "i18next": "^19.8.4",
     "random": "^2.2.0",

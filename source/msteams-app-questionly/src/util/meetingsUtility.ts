@@ -53,7 +53,7 @@ export const getParticipantRole = async (
             tenantId: tenantId,
             meetingId: meetingId,
             userId: userId,
-            fileName: module.id,
+            filename: module.id,
             name: TelemetryExceptions.GetParticipantRoleFailed,
         });
         throw new Error('Error while getting participant role.');

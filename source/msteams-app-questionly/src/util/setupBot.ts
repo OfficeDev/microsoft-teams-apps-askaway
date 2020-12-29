@@ -36,7 +36,7 @@ const setupBotAdapterAndRouting = async (
             userAadObjectId: <string>context.activity.from.aadObjectId,
             tenantId: context.activity.conversation.tenantId,
             meetingId: context.activity.channelData?.meeting?.id,
-            fileName: module.id,
+            filename: module.id,
             name: TelemetryExceptions.SetUpBotFailed,
         });
     };

@@ -193,7 +193,7 @@ export const getTeamsUserId = async (
         exceptionLogger(error, {
             conversationId: conversationId,
             userAadObjectId: userAadObjectId,
-            fileName: module.id,
+            filename: module.id,
             name: TelemetryExceptions.GetTeamsMemberIdFailed,
         });
         throw error;

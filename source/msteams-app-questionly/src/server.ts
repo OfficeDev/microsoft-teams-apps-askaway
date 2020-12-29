@@ -12,10 +12,7 @@ log(`Initializing Microsoft Teams Express hosted App...`);
 dotenvConfig();
 
 // The import of components has to be done AFTER the dotenv config.
-import {
-    initiateAppInsights,
-    exceptionLogger,
-} from 'src/util/exceptionTracking';
+import { exceptionLogger, initiateAIClient } from 'src/util/exceptionTracking';
 import {
     ConversationDataService,
     IConversationDataService,
@@ -46,7 +43,7 @@ async function initializeSupportingModules() {
     initKeyVault();
 
     // Set up app insights
-    await initiateAppInsights();
+    await initiateAIClient();
 
     // Initialize localization
     await initLocalization();

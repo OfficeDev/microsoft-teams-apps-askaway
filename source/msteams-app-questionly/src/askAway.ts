@@ -152,7 +152,7 @@ export class AskAway extends TeamsActivityHandler {
                     conversationId: context.activity.conversation.id,
                     qnaSessionId: taskModuleRequest.data.qnaSessionId,
                     userAadObjectId: <string>context.activity.from.aadObjectId,
-                    fileName: module.id,
+                    filename: module.id,
                     name: TelemetryExceptions.ConversationValidationFailed,
                 }
             );
@@ -204,7 +204,7 @@ export class AskAway extends TeamsActivityHandler {
                     conversationId: context.activity.conversation.id,
                     qnaSessionId: taskModuleRequest.data.qnaSessionId,
                     userAadObjectId: <string>context.activity.from.aadObjectId,
-                    fileName: module.id,
+                    filename: module.id,
                     name: TelemetryExceptions.ConversationValidationFailed,
                 }
             );
@@ -283,7 +283,7 @@ export class AskAway extends TeamsActivityHandler {
                 conversationId: context.activity.conversation.id,
                 qnaSessionId: taskModuleRequest.data.qnaSessionId,
                 userAadObjectId: <string>context.activity.from.aadObjectId,
-                fileName: module.id,
+                filename: module.id,
                 name: TelemetryExceptions.ViewLeaderboardFailed,
             });
             return this._buildTaskModuleContinueResponse(
@@ -328,7 +328,7 @@ export class AskAway extends TeamsActivityHandler {
             );
 
         const qnaSessionId = taskModuleRequest.data.qnaSessionId;
-        const userAADObjId = <string>user.aadObjectId;
+        const userAadObjectId = <string>user.aadObjectId;
         const userName = user.name;
         const questionContent = <string>taskModuleRequest.data.usertext;
         const conversationId = context.activity.conversation.id;
@@ -340,7 +340,7 @@ export class AskAway extends TeamsActivityHandler {
         try {
             await controller.submitNewQuestion(
                 qnaSessionId,
-                userAADObjId,
+                userAadObjectId,
                 userName,
                 questionContent,
                 conversationId
@@ -350,8 +350,8 @@ export class AskAway extends TeamsActivityHandler {
                 conversationId: conversationId,
                 qnaSessionId: qnaSessionId,
                 questionContent: questionContent,
-                userAADObjId: userAADObjId,
-                fileName: module.id,
+                userAadObjectId: userAadObjectId,
+                filename: module.id,
                 name: TelemetryExceptions.CreateQuestionFailed,
             });
             return this.handleTeamsTaskModuleResubmitQuestion(
@@ -384,8 +384,8 @@ export class AskAway extends TeamsActivityHandler {
                 conversationId: context.activity.conversation.id,
                 qnaSessionId: taskModuleRequest.data.qnaSessionId,
                 questionId: taskModuleRequest.data.questionId,
-                userAADObjId: <string>context.activity.from.aadObjectId,
-                fileName: module.id,
+                userAadObjectId: <string>context.activity.from.aadObjectId,
+                filename: module.id,
                 name: TelemetryExceptions.VoteQuestionFailed,
             });
             return this._buildTaskModuleContinueResponse(
@@ -451,8 +451,8 @@ export class AskAway extends TeamsActivityHandler {
                     conversationId: context.activity.conversation.id,
                     qnaSessionId: qnaSessionId,
                     tenantId: conversation.tenantId,
-                    userAADObjId: <string>context.activity.from.aadObjectId,
-                    fileName: module.id,
+                    userAadObjectId: <string>context.activity.from.aadObjectId,
+                    filename: module.id,
                     name: TelemetryExceptions.EndQnASessionFailed,
                 });
                 return this.handleTeamsTaskModuleSubmitError();
@@ -552,7 +552,7 @@ export class AskAway extends TeamsActivityHandler {
                     tenantId: tenantId,
                     conversationId: conversationId,
                     userAadObjectId: userAadObjectId,
-                    fileName: module.id,
+                    filename: module.id,
                     name: TelemetryExceptions.CreateQnASessionFailed,
                 }
             );
@@ -592,7 +592,7 @@ export class AskAway extends TeamsActivityHandler {
                 tenantId: tenantId,
                 conversationId: conversationId,
                 userAadObjectId: userAadObjectId,
-                fileName: module.id,
+                filename: module.id,
                 name: TelemetryExceptions.CreateQnASessionFailed,
             });
             if (error.code === 'QnASessionLimitExhaustedError') {

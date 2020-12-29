@@ -1,62 +1,50 @@
-import * as appInsights from 'applicationinsights';
 import { TelemetryEvents } from 'src/constants/telemetryConstants';
 import { getApplicationInsightsInstrumentationKeyURI } from 'src/util/keyvault';
+import {
+    initiateAndGetAppInsights,
+    TraceData,
+} from 'msteams-app-questionly.common';
 
 export let aiClient;
 
-export const initiateAppInsights = async () => {
-    const applicationInsightsInstrumentationKey = await getApplicationInsightsInstrumentationKeyURI();
-
-    // Set up app insights
-    appInsights
-        .setup(applicationInsightsInstrumentationKey)
-        .setAutoDependencyCorrelation(true)
-        .setAutoCollectRequests(true)
-        .setAutoCollectPerformance(true, true)
-        .setAutoCollectExceptions(true)
-        .setAutoCollectDependencies(true)
-        .setAutoCollectConsole(true, true)
-        .setUseDiskRetryCaching(true)
-        .setSendLiveMetrics(true)
-        .setDistributedTracingMode(appInsights.DistributedTracingModes.AI);
-    appInsights.start();
-
-    aiClient = appInsights.defaultClient;
+export const initiateAIClient = async () => {
+    if (!aiClient) {
+        const applicationInsightsInstrumentationKey = await getApplicationInsightsInstrumentationKeyURI();
+        aiClient = initiateAndGetAppInsights(
+            applicationInsightsInstrumentationKey
+        );
+    }
 };
 
 export const exceptionLogger = (
     error: Error | string,
-    properties?: { [key: string]: any }
+    traceData?: TraceData
 ) => {
     if (process.env.debugMode === 'true') {
         // eslint-disable-next-line no-console
         console.error(error);
     } else {
-        aiClient.trackException({
+        aiClient?.trackException({
             exception: error,
-            properties: properties,
+            properties: traceData,
         });
     }
 };
 
-export const trackCreateQnASessionEvent = (properties: {
-    [key: string]: any;
-}) => {
+export const trackCreateQnASessionEvent = (traceData: TraceData) => {
     if (process.env.debugMode !== 'true') {
-        aiClient.trackEvent({
+        aiClient?.trackEvent({
             name: TelemetryEvents.CreateQnASessionEvent,
-            properties: properties,
+            properties: traceData,
         });
     }
 };
 
-export const trackCreateQuestionEvent = (properties: {
-    [key: string]: any;
-}) => {
+export const trackCreateQuestionEvent = (traceData: TraceData) => {
     if (process.env.debugMode !== 'true') {
-        aiClient.trackEvent({
+        aiClient?.trackEvent({
             name: TelemetryEvents.CreateQuestionEvent,
-            properties: properties,
+            properties: traceData,
         });
     }
 };

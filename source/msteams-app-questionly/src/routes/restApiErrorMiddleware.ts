@@ -33,7 +33,7 @@ export const restApiErrorMiddleware = (
         qnaSessionId: request.params['sessionId'],
         questionId: request.params['questionId'],
         userAadObjectId: user?._id,
-        fileName: module.id,
+        filename: module.id,
         name: TelemetryExceptions.RestApiCallFailed,
     });
 
