@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { shallow, configure, mount } from 'enzyme';
+import { shallow, configure } from 'enzyme';
 import enzymeToJson from 'enzyme-to-json';
 import Adapter from 'enzyme-adapter-react-16';
-import { CreateSession } from '../CreateSession';
 import { Flex } from '@fluentui/react-northstar';
+import { CreateSession } from '../popups/CreateSession';
 
 configure({ adapter: new Adapter() });
 
@@ -13,7 +13,6 @@ describe('Create session', () => {
         expect(enzymeToJson(wrapper)).toMatchSnapshot();
     });
 
-    // Component Test Sample
     it('should render TabContent', () => {
         const component = shallow(<CreateSession />);
 

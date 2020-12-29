@@ -9,7 +9,6 @@ import Adapter from 'enzyme-adapter-react-16';
 import { TabContent } from '../TabContent';
 import { telemetryService } from '../../telemetryService';
 import { HttpService } from '../shared/HttpService';
-import i18next from 'i18next';
 
 configure({ adapter: new Adapter() });
 
@@ -24,14 +23,10 @@ describe('TabContent Component', () => {
         jest.resetAllMocks();
     });
 
-    // Snapshot Test Sample
     it('should match the snapshot', () => {
         const wrapper = shallow(
             <TabContent
                 teamsData={{}}
-                tReady={false}
-                t={() => ''}
-                i18n={i18next}
                 httpService={httpServiceIns}
                 appInsights={telemetryService.appInsights}
             />
@@ -39,14 +34,10 @@ describe('TabContent Component', () => {
         expect(toJson(wrapper)).toMatchSnapshot();
     });
 
-    // Component Test Sample
     it('should render TabContent', () => {
         const component = mount(
             <TabContent
                 teamsData={{}}
-                tReady={false}
-                t={() => ''}
-                i18n={i18next}
                 httpService={httpServiceIns}
                 appInsights={telemetryService.appInsights}
             />

@@ -9,6 +9,9 @@ module.exports = {
     preset: 'ts-jest',
     testEnvironment: 'node',
     moduleNameMapper: {
+        ...pathsToModuleNameMapper(tsconfig.compilerOptions.paths, {
+            prefix: `${path.resolve(__dirname, '.')}/`,
+        }),
         '\\.(css|less|sass|scss)$': 'identity-obj-proxy',
     },
     transform: {

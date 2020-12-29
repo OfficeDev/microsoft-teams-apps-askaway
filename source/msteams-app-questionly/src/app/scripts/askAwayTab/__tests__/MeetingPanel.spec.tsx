@@ -5,11 +5,11 @@
 import * as React from 'react';
 import { shallow, configure, mount } from 'enzyme';
 import { Loader } from '@fluentui/react-northstar';
-import toJson from 'enzyme-to-json';
 import Adapter from 'enzyme-adapter-react-16';
 import MeetingPanel from '../MeetingPanel';
-import { telemetryService } from '../../telemetryService';
 import { HttpService } from '../shared/HttpService';
+import { telemetryService } from '../../telemetryService';
+telemetryService;
 
 configure({ adapter: new Adapter() });
 
@@ -23,19 +23,7 @@ describe('Meeting Panel Component', () => {
     afterAll(() => {
         jest.resetAllMocks();
     });
-    // Snapshot Test Sample
-    it('should match the snapshot', () => {
-        const wrapper = shallow(
-            <MeetingPanel
-                teamsData={{}}
-                httpService={httpServiceIns}
-                appInsights={telemetryService.appInsights}
-            />
-        );
-        expect(toJson(wrapper)).toMatchSnapshot();
-    });
 
-    // Component Test Sample
     it('should render loader when showloader value is true', () => {
         const component = shallow(
             <MeetingPanel

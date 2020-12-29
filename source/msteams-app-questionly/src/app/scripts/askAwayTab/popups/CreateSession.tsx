@@ -106,7 +106,6 @@ export class CreateSession extends msteamsReactBaseComponent<
     }
 
     private showCreateSessionForm() {
-        console.log('##############################\n\n');
         return (
             <Flex column>
                 <Form

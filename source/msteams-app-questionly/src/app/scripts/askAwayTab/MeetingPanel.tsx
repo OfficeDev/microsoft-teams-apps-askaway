@@ -27,7 +27,6 @@ import { HttpService } from './shared/HttpService';
 import { SignalRLifecycle } from './signalR/SignalRLifecycle';
 
 const EmptySessionImage = require('./../../web/assets/create_session.png');
-// const EndSessionImage =  require('./../../web/assets/end_session.png');
 export interface MeetingPanelProps {
     teamsData: any;
     httpService: HttpService;
