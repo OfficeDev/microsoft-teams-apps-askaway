@@ -123,7 +123,7 @@ export class AskAwayTab extends msteamsReactBaseComponent<
             <Provider style={{ background: 'unset' }} theme={this.state.theme}>
                 {this.state.dataEvent && <h1>{this.state.dataEvent.type}</h1>}
                 {this.state.frameContext ===
-                    CONST.TAB_FRAME_CONTEXT.FC_SIDEPANEL && (
+                    microsoftTeams.FrameContexts.sidePanel && (
                     <MeetingPanel
                         teamsData={this.state.teamContext}
                         httpService={this.httpService}
@@ -133,7 +133,7 @@ export class AskAwayTab extends msteamsReactBaseComponent<
                     />
                 )}
                 {this.state.frameContext ===
-                    CONST.TAB_FRAME_CONTEXT.FC_CONTENT && (
+                    microsoftTeams.FrameContexts.content && (
                     <TabContent
                         teamsData={this.state.teamContext}
                         httpService={this.httpService}

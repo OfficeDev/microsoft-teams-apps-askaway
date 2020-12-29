@@ -16,7 +16,6 @@ import {
     menuAsToolbarBehavior,
     ShorthandCollection,
     MenuItemProps,
-    Form,
     tabListBehavior,
     Card,
     Avatar,
@@ -32,7 +31,6 @@ import { HttpService } from './shared/HttpService';
 import { SignalRLifecycle } from './signalR/SignalRLifecycle';
 
 const EmptySessionImage = require('./../../web/assets/create_session.png');
-// const EndSessionImage =  require('./../../web/assets/end_session.png');
 export interface MeetingPanelProps {
     teamsData: any;
     httpService: HttpService;
@@ -95,7 +93,6 @@ class MeetingPanel extends React.Component<
         this.props.httpService
             .get(`/conversations/${this.props.teamsData.chatId}/activesessions`)
             .then((response: any) => {
-                console.log('res-active-session', response);
                 if (response && response.data && response.data.length > 0) {
                     this.setState({
                         activeSessionData: response.data[0],
@@ -145,10 +142,13 @@ class MeetingPanel extends React.Component<
         let submitHandler = (err: any, result: any) => {
             result = JSON.parse(result);
             if (result) {
-                const stateInput = this.state;
-                stateInput.input.title = result['title'];
-                stateInput.input.description = result['description'];
-                this.setState(stateInput);
+                this.setState({
+                    input: {
+                        ...this.state.input,
+                        title: result['title'],
+                        description: result['description'],
+                    },
+                });
                 const createSessionData = {
                     scopeId: this.props.teamsData.chatId,
                     isChannel: false,
@@ -168,7 +168,6 @@ class MeetingPanel extends React.Component<
                             this.setState({
                                 activeSessionData: response.data,
                             });
-                            console.log('state', this.state.activeSessionData);
                         } else {
                             this.showAlertModel(false);
                         }
@@ -309,7 +308,6 @@ class MeetingPanel extends React.Component<
     /**
      * Meeting panel header
      */
-    // tslint:disable-next-line:max-func-body-length
     showMenubar = (sessionTitle) => {
         const menuItems: ShorthandCollection<MenuItemProps> = [
             {
@@ -381,7 +379,6 @@ class MeetingPanel extends React.Component<
                     { questionContent: this.state.input.postQuestion }
                 )
                 .then((response: any) => {
-                    console.log('resp', response);
                     if (response && response.status === 201) {
                         const stateValue = this.state;
                         stateValue.input.postQuestion = '';
@@ -411,6 +408,9 @@ class MeetingPanel extends React.Component<
         });
     };
 
+    /**
+     * Display pending questions
+     */
     private liveQuestionsPending(questions) {
         return (
             <div className="question-card">
@@ -460,7 +460,6 @@ class MeetingPanel extends React.Component<
                                                     }}
                                                     iconOnly
                                                     text
-                                                    title=""
                                                 />
                                                 <Text content={0} />
                                             </Flex>
@@ -497,15 +496,12 @@ class MeetingPanel extends React.Component<
                     `/conversations/${this.props.teamsData.chatId}/sessions/${this.state.activeSessionData.sessionId}/questions/${q['_id']}`,
                     { action: 'upvote' }
                 )
-                .then((response: any) => {
-                    console.log('resp', response);
-                })
+                .then((response: any) => {})
                 .catch((error) => {});
         }
     }
 
     private liveQuestionsMenu(stateVal) {
-        console.log('getLiveTabSelected', this.state.liveTab.selectedTab);
         const items = [
             {
                 key: this.props.constValue.TAB_QUESTIONS.PENDING,
@@ -572,7 +568,6 @@ class MeetingPanel extends React.Component<
         const sessionTitle = stateVal.input.title
             ? stateVal.input.title
             : stateVal.activeSessionData.title;
-        console.log('stateVal', stateVal);
         return (
             <React.Fragment>
                 {this.showMenubar(sessionTitle)}
