@@ -84,7 +84,7 @@ const QnASessionSchema = new mongoose.Schema(
     endedByUserId: {
       type: String,
       required: false,
-    }
+    },
   },
   { optimisticConcurrency: true }
 );
