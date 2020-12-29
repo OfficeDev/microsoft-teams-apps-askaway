@@ -128,10 +128,13 @@ class MeetingPanel extends React.Component<
         let submitHandler = (err: any, result: any) => {
             result = JSON.parse(result);
             if (result) {
-                const stateInput = this.state;
-                stateInput.input.title = result['title'];
-                stateInput.input.description = result['description'];
-                this.setState(stateInput);
+                this.setState({
+                    input: {
+                        ...this.state.input,
+                        title: result['title'],
+                        description: result['description'],
+                    },
+                });
                 const createSessionData = {
                     scopeId: this.props.teamsData.chatId,
                     isChannel: false,
