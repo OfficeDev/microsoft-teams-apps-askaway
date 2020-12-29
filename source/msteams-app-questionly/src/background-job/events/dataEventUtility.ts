@@ -4,7 +4,7 @@ import {
     qnaSessionDataService,
 } from 'msteams-app-questionly.data';
 import { DataEventType, IDataEvent } from 'msteams-app-questionly.common';
-import { qnaSessionClientDataContract } from 'src/contracts/qnaSessionClientDataContract';
+import { ClientDataContract } from 'src/contracts/clientDataContract';
 
 /**
  * Creates event data payload corresponding to qnaSession created operation.
@@ -15,7 +15,7 @@ import { qnaSessionClientDataContract } from 'src/contracts/qnaSessionClientData
 export const createQnaSessionCreatedEvent = (
     qnaSession: IQnASession_populated
 ): IDataEvent => {
-    const qnaSessionData: qnaSessionClientDataContract = {
+    const qnaSessionData: ClientDataContract.QnaSession = {
         sessionId: qnaSession._id,
         title: qnaSession.title,
         isActive: qnaSession.isActive,
@@ -23,10 +23,9 @@ export const createQnaSessionCreatedEvent = (
             id: qnaSession.hostId._id,
             name: qnaSession.hostId.userName,
         },
-        numberOfQuestions: 0,
         dateTimeCreated: qnaSession.dateTimeCreated,
-        questions: [],
-        users: [],
+        answeredQuestions: [],
+        unansweredQuestions: [],
     };
 
     return {

@@ -4,9 +4,9 @@ call npm.cmd run build
 
 cd .\..\msteams-app-questionly.common
 call npm.cmd install 
-call npm.cmd run build 
 xcopy .\..\msteams-app-questionly.data\dist\* node_modules\msteams-app-questionly.data\dist\* /s /Y
 xcopy .\..\msteams-app-questionly.data\package.json node_modules\msteams-app-questionly.data\  /Y
+call npm.cmd run build 
 
 cd .\..\msteams-app-questionly 
 call npm.cmd install 

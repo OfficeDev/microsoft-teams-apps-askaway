@@ -2,6 +2,8 @@ import { IQuestion, Question } from "src/schemas/question";
 import mongoose from "mongoose";
 import { IQnASession, QnASession } from "src/schemas/qnaSession";
 import { questionDataService } from "src/services/questionDataService";
+import { User } from "src/schemas/user";
+import { userDataService } from "src/services/userDataService";
 
 const testConversationId = "testConversationId";
 const testQuestionId = "5faccb06e62b5d7ea8e9c49e";
@@ -31,6 +33,8 @@ const createDummyQuestion = async (
   qnaSessionId: string,
   isanswered?: Boolean
 ) => {
+  await userDataService.getUserOrCreate(testUserId, testUserName);
+
   return await new Question({
     qnaSessionId: qnaSessionId,
     userId: testUserId,
