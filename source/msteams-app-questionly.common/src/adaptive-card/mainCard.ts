@@ -212,3 +212,12 @@ const actions = () => [
   },
   viewLeaderboardButton(),
 ];
+
+/**
+ * Extracts injected data from the master card
+ * @param card - the master card
+ */
+export const extractMainCardData = (card: IAdaptiveCard): MainCardData => {
+  if (!card.body) throw new Error("Non-existent card body");
+  return card.msTeams.entities[0].data;
+};

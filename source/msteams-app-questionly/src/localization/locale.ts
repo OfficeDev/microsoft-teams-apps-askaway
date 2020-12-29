@@ -3,7 +3,6 @@ import enJson from 'src/localization/resources/en.json';
 import { exceptionLogger } from 'src/util/exceptionTracking';
 
 export interface Strings {
-    mainCard: MainCard;
     leaderboard: Leaderboard;
     startQnA: StartQnA;
     endQnA: EndQnA;
@@ -42,7 +41,6 @@ export interface Generic {
     preview: string;
     cancel: string;
     endSession: string;
-    maxCharacters: string;
     noQuestions: string;
 }
 
@@ -52,24 +50,6 @@ export interface Leaderboard {
     allQuestions: string;
     noQuestions: string;
     refresh: string;
-}
-
-export interface MainCard {
-    updated: string;
-    initiatedBy: string;
-    endedBy: string;
-    topQuestions: string;
-    showRecentQuestions: string;
-    upvotes: string;
-    askQuestion: string;
-    upvoteQuestions: string;
-    viewQuestions: string;
-    noMoreQuestions: string;
-    noQuestions: string;
-    recentlyAskedAQuestion: string;
-    recentlyAskedQuestions: string;
-    and: string;
-    totalQuestions: string;
 }
 
 export interface StartQnA {
@@ -132,24 +112,30 @@ export const initLocalization = async (
     });
 };
 
-export const mainCardStrings = (string: keyof MainCard) => {
-    return i18next.t(`mainCard.${string}`);
-};
-
 export const leaderboardStrings = (string: keyof Leaderboard) => {
     return i18next.t(`leaderboard.${string}`);
 };
 
-export const startQnAStrings = (string: keyof StartQnA) => {
-    return i18next.t(`startQnA.${string}`);
+export const startQnAStrings = (
+    string: keyof StartQnA,
+    options?: {
+        [key: string]: any;
+    }
+) => {
+    return i18next.t(`startQnA.${string}`, options);
 };
 
 export const endQnAStrings = (string: keyof EndQnA) => {
     return i18next.t(`endQnA.${string}`);
 };
 
-export const askQuestionStrings = (string: keyof AskQuestion) => {
-    return i18next.t(`askQuestion.${string}`);
+export const askQuestionStrings = (
+    string: keyof AskQuestion,
+    options?: {
+        [key: string]: any;
+    }
+) => {
+    return i18next.t(`askQuestion.${string}`, options);
 };
 
 export const genericStrings = (string: keyof Generic) => {

@@ -440,6 +440,7 @@ test('handle submit end qna', async () => {
             from: {
                 name: 'name',
                 aadObjectId: 'objId',
+                id: 'sampleId',
             },
             conversation: {
                 id: 'randomConvoId',
@@ -465,7 +466,9 @@ test('handle submit end qna', async () => {
         context.activity.conversation.id,
         context.activity.conversation.tenantId,
         context.activity.serviceUrl,
-        sampleMeetingId
+        sampleMeetingId,
+        context.activity.from.name,
+        context.activity.from.id
     );
 });
 

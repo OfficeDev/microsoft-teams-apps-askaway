@@ -16,6 +16,7 @@ import {
     markQuestionAsAnswered,
 } from 'src/controller';
 import * as acb from 'src/adaptive-cards/adaptiveCardBuilder';
+import * as maincardBuilder from 'msteams-app-questionly.common';
 import {
     qnaSessionDataService,
     questionDataService,
@@ -49,6 +50,7 @@ const sampleMeetingId = 'meetingId';
 
 jest.mock('../adaptive-cards/adaptiveCardBuilder');
 jest.mock('msteams-app-questionly.data');
+jest.mock('msteams-app-questionly.common');
 
 beforeEach(() => {
     process.env.debugMode = 'true';
@@ -64,8 +66,8 @@ test('get main card', async () => {
         sampleUserAADObjId1,
         sampleHostUserId
     );
-    expect(acb.getMainCard).toBeCalledTimes(1);
-    expect(acb.getMainCard).toBeCalledWith(
+    expect(maincardBuilder.getMainCard).toBeCalledTimes(1);
+    expect(maincardBuilder.getMainCard).toBeCalledWith(
         sampleTitle,
         sampleDescription,
         sampleUserName,
@@ -358,7 +360,9 @@ test('end ama session', async () => {
             sampleConversationId,
             sampleTenantId,
             sampleServiceUrl,
-            ''
+            '',
+            sampleUserName,
+            sampleHostUserId
         )
     ).rejects.toThrow();
 
@@ -389,7 +393,9 @@ test('end ama session - meeting', async () => {
         sampleConversationId,
         sampleTenantId,
         sampleServiceUrl,
-        sampleMeetingId
+        sampleMeetingId,
+        sampleUserName,
+        sampleHostUserId
     );
     expect(qnaSessionDataService.isActiveQnA).toBeCalledTimes(1);
     expect(qnaSessionDataService.isActiveQnA).toBeCalledWith(
@@ -426,7 +432,9 @@ test('end ama session - meeting for attendee', async () => {
             sampleConversationId,
             sampleTenantId,
             sampleServiceUrl,
-            sampleMeetingId
+            sampleMeetingId,
+            sampleUserName,
+            sampleHostUserId
         )
     ).rejects.toThrow();
 
