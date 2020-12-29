@@ -1,10 +1,4 @@
-import {
-    IConversation,
-    IQnASession_populated,
-    IQuestionPopulatedUser,
-    questionDataService,
-    userDataService,
-} from 'msteams-app-questionly.data';
+import { IConversation } from 'msteams-app-questionly.data';
 import { exceptionLogger } from 'src/util/exceptionTracking';
 import { getMicrosoftAppPassword } from 'src/util/keyvault';
 import {
@@ -20,68 +14,6 @@ import { ConversationDoesNotBelongToMeetingChatError } from 'src/errors/conversa
 import { Request } from 'express';
 import { ParameterMissingInRequestError } from 'src/errors/parameterMissingInRequestError';
 import { TelemetryExceptions } from 'src/constants/telemetryConstants';
-import { qnaSessionClientDataContract } from 'src/contracts/qnaSessionClientDataContract';
-
-/**
- * Gets questions data and user data for each active qna sessions, process them and returns an array of detailed qna sessions.
- * @param qnaSessionDataArray - Array of qna sessions data
- * @returns - qna session data array.
- */
-export const processQnASesssionsDataForMeetingTab = async (
-    qnaSessionDataArray: IQnASession_populated[]
-): Promise<qnaSessionClientDataContract[]> => {
-    let qnaSessionData: IQnASession_populated;
-    const qnaSessionArrayForTab: qnaSessionClientDataContract[] = [];
-    for (let i = 0; i < qnaSessionDataArray.length; i++) {
-        qnaSessionData = qnaSessionDataArray[i];
-
-        const questionData: IQuestionPopulatedUser[] = await questionDataService.getQuestionData(
-            qnaSessionData._id
-        );
-
-        const voteSortedQuestions: IQuestionPopulatedUser[] = questionData.sort(
-            (a, b) => {
-                const diff = b.voters.length - a.voters.length;
-                if (diff !== 0) return diff;
-                return (
-                    new Date(b.dateTimeCreated).getTime() -
-                    new Date(a.dateTimeCreated).getTime()
-                );
-            }
-        );
-
-        const userSet = new Set();
-        const users: any[] = [];
-        if (questionData !== undefined) {
-            for (let j = 0; j < questionData.length; j++) {
-                if (!userSet.has(questionData[j].userId._id)) {
-                    users.push({
-                        id: questionData[j].userId._id,
-                        name: questionData[j].userId.userName,
-                    });
-                    userSet.add(questionData[j].userId._id);
-                }
-            }
-        }
-
-        const hostUser = await userDataService.getUser(qnaSessionData.hostId);
-
-        const qnaSessionDataObject: qnaSessionClientDataContract = {
-            sessionId: qnaSessionData._id,
-            title: qnaSessionData.title,
-            isActive: qnaSessionData.isActive,
-            dateTimeCreated: qnaSessionData.dateTimeCreated,
-            dateTimeEnded: qnaSessionData.dateTimeEnded,
-            hostUser: { id: hostUser._id, name: hostUser.userName },
-            numberOfQuestions: questionData.length,
-            questions: voteSortedQuestions,
-            users: users,
-        };
-        qnaSessionArrayForTab.push(qnaSessionDataObject);
-    }
-
-    return qnaSessionArrayForTab;
-};
 
 /**
  * Checks if a given parameter is a valid string.

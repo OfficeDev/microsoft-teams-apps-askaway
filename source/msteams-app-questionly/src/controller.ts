@@ -241,6 +241,7 @@ export const submitNewQuestion = async (
  * @param qnaSessionId - qnasession id.
  * @param questionId - question id.
  * @param aadObjectId - aad object id of user who marked question as answered.
+ * @returns - question document.
  */
 export const markQuestionAsAnswered = async (
     conversationData: IConversation,
@@ -248,7 +249,7 @@ export const markQuestionAsAnswered = async (
     qnaSessionId: string,
     questionId: string,
     aadObjectId: string
-) => {
+): Promise<IQuestionPopulatedUser> => {
     if (
         await isPresenterOrOrganizer(
             meetingId,
@@ -257,7 +258,7 @@ export const markQuestionAsAnswered = async (
             conversationData.serviceUrl
         )
     ) {
-        await questionDataService.markQuestionAsAnswered(
+        const questionData = await questionDataService.markQuestionAsAnswered(
             conversationData._id,
             qnaSessionId,
             questionId
@@ -269,6 +270,8 @@ export const markQuestionAsAnswered = async (
             qnaSessionId,
             aadObjectId
         );
+
+        return questionData;
     } else {
         throw new UnauthorizedAccessError(
             UnauthorizedAccessErrorCode.InsufficientPermissionsToMarkQuestionAsAnswered
@@ -283,6 +286,7 @@ export const markQuestionAsAnswered = async (
  * @param questionId - question id.
  * @param aadObjectId - aad object id of user who upvoted question.
  * @param userName - name of user who upvoted the question.
+ * @returns - question document.
  */
 export const upvoteQuestion = async (
     conversationId: string,
@@ -290,8 +294,8 @@ export const upvoteQuestion = async (
     questionId: string,
     aadObjectId: string,
     userName: string
-) => {
-    await questionDataService.upVoteQuestion(
+): Promise<IQuestionPopulatedUser> => {
+    const questionData = await questionDataService.upVoteQuestion(
         conversationId,
         qnaSessionId,
         questionId,
@@ -305,6 +309,8 @@ export const upvoteQuestion = async (
         qnaSessionId,
         aadObjectId
     );
+
+    return questionData;
 };
 
 /**
@@ -313,14 +319,15 @@ export const upvoteQuestion = async (
  * @param qnaSessionId - qnasession id.
  * @param questionId - question id.
  * @param aadObjectId - aad object id of user who downvoted question.
+ * @returns - question document.
  */
 export const downvoteQuestion = async (
     conversationId: string,
     qnaSessionId: string,
     questionId: string,
     aadObjectId: string
-) => {
-    await questionDataService.downVoteQuestion(
+): Promise<IQuestionPopulatedUser> => {
+    const questionData = await questionDataService.downVoteQuestion(
         conversationId,
         qnaSessionId,
         questionId,
@@ -333,6 +340,8 @@ export const downvoteQuestion = async (
         qnaSessionId,
         aadObjectId
     );
+
+    return questionData;
 };
 
 /**

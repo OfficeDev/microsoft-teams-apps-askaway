@@ -5,22 +5,20 @@ import {
     userDataService,
     IConversation,
 } from 'msteams-app-questionly.data';
-
 import {
-    processQnASesssionsDataForMeetingTab,
     getTeamsUserId,
     getMemberInfo,
     getAndEnsureRequestBodyContainsParameter,
     ensureUserIsPartOfMeetingConversation,
 } from 'src/routes/restUtils';
 import { getMicrosoftAppPassword } from 'src/util/keyvault';
-
 import { Request } from 'express';
 import { ParameterMissingInRequestError } from 'src/errors/parameterMissingInRequestError';
 import { errorMessages } from 'src/errors/errorMessages';
 import { ConversationDoesNotBelongToMeetingChatError } from 'src/errors/conversationDoesNotBelongToMeetingChatError';
 import { verifyUserFromConversationId } from 'msteams-app-questionly.common';
 import { UserIsNotPartOfConversationError } from 'src/errors/userIsNotPartOfConversationError';
+import { formatQnaSessionDataArrayAsPerClientDataContract } from 'src/util/clientDataContractFormatter';
 
 const sampleUserId = 'sampleUserId';
 const sampleServiceUrl = 'sampleServiceUrl';
@@ -65,6 +63,7 @@ describe('test process QnA sesssions for meeting tab', () => {
             userId: { _id: testQnAData1.hostId, userName: generateUniqueId() },
             content: generateUniqueId(),
             voters: [generateUniqueId(), generateUniqueId()],
+            isAnswered: true,
         };
 
         question2 = {
@@ -72,6 +71,7 @@ describe('test process QnA sesssions for meeting tab', () => {
             userId: { _id: testQnAData2.hostId, userName: generateUniqueId() },
             content: generateUniqueId(),
             voters: [generateUniqueId(), generateUniqueId()],
+            isAnswered: false,
         };
 
         user1 = {
@@ -107,39 +107,31 @@ describe('test process QnA sesssions for meeting tab', () => {
                 return user2;
             }
         });
-        const result = await processQnASesssionsDataForMeetingTab(
+        const result = await formatQnaSessionDataArrayAsPerClientDataContract(
             qnaSessionsData
         );
         expect(result.length).toEqual(2);
         expect(result[0].title).toEqual(testQnAData1.title);
-        expect(result[0].numberOfQuestions).toEqual(2);
         expect(result[0].isActive).toEqual(testQnAData1.isActive);
         expect(result[0].hostUser.id).toEqual(user1._id);
         expect(result[0].hostUser.name).toEqual(user1.userName);
-        expect(result[0].users?.length).toEqual(2);
-        expect(result[0].users?.[0].name).toEqual(user1.userName);
-        expect(result[0].users?.[1].name).toEqual(user2.userName);
-        expect(result[0].users?.[0].id).toEqual(user1._id);
-        expect(result[0].users?.[1].id).toEqual(user2._id);
-        expect(result[0].questions?.[0].qnaSessionId).toEqual(
-            question2.qnaSessionId
+        expect(result[0].unansweredQuestions?.[0].content).toEqual(
+            question2.content
         );
-        expect(result[0].questions?.[1].qnaSessionId).toEqual(
-            question1.qnaSessionId
+        expect(result[0].answeredQuestions?.[0].content).toEqual(
+            question1.content
         );
         expect(result[1].title).toEqual(testQnAData2.title);
-        expect(result[1].numberOfQuestions).toEqual(0);
         expect(result[1].isActive).toEqual(testQnAData2.isActive);
         expect(result[1].hostUser.id).toEqual(user2._id);
         expect(result[1].hostUser.name).toEqual(user2.userName);
-        expect(result[1].users?.length).toEqual(0);
         expect(questionDataService.getQuestionData).toBeCalledTimes(2);
         expect(userDataService.getUser).toBeCalledTimes(2);
     });
 
     it('validates process QnA sesssions for meeting tab - no qna session data', async () => {
         const qnaSessionsData = [];
-        const result = await processQnASesssionsDataForMeetingTab(
+        const result = await formatQnaSessionDataArrayAsPerClientDataContract(
             qnaSessionsData
         );
 
@@ -162,13 +154,13 @@ describe('test process QnA sesssions for meeting tab', () => {
         });
 
         const qnaSessionsData = [testQnAData1, testQnAData2];
-        await processQnASesssionsDataForMeetingTab(qnaSessionsData).catch(
-            (err) => {
-                expect(err).toEqual(new Error());
-            }
-        );
-        expect(questionDataService.getQuestionData).toBeCalledTimes(1);
-        expect(userDataService.getUser).toBeCalledTimes(1);
+        await formatQnaSessionDataArrayAsPerClientDataContract(
+            qnaSessionsData
+        ).catch((err) => {
+            expect(err).toEqual(sampleError);
+        });
+        expect(questionDataService.getQuestionData).toBeCalled();
+        expect(userDataService.getUser).toBeCalled();
     });
 
     it('validates process QnA sesssions for meeting tab - error while getting question data', async () => {
@@ -179,13 +171,12 @@ describe('test process QnA sesssions for meeting tab', () => {
             }
         );
         const qnaSessionsData = [testQnAData1, testQnAData2];
-        await processQnASesssionsDataForMeetingTab(qnaSessionsData).catch(
-            (err) => {
-                expect(err).toEqual(sampleError);
-            }
-        );
-        expect(questionDataService.getQuestionData).toBeCalledTimes(1);
-        expect(userDataService.getUser).toBeCalledTimes(0);
+        await formatQnaSessionDataArrayAsPerClientDataContract(
+            qnaSessionsData
+        ).catch((err) => {
+            expect(err).toEqual(sampleError);
+        });
+        expect(questionDataService.getQuestionData).toBeCalled();
     });
 });
 

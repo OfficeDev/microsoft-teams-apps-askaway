@@ -163,21 +163,16 @@ test("can update activity id", async () => {
 });
 
 test("get QnA session data", async () => {
-  const {
-    title,
-    userName,
-    activityId,
-    userAadObjId,
-    description,
-    isActive,
-  } = await qnaSessionDataService.getQnASessionData(testQnASession._id);
+  const qnaSessionData = await qnaSessionDataService.getQnASessionData(
+    testQnASession._id
+  );
 
-  expect(title).toBe(sampleTitle);
-  expect(userName).toBe(sampleUserName1);
-  expect(activityId).toBe(sampleActivityId);
-  expect(userAadObjId).toBe(sampleUserAADObjId1);
-  expect(description).toBe(sampleDescription);
-  expect(isActive).toBe(true);
+  expect(qnaSessionData.title).toBe(sampleTitle);
+  expect(qnaSessionData.hostId.userName).toBe(sampleUserName1);
+  expect(qnaSessionData.activityId).toBe(sampleActivityId);
+  expect(qnaSessionData.hostId._id).toBe(sampleUserAADObjId1);
+  expect(qnaSessionData.description).toBe(sampleDescription);
+  expect(qnaSessionData.isActive).toBe(true);
 });
 
 test("retrieve most recent/top questions with three questions", async () => {
