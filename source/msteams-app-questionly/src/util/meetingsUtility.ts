@@ -52,7 +52,7 @@ export const getParticipantRole = async (
         exceptionLogger(error, {
             tenantId: tenantId,
             meetingId: meetingId,
-            userId: userId,
+            userAadObjectId: userId,
             filename: module.id,
             name: TelemetryExceptions.GetParticipantRoleFailed,
         });

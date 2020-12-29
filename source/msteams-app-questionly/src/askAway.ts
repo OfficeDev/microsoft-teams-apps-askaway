@@ -150,7 +150,7 @@ export class AskAway extends TeamsActivityHandler {
                 new Error(`Check Conversation Validation Failed: ${error}`),
                 {
                     conversationId: context.activity.conversation.id,
-                    qnaSessionId: taskModuleRequest.data.qnaSessionId,
+                    qnaSessionId: taskModuleRequest.data?.qnaSessionId,
                     userAadObjectId: <string>context.activity.from.aadObjectId,
                     filename: module.id,
                     name: TelemetryExceptions.ConversationValidationFailed,
@@ -202,7 +202,7 @@ export class AskAway extends TeamsActivityHandler {
                 new Error(`Check Conversation Validation Failed: ${error}`),
                 {
                     conversationId: context.activity.conversation.id,
-                    qnaSessionId: taskModuleRequest.data.qnaSessionId,
+                    qnaSessionId: taskModuleRequest.data?.qnaSessionId,
                     userAadObjectId: <string>context.activity.from.aadObjectId,
                     filename: module.id,
                     name: TelemetryExceptions.ConversationValidationFailed,
@@ -281,7 +281,7 @@ export class AskAway extends TeamsActivityHandler {
         } catch (error) {
             exceptionLogger(error, {
                 conversationId: context.activity.conversation.id,
-                qnaSessionId: taskModuleRequest.data.qnaSessionId,
+                qnaSessionId: taskModuleRequest.data?.qnaSessionId,
                 userAadObjectId: <string>context.activity.from.aadObjectId,
                 filename: module.id,
                 name: TelemetryExceptions.ViewLeaderboardFailed,
@@ -382,8 +382,8 @@ export class AskAway extends TeamsActivityHandler {
         } catch (error) {
             exceptionLogger(error, {
                 conversationId: context.activity.conversation.id,
-                qnaSessionId: taskModuleRequest.data.qnaSessionId,
-                questionId: taskModuleRequest.data.questionId,
+                qnaSessionId: taskModuleRequest.data?.qnaSessionId,
+                questionId: taskModuleRequest.data?.questionId,
                 userAadObjectId: <string>context.activity.from.aadObjectId,
                 filename: module.id,
                 name: TelemetryExceptions.VoteQuestionFailed,

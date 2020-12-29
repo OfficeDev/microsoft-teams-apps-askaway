@@ -28,10 +28,10 @@ export const restApiErrorMiddleware = (
     // More details will be logged as part of server side telemetry story.
     const user = <IUser>request.user;
     exceptionLogger(error, {
-        path: request.path,
-        conversationId: request.params['conversationId'],
-        qnaSessionId: request.params['sessionId'],
-        questionId: request.params['questionId'],
+        path: request?.path,
+        conversationId: request?.params['conversationId'],
+        qnaSessionId: request?.params['sessionId'],
+        questionId: request?.params['questionId'],
         userAadObjectId: user?._id,
         filename: module.id,
         name: TelemetryExceptions.RestApiCallFailed,
