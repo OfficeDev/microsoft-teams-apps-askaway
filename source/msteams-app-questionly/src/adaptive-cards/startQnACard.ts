@@ -1,5 +1,6 @@
 import { IAdaptiveCard } from 'adaptivecards';
 import { startQnAStrings, genericStrings } from 'src/localization/locale';
+import { CardConstants } from 'src/adaptive-cards/constants/cardConstants';
 
 /**
  * Adaptive Card form used to collect information to start the QnA.
@@ -27,31 +28,35 @@ export const startQnACard = () =>
                                     },
                                     {
                                         type: 'TextBlock',
-                                        text: `${startQnAStrings(
+                                        text: startQnAStrings(
                                             'titleFieldLabel'
-                                        )}*`,
+                                        ),
                                         wrap: true,
                                     },
                                     {
                                         type: 'Input.Text',
                                         id: 'title',
                                         value: '${title}',
-                                        maxLength: 250,
+                                        maxLength:
+                                            CardConstants.qnaSessionTitleCharLimit,
                                     },
                                     {
                                         type: 'TextBlock',
-                                        text: `${startQnAStrings(
-                                            'descriptionFieldLabel'
-                                        )}* (250 ${genericStrings(
-                                            'maxCharacters'
-                                        )})`,
+                                        text: startQnAStrings(
+                                            'descriptionFieldLabel',
+                                            {
+                                                maxCharCount:
+                                                    CardConstants.qnaSessionDescriptioCharLimit,
+                                            }
+                                        ),
                                         wrap: true,
                                     },
                                     {
                                         type: 'Input.Text',
                                         id: 'description',
                                         value: '${description}',
-                                        maxLength: 250,
+                                        maxLength:
+                                            CardConstants.qnaSessionDescriptioCharLimit,
                                         placeholder: startQnAStrings(
                                             'descriptionFieldExample'
                                         ),

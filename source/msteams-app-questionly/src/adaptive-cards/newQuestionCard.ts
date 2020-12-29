@@ -4,6 +4,7 @@ import {
     genericStrings,
     errorStrings,
 } from 'src/localization/locale';
+import { CardConstants } from 'src/adaptive-cards/constants/cardConstants';
 
 /**
  * Defines the template for the adaptive card used when creating a new question.
@@ -22,15 +23,15 @@ export const newQuestionCard = () =>
             },
             {
                 type: 'TextBlock',
-                text: `${askQuestionStrings(
-                    'textFieldLabel'
-                )} (250 ${genericStrings('maxCharacters')})`,
+                text: askQuestionStrings('textFieldLabel', {
+                    maxCharCount: CardConstants.questionContentCharLimit,
+                }),
             },
             {
                 type: 'Input.Text',
                 id: 'usertext',
                 placeholder: askQuestionStrings('textFieldExample'),
-                maxLength: 250,
+                maxLength: CardConstants.questionContentCharLimit,
                 isMultiline: true,
                 value: '${if(question != null, question, null)}',
             },

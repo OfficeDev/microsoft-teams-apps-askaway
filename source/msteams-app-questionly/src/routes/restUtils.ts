@@ -160,8 +160,14 @@ export const ensureUserIsPartOfMeetingConversation = async (
 
 export const patchActionForQuestion = ['upvote', 'downvote', 'markAnswered'];
 
-export const getHostUserId = async (
-    userId: string,
+/**
+ * Get teams member id from teams member info. This is the 29:xxx ID for the user.
+ * @param userAadObjectId - AAD user id.
+ * @param conversationId - conversation id
+ * @param serviceUrl - service url.
+ */
+export const getTeamsUserId = async (
+    userAadObjectId: string,
     conversationId: string,
     serviceUrl: string
 ) => {
@@ -180,7 +186,7 @@ export const getHostUserId = async (
         });
 
         const teamMember = await getMemberInfo(
-            userId,
+            userAadObjectId,
             adapter,
             conversationReference
         );
