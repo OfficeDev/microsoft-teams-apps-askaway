@@ -5,6 +5,7 @@
     "AzureWebJobsStorage": "{{AzureWebJobsStorage}}",
     "FUNCTIONS_WORKER_RUNTIME": "node",
     "APPINSIGHTS_INSTRUMENTATIONKEY": "{{APPINSIGHTS_INSTRUMENTATIONKEY}}",
+    "AzureAd_ClientId": "{{AzureAd_ClientId}}",
     "AzureAd_ApplicationIdUri": "{{AzureAd_ApplicationIdUri}}",
     "AzureAd_ValidIssuers": "https://login.microsoftonline.com/TENANT_ID/v2.0,https://sts.windows.net/TENANT_ID/",
     "TenantId": "{{TenantId}}",

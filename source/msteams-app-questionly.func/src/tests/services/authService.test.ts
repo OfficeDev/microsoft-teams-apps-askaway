@@ -22,6 +22,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   process.env.AzureAd_ApplicationIdUri =
     "api://example.com/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
+  process.env.AzureAd_ClientId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
   process.env.AzureAd_ValidIssuers =
     "https://login.microsoftonline.com/TENANT_ID/v2.0,https://sts.windows.net/TENANT_ID/";
   process.env.TenantId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
