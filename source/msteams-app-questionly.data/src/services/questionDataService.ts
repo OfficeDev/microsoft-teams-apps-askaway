@@ -183,7 +183,7 @@ export class QuestionDataService {
     conversationId: string,
     sessionId: string,
     questionId: string
-  ): Promise<IQuestion> {
+  ): Promise<IQuestionPopulatedUser> {
     const session = await qnaSessionDataService.getQnASession(sessionId);
 
     if (!session) {
@@ -196,8 +196,8 @@ export class QuestionDataService {
       throw new Error(`session ${sessionId} is not active`);
     }
 
-    const question: IQuestion = await retryWrapper<IQuestion>(() =>
-      Question.findById(questionId)
+    const question = await retryWrapper<IQuestionPopulatedUser>(() =>
+      Question.findById(questionId).populate({ path: "userId", model: User })
     );
 
     if (!question) {
@@ -218,6 +218,7 @@ export class QuestionDataService {
    * @param questionId - The DBID of the question document for the question being upvoted.
    * @param aadObjectId - The aadObjectId of the user upvoting the question.
    * @param name - The name of the user upvoting the question, used for creating a new User document if one doesn't exist.
+   * @returns - user document.
    * @throws - exception if question validation fails.
    */
   public async upVoteQuestion(
@@ -226,14 +227,14 @@ export class QuestionDataService {
     questionId: string,
     aadObjectId: string,
     name: string
-  ): Promise<void> {
-    const question: IQuestion = await this.getAndValidateQuestion(
+  ): Promise<IQuestionPopulatedUser> {
+    const question = await this.getAndValidateQuestion(
       conversationId,
       sessionId,
       questionId
     );
 
-    if (question.userId === aadObjectId) {
+    if (question.userId._id === aadObjectId) {
       throw new Error("User cannot upvote/ downvote own question");
     }
 
@@ -242,6 +243,8 @@ export class QuestionDataService {
       await this.userDataService.getUserOrCreate(aadObjectId, name);
       await retryWrapper(() => question.save(), new ExponentialBackOff());
     }
+
+    return question;
   }
 
   /**
@@ -250,6 +253,7 @@ export class QuestionDataService {
    * @param sessionId - The DBID of the session document.
    * @param questionId - The DBID of the question document for the question being upvoted.
    * @param aadObjectId - The aadObjectId of the user upvoting the question.
+   * @returns - user document.
    * @throws - exception if question validation fails.
    */
   public async downVoteQuestion(
@@ -257,14 +261,14 @@ export class QuestionDataService {
     sessionId: string,
     questionId: string,
     aadObjectId: string
-  ): Promise<void> {
+  ): Promise<IQuestionPopulatedUser> {
     const question = await this.getAndValidateQuestion(
       conversationId,
       sessionId,
       questionId
     );
 
-    if (question.userId === aadObjectId) {
+    if (question.userId._id === aadObjectId) {
       throw new Error("User cannot upvote/ downvote own question");
     }
 
@@ -272,6 +276,8 @@ export class QuestionDataService {
       question.voters.splice(question.voters.indexOf(aadObjectId), 1);
       await retryWrapper(() => question.save(), new ExponentialBackOff());
     }
+
+    return question;
   }
 
   /**
@@ -279,13 +285,14 @@ export class QuestionDataService {
    * @param conversationId - conversation id corresponding to session.
    * @param sessionId - The DBID of the session document.
    * @param questionId - The DBID of the question document for the question being upvoted.
+   * @returns - user document.
    * @throws - exception if question validation fails.
    */
   public async markQuestionAsAnswered(
     conversationId: string,
     sessionId: string,
     questionId: string
-  ): Promise<void> {
+  ): Promise<IQuestionPopulatedUser> {
     const question = await this.getAndValidateQuestion(
       conversationId,
       sessionId,
@@ -296,6 +303,8 @@ export class QuestionDataService {
       question.isAnswered = true;
       await retryWrapper(() => question.save(), new ExponentialBackOff());
     }
+
+    return question;
   }
 
   /**
