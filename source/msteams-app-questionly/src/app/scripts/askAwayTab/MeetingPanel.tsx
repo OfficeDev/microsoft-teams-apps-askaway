@@ -78,7 +78,6 @@ class MeetingPanel extends React.Component<
                 defaultActiveIndex: props.constValue.TAB_QUESTIONS.ACTIVE_INDEX,
             },
         };
-        this.onShowTaskModule = this.onShowTaskModule.bind(this);
     }
 
     componentDidMount() {
@@ -132,7 +131,7 @@ class MeetingPanel extends React.Component<
     /**
      * Display Create AMA session form
      */
-    private onShowTaskModule() {
+    private onShowTaskModule = () => {
         let taskInfo: any = {
             fallbackUrl: '',
             appId: process.env.MicrosoftAppId,
@@ -179,7 +178,7 @@ class MeetingPanel extends React.Component<
         };
 
         microsoftTeams.tasks.startTask(taskInfo, submitHandler);
-    }
+    };
 
     /**
      * Display's success and failure screens for AMA session
@@ -379,46 +378,52 @@ class MeetingPanel extends React.Component<
                     { questionContent: this.state.input.postQuestion }
                 )
                 .then((response: any) => {
-                    if (response && response.status === 201) {
-                        const stateValue = this.state;
-                        stateValue.input.postQuestion = '';
-                        this.setState(stateValue);
-                        this.getActiveSession();
+                    if (response && response.data && response.data.id) {
+                        this.setState({
+                            input: { ...this.state.input, postQuestion: '' },
+                        });
+                        this.setState({
+                            activeSessionData: {
+                                ...this.state.activeSessionData,
+                                unansweredQuestions: [
+                                    response.data,
+                                    ...this.state.activeSessionData
+                                        .unansweredQuestions,
+                                ],
+                            },
+                        });
                     }
                 })
                 .catch((error) => {});
         }
     }
 
-    getLiveTabPendingQ = () => {
+    /**
+     * Get Live Tab Content on change
+     * @param value
+     */
+    private getLiveTab(value) {
         this.setState({
             liveTab: {
                 ...this.state.liveTab,
-                selectedTab: this.props.constValue.TAB_QUESTIONS.PENDING,
+                selectedTab: value,
             },
         });
-    };
-
-    getLiveTabAnsweredQ = () => {
-        this.setState({
-            liveTab: {
-                ...this.state.liveTab,
-                selectedTab: this.props.constValue.TAB_QUESTIONS.ANSWERED,
-            },
-        });
-    };
+    }
 
     /**
      * Display pending questions
+     * @param questions
+     * @param key
      */
-    private liveQuestionsPending(questions) {
+    private liveQuestions(questions, key) {
         return (
             <div className="question-card">
                 {questions.map((q, index) => {
                     return (
                         <div
                             style={{ borderBottom: '1px solid #fff' }}
-                            key={q.index}
+                            key={index}
                         >
                             <Card
                                 aria-roledescription="card avatar"
@@ -428,7 +433,7 @@ class MeetingPanel extends React.Component<
                                     <Flex gap="gap.small">
                                         <Avatar
                                             size={'smaller'}
-                                            name={q.userId.userName}
+                                            name={q.author.name}
                                         />
                                         <Flex>
                                             <Text
@@ -436,7 +441,7 @@ class MeetingPanel extends React.Component<
                                                     fontSize: '12px',
                                                     lineHeight: '20px',
                                                 }}
-                                                content={q.userId.userName}
+                                                content={q.author.name}
                                                 weight="regular"
                                             />
                                             <Flex
@@ -451,7 +456,8 @@ class MeetingPanel extends React.Component<
                                                     onClick={(e) =>
                                                         this.onClickPendingQLikeBtn(
                                                             e,
-                                                            q
+                                                            q,
+                                                            key
                                                         )
                                                     }
                                                     icon={<LikeIcon />}
@@ -461,7 +467,7 @@ class MeetingPanel extends React.Component<
                                                     iconOnly
                                                     text
                                                 />
-                                                <Text content={0} />
+                                                <Text content={q.votesCount} />
                                             </Flex>
                                         </Flex>
                                     </Flex>
@@ -488,30 +494,65 @@ class MeetingPanel extends React.Component<
      * On click pending like button
      * @param e - event
      * @param q - pending question data
+     * @param key - answeredQuestions / unansweredQuestions
      */
-    private onClickPendingQLikeBtn(e, q) {
+    private onClickPendingQLikeBtn(e, q, key) {
         if (e) {
             this.props.httpService
                 .patch(
-                    `/conversations/${this.props.teamsData.chatId}/sessions/${this.state.activeSessionData.sessionId}/questions/${q['_id']}`,
+                    `/conversations/${this.props.teamsData.chatId}/sessions/${this.state.activeSessionData.sessionId}/questions/${q['id']}`,
                     { action: 'upvote' }
                 )
-                .then((response: any) => {})
+                .then((response: any) => {
+                    if (response.data && response.data.id) {
+                        const questions = this.state.activeSessionData[key];
+                        const index = questions.findIndex(
+                            (q) => q.id === response.data.id
+                        );
+                        questions.splice(index, 1);
+                        questions.splice(index, 0, response.data);
+                        this.setState(questions);
+                    }
+                })
                 .catch((error) => {});
         }
     }
 
     private liveQuestionsMenu(stateVal) {
+        if (
+            stateVal.activeSessionData[
+                this.props.constValue.TAB_QUESTIONS.ANSWERED_Q
+            ] &&
+            stateVal.activeSessionData[
+                this.props.constValue.TAB_QUESTIONS.ANSWERED_Q
+            ].length === 0 &&
+            stateVal.activeSessionData[
+                this.props.constValue.TAB_QUESTIONS.UNANSWERED_Q
+            ] &&
+            stateVal.activeSessionData[
+                this.props.constValue.TAB_QUESTIONS.UNANSWERED_Q
+            ].length === 0
+        ) {
+            return null;
+        }
         const items = [
             {
                 key: this.props.constValue.TAB_QUESTIONS.PENDING,
-                content: 'Pending questions',
-                onClick: this.getLiveTabPendingQ,
+                content: this.props.constValue.TAB_QUESTIONS.PENDING,
+                onClick: () => {
+                    this.getLiveTab(
+                        this.props.constValue.TAB_QUESTIONS.PENDING
+                    );
+                },
             },
             {
                 key: this.props.constValue.TAB_QUESTIONS.ANSWERED,
-                content: 'Answered questions',
-                onClick: this.getLiveTabAnsweredQ,
+                content: this.props.constValue.TAB_QUESTIONS.ANSWERED,
+                onClick: () => {
+                    this.getLiveTab(
+                        this.props.constValue.TAB_QUESTIONS.ANSWERED
+                    );
+                },
             },
         ];
         return (
@@ -527,10 +568,6 @@ class MeetingPanel extends React.Component<
                 />
             </React.Fragment>
         );
-    }
-
-    private liveQuestionsAnswered(answers) {
-        return <p>Answered content</p>;
     }
 
     /**
@@ -571,24 +608,36 @@ class MeetingPanel extends React.Component<
         return (
             <React.Fragment>
                 {this.showMenubar(sessionTitle)}
-                {stateVal.activeSessionData.questions &&
-                    stateVal.activeSessionData.questions.length > 0 && (
-                        <React.Fragment>
-                            {this.liveQuestionsMenu(stateVal)}
-
-                            {stateVal.liveTab.selectedTab ===
-                            this.props.constValue.TAB_QUESTIONS.PENDING
-                                ? this.liveQuestionsPending(
-                                      stateVal.activeSessionData.questions
-                                  )
-                                : this.liveQuestionsAnswered(
-                                      stateVal.activeSessionData
-                                  )}
-                        </React.Fragment>
+                {this.liveQuestionsMenu(stateVal)}
+                {stateVal.liveTab.selectedTab ===
+                    this.props.constValue.TAB_QUESTIONS.PENDING &&
+                    stateVal.activeSessionData.unansweredQuestions &&
+                    stateVal.activeSessionData.unansweredQuestions.length > 0 &&
+                    this.liveQuestions(
+                        stateVal.activeSessionData.unansweredQuestions,
+                        this.props.constValue.TAB_QUESTIONS.UNANSWERED_Q
+                    )}
+                {stateVal.liveTab.selectedTab ===
+                    this.props.constValue.TAB_QUESTIONS.ANSWERED &&
+                    stateVal.activeSessionData.answeredQuestions &&
+                    stateVal.activeSessionData.answeredQuestions.length > 0 &&
+                    this.liveQuestions(
+                        stateVal.activeSessionData.answeredQuestions,
+                        this.props.constValue.TAB_QUESTIONS.ANSWERED_Q
                     )}
 
-                {stateVal.activeSessionData.questions &&
-                    stateVal.activeSessionData.questions.length === 0 &&
+                {stateVal.activeSessionData[
+                    this.props.constValue.TAB_QUESTIONS.ANSWERED_Q
+                ] &&
+                    stateVal.activeSessionData[
+                        this.props.constValue.TAB_QUESTIONS.ANSWERED_Q
+                    ].length === 0 &&
+                    stateVal.activeSessionData[
+                        this.props.constValue.TAB_QUESTIONS.UNANSWERED_Q
+                    ] &&
+                    stateVal.activeSessionData[
+                        this.props.constValue.TAB_QUESTIONS.UNANSWERED_Q
+                    ].length === 0 &&
                     this.noQuestionDesign(
                         EmptySessionImage,
                         'Q & A session is live...Ask away!'
@@ -604,6 +653,7 @@ class MeetingPanel extends React.Component<
                         <Input
                             styles={{ background: 'none' }}
                             fluid
+                            className="ask-question"
                             as="div"
                             onChange={(e) => this.appendInput(e)}
                             placeholder="Type a question here"
@@ -629,12 +679,9 @@ class MeetingPanel extends React.Component<
     };
 
     appendInput(e) {
-        const state = {
-            input: {
-                postQuestion: e.target.value,
-            },
-        };
-        this.props.helper.appendInput(this, state);
+        this.setState({
+            input: { ...this.state.input, postQuestion: e.target.value },
+        });
     }
 
     /**

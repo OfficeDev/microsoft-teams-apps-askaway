@@ -11,10 +11,6 @@ class Helper {
             i18next.changeLanguage(locale[0].toLowerCase());
         }
     }
-
-    public appendInput(that, value) {
-        that.setState({ ...that.state, ...value });
-    }
 }
 // tslint:disable-next-line:export-name
 export default new Helper();

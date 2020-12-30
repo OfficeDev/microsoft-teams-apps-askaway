@@ -234,9 +234,9 @@ export class QuestionDataService {
       questionId
     );
 
-    if (question.userId._id === aadObjectId) {
-      throw new Error("User cannot upvote/ downvote own question");
-    }
+    // if (question.userId._id === aadObjectId) {
+    //   throw new Error("User cannot upvote/ downvote own question");
+    // }
 
     if (!question.voters.includes(aadObjectId)) {
       question.voters.push(aadObjectId);
@@ -268,9 +268,9 @@ export class QuestionDataService {
       questionId
     );
 
-    if (question.userId._id === aadObjectId) {
-      throw new Error("User cannot upvote/ downvote own question");
-    }
+    // if (question.userId._id === aadObjectId) {
+    //   throw new Error("User cannot upvote/ downvote own question");
+    // }
 
     if (question.voters.includes(aadObjectId)) {
       question.voters.splice(question.voters.indexOf(aadObjectId), 1);
