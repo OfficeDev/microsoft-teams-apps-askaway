@@ -70,6 +70,11 @@ export interface TraceData {
   path?: string;
 
   /**
+   * teams user id. This 29:xxx ID.
+   */
+  userId?: string;
+
+  /**
    * Property bag for additional params.
    */
   properties?: { [key: string]: any };

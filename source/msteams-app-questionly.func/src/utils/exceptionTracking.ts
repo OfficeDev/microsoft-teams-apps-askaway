@@ -20,7 +20,6 @@ export const exceptionLogger = (
         process.env.APPINSIGHTS_INSTRUMENTATIONKEY
       );
     }
-    aiClient.context.keys.operationId = context?.invocationId;
     aiClient?.trackException({
       exception: error,
       properties: traceData,

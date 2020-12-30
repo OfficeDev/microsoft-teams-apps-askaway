@@ -85,7 +85,7 @@ const httpTrigger: AzureFunction = async function (
       exceptionLogger(error, context, {
         conversationId: conversationId,
         tenantId: conversation.tenantId,
-        userAadObjectId: userId,
+        userId: userId,
         filename: module.id,
       });
 
@@ -108,7 +108,7 @@ const httpTrigger: AzureFunction = async function (
     context.log.error(error);
     exceptionLogger(error, context, {
       conversationId: conversationId,
-      userAadObjectId: userId,
+      userId: userId,
       filename: module.id,
     });
     createInternalServerErrorResponse(context);
