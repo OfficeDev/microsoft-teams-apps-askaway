@@ -123,7 +123,7 @@ export class AskAwayTab extends msteamsReactBaseComponent<
                 {this.state.frameContext ===
                     microsoftTeams.FrameContexts.sidePanel && (
                     <MeetingPanel
-                        teamsData={this.state.teamContext}
+                        teamsTabContext={this.state.teamContext}
                         httpService={this.httpService}
                         appInsights={telemetryService.appInsights}
                         helper={Helper}
@@ -132,7 +132,7 @@ export class AskAwayTab extends msteamsReactBaseComponent<
                 {this.state.frameContext ===
                     microsoftTeams.FrameContexts.content && (
                     <TabContent
-                        teamsData={this.state.teamContext}
+                        teamsTabContext={this.state.teamContext}
                         httpService={this.httpService}
                         appInsights={telemetryService.appInsights}
                         helper={Helper}

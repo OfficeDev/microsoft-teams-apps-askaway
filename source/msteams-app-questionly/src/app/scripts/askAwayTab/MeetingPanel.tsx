@@ -29,7 +29,7 @@ import { SignalRLifecycle } from './signalR/SignalRLifecycle';
 const EmptySessionImage = require('./../../web/assets/create_session.png');
 // const EndSessionImage =  require('./../../web/assets/end_session.png');
 export interface MeetingPanelProps {
-    teamsData: any;
+    teamsTabContext: any;
     httpService: HttpService;
     appInsights: ApplicationInsights;
     helper: any;
@@ -78,7 +78,9 @@ class MeetingPanel extends React.Component<
     private getActiveSession() {
         this.setState({ showLoader: true });
         this.props.httpService
-            .get(`/conversations/${this.props.teamsData.chatId}/activesessions`)
+            .get(
+                `/conversations/${this.props.teamsTabContext.chatId}/activesessions`
+            )
             .then((response: any) => {
                 if (response && response.data && response.data.length > 0) {
                     this.setState({
@@ -100,7 +102,7 @@ class MeetingPanel extends React.Component<
             this.setState({ showLoader: true });
             this.props.httpService
                 .patch(
-                    `/conversations/${this.props.teamsData.chatId}/sessions/${this.state.activeSessionData.sessionId}`,
+                    `/conversations/${this.props.teamsTabContext.chatId}/sessions/${this.state.activeSessionData.sessionId}`,
                     { action: 'end' }
                 )
                 .then((response: any) => {
@@ -122,7 +124,7 @@ class MeetingPanel extends React.Component<
         let taskInfo: any = {
             fallbackUrl: '',
             appId: process.env.MicrosoftAppId,
-            url: `https://${process.env.HostName}/askAwayTab/createsession.html?theme=${this.props.teamsData.theme}&locale=${this.props.teamsData.locale}`,
+            url: `https://${process.env.HostName}/askAwayTab/createsession.html?theme=${this.props.teamsTabContext.theme}&locale=${this.props.teamsTabContext.locale}`,
         };
 
         let submitHandler = (err: any, result: any) => {
@@ -136,12 +138,12 @@ class MeetingPanel extends React.Component<
                     },
                 });
                 const createSessionData = {
-                    scopeId: this.props.teamsData.chatId,
+                    scopeId: this.props.teamsTabContext.chatId,
                     isChannel: false,
                 };
                 this.props.httpService
                     .post(
-                        `/conversations/${this.props.teamsData.chatId}/sessions`,
+                        `/conversations/${this.props.teamsTabContext.chatId}/sessions`,
                         { ...this.state.input, ...createSessionData }
                     )
                     .then((response: any) => {
@@ -422,7 +424,7 @@ class MeetingPanel extends React.Component<
         return (
             <React.Fragment>
                 <SignalRLifecycle
-                    conversationId={this.props.teamsData.chatId}
+                    conversationId={this.props.teamsTabContext.chatId}
                     updateEvent={this.updateEvent}
                     httpService={this.props.httpService}
                     appInsights={this.props.appInsights}
