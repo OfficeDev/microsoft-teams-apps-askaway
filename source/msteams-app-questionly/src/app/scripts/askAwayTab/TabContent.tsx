@@ -10,9 +10,10 @@ import { ApplicationInsights } from '@microsoft/applicationinsights-web';
 import { HttpService } from './shared/HttpService';
 
 export interface TabContentProps {
-    teamsData: any;
+    teamsTabContext: any;
     httpService: HttpService;
     appInsights: ApplicationInsights;
+    helper: any;
 }
 export interface TabContentState {}
 
@@ -31,7 +32,9 @@ export class TabContent extends React.Component<
 
     private getActiveSession() {
         this.props.httpService
-            .get(`/conversations/${this.props.teamsData.chatId}/activesessions`)
+            .get(
+                `/conversations/${this.props.teamsTabContext.chatId}/activesessions`
+            )
             .then((response: any) => {})
             .catch((error) => {
                 // TODO: handle this gracefully.
@@ -118,12 +121,12 @@ export class TabContent extends React.Component<
                 const createSessionData = {
                     title: result['title'],
                     description: result['description'],
-                    scopeId: this.props.teamsData.chatId,
+                    scopeId: this.props.teamsTabContext.chatId,
                     isChannel: false,
                 };
                 this.props.httpService
                     .post(
-                        `/conversations/${this.props.teamsData.chatId}/sessions`,
+                        `/conversations/${this.props.teamsTabContext.chatId}/sessions`,
                         createSessionData
                     )
                     .then((response: any) => {

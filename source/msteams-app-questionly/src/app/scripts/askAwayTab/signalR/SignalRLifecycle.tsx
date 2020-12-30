@@ -7,6 +7,7 @@ import {
     SeverityLevel,
 } from '@microsoft/applicationinsights-web';
 import { HttpService } from './../shared/HttpService';
+import { Alert } from '@fluentui/react-northstar';
 
 /**
  * signalR connection status
@@ -58,7 +59,7 @@ export interface SignalRLifecycleProps {
     /**
      * callback function from caller, which recives update on events.
      */
-    updateEvent: (dataEvent: any) => void;
+    onEvent: (dataEvent: any) => void;
 
     /**
      * http service.
@@ -113,7 +114,7 @@ export class SignalRLifecycle extends React.Component<
      * Register callbacks for signalR connection life cycle events.
      */
     private registerCallbacksOnConnection() {
-        this.connection.on('updateEvent', this.updateEvent.bind(this));
+        this.connection.on('updateEvent', this.onEvent.bind(this));
         this.connection.onclose(this.handleConnectionError.bind(this));
         // `onreconnected` callback is called with new connection id.
         this.connection.onreconnected(this.addConnectionToGroup.bind(this));
@@ -183,13 +184,13 @@ export class SignalRLifecycle extends React.Component<
      * This function is triggered on events from signalR connection.
      * @param dataEvent - event received.
      */
-    private updateEvent = (dataEvent: any) => {
-        this.props.updateEvent(dataEvent);
+    private onEvent = (dataEvent: any) => {
+        this.props.onEvent(dataEvent);
     };
 
     /**
      * When signalR connection is closed and the client retries the connection,
-     * this handler shows proper error message to user.
+     * this handler updates state accordingly.
      * @param error - error which closed the connection. signalR client passes error to `onreconnecting` callback.
      */
     private showAutoRefreshEstablishingMessage(error?: Error) {
@@ -238,8 +239,8 @@ export class SignalRLifecycle extends React.Component<
     }
 
     /**
-     * When signalR connectios can not be established by the client,
-     * this handler shows manual retry option to the user.
+     * When signalR connection can not be established by the client,
+     * this handler updates state accordingly.
      * @param error - error that occured while establishing connection. signalR client passes error to `onclose` callback.
      */
     private handleConnectionError(error?: Error) {
@@ -253,30 +254,27 @@ export class SignalRLifecycle extends React.Component<
         }
     }
 
+    /**
+     * Retries the connection if it's not alive already.
+     */
+    public refreshConnection() {
+        if (this.state.connectionStatus !== ConnectionStatus.Connected) {
+            this.initiateConnectionSetup();
+        }
+    }
+
     public render() {
-        // These are temporary placeholders for error scenarios.
         return (
-            <div id="errorHolder">
-                {this.state.connectionStatus ===
-                    ConnectionStatus.NotConnected && (
-                    <button
-                        id="connectionRetry"
-                        onClick={this.initiateConnectionSetup.bind(this)}
-                    >
-                        retry
-                    </button>
-                )}
-                {this.state.connectionStatus ===
-                    ConnectionStatus.Reconnecting && (
-                    <h1 id="reconnecting">
-                        Auto refresh is disrupted! Reconnecting!
-                    </h1>
-                )}
-                {this.state.connectionLimit === ConnectionLimit.Exhausted && (
-                    <h1 id="connectionExhausted">
-                        SignalR connection limit is reached. Please use refresh
-                        option for live updates.
-                    </h1>
+            <div id="alertHolder">
+                {(this.state.connectionStatus ===
+                    ConnectionStatus.NotConnected ||
+                    this.state.connectionStatus ===
+                        ConnectionStatus.Reconnecting) && (
+                    <Alert
+                        id="alert"
+                        content="Connection lost. Refresh to view content. if that doesn't do the trick, try again later."
+                        dismissible
+                    />
                 )}
             </div>
         );

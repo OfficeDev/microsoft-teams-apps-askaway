@@ -28,9 +28,10 @@ import { SignalRLifecycle } from './signalR/SignalRLifecycle';
 
 const EmptySessionImage = require('./../../web/assets/create_session.png');
 export interface MeetingPanelProps {
-    teamsData: any;
+    teamsTabContext: any;
     httpService: HttpService;
     appInsights: ApplicationInsights;
+    helper: any;
 }
 
 export interface MeetingPanelState {
@@ -49,11 +50,16 @@ class MeetingPanel extends React.Component<
     MeetingPanelProps,
     MeetingPanelState
 > {
+    /**
+     * signalR component instance which is used later to refresh the connection.
+     */
+    private signalRComponent: SignalRLifecycle | null;
+
     constructor(props) {
         super(props);
         this.state = {
             activeSessionData: null,
-            showLoader: true,
+            showLoader: false,
             input: {
                 title: '',
                 description: '',
@@ -69,16 +75,15 @@ class MeetingPanel extends React.Component<
         this.getActiveSession();
     }
 
-    forceUpdateHandler = () => {
-        window.location.reload();
-    };
-
     /**
      * To Identify Active Session
      */
     private getActiveSession() {
+        this.setState({ showLoader: true });
         this.props.httpService
-            .get(`/conversations/${this.props.teamsData.chatId}/activesessions`)
+            .get(
+                `/conversations/${this.props.teamsTabContext.chatId}/activesessions`
+            )
             .then((response: any) => {
                 if (response && response.data && response.data.length > 0) {
                     this.setState({
@@ -96,14 +101,11 @@ class MeetingPanel extends React.Component<
      * To End the active session
      */
     endActiveSession = (e) => {
-        if (
-            this.state.activeSessionData &&
-            this.state.activeSessionData.sessionId !== undefined
-        ) {
+        if (this.state?.activeSessionData?.sessionId) {
             this.setState({ showLoader: true });
             this.props.httpService
                 .patch(
-                    `/conversations/${this.props.teamsData.chatId}/sessions/${this.state.activeSessionData.sessionId}`,
+                    `/conversations/${this.props.teamsTabContext.chatId}/sessions/${this.state.activeSessionData.sessionId}`,
                     { action: 'end' }
                 )
                 .then((response: any) => {
@@ -125,23 +127,26 @@ class MeetingPanel extends React.Component<
         let taskInfo: any = {
             fallbackUrl: '',
             appId: process.env.MicrosoftAppId,
-            url: `https://${process.env.HostName}/askAwayTab/createsession.html?theme=${this.props.teamsData.theme}&locale=${this.props.teamsData.locale}`,
+            url: `https://${process.env.HostName}/askAwayTab/createsession.html?theme=${this.props.teamsTabContext.theme}&locale=${this.props.teamsTabContext.locale}`,
         };
 
         let submitHandler = (err: any, result: any) => {
             result = JSON.parse(result);
             if (result) {
-                const stateInput = this.state;
-                stateInput.input.title = result['title'];
-                stateInput.input.description = result['description'];
-                this.setState(stateInput);
+                this.setState({
+                    input: {
+                        ...this.state.input,
+                        title: result['title'],
+                        description: result['description'],
+                    },
+                });
                 const createSessionData = {
-                    scopeId: this.props.teamsData.chatId,
+                    scopeId: this.props.teamsTabContext.chatId,
                     isChannel: false,
                 };
                 this.props.httpService
                     .post(
-                        `/conversations/${this.props.teamsData.chatId}/sessions`,
+                        `/conversations/${this.props.teamsTabContext.chatId}/sessions`,
                         { ...this.state.input, ...createSessionData }
                     )
                     .then((response: any) => {
@@ -151,7 +156,9 @@ class MeetingPanel extends React.Component<
                             response['data']['sessionId']
                         ) {
                             this.showAlertModel(true);
-                            this.getActiveSession();
+                            this.setState({
+                                activeSessionData: response.data,
+                            });
                         } else {
                             this.showAlertModel(false);
                         }
@@ -254,7 +261,7 @@ class MeetingPanel extends React.Component<
     /**
      * Show this screen when no questions posted
      */
-    private noQuestionDesign(image, text) {
+    private noQuestionDesign(image: string, text: string) {
         return (
             <div className="no-question">
                 <Image
@@ -311,7 +318,9 @@ class MeetingPanel extends React.Component<
                         {
                             key: '5',
                             content: 'Refresh session',
-                            onClick: this.forceUpdateHandler,
+                            onClick: () => {
+                                this.getActiveSession();
+                            },
                             icon: <RetryIcon outline />,
                         },
                         {
@@ -418,10 +427,13 @@ class MeetingPanel extends React.Component<
         return (
             <React.Fragment>
                 <SignalRLifecycle
-                    conversationId={this.props.teamsData.chatId}
+                    conversationId={this.props.teamsTabContext.chatId}
                     updateEvent={this.updateEvent}
                     httpService={this.props.httpService}
                     appInsights={this.props.appInsights}
+                    ref={(instance) => {
+                        this.signalRComponent = instance;
+                    }}
                 />
                 {this.state.showLoader && (
                     <Loader label="Loading Meeting Information" />
