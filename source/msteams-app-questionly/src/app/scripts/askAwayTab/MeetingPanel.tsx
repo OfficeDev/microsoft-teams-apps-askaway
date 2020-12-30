@@ -63,7 +63,6 @@ class MeetingPanel extends React.Component<
                 isDescription: false,
             },
         };
-        this.onShowTaskModule = this.onShowTaskModule.bind(this);
     }
 
     componentDidMount() {
@@ -122,7 +121,7 @@ class MeetingPanel extends React.Component<
     /**
      * Display Create AMA session form
      */
-    private onShowTaskModule() {
+    private onShowTaskModule = () => {
         let taskInfo: any = {
             fallbackUrl: '',
             appId: process.env.MicrosoftAppId,
@@ -164,7 +163,7 @@ class MeetingPanel extends React.Component<
         };
 
         microsoftTeams.tasks.startTask(taskInfo, submitHandler);
-    }
+    };
 
     /**
      * Display's success and failure screens for AMA session
