@@ -41,6 +41,9 @@ const orchestrator = df.orchestrator(function* (context) {
   // Conversation id from bot flow sometimes contain messageid
   const conversationId = context.bindingData.input.conversationId.split(";")[0];
 
+  // Operation id for telemetry correaltion.
+  const operationId = context.bindingData.input.operationId;
+
   try {
     // Get conversation data before triggering any background job
     const startupActivityInput = {
@@ -60,7 +63,7 @@ const orchestrator = df.orchestrator(function* (context) {
         new Error(
           `Could not find conversation data for conversation id ${conversationId}`
         ),
-        context,
+        operationId,
         {
           conversationId: conversationId,
           tenantId: conversation.tenantId,
@@ -159,7 +162,7 @@ const orchestrator = df.orchestrator(function* (context) {
       error,
       "Error occurred while scheduling background tasks"
     );
-    exceptionLogger(error, context, {
+    exceptionLogger(error, operationId, {
       conversationId: conversationId,
       qnaSessionId: context.bindingData.input.qnaSessionId,
       filename: module.id,

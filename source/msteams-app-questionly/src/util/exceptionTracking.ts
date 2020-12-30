@@ -4,9 +4,13 @@ import {
     initiateAndGetAppInsights,
     TraceData,
 } from 'msteams-app-questionly.common';
+import * as appInsights from 'applicationinsights';
 
 export let aiClient;
 
+/**
+ * Initiates telemetry client.
+ */
 export const initiateAIClient = async () => {
     if (!aiClient) {
         const applicationInsightsInstrumentationKey = await getApplicationInsightsInstrumentationKeyURI();
@@ -14,6 +18,14 @@ export const initiateAIClient = async () => {
             applicationInsightsInstrumentationKey
         );
     }
+};
+
+/**
+ * Get operation id for the current request.
+ */
+export const getOperationIdForCurrentRequest = () => {
+    const context = appInsights.getCorrelationContext();
+    return context?.operation.id;
 };
 
 export const exceptionLogger = (

@@ -1,4 +1,3 @@
-import { Context } from "@azure/functions";
 import {
   initiateAndGetAppInsights,
   TraceData,
@@ -8,7 +7,7 @@ export let aiClient;
 
 export const exceptionLogger = (
   error: Error,
-  context?: Context,
+  operationId?: string,
   traceData?: TraceData
 ) => {
   if (process.env.debugMode === "true") {
@@ -20,6 +19,7 @@ export const exceptionLogger = (
         process.env.APPINSIGHTS_INSTRUMENTATIONKEY
       );
     }
+    aiClient.context.tags["ai.operation.parentId"] = operationId;
     aiClient?.trackException({
       exception: error,
       properties: traceData,

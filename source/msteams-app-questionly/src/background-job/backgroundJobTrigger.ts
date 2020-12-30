@@ -1,7 +1,10 @@
 import { IBackgroundJobPayload } from 'src/background-job/backgroundJobPayload';
 import { IDataEvent } from 'msteams-app-questionly.common';
 import axios, { AxiosRequestConfig } from 'axios';
-import { exceptionLogger } from 'src/util/exceptionTracking';
+import {
+    exceptionLogger,
+    getOperationIdForCurrentRequest,
+} from 'src/util/exceptionTracking';
 import { getBackgroundFunctionKey } from 'src/util/keyvault';
 import { IQnASession_populated, IQuestion } from 'msteams-app-questionly.data';
 import {
@@ -159,6 +162,7 @@ const triggerBackgroundJob = async (
         conversationId: conversationId,
         qnaSessionId: qnaSessionId,
         eventData: dataEvent,
+        operationId: getOperationIdForCurrentRequest(),
     };
 
     try {

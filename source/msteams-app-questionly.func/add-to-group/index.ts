@@ -25,6 +25,8 @@ const httpTrigger: AzureFunction = async function (
   const conversationId: string = req.body?.conversationId;
   const connectionId: string = req.body?.connectionId;
   const userId: string = req[userIdParameterConstant];
+  const operationId: string = req.body?.operationId;
+
   try {
     // Validate request parameters.
     if (!isValidParam(conversationId)) {
@@ -82,7 +84,7 @@ const httpTrigger: AzureFunction = async function (
       await signalRUtility.addConnectionToGroup(connectionId, conversationId);
     } catch (error) {
       context.log.error(error);
-      exceptionLogger(error, context, {
+      exceptionLogger(error, operationId, {
         conversationId: conversationId,
         tenantId: conversation.tenantId,
         userId: userId,
@@ -106,7 +108,7 @@ const httpTrigger: AzureFunction = async function (
     };
   } catch (error) {
     context.log.error(error);
-    exceptionLogger(error, context, {
+    exceptionLogger(error, operationId, {
       conversationId: conversationId,
       userId: userId,
       filename: module.id,
