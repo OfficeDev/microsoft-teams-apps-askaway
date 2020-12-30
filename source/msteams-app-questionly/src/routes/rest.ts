@@ -4,9 +4,9 @@ import {
     qnaSessionDataService,
     IUser,
     IQnASession_populated,
+    IQuestionPopulatedUser,
 } from 'msteams-app-questionly.data';
 import {
-    processQnASesssionsDataForMeetingTab,
     patchActionForQuestion,
     getTeamsUserId,
     ensureUserIsPartOfMeetingConversation,
@@ -24,7 +24,12 @@ import {
     upvoteQuestion,
 } from 'src/controller';
 import { createResponseForBadRequest } from 'src/routes/responseUtility';
-import { qnaSessionClientDataContract } from 'src/contracts/qnaSessionClientDataContract';
+import { ClientDataContract } from 'src/contracts/clientDataContract';
+import {
+    formatQnaSessionDataArrayAsPerClientDataContract,
+    formatQnaSessionDataAsPerClientDataContract,
+    formatQuestionDataAsPerClientDataContract,
+} from 'src/util/clientDataContractFormatter';
 
 export const router = Express.Router();
 let conversationDataService: IConversationDataService;
@@ -56,11 +61,12 @@ router.get(
                 userId
             );
 
-            // This logic will be improved as part of rest api TASK 1211744, this is a boilerplate code.
+            const qnaSessionData = await qnaSessionDataService.getQnASessionData(
+                req.params['sessionId']
+            );
+
             res.send(
-                await qnaSessionDataService.getQnASessionData(
-                    req.params['sessionId']
-                )
+                formatQnaSessionDataAsPerClientDataContract(qnaSessionData)
             );
         } catch (error) {
             next(error);
@@ -99,7 +105,9 @@ router.get(
                 return;
             } else {
                 res.send(
-                    await processQnASesssionsDataForMeetingTab(qnaSessionsData)
+                    await formatQnaSessionDataArrayAsPerClientDataContract(
+                        qnaSessionsData
+                    )
                 );
 
                 return;
@@ -183,9 +191,17 @@ router.post(
                 conversationId
             );
 
-            res.status(StatusCodes.CREATED).send({
-                questionId: result._id,
-            });
+            const response: ClientDataContract.Question = {
+                id: result._id,
+                sessionId: result.qnaSessionId,
+                content: result.content,
+                author: { id: user._id, name: user.userName },
+                votesCount: result.voters.length,
+                dateTimeCreated: result.dateTimeCreated,
+                isAnswered: result.isAnswered.valueOf(),
+            };
+
+            res.status(StatusCodes.CREATED).send(response);
 
             return;
         } catch (error) {
@@ -309,15 +325,14 @@ router.post(
                 meetingId: <string>meetingId,
             });
 
-            const response: qnaSessionClientDataContract = {
+            const response: ClientDataContract.QnaSession = {
                 sessionId: session._id,
                 title: session.title,
                 isActive: session.isActive,
                 hostUser: { id: user._id, name: user.userName },
-                numberOfQuestions: 0,
                 dateTimeCreated: session.dateTimeCreated,
-                users: [],
-                questions: [],
+                answeredQuestions: [],
+                unansweredQuestions: [],
             };
 
             res.send(response);
@@ -358,18 +373,24 @@ router.patch(
                 conversationId
             );
 
+            let question: IQuestionPopulatedUser;
+
             if (action === 'upvote') {
                 await ensureUserIsPartOfMeetingConversation(
                     conversationData,
                     user._id
                 );
 
-                await upvoteQuestion(
+                question = await upvoteQuestion(
                     conversationId,
                     sessionId,
                     questionId,
                     user._id,
                     user.userName
+                );
+
+                res.status(StatusCodes.OK).send(
+                    formatQuestionDataAsPerClientDataContract(question)
                 );
             } else if (action === 'downvote') {
                 await ensureUserIsPartOfMeetingConversation(
@@ -377,16 +398,20 @@ router.patch(
                     user._id
                 );
 
-                await downvoteQuestion(
+                question = await downvoteQuestion(
                     conversationId,
                     sessionId,
                     questionId,
                     user._id
                 );
+
+                res.status(StatusCodes.OK).send(
+                    formatQuestionDataAsPerClientDataContract(question)
+                );
             } else if (action === 'markAnswered') {
                 ensureConversationBelongsToMeetingChat(conversationData);
 
-                await markQuestionAsAnswered(
+                question = await markQuestionAsAnswered(
                     conversationData,
                     // `ensureConversationBelongsToMeetingChat` makes sure meeting id is available
                     <string>conversationData.meetingId,
@@ -394,9 +419,11 @@ router.patch(
                     questionId,
                     user._id
                 );
-            }
 
-            res.status(StatusCodes.NO_CONTENT).send();
+                res.status(StatusCodes.OK).send(
+                    formatQuestionDataAsPerClientDataContract(question)
+                );
+            }
         } catch (error) {
             next(error);
         }
@@ -432,7 +459,9 @@ router.get(
                 return;
             } else {
                 res.send(
-                    await processQnASesssionsDataForMeetingTab(activeSessions)
+                    await formatQnaSessionDataArrayAsPerClientDataContract(
+                        activeSessions
+                    )
                 );
                 return;
             }

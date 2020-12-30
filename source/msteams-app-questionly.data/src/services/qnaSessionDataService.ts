@@ -123,20 +123,7 @@ class QnASessionDataService {
     // if (!_qnaSessionData.activityId)
     //     throw new Error('QnA Session `activityId` not found');
 
-    return {
-      title: _qnaSessionData.title,
-      userName: _qnaSessionData.hostId.userName,
-      activityId: _qnaSessionData.activityId,
-      conversationId: _qnaSessionData.conversationId,
-      userAadObjId: _qnaSessionData.hostId._id,
-      description: _qnaSessionData.description,
-      dateCreated: _qnaSessionData.dateTimeCreated,
-      hostUserId: _qnaSessionData.hostUserId,
-      isActive: _qnaSessionData.isActive,
-      endedById: _qnaSessionData.endedById?._id,
-      endedByName: _qnaSessionData.endedById?.userName,
-      endedByUserId: _qnaSessionData.endedByUserId,
-    };
+    return _qnaSessionData;
   }
 
   /**

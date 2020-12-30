@@ -51,6 +51,11 @@ class MeetingPanel extends React.Component<
     MeetingPanelProps,
     MeetingPanelState
 > {
+    /**
+     * signalR component instance which is used later to refresh the connection.
+     */
+    private signalRComponent: SignalRLifecycle | null;
+
     constructor(props) {
         super(props);
         this.state = {
@@ -428,6 +433,9 @@ class MeetingPanel extends React.Component<
                     updateEvent={this.updateEvent}
                     httpService={this.props.httpService}
                     appInsights={this.props.appInsights}
+                    ref={(instance) => {
+                        this.signalRComponent = instance;
+                    }}
                 />
                 {this.state.showLoader && (
                     <Loader label="Loading Meeting Information" />

@@ -6,10 +6,7 @@ import {
     ConversationDataService,
     qnaSessionDataService,
 } from 'msteams-app-questionly.data';
-import {
-    processQnASesssionsDataForMeetingTab,
-    getTeamsUserId,
-} from 'src/routes/restUtils';
+import { getTeamsUserId } from 'src/routes/restUtils';
 import { generateUniqueId } from 'adaptivecards';
 import {
     downvoteQuestion,
@@ -31,6 +28,10 @@ import {
     UnauthorizedAccessError,
     UnauthorizedAccessErrorCode,
 } from 'src/errors/unauthorizedAccessError';
+import {
+    formatQnaSessionDataArrayAsPerClientDataContract,
+    formatQnaSessionDataAsPerClientDataContract,
+} from 'src/util/clientDataContractFormatter';
 
 let app: ExpressType;
 
@@ -51,8 +52,9 @@ const sampleServiceUrl = 'sampleServiceUrl';
 const sampleTenantId = 'sampleTenantId';
 let testQnAData1, testQnAData2;
 
-// Test cases will be improved as part of rest api TASK 1211744, this is a boilerplate code.
 describe('test /conversations/:conversationId/sessions/:sessionId api', () => {
+    const testError = new Error('test error');
+
     beforeAll(() => {
         app = Express();
 
@@ -73,6 +75,12 @@ describe('test /conversations/:conversationId/sessions/:sessionId api', () => {
         process.env.MicrosoftAppId = 'random';
         (<any>getMicrosoftAppPassword) = jest.fn();
         (<any>conversationDataService.getConversationData) = jest.fn();
+        (<any>formatQnaSessionDataAsPerClientDataContract) = jest.fn();
+        (<any>qnaSessionDataService.getQnASessionData) = jest.fn();
+    });
+
+    beforeEach(() => {
+        jest.clearAllMocks();
     });
 
     it('validates get ama session api', async () => {
@@ -80,10 +88,9 @@ describe('test /conversations/:conversationId/sessions/:sessionId api', () => {
 
         const testQnASession = {
             title: generateUniqueId(),
-            userName: generateUniqueId(),
             activityId: generateUniqueId(),
             conversationId: generateUniqueId(),
-            userAadObjId: generateUniqueId(),
+            hostId: { _id: generateUniqueId(), userName: generateUniqueId() },
             description: generateUniqueId(),
             hostUserId: generateUniqueId(),
             isActive: true,
@@ -113,16 +120,102 @@ describe('test /conversations/:conversationId/sessions/:sessionId api', () => {
             }
         );
 
+        const processedData = {
+            sessionId: '1',
+            title: generateUniqueId(),
+            isActive: true,
+            dateTimeCreated: generateUniqueId(),
+            dateTimeEnded: generateUniqueId(),
+            hostUser: { id: generateUniqueId(), name: generateUniqueId() },
+            numberOfQuestions: 0,
+        };
+
+        (<any>(
+            formatQnaSessionDataAsPerClientDataContract
+        )).mockImplementationOnce(() => {
+            return processedData;
+        });
+
         const result = await request(app).get(
             `/api/conversations/${sampleConversationId}/sessions/${testSessionId}`
         );
 
         expect(result).toBeDefined();
-        expect(result.body).toEqual(testQnASession);
+        expect(result.body).toBeDefined();
+        expect(result.body).toEqual(processedData);
         expect(qnaSessionDataService.getQnASessionData).toBeCalledTimes(1);
         expect(qnaSessionDataService.getQnASessionData).toBeCalledWith(
             testSessionId
         );
+        expect(conversationDataService.getConversationData).toBeCalledTimes(1);
+        expect(conversationDataService.getConversationData).toBeCalledWith(
+            sampleConversationId
+        );
+        expect(verifyUserFromConversationId).toBeCalledTimes(1);
+    });
+
+    it('validates get ama session api - internal server error', async () => {
+        const testSessionId = 'testId';
+
+        const testConversation = {
+            _id: sampleConversationId,
+            serviceUrl: 'testServiceUrl',
+            tenantId: 'testTenantId',
+            meetingId: 'testMeetingId',
+        };
+
+        (<any>(
+            conversationDataService.getConversationData
+        )).mockImplementationOnce(() => {
+            return testConversation;
+        });
+
+        (<any>verifyUserFromConversationId).mockImplementationOnce(() => {
+            return true;
+        });
+
+        (<any>qnaSessionDataService.getQnASessionData).mockImplementationOnce(
+            () => {
+                throw testError;
+            }
+        );
+
+        const result = await request(app).get(
+            `/api/conversations/${sampleConversationId}/sessions/${testSessionId}`
+        );
+
+        expect(result).toBeDefined();
+        expect(result.status).toEqual(StatusCodes.INTERNAL_SERVER_ERROR);
+        expect(result.text).toEqual(testError.message);
+    });
+
+    it('validates get ama session api - user is not part of conversation', async () => {
+        const testSessionId = 'testId';
+
+        const testConversation = {
+            _id: sampleConversationId,
+            serviceUrl: 'testServiceUrl',
+            tenantId: 'testTenantId',
+            meetingId: 'testMeetingId',
+        };
+
+        (<any>(
+            conversationDataService.getConversationData
+        )).mockImplementationOnce(() => {
+            return testConversation;
+        });
+
+        (<any>verifyUserFromConversationId).mockImplementationOnce(() => {
+            return false;
+        });
+
+        const result = await request(app).get(
+            `/api/conversations/${sampleConversationId}/sessions/${testSessionId}`
+        );
+
+        expect(result).toBeDefined();
+        expect(result.status).toEqual(StatusCodes.FORBIDDEN);
+
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(
             sampleConversationId
@@ -148,7 +241,7 @@ describe('test conversations/:conversationId/sessions api', () => {
         app.use('/api/conversations', mockEnsureAuthenticated, router);
         app.use(restApiErrorMiddleware);
         (<any>qnaSessionDataService.getAllQnASessionData) = jest.fn();
-        (<any>processQnASesssionsDataForMeetingTab) = jest.fn();
+        (<any>formatQnaSessionDataArrayAsPerClientDataContract) = jest.fn();
 
         (<any>verifyUserFromConversationId) = jest.fn();
         process.env.MicrosoftAppId = 'random';
@@ -217,11 +310,11 @@ describe('test conversations/:conversationId/sessions api', () => {
             ],
         };
 
-        (<any>processQnASesssionsDataForMeetingTab).mockImplementationOnce(
-            () => {
-                return [qnaSessionDataObject1, qnaSessionDataObject2];
-            }
-        );
+        (<any>(
+            formatQnaSessionDataArrayAsPerClientDataContract
+        )).mockImplementationOnce(() => {
+            return [qnaSessionDataObject1, qnaSessionDataObject2];
+        });
 
         const testConversation = {
             _id: sampleConversationId,
@@ -250,8 +343,10 @@ describe('test conversations/:conversationId/sessions api', () => {
         expect(res.length).toEqual(2);
         expect(res[0]).toEqual(qnaSessionDataObject1);
         expect(res[1]).toEqual(qnaSessionDataObject2);
-        expect(processQnASesssionsDataForMeetingTab).toBeCalledTimes(1);
-        expect(processQnASesssionsDataForMeetingTab).toBeCalledWith(
+        expect(
+            formatQnaSessionDataArrayAsPerClientDataContract
+        ).toBeCalledTimes(1);
+        expect(formatQnaSessionDataArrayAsPerClientDataContract).toBeCalledWith(
             testQnAData
         );
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
@@ -268,11 +363,11 @@ describe('test conversations/:conversationId/sessions api', () => {
         )).mockImplementationOnce(() => {
             return testQnAData;
         });
-        (<any>processQnASesssionsDataForMeetingTab).mockImplementationOnce(
-            () => {
-                throw new Error();
-            }
-        );
+        (<any>(
+            formatQnaSessionDataArrayAsPerClientDataContract
+        )).mockImplementationOnce(() => {
+            throw new Error();
+        });
 
         const testConversation = {
             _id: sampleConversationId,
@@ -295,8 +390,10 @@ describe('test conversations/:conversationId/sessions api', () => {
             `/api/conversations/${sampleConversationId}/sessions`
         );
         expect(result.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
-        expect(processQnASesssionsDataForMeetingTab).toBeCalledTimes(1);
-        expect(processQnASesssionsDataForMeetingTab).toBeCalledWith(
+        expect(
+            formatQnaSessionDataArrayAsPerClientDataContract
+        ).toBeCalledTimes(1);
+        expect(formatQnaSessionDataArrayAsPerClientDataContract).toBeCalledWith(
             testQnAData
         );
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
@@ -370,7 +467,9 @@ describe('test conversations/:conversationId/sessions api', () => {
         );
         expect(result.status).toBe(StatusCodes.OK);
         expect(JSON.parse(result.text)).toEqual([]);
-        expect(processQnASesssionsDataForMeetingTab).toBeCalledTimes(0);
+        expect(
+            formatQnaSessionDataArrayAsPerClientDataContract
+        ).toBeCalledTimes(0);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(
             sampleInvalidConversationId
@@ -754,6 +853,8 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
         const testQuestionContent = 'testQuestionContent';
         const questionRes = {
             _id: questionId,
+            voters: [],
+            isAnswered: new Boolean(true),
         };
 
         const testConversation = {
@@ -782,7 +883,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
             .accept('application/json');
 
         expect(result.status).toBe(StatusCodes.CREATED);
-        expect(result.text).toEqual(`{"questionId":"testQuestionId"}`);
+        expect(result.body.id).toEqual('testQuestionId');
         expect(submitNewQuestion).toBeCalledTimes(1);
         expect(submitNewQuestion).toBeCalledWith(
             testSessionId,
@@ -1128,8 +1229,14 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
         (<any>verifyUserFromConversationId).mockImplementationOnce(() => {
             return true;
         });
+
         (<any>upvoteQuestion).mockImplementationOnce(() => {
-            return;
+            return {
+                _id: testQuestionId,
+                userId: { _id: testUserId, userName: testUserName },
+                voters: [],
+                isAnswered: new Boolean(true),
+            };
         });
 
         const result = await request(app)
@@ -1138,8 +1245,8 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
             )
             .send({ action: 'upvote' });
 
-        expect(result.status).toBe(StatusCodes.NO_CONTENT);
-        expect(result.noContent).toBeTruthy();
+        expect(result.status).toBe(StatusCodes.OK);
+        expect(result.body.id).toEqual(testQuestionId);
         expect(upvoteQuestion).toBeCalledTimes(1);
         expect(upvoteQuestion).toBeCalledWith(
             sampleConversationId,
@@ -1213,7 +1320,12 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
             return true;
         });
         (<any>downvoteQuestion).mockImplementationOnce(() => {
-            return;
+            return {
+                _id: testQuestionId,
+                userId: { _id: testUserId, userName: testUserName },
+                voters: [],
+                isAnswered: new Boolean(true),
+            };
         });
 
         const result = await request(app)
@@ -1222,8 +1334,8 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
             )
             .send({ action: 'downvote' });
 
-        expect(result.status).toBe(StatusCodes.NO_CONTENT);
-        expect(result.noContent).toBeTruthy();
+        expect(result.status).toBe(StatusCodes.OK);
+        expect(result.body.id).toEqual(testQuestionId);
         expect(downvoteQuestion).toBeCalledTimes(1);
         expect(downvoteQuestion).toBeCalledWith(
             sampleConversationId,
@@ -1381,7 +1493,12 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
         });
 
         (<any>markQuestionAsAnswered).mockImplementationOnce(() => {
-            return;
+            return {
+                _id: testQuestionId,
+                userId: { _id: testUserId, userName: testUserName },
+                voters: [],
+                isAnswered: new Boolean(true),
+            };
         });
 
         const result = await request(app)
@@ -1390,8 +1507,8 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
             )
             .send({ action: 'markAnswered' });
 
-        expect(result.status).toBe(StatusCodes.NO_CONTENT);
-        expect(result.noContent).toBeTruthy();
+        expect(result.status).toBe(StatusCodes.OK);
+        expect(result.body.id).toEqual(testQuestionId);
         expect(markQuestionAsAnswered).toBeCalledTimes(1);
         expect(markQuestionAsAnswered).toBeCalledWith(
             testConversationData,
@@ -1685,7 +1802,7 @@ describe('test get /:conversationId/activesessions api', () => {
         app.use(restApiErrorMiddleware);
 
         (<any>qnaSessionDataService.getAllActiveQnASessionData) = jest.fn();
-        (<any>processQnASesssionsDataForMeetingTab) = jest.fn();
+        (<any>formatQnaSessionDataArrayAsPerClientDataContract) = jest.fn();
 
         testQnAData1 = {
             id: generateUniqueId(),
@@ -1767,11 +1884,11 @@ describe('test get /:conversationId/activesessions api', () => {
             ],
         };
 
-        (<any>processQnASesssionsDataForMeetingTab).mockImplementationOnce(
-            () => {
-                return [qnaSessionDataObject1, qnaSessionDataObject2];
-            }
-        );
+        (<any>(
+            formatQnaSessionDataArrayAsPerClientDataContract
+        )).mockImplementationOnce(() => {
+            return [qnaSessionDataObject1, qnaSessionDataObject2];
+        });
 
         const result = await request(app).get(
             `/api/conversations/${sampleConversationId}/activesessions`
@@ -1783,8 +1900,10 @@ describe('test get /:conversationId/activesessions api', () => {
         expect(res.length).toEqual(2);
         expect(res[0]).toEqual(qnaSessionDataObject1);
         expect(res[1]).toEqual(qnaSessionDataObject2);
-        expect(processQnASesssionsDataForMeetingTab).toBeCalledTimes(1);
-        expect(processQnASesssionsDataForMeetingTab).toBeCalledWith(
+        expect(
+            formatQnaSessionDataArrayAsPerClientDataContract
+        ).toBeCalledTimes(1);
+        expect(formatQnaSessionDataArrayAsPerClientDataContract).toBeCalledWith(
             testQnAData
         );
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
@@ -1801,11 +1920,11 @@ describe('test get /:conversationId/activesessions api', () => {
         )).mockImplementationOnce(() => {
             return testQnAData;
         });
-        (<any>processQnASesssionsDataForMeetingTab).mockImplementationOnce(
-            () => {
-                throw new Error();
-            }
-        );
+        (<any>(
+            formatQnaSessionDataArrayAsPerClientDataContract
+        )).mockImplementationOnce(() => {
+            throw new Error();
+        });
         const testConversation = {
             _id: sampleConversationId,
             serviceUrl: 'testServiceUrl',
@@ -1827,8 +1946,10 @@ describe('test get /:conversationId/activesessions api', () => {
             `/api/conversations/${sampleConversationId}/activesessions`
         );
         expect(result.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
-        expect(processQnASesssionsDataForMeetingTab).toBeCalledTimes(1);
-        expect(processQnASesssionsDataForMeetingTab).toBeCalledWith(
+        expect(
+            formatQnaSessionDataArrayAsPerClientDataContract
+        ).toBeCalledTimes(1);
+        expect(formatQnaSessionDataArrayAsPerClientDataContract).toBeCalledWith(
             testQnAData
         );
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
@@ -1869,7 +1990,9 @@ describe('test get /:conversationId/activesessions api', () => {
         );
         expect(result.status).toBe(StatusCodes.OK);
         expect(JSON.parse(result.text)).toEqual([]);
-        expect(processQnASesssionsDataForMeetingTab).toBeCalledTimes(0);
+        expect(
+            formatQnaSessionDataArrayAsPerClientDataContract
+        ).toBeCalledTimes(0);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(
             sampleInvalidConversationId
