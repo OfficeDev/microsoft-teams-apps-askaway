@@ -48,6 +48,11 @@ class MeetingPanel extends React.Component<
     MeetingPanelProps,
     MeetingPanelState
 > {
+    /**
+     * signalR component instance which is used later to refresh the connection.
+     */
+    private signalRComponent: SignalRLifecycle | null;
+
     constructor(props) {
         super(props);
         this.onShowTaskModule = this.onShowTaskModule.bind(this);
@@ -380,6 +385,13 @@ class MeetingPanel extends React.Component<
     }
 
     /**
+     * Refreshes ama session and signal connection.
+     */
+    private refreshHandler = () => {
+        this.signalRComponent?.refreshConnection();
+    };
+
+    /**
      * The render() method to create the UI of the meeting panel
      */
     public render() {
@@ -387,9 +399,12 @@ class MeetingPanel extends React.Component<
             <React.Fragment>
                 <SignalRLifecycle
                     conversationId={this.props.teamsData.chatId}
-                    updateEvent={this.updateEvent}
+                    onEvent={this.updateEvent}
                     httpService={this.props.httpService}
                     appInsights={this.props.appInsights}
+                    ref={(instance) => {
+                        this.signalRComponent = instance;
+                    }}
                 />
                 {this.state.showLoader && (
                     <Loader label="Loading Meeting Information" />
