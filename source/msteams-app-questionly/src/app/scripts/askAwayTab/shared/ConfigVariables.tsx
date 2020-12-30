@@ -8,7 +8,6 @@ export const CONST = Object.freeze({
     TAB_QUESTIONS: {
         PENDING: 'Pending questions',
         ANSWERED: 'Answered questions',
-        ACTIVE_INDEX: 0,
         ANSWERED_Q: 'answeredQuestions',
         UNANSWERED_Q: 'unansweredQuestions',
     },
