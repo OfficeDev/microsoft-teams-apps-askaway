@@ -18,10 +18,9 @@ class SignalRUtility {
 
   /**
    * The constructor
-   * @param signalRConnectionString - only required for UTs, signalR connectionstring
    */
-  constructor(signalRConnectionString?: string) {
-    this._parseConnectionString(signalRConnectionString);
+  constructor() {
+    this._parseConnectionString();
   }
 
   /**
@@ -101,15 +100,4 @@ class SignalRUtility {
   };
 }
 
-// This function sets test signalR connection string for UTs.
-const getSignalRUtilityInstance = () => {
-  if (process.env.debugMode === "true") {
-    return new SignalRUtility(
-      "Endpoint=https://test.service.signalr.net;AccessKey=test=AccessKey=;Version=1.0;"
-    );
-  }
-
-  return new SignalRUtility();
-};
-
-export const signalRUtility = getSignalRUtilityInstance();
+export const signalRUtility = new SignalRUtility();

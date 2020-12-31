@@ -52,9 +52,16 @@ const getVerifyOptions = (): VerifyOptions => {
     throw new Error(errorStrings.AzureAdApplicationIdUriMissingError);
   }
 
+  if (process.env.AzureAd_ClientId === undefined) {
+    throw new Error(errorStrings.AzureAdClientIdMissingError);
+  }
+
   const options: VerifyOptions = {
     issuer: getValidIssuers(),
-    audience: process.env.AzureAd_ApplicationIdUri.toString().trim(),
+    audience: [
+      process.env.AzureAd_ApplicationIdUri.toString().trim(),
+      process.env.AzureAd_ClientId.toString().trim(),
+    ],
   };
 
   return options;
