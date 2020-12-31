@@ -9,7 +9,7 @@ import Adapter from 'enzyme-adapter-react-16';
 import MeetingPanel from '../MeetingPanel';
 import { HttpService } from '../shared/HttpService';
 import { telemetryService } from '../../telemetryService';
-telemetryService;
+import Helper from '../shared/Helper';
 
 configure({ adapter: new Adapter() });
 
@@ -27,9 +27,10 @@ describe('Meeting Panel Component', () => {
     it('should render loader when showloader value is true', () => {
         const component = shallow(
             <MeetingPanel
-                teamsData={{}}
+                teamsTabContext={{}}
                 httpService={httpServiceIns}
                 appInsights={telemetryService.appInsights}
+                helper={Helper}
             />
         );
         const stateVal = { showLoader: true };
@@ -41,9 +42,10 @@ describe('Meeting Panel Component', () => {
     it('should render meeting panel when activeSessionData is present', () => {
         const component = mount(
             <MeetingPanel
-                teamsData={{}}
+                teamsTabContext={{}}
                 httpService={httpServiceIns}
                 appInsights={telemetryService.appInsights}
+                helper={Helper}
             />
         );
         const stateVal = { showLoader: false, activeSessionData: true };
@@ -56,9 +58,10 @@ describe('Meeting Panel Component', () => {
     it('should render createSessionLayout when activeSessionData is not present', () => {
         const component = mount(
             <MeetingPanel
-                teamsData={{}}
+                teamsTabContext={{}}
                 httpService={httpServiceIns}
                 appInsights={telemetryService.appInsights}
+                helper={Helper}
             />
         );
         const stateVal = { showLoader: false };

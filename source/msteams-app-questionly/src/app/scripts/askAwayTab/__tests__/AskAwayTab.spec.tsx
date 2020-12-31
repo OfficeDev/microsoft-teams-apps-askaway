@@ -9,7 +9,6 @@ import { AskAwayTab } from '../AskAwayTab';
 import Adapter from 'enzyme-adapter-react-16';
 import TabContent from '../TabContent';
 import MeetingPanel from '../MeetingPanel';
-import { CONST } from '../shared/ConfigVariables';
 
 configure({ adapter: new Adapter() });
 
@@ -22,7 +21,7 @@ describe('AskAwayTab Component', () => {
     it('should render the MeetingPanel when frameContext is set to sidepanel', () => {
         const component = shallow(<AskAwayTab />);
         component.setState({
-            frameContext: CONST.TAB_FRAME_CONTEXT.FC_SIDEPANEL,
+            frameContext: 'sidePanel',
         });
 
         expect(component.find(MeetingPanel)).toHaveLength(1);
@@ -31,7 +30,7 @@ describe('AskAwayTab Component', () => {
     it('should render the TabContent when frameContext is set to content', () => {
         const component = shallow(<AskAwayTab />);
         component.setState({
-            frameContext: CONST.TAB_FRAME_CONTEXT.FC_CONTENT,
+            frameContext: 'content',
         });
 
         expect(component.find(TabContent)).toHaveLength(1);

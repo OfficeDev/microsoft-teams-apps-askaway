@@ -9,6 +9,7 @@ import Adapter from 'enzyme-adapter-react-16';
 import { TabContent } from '../TabContent';
 import { telemetryService } from '../../telemetryService';
 import { HttpService } from '../shared/HttpService';
+import Helper from '../shared/Helper';
 
 configure({ adapter: new Adapter() });
 
@@ -26,9 +27,10 @@ describe('TabContent Component', () => {
     it('should match the snapshot', () => {
         const wrapper = shallow(
             <TabContent
-                teamsData={{}}
+                teamsTabContext={{}}
                 httpService={httpServiceIns}
                 appInsights={telemetryService.appInsights}
+                helper={Helper}
             />
         );
         expect(toJson(wrapper)).toMatchSnapshot();
@@ -37,9 +39,10 @@ describe('TabContent Component', () => {
     it('should render TabContent', () => {
         const component = mount(
             <TabContent
-                teamsData={{}}
+                teamsTabContext={{}}
                 httpService={httpServiceIns}
                 appInsights={telemetryService.appInsights}
+                helper={Helper}
             />
         );
         const divEle = component.find('div.screen');
