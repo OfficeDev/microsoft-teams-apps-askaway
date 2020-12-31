@@ -14,12 +14,11 @@ import msteamsReactBaseComponent, {
 import * as microsoftTeams from '@microsoft/teams-js';
 // tslint:disable-next-line:no-relative-imports
 import i18next from './../askAwayTab/shared/i18next';
-// tslint:disable-next-line:no-relative-imports
-import { CONST } from './../askAwayTab/shared/ConfigVariables';
 import { withAITracking } from '@microsoft/applicationinsights-react-js';
 import { SeverityLevel } from '@microsoft/applicationinsights-web';
 import { HttpService } from './shared/HttpService';
 import { telemetryService } from './../telemetryService';
+import { CONST } from './shared/ConfigVariables';
 
 /**
  * State for the askAwayTabTab React component
@@ -125,7 +124,7 @@ export class AskAwayTab extends msteamsReactBaseComponent<
                 {this.state.frameContext ===
                     microsoftTeams.FrameContexts.sidePanel && (
                     <MeetingPanel
-                        teamsData={this.state.teamContext}
+                        teamsTabContext={this.state.teamContext}
                         httpService={this.httpService}
                         appInsights={telemetryService.appInsights}
                         helper={Helper}
@@ -135,7 +134,7 @@ export class AskAwayTab extends msteamsReactBaseComponent<
                 {this.state.frameContext ===
                     microsoftTeams.FrameContexts.content && (
                     <TabContent
-                        teamsData={this.state.teamContext}
+                        teamsTabContext={this.state.teamContext}
                         httpService={this.httpService}
                         appInsights={telemetryService.appInsights}
                         helper={Helper}
