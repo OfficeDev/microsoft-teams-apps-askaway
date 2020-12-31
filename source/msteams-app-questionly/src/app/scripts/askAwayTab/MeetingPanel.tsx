@@ -631,6 +631,7 @@ class MeetingPanel extends React.Component<
                     <Card styles={{ padding: '0rem', width: '100%' }}>
                         <Input
                             styles={{ background: 'none' }}
+                            maxLength={250}
                             fluid
                             className="ask-question"
                             as="div"
