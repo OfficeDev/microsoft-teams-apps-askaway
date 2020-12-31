@@ -25,6 +25,7 @@ import { setupRestApis } from 'src/util/setupRestApis';
 import { initBackgroundJobSetup } from 'src/background-job/backgroundJobTrigger';
 import { initLocalization } from 'src/localization/locale';
 import { setupWebServerApp, startWebServer } from 'src/util/webServerUtility';
+import { TelemetryExceptions } from './constants/telemetryConstants';
 
 /**
  * Establishes DB connection.
@@ -92,6 +93,9 @@ async function startup() {
 
 startup().catch((error) => {
     log('Error starting web app!');
-    exceptionLogger(error);
+    exceptionLogger(error, {
+        filename: module.id,
+        exceptionName: TelemetryExceptions.ApplicationStartUpFailed,
+    });
     throw error;
 });

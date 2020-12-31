@@ -32,12 +32,12 @@ const setupBotAdapterAndRouting = async (
 
     adapter.onTurnError = async (context, error) => {
         exceptionLogger(error, {
-            conversationId: context.activity.conversation.id,
-            userAadObjectId: <string>context.activity.from.aadObjectId,
-            tenantId: context.activity.conversation.tenantId,
-            meetingId: context.activity.channelData?.meeting?.id,
+            conversationId: context.activity?.conversation?.id,
+            userAadObjectId: context.activity?.from?.aadObjectId,
+            tenantId: context.activity?.conversation?.tenantId,
+            meetingId: context.activity?.channelData?.meeting?.id,
             filename: module.id,
-            name: TelemetryExceptions.SetUpBotFailed,
+            exceptionName: TelemetryExceptions.SetUpBotFailed,
         });
     };
 

@@ -151,9 +151,14 @@ export class AskAway extends TeamsActivityHandler {
                 {
                     conversationId: context.activity.conversation.id,
                     qnaSessionId: taskModuleRequest.data?.qnaSessionId,
-                    userAadObjectId: <string>context.activity.from.aadObjectId,
+                    userAadObjectId: context.activity.from.aadObjectId,
+                    isChannel:
+                        context.activity.conversation.conversationType ===
+                        ConversationType.Channel,
+                    meetingId: getMeetingIdFromContext(context),
                     filename: module.id,
-                    name: TelemetryExceptions.ConversationValidationFailed,
+                    exceptionName:
+                        TelemetryExceptions.ConversationValidationFailed,
                 }
             );
             return this.handleTeamsTaskModuleFetchError();
@@ -204,8 +209,13 @@ export class AskAway extends TeamsActivityHandler {
                     conversationId: context.activity.conversation.id,
                     qnaSessionId: taskModuleRequest.data?.qnaSessionId,
                     userAadObjectId: <string>context.activity.from.aadObjectId,
+                    isChannel:
+                        context.activity.conversation.conversationType ===
+                        ConversationType.Channel,
+                    meetingId: getMeetingIdFromContext(context),
                     filename: module.id,
-                    name: TelemetryExceptions.ConversationValidationFailed,
+                    exceptionName:
+                        TelemetryExceptions.ConversationValidationFailed,
                 }
             );
             return this.handleTeamsTaskModuleFetchError();
@@ -283,8 +293,12 @@ export class AskAway extends TeamsActivityHandler {
                 conversationId: context.activity.conversation.id,
                 qnaSessionId: taskModuleRequest.data?.qnaSessionId,
                 userAadObjectId: <string>context.activity.from.aadObjectId,
+                isChannel:
+                    context.activity.conversation.conversationType ===
+                    ConversationType.Channel,
+                meetingId: getMeetingIdFromContext(context),
                 filename: module.id,
-                name: TelemetryExceptions.ViewLeaderboardFailed,
+                exceptionName: TelemetryExceptions.ViewLeaderboardFailed,
             });
             return this._buildTaskModuleContinueResponse(
                 controller.getErrorCard(errorStrings('leaderboard'))
@@ -351,8 +365,12 @@ export class AskAway extends TeamsActivityHandler {
                 qnaSessionId: qnaSessionId,
                 questionContent: questionContent,
                 userAadObjectId: userAadObjectId,
+                isChannel:
+                    context.activity.conversation.conversationType ===
+                    ConversationType.Channel,
+                meetingId: getMeetingIdFromContext(context),
                 filename: module.id,
-                name: TelemetryExceptions.CreateQuestionFailed,
+                exceptionName: TelemetryExceptions.CreateQuestionFailed,
             });
             return this.handleTeamsTaskModuleResubmitQuestion(
                 qnaSessionId,
@@ -385,8 +403,12 @@ export class AskAway extends TeamsActivityHandler {
                 qnaSessionId: taskModuleRequest.data?.qnaSessionId,
                 questionId: taskModuleRequest.data?.questionId,
                 userAadObjectId: <string>context.activity.from.aadObjectId,
+                isChannel:
+                    context.activity.conversation.conversationType ===
+                    ConversationType.Channel,
+                meetingId: getMeetingIdFromContext(context),
                 filename: module.id,
-                name: TelemetryExceptions.VoteQuestionFailed,
+                exceptionName: TelemetryExceptions.VoteQuestionFailed,
             });
             return this._buildTaskModuleContinueResponse(
                 controller.getErrorCard(errorStrings('upvoting'))
@@ -432,7 +454,7 @@ export class AskAway extends TeamsActivityHandler {
 
         const conversation = context.activity.conversation;
         const qnaSessionId = taskModuleRequest.data.qnaSessionId,
-            meetingId = await getMeetingIdFromContext(context);
+            meetingId = getMeetingIdFromContext(context);
 
         if (taskModuleRequest.data.id == 'submitEndQnA') {
             try {
@@ -452,8 +474,12 @@ export class AskAway extends TeamsActivityHandler {
                     qnaSessionId: qnaSessionId,
                     tenantId: conversation.tenantId,
                     userAadObjectId: <string>context.activity.from.aadObjectId,
+                    isChannel:
+                        conversation.conversationType ===
+                        ConversationType.Channel,
+                    meetingId: meetingId,
                     filename: module.id,
-                    name: TelemetryExceptions.EndQnASessionFailed,
+                    exceptionName: TelemetryExceptions.EndQnASessionFailed,
                 });
                 return this.handleTeamsTaskModuleSubmitError();
             }
@@ -533,8 +559,8 @@ export class AskAway extends TeamsActivityHandler {
         let cardData: MainCardData | { title: string; description: string };
 
         // if starting QnA from reply chain, update conversation id so that card is sent to channel as a new conversation
-        const conversationId = context.activity.conversation.id,
-            conversation = context.activity.conversation,
+        const conversation = context.activity.conversation,
+            conversationId = conversation.id,
             tenantId = conversation.tenantId,
             userAadObjectId = <string>context.activity.from.aadObjectId;
 
@@ -552,8 +578,12 @@ export class AskAway extends TeamsActivityHandler {
                     tenantId: tenantId,
                     conversationId: conversationId,
                     userAadObjectId: userAadObjectId,
+                    isChannel:
+                        conversation.conversationType ===
+                        ConversationType.Channel,
+                    meetingId: getMeetingIdFromContext(context),
                     filename: module.id,
-                    name: TelemetryExceptions.CreateQnASessionFailed,
+                    exceptionName: TelemetryExceptions.CreateQnASessionFailed,
                 }
             );
             return NULL_RESPONSE;
@@ -570,7 +600,7 @@ export class AskAway extends TeamsActivityHandler {
                 ? teamsGetChannelId(context.activity)
                 : conversation.id,
             serviceURL = context.activity.serviceUrl,
-            meetingId = await getMeetingIdFromContext(context);
+            meetingId = getMeetingIdFromContext(context);
 
         try {
             await controller.startQnASession({
@@ -589,11 +619,15 @@ export class AskAway extends TeamsActivityHandler {
             });
         } catch (error) {
             exceptionLogger(error, {
+                activityId: activityId,
                 tenantId: tenantId,
                 conversationId: conversationId,
+                hostUserId: hostUserId,
                 userAadObjectId: userAadObjectId,
+                isChannel: isChannel,
+                meetingId: meetingId,
                 filename: module.id,
-                name: TelemetryExceptions.CreateQnASessionFailed,
+                exceptionName: TelemetryExceptions.CreateQnASessionFailed,
             });
             if (error.code === 'QnASessionLimitExhaustedError') {
                 await context.sendActivity(

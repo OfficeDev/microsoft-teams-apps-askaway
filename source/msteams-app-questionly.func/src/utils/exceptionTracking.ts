@@ -2,8 +2,9 @@ import {
   initiateAndGetAppInsights,
   TraceData,
 } from "msteams-app-questionly.common";
+import * as appInsights from "applicationinsights";
 
-export let aiClient;
+let aiClient: appInsights.TelemetryClient;
 
 export const exceptionLogger = (
   error: Error,
@@ -19,7 +20,9 @@ export const exceptionLogger = (
         process.env.APPINSIGHTS_INSTRUMENTATIONKEY
       );
     }
-    aiClient.context.tags["ai.operation.parentId"] = operationId;
+    if (operationId) {
+      aiClient.context.tags["ai.operation.parentId"] = operationId;
+    }
     aiClient?.trackException({
       exception: error,
       properties: traceData,

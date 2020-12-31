@@ -5,6 +5,11 @@ export interface TraceData {
   message?: string;
 
   /**
+   * activity id.
+   */
+  activityId?: string;
+
+  /**
    * chat conversation id.
    */
   conversationId?: string;
@@ -62,17 +67,22 @@ export interface TraceData {
   /**
    * name of the exception
    */
-  name?: string;
+  exceptionName?: string;
 
   /**
    * API path
    */
-  path?: string;
+  apiPath?: string;
 
   /**
    * teams user id. This 29:xxx ID.
    */
   userId?: string;
+
+  /**
+   * Http method
+   */
+  httpMethod?: string;
 
   /**
    * Property bag for additional params.

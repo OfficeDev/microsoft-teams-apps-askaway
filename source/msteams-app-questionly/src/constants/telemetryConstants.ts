@@ -20,5 +20,6 @@ export const TelemetryExceptions = {
     RestApiCallFailed: 'RestApiCallFailed',
     GetParticipantRoleFailed: 'GetParticipantRoleFailed',
     GetTeamsMemberIdFailed: 'GetTeamsMemberIdFailed',
+    ApplicationStartUpFailed: 'ApplicationStartUpFailed',
     SetUpBotFailed: 'SetUpBotFailed',
 };

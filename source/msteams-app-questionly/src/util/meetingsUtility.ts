@@ -54,7 +54,7 @@ export const getParticipantRole = async (
             meetingId: meetingId,
             userAadObjectId: userId,
             filename: module.id,
-            name: TelemetryExceptions.GetParticipantRoleFailed,
+            exceptionName: TelemetryExceptions.GetParticipantRoleFailed,
         });
         throw new Error('Error while getting participant role.');
     }
@@ -80,6 +80,6 @@ const getToken = async () => {
  * Returns meeting id for meeting, if it is defined. Otherwise undefined.
  * @param context - turn context
  */
-export const getMeetingIdFromContext = async (context: TurnContext) => {
+export const getMeetingIdFromContext = (context: TurnContext) => {
     return context.activity.channelData?.meeting?.id;
 };

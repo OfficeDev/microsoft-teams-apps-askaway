@@ -6,7 +6,7 @@ import {
 } from 'msteams-app-questionly.common';
 import * as appInsights from 'applicationinsights';
 
-export let aiClient;
+let aiClient: appInsights.TelemetryClient;
 
 /**
  * Initiates telemetry client.
@@ -28,6 +28,11 @@ export const getOperationIdForCurrentRequest = () => {
     return context?.operation.id;
 };
 
+/**
+ * Logs exception.
+ * @param error  - error to be logged.
+ * @param traceData - custom properties logged for this exception.
+ */
 export const exceptionLogger = (
     error: Error | string,
     traceData?: TraceData
@@ -37,12 +42,16 @@ export const exceptionLogger = (
         console.error(error);
     } else {
         aiClient?.trackException({
-            exception: error,
+            exception: error instanceof Error ? error : new Error(error),
             properties: traceData,
         });
     }
 };
 
+/**
+ * Logs qna session created event.
+ * @param traceData - custom properties to log for this event
+ */
 export const trackCreateQnASessionEvent = (traceData: TraceData) => {
     if (process.env.debugMode !== 'true') {
         aiClient?.trackEvent({
@@ -52,6 +61,10 @@ export const trackCreateQnASessionEvent = (traceData: TraceData) => {
     }
 };
 
+/**
+ * Logs question created event.
+ * @param traceData - custom properties to log for this event.
+ */
 export const trackCreateQuestionEvent = (traceData: TraceData) => {
     if (process.env.debugMode !== 'true') {
         aiClient?.trackEvent({

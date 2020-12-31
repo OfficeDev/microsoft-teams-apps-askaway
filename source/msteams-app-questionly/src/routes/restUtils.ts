@@ -126,7 +126,7 @@ export const getTeamsUserId = async (
             conversationId: conversationId,
             userAadObjectId: userAadObjectId,
             filename: module.id,
-            name: TelemetryExceptions.GetTeamsMemberIdFailed,
+            exceptionName: TelemetryExceptions.GetTeamsMemberIdFailed,
         });
         throw error;
     }

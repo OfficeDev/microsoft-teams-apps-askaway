@@ -182,7 +182,7 @@ const triggerBackgroundJob = async (
             conversationId: conversationId,
             qnaSessionId: qnaSessionId,
             filename: module.id,
-            name: TelemetryExceptions.TriggerBackgroundJobFailed,
+            exceptionName: TelemetryExceptions.TriggerBackgroundJobFailed,
         });
     }
 };

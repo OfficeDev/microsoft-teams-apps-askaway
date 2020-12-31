@@ -66,8 +66,8 @@ const orchestrator = df.orchestrator(function* (context) {
         operationId,
         {
           conversationId: conversationId,
-          tenantId: conversation.tenantId,
-          meetingId: conversation.meetingId,
+          tenantId: conversation?.tenantId,
+          meetingId: conversation?.meetingId,
           qnaSessionId: context.bindingData.input.qnaSessionId,
           filename: module.id,
         }
