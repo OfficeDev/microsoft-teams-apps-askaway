@@ -9,6 +9,7 @@ import {
     Button,
     Image,
     Input,
+    TextArea,
     FlexItem,
     SendIcon,
     Loader,
@@ -78,6 +79,7 @@ class MeetingPanel extends React.Component<
                 defaultActiveIndex: 0,
             },
         };
+        console.log('test', props.teamsData);
     }
 
     componentDidMount() {
@@ -272,12 +274,7 @@ class MeetingPanel extends React.Component<
     private noQuestionDesign(image: string, text: string) {
         return (
             <div className="no-question">
-                <Image
-                    className="create-session"
-                    alt="image"
-                    styles={{ width: '17rem' }}
-                    src={image}
-                />
+                <Image className="create-session" alt="image" src={image} />
                 <Flex.Item align="center">
                     <Text className="text-caption-panel" content={text} />
                 </Flex.Item>
@@ -344,10 +341,7 @@ class MeetingPanel extends React.Component<
         return (
             <Flex vAlign="start">
                 <Text
-                    styles={{
-                        fontSize: '18px',
-                        lineHeight: '21px',
-                    }}
+                    className="session-title"
                     content={sessionTitle}
                     size="medium"
                 />
@@ -418,15 +412,12 @@ class MeetingPanel extends React.Component<
     private liveQuestions(questions, key) {
         return (
             <div className="question-card">
-                {questions.map((q) => {
+                {questions[key].map((q) => {
                     return (
-                        <div
-                            style={{ borderBottom: '1px solid #fff' }}
-                            key={q.id}
-                        >
+                        <div className="card-divider" key={q.id}>
                             <Card
                                 aria-roledescription="card avatar"
-                                styles={{ width: '100%', padding: '0.5rem' }}
+                                className="card-layout"
                             >
                                 <Card.Header fitted>
                                     <Flex gap="gap.small">
@@ -436,22 +427,25 @@ class MeetingPanel extends React.Component<
                                         />
                                         <Flex>
                                             <Text
-                                                styles={{
-                                                    fontSize: '12px',
-                                                    lineHeight: '20px',
-                                                }}
+                                                className="author-name"
                                                 content={q.author.name}
                                                 weight="regular"
                                             />
                                             <Flex
                                                 vAlign="center"
-                                                styles={{
-                                                    position: 'absolute',
-                                                    top: '0.3rem',
-                                                    right: '1rem',
-                                                }}
+                                                className="like-icon"
                                             >
                                                 <Button
+                                                    disabled={
+                                                        questions.hostUser
+                                                            .id ===
+                                                            q.author.id ||
+                                                        this.props.teamsData
+                                                            .userObjectId ===
+                                                            q.author.id
+                                                            ? true
+                                                            : false
+                                                    }
                                                     onClick={() =>
                                                         this.onClickLikeButton(
                                                             q,
@@ -459,9 +453,7 @@ class MeetingPanel extends React.Component<
                                                         )
                                                     }
                                                     icon={<LikeIcon />}
-                                                    styles={{
-                                                        minWidth: '1rem',
-                                                    }}
+                                                    className="like-icon-size"
                                                     iconOnly
                                                     text
                                                 />
@@ -473,11 +465,7 @@ class MeetingPanel extends React.Component<
                                 <Card.Body>
                                     <Text
                                         content={q.content}
-                                        styles={{
-                                            fontSize: '14px',
-                                            lineHeight: '20px',
-                                            marginTop: '0.75rem',
-                                        }}
+                                        className="card-body-question"
                                     />
                                 </Card.Body>
                             </Card>
@@ -543,7 +531,7 @@ class MeetingPanel extends React.Component<
                     underlined
                     accessibility={tabListBehavior}
                     aria-label="Today's events"
-                    styles={{ borderBottom: 'none' }}
+                    className="menu-bar"
                 />
             </React.Fragment>
         );
@@ -602,7 +590,7 @@ class MeetingPanel extends React.Component<
                             stateVal.activeSessionData.unansweredQuestions
                                 .length > 0 &&
                             this.liveQuestions(
-                                stateVal.activeSessionData.unansweredQuestions,
+                                stateVal.activeSessionData,
                                 this.props.constValue.TAB_QUESTIONS.UNANSWERED_Q
                             )}
                         {stateVal.liveTab.selectedTab ===
@@ -611,7 +599,7 @@ class MeetingPanel extends React.Component<
                             stateVal.activeSessionData.answeredQuestions
                                 .length > 0 &&
                             this.liveQuestions(
-                                stateVal.activeSessionData.answeredQuestions,
+                                stateVal.activeSessionData,
                                 this.props.constValue.TAB_QUESTIONS.ANSWERED_Q
                             )}
                     </React.Fragment>
@@ -621,38 +609,31 @@ class MeetingPanel extends React.Component<
                         'Q & A session is live...Ask away!'
                     )
                 )}
-                <div
-                    style={{
-                        position: 'absolute',
-                        bottom: '0.75rem',
-                        width: '94%',
-                    }}
-                >
-                    <Card styles={{ padding: '0rem', width: '100%' }}>
-                        <Input
-                            styles={{ background: 'none' }}
-                            maxLength={250}
+                <div className="input-text-field">
+                    <Flex gap="gap.small">
+                        <TextArea
+                            className="text-question"
+                            inverted
                             fluid
-                            className="ask-question"
-                            as="div"
-                            onChange={(e) => this.onChangeQuestionInput(e)}
+                            maxLength={250}
                             placeholder="Type a question here"
-                            icon={
-                                <Button
-                                    icon={
-                                        <SendIcon
-                                            onClick={() =>
-                                                this.submitQuestion()
-                                            }
-                                        />
-                                    }
-                                    text
-                                    iconOnly
-                                />
-                            }
+                            onChange={(e) => this.onChangeQuestionInput(e)}
                             value={stateVal.input.postQuestion}
                         />
-                    </Card>
+                        <FlexItem push>
+                            <Button
+                                className="send-button"
+                                icon={
+                                    <SendIcon
+                                        size="large"
+                                        onClick={() => this.submitQuestion()}
+                                    />
+                                }
+                                text
+                                iconOnly
+                            />
+                        </FlexItem>
+                    </Flex>
                 </div>
             </React.Fragment>
         );
