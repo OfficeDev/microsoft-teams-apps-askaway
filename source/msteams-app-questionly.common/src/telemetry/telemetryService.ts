@@ -1,4 +1,7 @@
 import * as appInsights from "applicationinsights";
+import { Contracts } from "applicationinsights";
+
+let telemetryClient: appInsights.TelemetryClient;
 
 export const initiateAndGetAppInsights = (
   applicationInsightsInstrumentationKey: string
@@ -17,5 +20,17 @@ export const initiateAndGetAppInsights = (
     .setDistributedTracingMode(appInsights.DistributedTracingModes.AI);
   appInsights.start();
 
-  return appInsights.defaultClient;
+  telemetryClient = appInsights.defaultClient;
+  telemetryClient.addTelemetryProcessor(addUserContext);
+
+  return telemetryClient;
 };
+
+function addUserContext(envelope: Contracts.Envelope): boolean {
+  const data = envelope.data["baseData"];
+  if (data?.properties?.userAadObjectId) {
+    telemetryClient.context.tags["ai.user.id"] =
+      data.properties.userAadObjectId;
+  }
+  return true;
+}

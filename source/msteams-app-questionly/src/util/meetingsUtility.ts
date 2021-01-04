@@ -2,6 +2,7 @@ import axios from 'axios';
 import { TurnContext } from 'botbuilder';
 import { MicrosoftAppCredentials } from 'botframework-connector';
 import { TelemetryExceptions } from 'src/constants/telemetryConstants';
+import { ConversationType } from 'src/enums/ConversationType';
 import { ParticipantRoles } from 'src/enums/ParticipantRoles';
 import { exceptionLogger } from 'src/util/exceptionTracking';
 import { getMicrosoftAppPassword } from 'src/util/keyvault';
@@ -82,4 +83,15 @@ const getToken = async () => {
  */
 export const getMeetingIdFromContext = (context: TurnContext) => {
     return context.activity.channelData?.meeting?.id;
+};
+
+/**
+ * Checks if the conversation type is channel.
+ * @param context - turn context
+ */
+export const isConverationTypeChannel = (context: TurnContext): boolean => {
+    return (
+        context.activity.conversation.conversationType ===
+        ConversationType.Channel
+    );
 };
