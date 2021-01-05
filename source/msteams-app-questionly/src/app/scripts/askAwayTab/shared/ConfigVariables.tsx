@@ -10,5 +10,8 @@ export const CONST = Object.freeze({
         ANSWERED: 'Answered questions',
         ANSWERED_Q: 'answeredQuestions',
         UNANSWERED_Q: 'unansweredQuestions',
+        UP_VOTE: 'upvote',
+        DOWN_VOTE: 'downvote',
+        MARK_ANSWERED: 'markAnswered',
     },
 });

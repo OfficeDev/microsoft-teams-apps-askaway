@@ -26,7 +26,9 @@ import {
     LeaveIcon,
     RetryIcon,
     LikeIcon,
+    AcceptIcon,
 } from '@fluentui/react-icons-northstar';
+import { CONST } from './shared/ConfigVariables';
 import { ApplicationInsights } from '@microsoft/applicationinsights-web';
 import { HttpService } from './shared/HttpService';
 import { SignalRLifecycle } from './signalR/SignalRLifecycle';
@@ -37,11 +39,11 @@ export interface MeetingPanelProps {
     httpService: HttpService;
     appInsights: ApplicationInsights;
     helper: any;
-    constValue: any;
 }
 export interface MeetingPanelState {
     activeSessionData: any;
     showLoader: boolean;
+    isHoveredQuestionIndex: number;
     input: {
         title: string;
         description: string;
@@ -70,6 +72,7 @@ class MeetingPanel extends React.Component<
         this.state = {
             activeSessionData: null,
             showLoader: false,
+            isHoveredQuestionIndex: -1,
             input: {
                 title: '',
                 description: '',
@@ -80,7 +83,7 @@ class MeetingPanel extends React.Component<
                 isDescription: false,
             },
             liveTab: {
-                selectedTab: props.constValue.TAB_QUESTIONS.PENDING,
+                selectedTab: CONST.TAB_QUESTIONS.PENDING,
                 defaultActiveIndex: 0,
             },
         };
@@ -399,7 +402,7 @@ class MeetingPanel extends React.Component<
 
     /**
      * Get Live Tab Content on change
-     * @param value
+     * @param value - selectedTab
      */
     private getLiveTab(value) {
         this.setState({
@@ -411,75 +414,131 @@ class MeetingPanel extends React.Component<
     }
 
     /**
-     * Display pending questions
-     * @param questions
-     * @param key
+     * On hover show accepticon in the answered/unanswered questions
+     * @param index - for loop index value
      */
-    private liveQuestions(questions, key) {
+    private setHoveredQuestionIndex(index: number) {
+        this.setState({ isHoveredQuestionIndex: index });
+    }
+
+    /**
+     * Display pending questions
+     * @param questions - activeSession array
+     * @param key - answered/unanswered questions
+     * @param stateVal - this.state
+     */
+    private liveQuestions(questions, key, stateVal) {
         return (
-            <div className="question-card">
-                {questions[key].map((q) => {
-                    return (
-                        <div className="card-divider" key={q.id}>
-                            <Card
-                                aria-roledescription="card avatar"
-                                className="card-layout"
-                            >
-                                <Card.Header fitted>
-                                    <Flex gap="gap.small">
-                                        <Avatar
-                                            size={'smaller'}
-                                            name={q.author.name}
-                                        />
-                                        <Flex>
-                                            <Text
-                                                className="author-name"
-                                                content={q.author.name}
-                                                weight="regular"
-                                            />
-                                            <Flex
-                                                vAlign="center"
-                                                className="like-icon"
-                                            >
-                                                <Button
-                                                    disabled={
-                                                        questions.hostUser
-                                                            .id ===
-                                                            q.author.id ||
-                                                        this.props
-                                                            .teamsTabContext
-                                                            .userObjectId ===
-                                                            q.author.id
-                                                            ? true
-                                                            : false
-                                                    }
-                                                    onClick={() =>
-                                                        this.onClickLikeButton(
-                                                            q,
-                                                            key
-                                                        )
-                                                    }
-                                                    icon={<LikeIcon />}
-                                                    className="like-icon-size"
-                                                    iconOnly
-                                                    text
+            questions[key].length > 0 && (
+                <React.Fragment>
+                    <div className="question-card">
+                        {questions[key].map((q, index) => {
+                            return (
+                                <div
+                                    className="card-divider"
+                                    key={q.id}
+                                    onMouseEnter={() => {
+                                        this.setHoveredQuestionIndex(index);
+                                    }}
+                                    onMouseLeave={() => {
+                                        this.setHoveredQuestionIndex(-1);
+                                    }}
+                                >
+                                    <Card
+                                        aria-roledescription="card avatar"
+                                        className="card-layout"
+                                    >
+                                        <Card.Header fitted>
+                                            <Flex gap="gap.small">
+                                                <Avatar
+                                                    size={'smaller'}
+                                                    name={q.author.name}
                                                 />
-                                                <Text content={q.votesCount} />
+                                                <Flex>
+                                                    <Text
+                                                        className="author-name"
+                                                        content={q.author.name}
+                                                        weight="regular"
+                                                    />
+                                                    <Flex
+                                                        vAlign="center"
+                                                        className="like-icon"
+                                                    >
+                                                        {stateVal.isHoveredQuestionIndex ===
+                                                            index && (
+                                                            <Button
+                                                                icon={
+                                                                    <AcceptIcon />
+                                                                }
+                                                                onClick={() => {
+                                                                    if (
+                                                                        key !==
+                                                                        CONST
+                                                                            .TAB_QUESTIONS
+                                                                            .ANSWERED_Q
+                                                                    ) {
+                                                                        this.onClickAction(
+                                                                            q,
+                                                                            key,
+                                                                            CONST
+                                                                                .TAB_QUESTIONS
+                                                                                .MARK_ANSWERED
+                                                                        );
+                                                                    }
+                                                                }}
+                                                                className="like-icon-size answered-icon"
+                                                                iconOnly
+                                                                text
+                                                            />
+                                                        )}
+                                                        <Button
+                                                            disabled={
+                                                                questions
+                                                                    .hostUser
+                                                                    .id ===
+                                                                    q.author
+                                                                        .id ||
+                                                                this.props
+                                                                    .teamsTabContext
+                                                                    .userObjectId ===
+                                                                    q.author.id
+                                                            }
+                                                            onClick={() =>
+                                                                this.onClickAction(
+                                                                    q,
+                                                                    key,
+                                                                    CONST
+                                                                        .TAB_QUESTIONS
+                                                                        .UP_VOTE
+                                                                )
+                                                            }
+                                                            icon={<LikeIcon />}
+                                                            className="like-icon-size"
+                                                            iconOnly
+                                                            text
+                                                        />
+                                                        <Text
+                                                            content={
+                                                                q.votesCount
+                                                            }
+                                                        />
+                                                    </Flex>
+                                                </Flex>
                                             </Flex>
-                                        </Flex>
-                                    </Flex>
-                                </Card.Header>
-                                <Card.Body>
-                                    <Text
-                                        content={q.content}
-                                        className="card-body-question"
-                                    />
-                                </Card.Body>
-                            </Card>
-                        </div>
-                    );
-                })}
-            </div>
+                                        </Card.Header>
+                                        <Card.Body>
+                                            <Text
+                                                content={q.content}
+                                                className="card-body-question"
+                                            />
+                                        </Card.Body>
+                                    </Card>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </React.Fragment>
+            )
         );
     }
 
@@ -488,11 +547,11 @@ class MeetingPanel extends React.Component<
      * @param question - pending question data
      * @param key - answeredQuestions / unansweredQuestions
      */
-    private onClickLikeButton(question, key) {
+    private onClickAction(question, key, actionValue) {
         this.props.httpService
             .patch(
                 `/conversations/${this.props.teamsTabContext.chatId}/sessions/${this.state.activeSessionData.sessionId}/questions/${question['id']}`,
-                { action: 'upvote' }
+                { action: actionValue }
             )
             .then((response: any) => {
                 if (response.data && response.data.id) {
@@ -501,31 +560,50 @@ class MeetingPanel extends React.Component<
                         (q) => q.id === response.data.id
                     );
                     questions.splice(index, 1);
-                    questions.splice(index, 0, response.data);
-                    this.setState(questions);
+                    if (actionValue !== CONST.TAB_QUESTIONS.MARK_ANSWERED) {
+                        questions[index] = response.data;
+                        this.setState(questions);
+                    } else {
+                        this.setState(questions);
+                        const activeSessionData = this.state.activeSessionData;
+                        if (key === CONST.TAB_QUESTIONS.UNANSWERED_Q) {
+                            let questionsAnswered = this.state
+                                .activeSessionData[
+                                CONST.TAB_QUESTIONS.ANSWERED_Q
+                            ];
+                            questionsAnswered = [
+                                response.data,
+                                ...questionsAnswered,
+                            ];
+                            activeSessionData[
+                                CONST.TAB_QUESTIONS.ANSWERED_Q
+                            ] = questionsAnswered;
+                        }
+                        this.setState(activeSessionData);
+                    }
                 }
             })
             .catch((error) => {});
     }
 
+    /**
+     * Display Pending and answered questions menu
+     * @param stateVal - this.state
+     */
     private liveQuestionsMenu(stateVal) {
         const items = [
             {
-                key: this.props.constValue.TAB_QUESTIONS.PENDING,
-                content: this.props.constValue.TAB_QUESTIONS.PENDING,
+                key: CONST.TAB_QUESTIONS.PENDING,
+                content: CONST.TAB_QUESTIONS.PENDING,
                 onClick: () => {
-                    this.getLiveTab(
-                        this.props.constValue.TAB_QUESTIONS.PENDING
-                    );
+                    this.getLiveTab(CONST.TAB_QUESTIONS.PENDING);
                 },
             },
             {
-                key: this.props.constValue.TAB_QUESTIONS.ANSWERED,
-                content: this.props.constValue.TAB_QUESTIONS.ANSWERED,
+                key: CONST.TAB_QUESTIONS.ANSWERED,
+                content: CONST.TAB_QUESTIONS.ANSWERED,
                 onClick: () => {
-                    this.getLiveTab(
-                        this.props.constValue.TAB_QUESTIONS.ANSWERED
-                    );
+                    this.getLiveTab(CONST.TAB_QUESTIONS.ANSWERED);
                 },
             },
         ];
@@ -576,9 +654,8 @@ class MeetingPanel extends React.Component<
      * Display session questions
      */
     showSessionQuestions = (stateVal) => {
-        const sessionTitle = stateVal.input.title
-            ? stateVal.input.title
-            : stateVal.activeSessionData.title;
+        const sessionTitle =
+            stateVal.input.title ?? stateVal.activeSessionData.title;
         return (
             <React.Fragment>
                 {this.showMenubar(sessionTitle)}
@@ -592,22 +669,18 @@ class MeetingPanel extends React.Component<
                     <React.Fragment>
                         {this.liveQuestionsMenu(stateVal)}
                         {stateVal.liveTab.selectedTab ===
-                            this.props.constValue.TAB_QUESTIONS.PENDING &&
-                            stateVal.activeSessionData.unansweredQuestions &&
-                            stateVal.activeSessionData.unansweredQuestions
-                                .length > 0 &&
+                            CONST.TAB_QUESTIONS.PENDING &&
                             this.liveQuestions(
                                 stateVal.activeSessionData,
-                                this.props.constValue.TAB_QUESTIONS.UNANSWERED_Q
+                                CONST.TAB_QUESTIONS.UNANSWERED_Q,
+                                stateVal
                             )}
                         {stateVal.liveTab.selectedTab ===
-                            this.props.constValue.TAB_QUESTIONS.ANSWERED &&
-                            stateVal.activeSessionData.answeredQuestions &&
-                            stateVal.activeSessionData.answeredQuestions
-                                .length > 0 &&
+                            CONST.TAB_QUESTIONS.ANSWERED &&
                             this.liveQuestions(
                                 stateVal.activeSessionData,
-                                this.props.constValue.TAB_QUESTIONS.ANSWERED_Q
+                                CONST.TAB_QUESTIONS.ANSWERED_Q,
+                                stateVal
                             )}
                     </React.Fragment>
                 ) : (
@@ -648,7 +721,7 @@ class MeetingPanel extends React.Component<
 
     /**
      * On change question input field
-     * @param e
+     * @param e - event
      */
     private onChangeQuestionInput(e) {
         this.setState({
