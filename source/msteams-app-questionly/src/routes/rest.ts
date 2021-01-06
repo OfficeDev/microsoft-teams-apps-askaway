@@ -199,6 +199,7 @@ router.post(
                 votesCount: result.voters.length,
                 dateTimeCreated: result.dateTimeCreated,
                 isAnswered: result.isAnswered.valueOf(),
+                voterAadObjectIds: result.voters,
             };
 
             res.status(StatusCodes.CREATED).send(response);
