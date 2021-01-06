@@ -6,8 +6,6 @@ export const getBaseUrl = (): string => {
 // [Constant Values]
 export const CONST = Object.freeze({
     TAB_QUESTIONS: {
-        PENDING: 'Pending questions',
-        ANSWERED: 'Answered questions',
         ANSWERED_Q: 'answeredQuestions',
         UNANSWERED_Q: 'unansweredQuestions',
         UP_VOTE: 'upvote',

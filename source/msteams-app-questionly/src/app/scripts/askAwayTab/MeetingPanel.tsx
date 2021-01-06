@@ -8,7 +8,6 @@ import {
     Text,
     Button,
     Image,
-    Input,
     TextArea,
     FlexItem,
     SendIcon,
@@ -17,22 +16,17 @@ import {
     menuAsToolbarBehavior,
     ShorthandCollection,
     MenuItemProps,
-    tabListBehavior,
-    Card,
-    Avatar,
 } from '@fluentui/react-northstar';
 import {
     MoreIcon,
     LeaveIcon,
     RetryIcon,
-    LikeIcon,
-    AcceptIcon,
 } from '@fluentui/react-icons-northstar';
 import { CONST } from './shared/ConfigVariables';
 import { ApplicationInsights } from '@microsoft/applicationinsights-web';
 import { HttpService } from './shared/HttpService';
 import { SignalRLifecycle } from './signalR/SignalRLifecycle';
-
+import ActiveSessionData from './MeetingPanel/activeSessionData';
 const EmptySessionImage = require('./../../web/assets/create_session.png');
 export interface MeetingPanelProps {
     teamsTabContext: any;
@@ -43,19 +37,10 @@ export interface MeetingPanelProps {
 export interface MeetingPanelState {
     activeSessionData: any;
     showLoader: boolean;
-    isHoveredQuestionIndex: number;
     input: {
         title: string;
         description: string;
-        postQuestion: any;
-    };
-    error: {
-        isTitle: boolean;
-        isDescription: boolean;
-    };
-    liveTab: {
-        selectedTab: string;
-        defaultActiveIndex: number;
+        postQuestion: string;
     };
 }
 class MeetingPanel extends React.Component<
@@ -72,21 +57,13 @@ class MeetingPanel extends React.Component<
         this.state = {
             activeSessionData: null,
             showLoader: false,
-            isHoveredQuestionIndex: -1,
             input: {
                 title: '',
                 description: '',
                 postQuestion: '',
             },
-            error: {
-                isTitle: false,
-                isDescription: false,
-            },
-            liveTab: {
-                selectedTab: CONST.TAB_QUESTIONS.PENDING,
-                defaultActiveIndex: 0,
-            },
         };
+        this.showSessionQuestions = this.showSessionQuestions.bind(this);
     }
 
     componentDidMount() {
@@ -401,228 +378,6 @@ class MeetingPanel extends React.Component<
     }
 
     /**
-     * Get Live Tab Content on change
-     * @param value - selectedTab
-     */
-    private getLiveTab(value) {
-        this.setState({
-            liveTab: {
-                ...this.state.liveTab,
-                selectedTab: value,
-            },
-        });
-    }
-
-    /**
-     * On hover show accepticon in the answered/unanswered questions
-     * @param index - for loop index value
-     */
-    private setHoveredQuestionIndex(index: number) {
-        this.setState({ isHoveredQuestionIndex: index });
-    }
-
-    /**
-     * Display pending questions
-     * @param questions - activeSession array
-     * @param key - answered/unanswered questions
-     * @param stateVal - this.state
-     */
-    private liveQuestions(questions, key, stateVal) {
-        return (
-            questions[key].length > 0 && (
-                <React.Fragment>
-                    <div className="question-card">
-                        {questions[key].map((q, index) => {
-                            return (
-                                <div
-                                    className="card-divider"
-                                    key={q.id}
-                                    onMouseEnter={() => {
-                                        this.setHoveredQuestionIndex(index);
-                                    }}
-                                    onMouseLeave={() => {
-                                        this.setHoveredQuestionIndex(-1);
-                                    }}
-                                >
-                                    <Card
-                                        aria-roledescription="card avatar"
-                                        className="card-layout"
-                                    >
-                                        <Card.Header fitted>
-                                            <Flex gap="gap.small">
-                                                <Avatar
-                                                    size={'smaller'}
-                                                    name={q.author.name}
-                                                />
-                                                <Flex>
-                                                    <Text
-                                                        className="author-name"
-                                                        content={q.author.name}
-                                                        weight="regular"
-                                                    />
-                                                    <Flex
-                                                        vAlign="center"
-                                                        className="like-icon"
-                                                    >
-                                                        {stateVal.isHoveredQuestionIndex ===
-                                                            index && (
-                                                            <Button
-                                                                icon={
-                                                                    <AcceptIcon />
-                                                                }
-                                                                onClick={() => {
-                                                                    if (
-                                                                        key !==
-                                                                        CONST
-                                                                            .TAB_QUESTIONS
-                                                                            .ANSWERED_Q
-                                                                    ) {
-                                                                        this.onClickAction(
-                                                                            q,
-                                                                            key,
-                                                                            CONST
-                                                                                .TAB_QUESTIONS
-                                                                                .MARK_ANSWERED
-                                                                        );
-                                                                    }
-                                                                }}
-                                                                className="like-icon-size answered-icon"
-                                                                iconOnly
-                                                                text
-                                                            />
-                                                        )}
-                                                        <Button
-                                                            disabled={
-                                                                questions
-                                                                    .hostUser
-                                                                    .id ===
-                                                                    q.author
-                                                                        .id ||
-                                                                this.props
-                                                                    .teamsTabContext
-                                                                    .userObjectId ===
-                                                                    q.author.id
-                                                            }
-                                                            onClick={() =>
-                                                                this.onClickAction(
-                                                                    q,
-                                                                    key,
-                                                                    CONST
-                                                                        .TAB_QUESTIONS
-                                                                        .UP_VOTE
-                                                                )
-                                                            }
-                                                            icon={<LikeIcon />}
-                                                            className="like-icon-size"
-                                                            iconOnly
-                                                            text
-                                                        />
-                                                        <Text
-                                                            content={
-                                                                q.votesCount
-                                                            }
-                                                        />
-                                                    </Flex>
-                                                </Flex>
-                                            </Flex>
-                                        </Card.Header>
-                                        <Card.Body>
-                                            <Text
-                                                content={q.content}
-                                                className="card-body-question"
-                                            />
-                                        </Card.Body>
-                                    </Card>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </React.Fragment>
-            )
-        );
-    }
-
-    /**
-     * On click like icon in the answered and unanswered questions
-     * @param question - pending question data
-     * @param key - answeredQuestions / unansweredQuestions
-     */
-    private onClickAction(question, key, actionValue) {
-        this.props.httpService
-            .patch(
-                `/conversations/${this.props.teamsTabContext.chatId}/sessions/${this.state.activeSessionData.sessionId}/questions/${question['id']}`,
-                { action: actionValue }
-            )
-            .then((response: any) => {
-                if (response.data && response.data.id) {
-                    const questions = this.state.activeSessionData[key];
-                    const index = questions.findIndex(
-                        (q) => q.id === response.data.id
-                    );
-                    questions.splice(index, 1);
-                    if (actionValue !== CONST.TAB_QUESTIONS.MARK_ANSWERED) {
-                        questions[index] = response.data;
-                        this.setState(questions);
-                    } else {
-                        this.setState(questions);
-                        const activeSessionData = this.state.activeSessionData;
-                        if (key === CONST.TAB_QUESTIONS.UNANSWERED_Q) {
-                            let questionsAnswered = this.state
-                                .activeSessionData[
-                                CONST.TAB_QUESTIONS.ANSWERED_Q
-                            ];
-                            questionsAnswered = [
-                                response.data,
-                                ...questionsAnswered,
-                            ];
-                            activeSessionData[
-                                CONST.TAB_QUESTIONS.ANSWERED_Q
-                            ] = questionsAnswered;
-                        }
-                        this.setState(activeSessionData);
-                    }
-                }
-            })
-            .catch((error) => {});
-    }
-
-    /**
-     * Display Pending and answered questions menu
-     * @param stateVal - this.state
-     */
-    private liveQuestionsMenu(stateVal) {
-        const items = [
-            {
-                key: CONST.TAB_QUESTIONS.PENDING,
-                content: CONST.TAB_QUESTIONS.PENDING,
-                onClick: () => {
-                    this.getLiveTab(CONST.TAB_QUESTIONS.PENDING);
-                },
-            },
-            {
-                key: CONST.TAB_QUESTIONS.ANSWERED,
-                content: CONST.TAB_QUESTIONS.ANSWERED,
-                onClick: () => {
-                    this.getLiveTab(CONST.TAB_QUESTIONS.ANSWERED);
-                },
-            },
-        ];
-        return (
-            <React.Fragment>
-                <Menu
-                    defaultActiveIndex={0}
-                    items={items}
-                    primary
-                    underlined
-                    accessibility={tabListBehavior}
-                    aria-label="Today's events"
-                    className="menu-bar"
-                />
-            </React.Fragment>
-        );
-    }
-
-    /**
      * This function is triggered on events from signalR connection.
      * @param dataEvent - event received.
      */
@@ -653,36 +408,21 @@ class MeetingPanel extends React.Component<
     /**
      * Display session questions
      */
-    showSessionQuestions = (stateVal) => {
+    showSessionQuestions(stateVal) {
         const sessionTitle =
-            stateVal.input.title ?? stateVal.activeSessionData.title;
+            stateVal.activeSessionData.title ?? stateVal.input.title;
         return (
             <React.Fragment>
                 {this.showMenubar(sessionTitle)}
                 {stateVal.activeSessionData &&
-                ((stateVal.activeSessionData.unansweredQuestions &&
-                    stateVal.activeSessionData.unansweredQuestions.length >
-                        0) ||
-                    (stateVal.activeSessionData.answeredQuestions &&
-                        stateVal.activeSessionData.answeredQuestions.length >
-                            0)) ? (
-                    <React.Fragment>
-                        {this.liveQuestionsMenu(stateVal)}
-                        {stateVal.liveTab.selectedTab ===
-                            CONST.TAB_QUESTIONS.PENDING &&
-                            this.liveQuestions(
-                                stateVal.activeSessionData,
-                                CONST.TAB_QUESTIONS.UNANSWERED_Q,
-                                stateVal
-                            )}
-                        {stateVal.liveTab.selectedTab ===
-                            CONST.TAB_QUESTIONS.ANSWERED &&
-                            this.liveQuestions(
-                                stateVal.activeSessionData,
-                                CONST.TAB_QUESTIONS.ANSWERED_Q,
-                                stateVal
-                            )}
-                    </React.Fragment>
+                (stateVal.activeSessionData.unansweredQuestions.length > 0 ||
+                    stateVal.activeSessionData.answeredQuestions.length > 0) ? (
+                    <ActiveSessionData
+                        activeSessionData={stateVal.activeSessionData}
+                        constValue={CONST}
+                        httpService={this.props.httpService}
+                        teamsTabContext={this.props.teamsTabContext}
+                    />
                 ) : (
                     this.noQuestionDesign(
                         EmptySessionImage,
@@ -717,7 +457,7 @@ class MeetingPanel extends React.Component<
                 </div>
             </React.Fragment>
         );
-    };
+    }
 
     /**
      * On change question input field
