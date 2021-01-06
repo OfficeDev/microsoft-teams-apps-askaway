@@ -3,8 +3,8 @@
  */
 
 import * as React from 'react';
-import { shallow, configure, mount } from 'enzyme';
-import { Loader } from '@fluentui/react-northstar';
+import { shallow, configure } from 'enzyme';
+import { Loader, Button } from '@fluentui/react-northstar';
 import Adapter from 'enzyme-adapter-react-16';
 import MeetingPanel from '../MeetingPanel';
 import { HttpService } from '../shared/HttpService';
@@ -40,7 +40,7 @@ describe('Meeting Panel Component', () => {
     });
 
     it('should render meeting panel when activeSessionData is present', () => {
-        const component = mount(
+        const component = shallow(
             <MeetingPanel
                 teamsTabContext={{}}
                 httpService={httpServiceIns}
@@ -56,7 +56,7 @@ describe('Meeting Panel Component', () => {
     });
 
     it('should render createSessionLayout when activeSessionData is not present', () => {
-        const component = mount(
+        const component = shallow(
             <MeetingPanel
                 teamsTabContext={{}}
                 httpService={httpServiceIns}
@@ -66,8 +66,10 @@ describe('Meeting Panel Component', () => {
         );
         const stateVal = { showLoader: false };
         component.setState(stateVal);
-        const divEle = component.find('div.no-question');
+        const buttonEle = component.containsMatchingElement(
+            <Button.Content>Start a Q&A session</Button.Content>
+        );
 
-        expect(divEle).toHaveLength(1);
+        expect(buttonEle).toBeTruthy();
     });
 });
