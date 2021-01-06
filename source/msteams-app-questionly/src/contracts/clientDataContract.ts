@@ -83,5 +83,10 @@ export namespace ClientDataContract {
          * Number upvotes on the question.
          */
         votesCount: number;
+
+        /**
+         * List of aad object ids of users who upvoted the question.
+         */
+        voterAadObjectIds: string[];
     }
 }
