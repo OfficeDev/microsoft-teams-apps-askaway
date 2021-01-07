@@ -430,7 +430,7 @@ class MeetingPanel extends React.Component<
             <React.Fragment>
                 <SignalRLifecycle
                     conversationId={this.props.teamsTabContext.chatId}
-                    updateEvent={this.updateEvent}
+                    onEvent={this.updateEvent}
                     httpService={this.props.httpService}
                     appInsights={this.props.appInsights}
                     ref={(instance) => {
