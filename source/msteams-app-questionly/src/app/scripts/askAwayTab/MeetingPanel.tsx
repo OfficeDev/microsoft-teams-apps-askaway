@@ -8,9 +8,7 @@ import {
     Text,
     Button,
     Image,
-    TextArea,
     FlexItem,
-    SendIcon,
     Loader,
     Menu,
     menuAsToolbarBehavior,
@@ -26,21 +24,25 @@ import { CONST } from './shared/ConfigVariables';
 import { ApplicationInsights } from '@microsoft/applicationinsights-web';
 import { HttpService } from './shared/HttpService';
 import { SignalRLifecycle } from './signalR/SignalRLifecycle';
-import ActiveSessionData from './MeetingPanel/activeSessionData';
+import QuestionsList from './MeetingPanel/questionsList';
+import Question from './MeetingPanel/question';
+import { Helper } from './shared/Helper';
+import { ActiveSessionData } from './types';
+
 const EmptySessionImage = require('./../../web/assets/create_session.png');
+
 export interface MeetingPanelProps {
-    teamsTabContext: any;
+    teamsTabContext: microsoftTeams.Context;
     httpService: HttpService;
     appInsights: ApplicationInsights;
-    helper: any;
+    helper: Helper;
 }
 export interface MeetingPanelState {
-    activeSessionData: any;
+    activeSessionData: ActiveSessionData;
     showLoader: boolean;
     input: {
         title: string;
         description: string;
-        postQuestion: string;
     };
 }
 class MeetingPanel extends React.Component<
@@ -55,15 +57,13 @@ class MeetingPanel extends React.Component<
     constructor(props) {
         super(props);
         this.state = {
-            activeSessionData: null,
+            activeSessionData: this.props.helper.emptyActiveSessionData(),
             showLoader: false,
             input: {
                 title: '',
                 description: '',
-                postQuestion: '',
             },
         };
-        this.showSessionQuestions = this.showSessionQuestions.bind(this);
     }
 
     componentDidMount() {
@@ -80,7 +80,7 @@ class MeetingPanel extends React.Component<
                 `/conversations/${this.props.teamsTabContext.chatId}/activesessions`
             )
             .then((response: any) => {
-                if (response && response.data && response.data.length > 0) {
+                if (response?.data?.length > 0) {
                     this.setState({
                         activeSessionData: response.data[0],
                     });
@@ -107,7 +107,7 @@ class MeetingPanel extends React.Component<
                 .then((response: any) => {
                     this.setState({
                         showLoader: false,
-                        activeSessionData: null,
+                        activeSessionData: this.props.helper.emptyActiveSessionData(),
                     });
                 })
                 .catch((error) => {
@@ -126,12 +126,11 @@ class MeetingPanel extends React.Component<
             url: `https://${process.env.HostName}/askAwayTab/createsession.html?theme=${this.props.teamsTabContext.theme}&locale=${this.props.teamsTabContext.locale}`,
         };
 
-        let submitHandler = (err: any, result: any) => {
+        let submitHandler = async (err: any, result: any) => {
             result = JSON.parse(result);
             if (result) {
                 this.setState({
                     input: {
-                        ...this.state.input,
                         title: result['title'],
                         description: result['description'],
                     },
@@ -164,7 +163,6 @@ class MeetingPanel extends React.Component<
                     });
             }
         };
-
         microsoftTeams.tasks.startTask(taskInfo, submitHandler);
     };
 
@@ -347,37 +345,6 @@ class MeetingPanel extends React.Component<
     };
 
     /**
-     * on Submit the questions
-     */
-    submitQuestion() {
-        if (this.state.input.postQuestion) {
-            this.props.httpService
-                .post(
-                    `/conversations/${this.props.teamsTabContext.chatId}/sessions/${this.state.activeSessionData.sessionId}/questions`,
-                    { questionContent: this.state.input.postQuestion }
-                )
-                .then((response: any) => {
-                    if (response && response.data && response.data.id) {
-                        this.setState({
-                            input: { ...this.state.input, postQuestion: '' },
-                        });
-                        this.setState({
-                            activeSessionData: {
-                                ...this.state.activeSessionData,
-                                unansweredQuestions: [
-                                    response.data,
-                                    ...this.state.activeSessionData
-                                        .unansweredQuestions,
-                                ],
-                            },
-                        });
-                    }
-                })
-                .catch((error) => {});
-        }
-    }
-
-    /**
      * This function is triggered on events from signalR connection.
      * @param dataEvent - event received.
      */
@@ -398,7 +365,7 @@ class MeetingPanel extends React.Component<
             }
             case 'qnaSessionEndedEvent': {
                 this.setState({
-                    activeSessionData: null,
+                    activeSessionData: this.props.helper.emptyActiveSessionData(),
                 });
                 break;
             }
@@ -406,18 +373,33 @@ class MeetingPanel extends React.Component<
     };
 
     /**
+     * Handle on add new question in the question component
+     * @param event
+     */
+    handleOnAddNewQuestion = (event) => {
+        this.setState({
+            activeSessionData: {
+                ...this.state.activeSessionData,
+                unansweredQuestions: [
+                    event,
+                    ...this.state.activeSessionData.unansweredQuestions,
+                ],
+            },
+        });
+    };
+
+    /**
      * Display session questions
      */
-    showSessionQuestions(stateVal) {
+    showSessionQuestions = (stateVal) => {
         const sessionTitle =
             stateVal.activeSessionData.title ?? stateVal.input.title;
         return (
             <React.Fragment>
                 {this.showMenubar(sessionTitle)}
-                {stateVal.activeSessionData &&
-                (stateVal.activeSessionData.unansweredQuestions.length > 0 ||
-                    stateVal.activeSessionData.answeredQuestions.length > 0) ? (
-                    <ActiveSessionData
+                {stateVal.activeSessionData.unansweredQuestions.length > 0 ||
+                stateVal.activeSessionData.answeredQuestions.length > 0 ? (
+                    <QuestionsList
                         activeSessionData={stateVal.activeSessionData}
                         constValue={CONST}
                         httpService={this.props.httpService}
@@ -429,45 +411,15 @@ class MeetingPanel extends React.Component<
                         'Q & A session is live...Ask away!'
                     )
                 )}
-                <div className="input-text-field">
-                    <Flex gap="gap.small">
-                        <TextArea
-                            className="text-question"
-                            inverted
-                            fluid
-                            maxLength={250}
-                            placeholder="Type a question here"
-                            onChange={(e) => this.onChangeQuestionInput(e)}
-                            value={stateVal.input.postQuestion}
-                        />
-                        <FlexItem push>
-                            <Button
-                                className="send-button"
-                                icon={
-                                    <SendIcon
-                                        size="large"
-                                        onClick={() => this.submitQuestion()}
-                                    />
-                                }
-                                text
-                                iconOnly
-                            />
-                        </FlexItem>
-                    </Flex>
-                </div>
+                <Question
+                    activeSessionData={stateVal.activeSessionData}
+                    httpService={this.props.httpService}
+                    teamsTabContext={this.props.teamsTabContext}
+                    onAddNewQuestion={this.handleOnAddNewQuestion}
+                />
             </React.Fragment>
         );
-    }
-
-    /**
-     * On change question input field
-     * @param e - event
-     */
-    private onChangeQuestionInput(e) {
-        this.setState({
-            input: { ...this.state.input, postQuestion: e.target.value },
-        });
-    }
+    };
 
     /**
      * The render() method to create the UI of the meeting panel
@@ -489,7 +441,7 @@ class MeetingPanel extends React.Component<
                     }}
                 />
                 <div className="meeting-panel">
-                    {stateVal.activeSessionData
+                    {stateVal.activeSessionData.sessionId
                         ? this.showSessionQuestions(stateVal)
                         : this.createNewSessionLayout()}
                 </div>

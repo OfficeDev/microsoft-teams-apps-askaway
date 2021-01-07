@@ -11,103 +11,90 @@ import {
     Avatar,
 } from '@fluentui/react-northstar';
 import { LikeIcon, AcceptIcon } from '@fluentui/react-icons-northstar';
-export interface ActiveSessionDataProps {
-    activeSessionData: any;
+import { useState, useMemo } from 'react';
+import * as microsoftTeams from '@microsoft/teams-js';
+import { HttpService } from '../shared/HttpService';
+import { ActiveSessionData } from '../types';
+
+export interface QuestionsListProps {
+    activeSessionData: ActiveSessionData;
     constValue: any;
-    httpService: any;
-    teamsTabContext: any;
+    httpService: HttpService;
+    teamsTabContext: microsoftTeams.Context;
 }
-export interface ActiveSessionDataState {
-    activeSessionData: any;
-    isHoveredQuestionIndex: number;
-    liveTab: {
-        selectedTab: string;
-        defaultActiveIndex: number;
-    };
+export interface QuestionTab {
+    selectedTab: string;
+    defaultActiveIndex: number;
 }
+const QuestionsList: React.FunctionComponent<QuestionsListProps> = (props) => {
+    const [activeSessionData, setActiveSessionData] = useState(
+        props.activeSessionData
+    );
 
-class ActiveSessionData extends React.Component<
-    ActiveSessionDataProps,
-    ActiveSessionDataState
-> {
-    constructor(props) {
-        super(props);
-        this.state = {
-            activeSessionData: props.activeSessionData,
-            isHoveredQuestionIndex: -1,
-            liveTab: {
-                selectedTab: props.constValue.TAB_QUESTIONS.UNANSWERED_Q,
-                defaultActiveIndex: 0,
-            },
-        };
-    }
+    const [isHoveredQuestionIndex, setIsHoveredQuestionIndex] = useState(-1);
 
-    componentWillReceiveProps(props) {
-        this.setState({
-            activeSessionData: {
-                ...this.state.activeSessionData,
-                ...props.activeSessionData,
-            },
-        });
-    }
+    const [liveTab, setLiveTab] = useState<QuestionTab>({
+        selectedTab: props.constValue.TAB_QUESTIONS.UNANSWERED_Q,
+        defaultActiveIndex: 0,
+    });
 
     /**
-     * On hover show accepticon in the answered/unanswered questions
-     * @param index - for loop index value
+     * component will receive props
      */
-    private setHoveredQuestionIndex(index: number) {
-        this.setState({ isHoveredQuestionIndex: index });
-    }
+    useMemo(() => {
+        setActiveSessionData(props.activeSessionData);
+    }, [props]);
 
     /**
      * On click like icon in the answered and unanswered questions
-     * @param question - pending question data
+     * @param question - answered / unanswered data
      * @param key - answeredQuestions / unansweredQuestions
+     * @param actionValue - upvote/downvote/markAnswered
      */
-    private onClickAction(question, key, actionValue) {
-        this.props.httpService
+    const onClickAction = (question, key, actionValue) => {
+        props.httpService
             .patch(
-                `/conversations/${this.props.teamsTabContext.chatId}/sessions/${this.state.activeSessionData.sessionId}/questions/${question['id']}`,
+                `/conversations/${props.teamsTabContext.chatId}/sessions/${activeSessionData.sessionId}/questions/${question['id']}`,
                 { action: actionValue }
             )
             .then((response: any) => {
                 if (response.data && response.data.id) {
-                    const questions = this.state.activeSessionData[key];
+                    const questions = activeSessionData[key];
                     const index = questions.findIndex(
                         (q) => q.id === response.data.id
                     );
                     questions.splice(index, 1);
                     if (
                         actionValue !==
-                        this.props.constValue.TAB_QUESTIONS.MARK_ANSWERED
+                        props.constValue.TAB_QUESTIONS.MARK_ANSWERED
                     ) {
                         questions[index] = response.data;
-                        this.setState(questions);
+                        activeSessionData[key] = questions;
+                        setActiveSessionData(activeSessionData);
                     } else {
-                        this.setState(questions);
-                        const activeSessionData = this.state.activeSessionData;
+                        activeSessionData[key] = questions;
+                        setActiveSessionData(activeSessionData);
                         if (
-                            key ===
-                            this.props.constValue.TAB_QUESTIONS.UNANSWERED_Q
+                            key === props.constValue.TAB_QUESTIONS.UNANSWERED_Q
                         ) {
-                            let questionsAnswered = this.state
-                                .activeSessionData[
-                                this.props.constValue.TAB_QUESTIONS.ANSWERED_Q
-                            ];
+                            let questionsAnswered =
+                                activeSessionData[
+                                    props.constValue.TAB_QUESTIONS.ANSWERED_Q
+                                ];
                             questionsAnswered = [
                                 response.data,
                                 ...questionsAnswered,
                             ];
                             activeSessionData[
-                                this.props.constValue.TAB_QUESTIONS.ANSWERED_Q
+                                props.constValue.TAB_QUESTIONS.ANSWERED_Q
                             ] = questionsAnswered;
                         }
-                        this.setState(activeSessionData);
+                        setActiveSessionData(activeSessionData);
                     }
                 }
             })
             .catch((error) => {});
-    }
+    };
 
     /**
      * Display pending questions
@@ -115,21 +102,25 @@ class ActiveSessionData extends React.Component<
      * @param key - answered/unanswered questions
      * @param stateVal - this.state
      */
-    private liveQuestions(stateVal: any, key: string, constValue: any) {
+    const liveQuestions = (
+        activeSessionData: any,
+        key: string,
+        constValue: any
+    ) => {
         return (
-            stateVal.activeSessionData[key].length > 0 && (
+            activeSessionData[key].length > 0 && (
                 <React.Fragment>
                     <div className="question-card">
-                        {stateVal.activeSessionData[key].map((q, index) => {
+                        {activeSessionData[key].map((q, index) => {
                             return (
                                 <div
                                     className="card-divider"
                                     key={q.id}
                                     onMouseEnter={() => {
-                                        this.setHoveredQuestionIndex(index);
+                                        setIsHoveredQuestionIndex(index);
                                     }}
                                     onMouseLeave={() => {
-                                        this.setHoveredQuestionIndex(-1);
+                                        setIsHoveredQuestionIndex(-1);
                                     }}
                                 >
                                     <Card
@@ -152,48 +143,51 @@ class ActiveSessionData extends React.Component<
                                                         vAlign="center"
                                                         className="like-icon"
                                                     >
-                                                        {stateVal.isHoveredQuestionIndex ===
-                                                            index && (
-                                                            <Button
-                                                                icon={
-                                                                    <AcceptIcon />
-                                                                }
-                                                                onClick={() => {
-                                                                    if (
-                                                                        key !==
-                                                                        constValue
-                                                                            .TAB_QUESTIONS
-                                                                            .ANSWERED_Q
-                                                                    ) {
-                                                                        this.onClickAction(
-                                                                            q,
-                                                                            key,
+                                                        {isHoveredQuestionIndex ===
+                                                            index &&
+                                                            key !==
+                                                                constValue
+                                                                    .TAB_QUESTIONS
+                                                                    .ANSWERED_Q && (
+                                                                <Button
+                                                                    icon={
+                                                                        <AcceptIcon />
+                                                                    }
+                                                                    onClick={() => {
+                                                                        if (
+                                                                            key !==
                                                                             constValue
                                                                                 .TAB_QUESTIONS
-                                                                                .MARK_ANSWERED
-                                                                        );
-                                                                    }
-                                                                }}
-                                                                className="like-icon-size answered-icon"
-                                                                iconOnly
-                                                                text
-                                                            />
-                                                        )}
+                                                                                .ANSWERED_Q
+                                                                        ) {
+                                                                            onClickAction(
+                                                                                q,
+                                                                                key,
+                                                                                constValue
+                                                                                    .TAB_QUESTIONS
+                                                                                    .MARK_ANSWERED
+                                                                            );
+                                                                        }
+                                                                    }}
+                                                                    className="like-icon-size answered-icon"
+                                                                    iconOnly
+                                                                    text
+                                                                />
+                                                            )}
                                                         <Button
                                                             disabled={
-                                                                stateVal
-                                                                    .activeSessionData
+                                                                activeSessionData
                                                                     .hostUser
                                                                     .id ===
                                                                     q.author
                                                                         .id ||
-                                                                this.props
+                                                                props
                                                                     .teamsTabContext
                                                                     .userObjectId ===
                                                                     q.author.id
                                                             }
                                                             onClick={() =>
-                                                                this.onClickAction(
+                                                                onClickAction(
                                                                     q,
                                                                     key,
                                                                     constValue
@@ -229,41 +223,37 @@ class ActiveSessionData extends React.Component<
                 </React.Fragment>
             )
         );
-    }
+    };
 
     /**
      * Get Live Tab Content on change
      * @param value - selectedTab
      */
-    private setActiveLiveTab(value) {
-        this.setState({
-            liveTab: {
-                ...this.state.liveTab,
-                selectedTab: value,
-            },
+    const setActiveLiveTab = (value) => {
+        setLiveTab({
+            ...liveTab,
+            selectedTab: value,
         });
-    }
+    };
 
     /**
      * Display Pending and answered questions menu
      * @param stateVal - this.state
      */
-    private liveQuestionsMenu(constValue) {
+    const liveQuestionsMenu = (constValue) => {
         const items = [
             {
                 key: constValue.TAB_QUESTIONS.UNANSWERED_Q,
                 content: 'Pending questions',
                 onClick: () => {
-                    this.setActiveLiveTab(
-                        constValue.TAB_QUESTIONS.UNANSWERED_Q
-                    );
+                    setActiveLiveTab(constValue.TAB_QUESTIONS.UNANSWERED_Q);
                 },
             },
             {
                 key: constValue.TAB_QUESTIONS.ANSWERED_Q,
                 content: 'Answered questions',
                 onClick: () => {
-                    this.setActiveLiveTab(constValue.TAB_QUESTIONS.ANSWERED_Q);
+                    setActiveLiveTab(constValue.TAB_QUESTIONS.ANSWERED_Q);
                 },
             },
         ];
@@ -280,33 +270,21 @@ class ActiveSessionData extends React.Component<
                 />
             </React.Fragment>
         );
-    }
+    };
 
-    /**
-     * The render() method to create the UI of the tab
-     */
-    public render() {
-        const stateVal = this.state;
-        const constValue = this.props.constValue;
-        return (
-            <React.Fragment>
-                {this.liveQuestionsMenu(constValue)}
-                {stateVal.liveTab.selectedTab ===
-                    constValue.TAB_QUESTIONS.UNANSWERED_Q &&
-                    this.liveQuestions(
-                        stateVal,
-                        constValue.TAB_QUESTIONS.UNANSWERED_Q,
-                        constValue
-                    )}
-                {stateVal.liveTab.selectedTab ===
-                    constValue.TAB_QUESTIONS.ANSWERED_Q &&
-                    this.liveQuestions(
-                        stateVal,
-                        constValue.TAB_QUESTIONS.ANSWERED_Q,
-                        constValue
-                    )}
-            </React.Fragment>
-        );
-    }
-}
-export default ActiveSessionData;
+    return (
+        <React.Fragment>
+            {liveQuestionsMenu(props.constValue)}
+            {liveQuestions(
+                activeSessionData,
+                liveTab.selectedTab ===
+                    props.constValue.TAB_QUESTIONS.UNANSWERED_Q
+                    ? props.constValue.TAB_QUESTIONS.UNANSWERED_Q
+                    : props.constValue.TAB_QUESTIONS.ANSWERED_Q,
+                props.constValue
+            )}
+        </React.Fragment>
+    );
+};
+
+export default QuestionsList;

@@ -1,4 +1,4 @@
-class Helper {
+export class Helper {
     constructor() {}
 
     /**
@@ -10,6 +10,18 @@ class Helper {
             locale = locale.split('-');
             i18next.changeLanguage(locale[0].toLowerCase());
         }
+    }
+
+    public emptyActiveSessionData() {
+        return {
+            sessionId: '',
+            title: '',
+            isActive: false,
+            dateTimeCreated: '',
+            hostUser: {},
+            answeredQuestions: [],
+            unansweredQuestions: [],
+        };
     }
 }
 // tslint:disable-next-line:export-name

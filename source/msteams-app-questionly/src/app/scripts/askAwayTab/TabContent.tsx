@@ -8,11 +8,13 @@ import { AddIcon, RetryIcon } from '@fluentui/react-icons-northstar';
 import * as microsoftTeams from '@microsoft/teams-js';
 import { ApplicationInsights } from '@microsoft/applicationinsights-web';
 import { HttpService } from './shared/HttpService';
+import { Helper } from './shared/Helper';
+
 export interface TabContentProps {
-    teamsTabContext: any;
+    teamsTabContext: microsoftTeams.Context;
     httpService: HttpService;
     appInsights: ApplicationInsights;
-    helper: any;
+    helper: Helper;
 }
 export interface TabContentState {}
 
