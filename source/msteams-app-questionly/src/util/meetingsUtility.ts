@@ -5,47 +5,26 @@ import { ParticipantRoles } from 'src/enums/ParticipantRoles';
 import { exceptionLogger } from 'src/util/exceptionTracking';
 import { getMicrosoftAppPassword } from 'src/util/keyvault';
 
-export const isPresenterOrOrganizer = async (
-    meetingId: string,
-    userId: string,
-    tenantId: string,
-    serviceUrl: string
-): Promise<boolean> => {
-    const role = await getParticipantRole(
-        meetingId,
-        userId,
-        tenantId,
-        serviceUrl
-    );
+export const isPresenterOrOrganizer = async (meetingId: string, userId: string, tenantId: string, serviceUrl: string): Promise<boolean> => {
+    const role = await getParticipantRole(meetingId, userId, tenantId, serviceUrl);
 
-    if (
-        role === ParticipantRoles.Organizer ||
-        role === ParticipantRoles.Presenter
-    ) {
+    if (role === ParticipantRoles.Organizer || role === ParticipantRoles.Presenter) {
         return true;
     }
     return false;
 };
 
-export const getParticipantRole = async (
-    meetingId: string,
-    userId: string,
-    tenantId: string,
-    serviceUrl: string
-) => {
+export const getParticipantRole = async (meetingId: string, userId: string, tenantId: string, serviceUrl: string) => {
     let token: string;
     let role: string;
 
     try {
         token = await getToken();
-        const result = await axios.get(
-            `${serviceUrl}/v1/meetings/${meetingId}/participants/${userId}?tenantId=${tenantId}`,
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            }
-        );
+        const result = await axios.get(`${serviceUrl}/v1/meetings/${meetingId}/participants/${userId}?tenantId=${tenantId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
         role = result.data.meeting.role;
     } catch (error) {
         exceptionLogger(error);

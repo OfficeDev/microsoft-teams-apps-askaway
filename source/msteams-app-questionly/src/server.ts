@@ -12,15 +12,8 @@ log(`Initializing Microsoft Teams Express hosted App...`);
 dotenvConfig();
 
 // The import of components has to be done AFTER the dotenv config.
-import {
-    initiateAppInsights,
-    exceptionLogger,
-} from 'src/util/exceptionTracking';
-import {
-    ConversationDataService,
-    IConversationDataService,
-    initiateConnection,
-} from 'msteams-app-questionly.data';
+import { initiateAppInsights, exceptionLogger } from 'src/util/exceptionTracking';
+import { ConversationDataService, IConversationDataService, initiateConnection } from 'msteams-app-questionly.data';
 import { getMongoURI, initKeyVault } from 'src/util/keyvault';
 import { setupBot } from 'src/util/setupBot';
 import { setupClientApp } from 'src/util/setupClientApp';

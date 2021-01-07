@@ -33,9 +33,7 @@ export const exceptionLogger = (error: Error | string) => {
     }
 };
 
-export const trackCreateQnASessionEvent = (properties: {
-    [key: string]: any;
-}) => {
+export const trackCreateQnASessionEvent = (properties: { [key: string]: any }) => {
     if (process.env.debugMode !== 'true') {
         aiClient.trackEvent({
             name: TelemetryEvents.CreateQnASessionEvent,
@@ -44,9 +42,7 @@ export const trackCreateQnASessionEvent = (properties: {
     }
 };
 
-export const trackCreateQuestionEvent = (properties: {
-    [key: string]: any;
-}) => {
+export const trackCreateQuestionEvent = (properties: { [key: string]: any }) => {
     if (process.env.debugMode !== 'true') {
         aiClient.trackEvent({
             name: TelemetryEvents.CreateQuestionEvent,

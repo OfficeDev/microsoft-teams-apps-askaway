@@ -6,8 +6,7 @@ import { ifNumber } from 'src/util/typeUtility';
 
 const vaultName = process.env.KeyVaultName;
 const mongoURISecretName = 'MongoDbUri';
-const applicationInsightsInstrumentationKeySecretName =
-    'ApplicationInsightsInstrumentationKey';
+const applicationInsightsInstrumentationKeySecretName = 'ApplicationInsightsInstrumentationKey';
 const microsoftAppPasswordSecretName = 'MicrosoftAppPassword';
 const avatarKeySecretName = 'AvatarKey';
 const backgroundFunctionKeySecretName = 'BackgroundFunctionKey';
@@ -58,9 +57,7 @@ const getSecretFromVault = async (secretName: string): Promise<string> => {
     const secret = await keyVaultSecretClient.getSecret(secretName);
 
     if (secret.value === undefined) {
-        exceptionLogger(
-            new Error(`Error in reading key vault secret: ${secretName}`)
-        );
+        exceptionLogger(new Error(`Error in reading key vault secret: ${secretName}`));
 
         throw new Error(`Error in reading key vault secret: ${secretName}`);
     }
@@ -83,10 +80,7 @@ const getSecretFromCache = async (secretName: string): Promise<string> => {
         // Secrets last in memory for some time (default 24 hours), post that cache should be updated from key vault.
         // Currently only `AvatarKey` and `MicrosoftAppPassword` are set in cache as it's used multiple time.
         // All other secrets are used once during initialization hence fetched from key vault directly.
-        const retryAfterMs = ifNumber(
-            process.env.ExpireInMemorySecretsAfterMs,
-            24 * 60 * 60 * 1000
-        );
+        const retryAfterMs = ifNumber(process.env.ExpireInMemorySecretsAfterMs, 24 * 60 * 60 * 1000);
         memCache.put(secretName, secret, retryAfterMs);
 
         return secret;
@@ -110,9 +104,7 @@ export const getMongoURI = async (): Promise<string> => {
  * @throws - Error if error occurs while fetching secret from key vault.
  */
 export const getApplicationInsightsInstrumentationKeyURI = async (): Promise<string> => {
-    return await getSecretFromVault(
-        applicationInsightsInstrumentationKeySecretName
-    );
+    return await getSecretFromVault(applicationInsightsInstrumentationKeySecretName);
 };
 
 /**

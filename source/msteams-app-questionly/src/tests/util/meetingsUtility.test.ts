@@ -1,7 +1,4 @@
-import {
-    getParticipantRole,
-    isPresenterOrOrganizer,
-} from 'src/util/meetingsUtility';
+import { getParticipantRole, isPresenterOrOrganizer } from 'src/util/meetingsUtility';
 
 const sampleMeetingId = 'sampleMeetingId';
 const sampleUserId = 'sampleUserId';
@@ -21,12 +18,7 @@ describe('validates isPreseterOrOrganizer', () => {
         (<any>getParticipantRole).mockImplementationOnce(() => {
             return 'Organizer';
         });
-        const result = await isPresenterOrOrganizer(
-            sampleMeetingId,
-            sampleUserId,
-            sampleTenantId,
-            sampleServiceUrl
-        );
+        const result = await isPresenterOrOrganizer(sampleMeetingId, sampleUserId, sampleTenantId, sampleServiceUrl);
         expect(result).toBeTruthy();
         expect(getParticipantRole).toBeCalledTimes(1);
     });
@@ -35,12 +27,7 @@ describe('validates isPreseterOrOrganizer', () => {
         (<any>getParticipantRole).mockImplementationOnce(() => {
             return 'Presenter';
         });
-        const result = await isPresenterOrOrganizer(
-            sampleMeetingId,
-            sampleUserId,
-            sampleTenantId,
-            sampleServiceUrl
-        );
+        const result = await isPresenterOrOrganizer(sampleMeetingId, sampleUserId, sampleTenantId, sampleServiceUrl);
         expect(result).toBeTruthy();
         expect(getParticipantRole).toBeCalledTimes(1);
     });
@@ -49,12 +36,7 @@ describe('validates isPreseterOrOrganizer', () => {
         (<any>getParticipantRole).mockImplementationOnce(() => {
             return 'test';
         });
-        const result = await isPresenterOrOrganizer(
-            sampleMeetingId,
-            sampleUserId,
-            sampleTenantId,
-            sampleServiceUrl
-        );
+        const result = await isPresenterOrOrganizer(sampleMeetingId, sampleUserId, sampleTenantId, sampleServiceUrl);
         expect(result).toBeFalsy();
         expect(getParticipantRole).toBeCalledTimes(1);
     });
