@@ -18,7 +18,10 @@ export class Helper {
             title: '',
             isActive: false,
             dateTimeCreated: '',
-            hostUser: {},
+            hostUser: {
+                id: '',
+                name: '',
+            },
             answeredQuestions: [],
             unansweredQuestions: [],
         };
