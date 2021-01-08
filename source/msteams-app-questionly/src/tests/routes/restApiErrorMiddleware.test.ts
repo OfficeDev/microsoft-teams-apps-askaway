@@ -14,6 +14,11 @@ import { restApiErrorMiddleware } from 'src/routes/restApiErrorMiddleware';
 const request = {
     path: '/api/conversations',
 } as Request;
+request.params = {
+    conversationId: 'sampleConversationId',
+    sessionId: 'sampleSessionId',
+    questionId: 'sampleQuestionId',
+};
 
 // tslint:disable-next-line
 const response = {

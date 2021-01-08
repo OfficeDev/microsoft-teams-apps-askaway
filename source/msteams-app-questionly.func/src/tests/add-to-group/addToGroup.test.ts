@@ -39,6 +39,7 @@ beforeEach(() => {
       connectionId: "testConnectionId",
     },
     headers: null,
+    userId: "testUserId",
   };
 });
 
