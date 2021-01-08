@@ -1,7 +1,10 @@
 import { IBackgroundJobPayload } from 'src/background-job/backgroundJobPayload';
 import { IDataEvent } from 'msteams-app-questionly.common';
 import axios, { AxiosRequestConfig } from 'axios';
-import { exceptionLogger } from 'src/util/exceptionTracking';
+import {
+    exceptionLogger,
+    getOperationIdForCurrentRequest,
+} from 'src/util/exceptionTracking';
 import { getBackgroundFunctionKey } from 'src/util/keyvault';
 import { IQnASession_populated, IQuestion } from 'msteams-app-questionly.data';
 import {
@@ -13,6 +16,7 @@ import {
     createQuestionUpvotedEvent,
 } from 'src/background-job/events/dataEventUtility';
 import { StatusCodes } from 'http-status-codes';
+import { TelemetryExceptions } from 'src/constants/telemetryConstants';
 
 const axiosConfig: AxiosRequestConfig = axios.defaults;
 let backgroundJobUri: string;
@@ -158,6 +162,7 @@ const triggerBackgroundJob = async (
         conversationId: conversationId,
         qnaSessionId: qnaSessionId,
         eventData: dataEvent,
+        operationId: getOperationIdForCurrentRequest(),
     };
 
     try {
@@ -173,6 +178,11 @@ const triggerBackgroundJob = async (
             );
         }
     } catch (error) {
-        exceptionLogger(error);
+        exceptionLogger(error, {
+            conversationId: conversationId,
+            qnaSessionId: qnaSessionId,
+            filename: module.id,
+            exceptionName: TelemetryExceptions.TriggerBackgroundJobFailed,
+        });
     }
 };

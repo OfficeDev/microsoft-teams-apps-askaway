@@ -13,6 +13,7 @@ import { requestPolicyHelper } from 'src/util/requestPolicyHelper';
 import { USER_AGENT } from 'botbuilder/lib/botFrameworkAdapter';
 import { ifNumber } from 'src/util/typeUtility';
 import { IConversationDataService } from 'msteams-app-questionly.data';
+import { TelemetryExceptions } from 'src/constants/telemetryConstants';
 
 interface AvatarRequest {
     initials: string;
@@ -30,7 +31,14 @@ const setupBotAdapterAndRouting = async (
     });
 
     adapter.onTurnError = async (context, error) => {
-        exceptionLogger(error);
+        exceptionLogger(error, {
+            conversationId: context.activity?.conversation?.id,
+            userAadObjectId: context.activity?.from?.aadObjectId,
+            tenantId: context.activity?.conversation?.tenantId,
+            meetingId: context.activity?.channelData?.meeting?.id,
+            filename: module.id,
+            exceptionName: TelemetryExceptions.SetUpBotFailed,
+        });
     };
 
     app.post('/api/messages', (req: any, res: any) => {
