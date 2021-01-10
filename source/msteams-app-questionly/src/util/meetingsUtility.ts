@@ -1,6 +1,8 @@
 import axios from 'axios';
 import { TurnContext } from 'botbuilder';
 import { MicrosoftAppCredentials } from 'botframework-connector';
+import { TelemetryExceptions } from 'src/constants/telemetryConstants';
+import { ConversationType } from 'src/enums/ConversationType';
 import { ParticipantRoles } from 'src/enums/ParticipantRoles';
 import { exceptionLogger } from 'src/util/exceptionTracking';
 import { getMicrosoftAppPassword } from 'src/util/keyvault';
@@ -48,7 +50,13 @@ export const getParticipantRole = async (
         );
         role = result.data.meeting.role;
     } catch (error) {
-        exceptionLogger(error);
+        exceptionLogger(error, {
+            tenantId: tenantId,
+            meetingId: meetingId,
+            userAadObjectId: userId,
+            filename: module.id,
+            exceptionName: TelemetryExceptions.GetParticipantRoleFailed,
+        });
         throw new Error('Error while getting participant role.');
     }
 
@@ -73,6 +81,17 @@ const getToken = async () => {
  * Returns meeting id for meeting, if it is defined. Otherwise undefined.
  * @param context - turn context
  */
-export const getMeetingIdFromContext = async (context: TurnContext) => {
+export const getMeetingIdFromContext = (context: TurnContext) => {
     return context.activity.channelData?.meeting?.id;
+};
+
+/**
+ * Checks if the conversation type is channel.
+ * @param context - turn context
+ */
+export const isConverationTypeChannel = (context: TurnContext): boolean => {
+    return (
+        context.activity.conversation.conversationType ===
+        ConversationType.Channel
+    );
 };

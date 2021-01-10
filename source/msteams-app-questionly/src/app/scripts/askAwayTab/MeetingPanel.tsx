@@ -15,7 +15,6 @@ import { Helper } from './shared/Helper';
 import { ActiveSessionData } from './types';
 
 const EmptySessionImage = require('./../../web/assets/create_session.png');
-
 export interface MeetingPanelProps {
     teamsTabContext: microsoftTeams.Context;
     httpService: HttpService;

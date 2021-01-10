@@ -5,6 +5,7 @@
 
 import * as df from "durable-functions";
 import moment = require("moment");
+import { exceptionLogger } from "../src/utils/exceptionTracking";
 import {
   isCardRefreshNeededForQuestionEvent,
   isQnaStartedOrEndedEvent,
@@ -40,6 +41,9 @@ const orchestrator = df.orchestrator(function* (context) {
   // Conversation id from bot flow sometimes contain messageid
   const conversationId = context.bindingData.input.conversationId.split(";")[0];
 
+  // Operation id for telemetry correaltion.
+  const operationId = context.bindingData.input.operationId;
+
   try {
     // Get conversation data before triggering any background job
     const startupActivityInput = {
@@ -54,6 +58,19 @@ const orchestrator = df.orchestrator(function* (context) {
     if (conversation === undefined && !context.df.isReplaying) {
       context.log.error(
         `Could not find conversation data for conversation id ${conversationId}`
+      );
+      exceptionLogger(
+        new Error(
+          `Could not find conversation data for conversation id ${conversationId}`
+        ),
+        operationId,
+        {
+          conversationId: conversationId,
+          tenantId: conversation?.tenantId,
+          meetingId: conversation?.meetingId,
+          qnaSessionId: context.bindingData.input.qnaSessionId,
+          filename: module.id,
+        }
       );
       return;
     }
@@ -145,6 +162,11 @@ const orchestrator = df.orchestrator(function* (context) {
       error,
       "Error occurred while scheduling background tasks"
     );
+    exceptionLogger(error, operationId, {
+      conversationId: conversationId,
+      qnaSessionId: context.bindingData.input.qnaSessionId,
+      filename: module.id,
+    });
   }
 });
 

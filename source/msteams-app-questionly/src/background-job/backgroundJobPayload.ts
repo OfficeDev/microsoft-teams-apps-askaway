@@ -18,4 +18,9 @@ export interface IBackgroundJobPayload {
      * Data needed by clients for UX refresh.
      */
     eventData: IDataEvent;
+
+    /**
+     * Operation id for telemetry client.
+     */
+    operationId: string;
 }

@@ -105,5 +105,6 @@ export const formatQuestionDataAsPerClientDataContract = (
             name: questionData.userId.userName,
         },
         votesCount: questionData.voters.length,
+        voterAadObjectIds: questionData.voters,
     };
 };

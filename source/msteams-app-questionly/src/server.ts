@@ -12,10 +12,7 @@ log(`Initializing Microsoft Teams Express hosted App...`);
 dotenvConfig();
 
 // The import of components has to be done AFTER the dotenv config.
-import {
-    initiateAppInsights,
-    exceptionLogger,
-} from 'src/util/exceptionTracking';
+import { exceptionLogger, initiateAIClient } from 'src/util/exceptionTracking';
 import {
     ConversationDataService,
     IConversationDataService,
@@ -28,6 +25,7 @@ import { setupRestApis } from 'src/util/setupRestApis';
 import { initBackgroundJobSetup } from 'src/background-job/backgroundJobTrigger';
 import { initLocalization } from 'src/localization/locale';
 import { setupWebServerApp, startWebServer } from 'src/util/webServerUtility';
+import { TelemetryExceptions } from './constants/telemetryConstants';
 
 /**
  * Establishes DB connection.
@@ -46,7 +44,7 @@ async function initializeSupportingModules() {
     initKeyVault();
 
     // Set up app insights
-    await initiateAppInsights();
+    await initiateAIClient();
 
     // Initialize localization
     await initLocalization();
@@ -95,6 +93,9 @@ async function startup() {
 
 startup().catch((error) => {
     log('Error starting web app!');
-    exceptionLogger(error);
+    exceptionLogger(error, {
+        filename: module.id,
+        exceptionName: TelemetryExceptions.ApplicationStartUpFailed,
+    });
     throw error;
 });

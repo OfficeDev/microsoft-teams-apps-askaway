@@ -1,4 +1,8 @@
-import { ExponentialBackOff, retryWrapper } from "./../utils/retryPolicies";
+import {
+  ExponentialBackOff,
+  retryWrapper,
+  retryWrapperForConcurrency,
+} from "./../utils/retryPolicies";
 import { IQnASession, QnASession } from "./../schemas/qnaSession";
 import {
   IQuestion,
@@ -142,33 +146,33 @@ export class QuestionDataService {
   ): Promise<{ question: IQuestion; upvoted: Boolean }> {
     await this.userDataService.getUserOrCreate(aadObjectId, name);
 
-    return await retryWrapper<{ question: IQuestion; upvoted: Boolean }>(
-      async () => {
-        const question: IQuestion = <IQuestion>(
-          await Question.findById(questionId)
-        );
+    return await retryWrapperForConcurrency<{
+      question: IQuestion;
+      upvoted: Boolean;
+    }>(async () => {
+      const question: IQuestion = <IQuestion>(
+        await Question.findById(questionId)
+      );
 
-        const qnaSession: IQnASession = <IQnASession>(
-          await QnASession.findById(question.qnaSessionId)
-        );
+      const qnaSession: IQnASession = <IQnASession>(
+        await QnASession.findById(question.qnaSessionId)
+      );
 
-        let upvoted = false;
+      let upvoted = false;
 
-        if (qnaSession.isActive) {
-          if (question.voters.includes(aadObjectId))
-            question.voters.splice(question.voters.indexOf(aadObjectId), 1);
-          else {
-            question.voters.push(aadObjectId);
-            upvoted = true;
-          }
-
-          await question.save();
+      if (qnaSession.isActive) {
+        if (question.voters.includes(aadObjectId))
+          question.voters.splice(question.voters.indexOf(aadObjectId), 1);
+        else {
+          question.voters.push(aadObjectId);
+          upvoted = true;
         }
 
-        return { question: question, upvoted: upvoted };
-      },
-      new ExponentialBackOff()
-    );
+        await question.save();
+      }
+
+      return { question: question, upvoted: upvoted };
+    }, new ExponentialBackOff());
   }
 
   /**
@@ -228,23 +232,28 @@ export class QuestionDataService {
     aadObjectId: string,
     name: string
   ): Promise<IQuestionPopulatedUser> {
-    const question = await this.getAndValidateQuestion(
-      conversationId,
-      sessionId,
-      questionId
+    await this.userDataService.getUserOrCreate(aadObjectId, name);
+
+    return await retryWrapperForConcurrency<IQuestionPopulatedUser>(
+      async () => {
+        const question = await this.getAndValidateQuestion(
+          conversationId,
+          sessionId,
+          questionId
+        );
+
+        if (question.userId._id === aadObjectId) {
+          throw new Error("User cannot upvote/ downvote own question");
+        }
+
+        if (!question.voters.includes(aadObjectId)) {
+          question.voters.push(aadObjectId);
+          await question.save();
+        }
+
+        return question;
+      }
     );
-
-    if (question.userId._id === aadObjectId) {
-      throw new Error("User cannot upvote/ downvote own question");
-    }
-
-    if (!question.voters.includes(aadObjectId)) {
-      question.voters.push(aadObjectId);
-      await this.userDataService.getUserOrCreate(aadObjectId, name);
-      await retryWrapper(() => question.save(), new ExponentialBackOff());
-    }
-
-    return question;
   }
 
   /**
@@ -262,22 +271,26 @@ export class QuestionDataService {
     questionId: string,
     aadObjectId: string
   ): Promise<IQuestionPopulatedUser> {
-    const question = await this.getAndValidateQuestion(
-      conversationId,
-      sessionId,
-      questionId
+    return await retryWrapperForConcurrency<IQuestionPopulatedUser>(
+      async () => {
+        const question = await this.getAndValidateQuestion(
+          conversationId,
+          sessionId,
+          questionId
+        );
+
+        if (question.userId._id === aadObjectId) {
+          throw new Error("User cannot upvote/ downvote own question");
+        }
+
+        if (question.voters.includes(aadObjectId)) {
+          question.voters.splice(question.voters.indexOf(aadObjectId), 1);
+          await question.save();
+        }
+
+        return question;
+      }
     );
-
-    if (question.userId._id === aadObjectId) {
-      throw new Error("User cannot upvote/ downvote own question");
-    }
-
-    if (question.voters.includes(aadObjectId)) {
-      question.voters.splice(question.voters.indexOf(aadObjectId), 1);
-      await retryWrapper(() => question.save(), new ExponentialBackOff());
-    }
-
-    return question;
   }
 
   /**
@@ -293,18 +306,22 @@ export class QuestionDataService {
     sessionId: string,
     questionId: string
   ): Promise<IQuestionPopulatedUser> {
-    const question = await this.getAndValidateQuestion(
-      conversationId,
-      sessionId,
-      questionId
+    return await retryWrapperForConcurrency<IQuestionPopulatedUser>(
+      async () => {
+        const question = await this.getAndValidateQuestion(
+          conversationId,
+          sessionId,
+          questionId
+        );
+
+        if (!question.isAnswered) {
+          question.isAnswered = true;
+          await question.save();
+        }
+
+        return question;
+      }
     );
-
-    if (!question.isAnswered) {
-      question.isAnswered = true;
-      await retryWrapper(() => question.save(), new ExponentialBackOff());
-    }
-
-    return question;
   }
 
   /**

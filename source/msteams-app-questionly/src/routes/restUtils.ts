@@ -13,6 +13,7 @@ import { UserIsNotPartOfConversationError } from 'src/errors/userIsNotPartOfConv
 import { ConversationDoesNotBelongToMeetingChatError } from 'src/errors/conversationDoesNotBelongToMeetingChatError';
 import { Request } from 'express';
 import { ParameterMissingInRequestError } from 'src/errors/parameterMissingInRequestError';
+import { TelemetryExceptions } from 'src/constants/telemetryConstants';
 
 /**
  * Checks if a given parameter is a valid string.
@@ -121,7 +122,12 @@ export const getTeamsUserId = async (
         }
         throw new Error('Could not get member info for teams user');
     } catch (error) {
-        exceptionLogger(error);
+        exceptionLogger(error, {
+            conversationId: conversationId,
+            userAadObjectId: userAadObjectId,
+            filename: module.id,
+            exceptionName: TelemetryExceptions.GetTeamsMemberIdFailed,
+        });
         throw error;
     }
 };

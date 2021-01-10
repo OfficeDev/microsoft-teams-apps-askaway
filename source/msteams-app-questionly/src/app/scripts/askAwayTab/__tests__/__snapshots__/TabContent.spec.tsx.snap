@@ -1,0 +1,109 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TabContent Component should match the snapshot 1`] = `
+<Fragment>
+  <div>
+    <Flex
+      className="screen"
+      gap="gap.large"
+    >
+      <Button
+        accessibility={[Function]}
+        as="button"
+        size="medium"
+        text={true}
+      >
+        <RetryIcon
+          xSpacing="after"
+        />
+        <ButtonContent
+          as="span"
+        >
+          Refresh
+        </ButtonContent>
+      </Button>
+      <Button
+        accessibility={[Function]}
+        as="button"
+        size="medium"
+        text={true}
+      >
+        <AddIcon
+          outline={true}
+          xSpacing="after"
+        />
+        <ButtonContent
+          as="span"
+        >
+          Create a new session
+        </ButtonContent>
+      </Button>
+      <Button
+        accessibility={[Function]}
+        as="button"
+        size="medium"
+        text={true}
+      >
+        <SwitchIcon
+          outline={true}
+          xSpacing="after"
+        />
+        <ButtonContent
+          as="span"
+        >
+          Switch to different sessions
+        </ButtonContent>
+      </Button>
+    </Flex>
+  </div>
+  <Flex
+    className="screen"
+    hAlign="center"
+    vAlign="center"
+  >
+    <Image
+      accessibility={[Function]}
+      alt="image"
+      as="img"
+      className="create-session"
+      src="create_session.png"
+    />
+    <FlexItem
+      align="center"
+    >
+      <Text
+        as="span"
+        className="text-caption"
+        content="Welcome to Ask Away! We’re glad you’re here."
+      />
+    </FlexItem>
+    <FlexItem
+      align="center"
+    >
+      <Text
+        as="span"
+        className="text-subcaption"
+        content="Ask away is your tool to create and manage Q&A sessions."
+      />
+    </FlexItem>
+    <FlexItem
+      align="center"
+    >
+      <Button
+        accessibility={[Function]}
+        as="button"
+        className="button"
+        onClick={[Function]}
+        primary={true}
+        size="medium"
+      >
+        <ButtonContent
+          as="span"
+        >
+          Create an ask away
+        </ButtonContent>
+      </Button>
+    </FlexItem>
+  </Flex>
+</Fragment>
+`;
