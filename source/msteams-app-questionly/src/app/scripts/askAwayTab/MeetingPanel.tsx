@@ -3,29 +3,14 @@ import './index.scss';
 // tslint:disable-next-line:no-relative-imports
 import * as React from 'react';
 import * as microsoftTeams from '@microsoft/teams-js';
-import {
-    Flex,
-    Text,
-    Button,
-    Image,
-    FlexItem,
-    Loader,
-    Menu,
-    menuAsToolbarBehavior,
-    ShorthandCollection,
-    MenuItemProps,
-} from '@fluentui/react-northstar';
-import {
-    MoreIcon,
-    LeaveIcon,
-    RetryIcon,
-} from '@fluentui/react-icons-northstar';
+import { Flex, Text, Button, Image, Loader } from '@fluentui/react-northstar';
 import { CONST } from './shared/ConfigVariables';
 import { ApplicationInsights } from '@microsoft/applicationinsights-web';
 import { HttpService } from './shared/HttpService';
 import { SignalRLifecycle } from './signalR/SignalRLifecycle';
 import QuestionsList from './MeetingPanel/questionsList';
 import Question from './MeetingPanel/question';
+import QuestionsHeader from './MeetingPanel/questionHeader';
 import { Helper } from './shared/Helper';
 import { ActiveSessionData } from './types';
 
@@ -73,7 +58,7 @@ class MeetingPanel extends React.Component<
     /**
      * To Identify Active Session
      */
-    private getActiveSession() {
+    getActiveSession = () => {
         this.setState({ showLoader: true });
         this.props.httpService
             .get(
@@ -90,7 +75,7 @@ class MeetingPanel extends React.Component<
             .catch((error) => {
                 this.setState({ showLoader: false });
             });
-    }
+    };
 
     /**
      * To End the active session
@@ -286,65 +271,6 @@ class MeetingPanel extends React.Component<
     }
 
     /**
-     * Meeting panel header
-     */
-    showMenubar = (sessionTitle) => {
-        const menuItems: ShorthandCollection<MenuItemProps> = [
-            {
-                icon: (
-                    <MoreIcon
-                        {...{
-                            outline: false,
-                        }}
-                    />
-                ),
-                key: 'menuButton2',
-                'aria-label': 'More options',
-                indicator: false,
-                menu: {
-                    items: [
-                        {
-                            key: 'Refresh session',
-                            content: 'Refresh session',
-                            onClick: () => {
-                                this.getActiveSession();
-                            },
-                            icon: <RetryIcon outline />,
-                        },
-                        {
-                            key: 'End session',
-                            content: 'End session',
-                            onClick: this.endActiveSession,
-                            icon: <LeaveIcon outline />,
-                        },
-                    ],
-                },
-            },
-        ];
-
-        return (
-            <Flex vAlign="start">
-                <Text
-                    className="session-title"
-                    content={sessionTitle}
-                    size="medium"
-                />
-                <FlexItem push>
-                    <div className="menuHeader">
-                        <Menu
-                            defaultActiveIndex={0}
-                            items={menuItems}
-                            iconOnly
-                            accessibility={menuAsToolbarBehavior}
-                            aria-label="Compose Editor"
-                        />
-                    </div>
-                </FlexItem>
-            </Flex>
-        );
-    };
-
-    /**
      * This function is triggered on events from signalR connection.
      * @param dataEvent - event received.
      */
@@ -396,7 +322,11 @@ class MeetingPanel extends React.Component<
             stateVal.activeSessionData.title ?? stateVal.input.title;
         return (
             <React.Fragment>
-                {this.showMenubar(sessionTitle)}
+                <QuestionsHeader
+                    title={sessionTitle}
+                    onClickRefreshSession={this.getActiveSession}
+                    onClickEndSession={this.endActiveSession}
+                />
                 {stateVal.activeSessionData.unansweredQuestions.length > 0 ||
                 stateVal.activeSessionData.answeredQuestions.length > 0 ? (
                     <QuestionsList

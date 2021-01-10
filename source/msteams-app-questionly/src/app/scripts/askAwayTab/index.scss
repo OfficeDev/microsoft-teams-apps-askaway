@@ -148,8 +148,9 @@
         bottom: 0.75rem;
         width: 94%;
         .text-question {
-            height: 2.5rem;
+            height: auto;
             margin-right: -0.5rem;
+            word-break: break-word;
         }
         .send-button {
             position: relative;

@@ -15,7 +15,7 @@ import { useState, useMemo } from 'react';
 import * as microsoftTeams from '@microsoft/teams-js';
 import { HttpService } from '../shared/HttpService';
 import { ActiveSessionData } from '../types';
-
+import QuestionsTab from './questionsTab';
 export interface QuestionsListProps {
     activeSessionData: ActiveSessionData;
     constValue: any;
@@ -236,45 +236,12 @@ const QuestionsList: React.FunctionComponent<QuestionsListProps> = (props) => {
         });
     };
 
-    /**
-     * Display Pending and answered questions menu
-     * @param stateVal - this.state
-     */
-    const liveQuestionsMenu = (constValue) => {
-        const items = [
-            {
-                key: constValue.TAB_QUESTIONS.UNANSWERED_Q,
-                content: 'Pending questions',
-                onClick: () => {
-                    setActiveLiveTab(constValue.TAB_QUESTIONS.UNANSWERED_Q);
-                },
-            },
-            {
-                key: constValue.TAB_QUESTIONS.ANSWERED_Q,
-                content: 'Answered questions',
-                onClick: () => {
-                    setActiveLiveTab(constValue.TAB_QUESTIONS.ANSWERED_Q);
-                },
-            },
-        ];
-        return (
-            <React.Fragment>
-                <Menu
-                    defaultActiveIndex={0}
-                    items={items}
-                    primary
-                    underlined
-                    accessibility={tabListBehavior}
-                    aria-label="Today's events"
-                    className="menu-bar"
-                />
-            </React.Fragment>
-        );
-    };
-
     return (
         <React.Fragment>
-            {liveQuestionsMenu(props.constValue)}
+            <QuestionsTab
+                constValue={props.constValue}
+                onSelectActiveTab={setActiveLiveTab}
+            />
             {liveQuestions(
                 activeSessionData,
                 liveTab.selectedTab ===
