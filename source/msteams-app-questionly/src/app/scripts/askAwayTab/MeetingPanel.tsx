@@ -27,7 +27,6 @@ import { HttpService } from './shared/HttpService';
 import { SignalRLifecycle } from './signalR/SignalRLifecycle';
 
 const EmptySessionImage = require('./../../web/assets/create_session.png');
-// const EndSessionImage =  require('./../../web/assets/end_session.png');
 export interface MeetingPanelProps {
     teamsTabContext: any;
     httpService: HttpService;
@@ -70,7 +69,6 @@ class MeetingPanel extends React.Component<
                 isDescription: false,
             },
         };
-        this.onShowTaskModule = this.onShowTaskModule.bind(this);
     }
 
     componentDidMount() {
@@ -125,7 +123,7 @@ class MeetingPanel extends React.Component<
     /**
      * Display Create AMA session form
      */
-    private onShowTaskModule() {
+    private onShowTaskModule = () => {
         let taskInfo: any = {
             fallbackUrl: '',
             appId: process.env.MicrosoftAppId,
@@ -172,7 +170,7 @@ class MeetingPanel extends React.Component<
         };
 
         microsoftTeams.tasks.startTask(taskInfo, submitHandler);
-    }
+    };
 
     /**
      * Display's success and failure screens for AMA session
