@@ -112,6 +112,12 @@ const QuestionsList: React.FunctionComponent<QuestionsListProps> = (props) => {
                 <React.Fragment>
                     <div className="question-card">
                         {activeSessionData[key].map((q, index) => {
+                            q['isUserLiked'] = isUserLikedQuestion(
+                                q.voterAadObjectIds,
+                                props.teamsTabContext.userObjectId
+                            )
+                                ? true
+                                : false;
                             return (
                                 <div
                                     className="card-divider"
@@ -190,12 +196,24 @@ const QuestionsList: React.FunctionComponent<QuestionsListProps> = (props) => {
                                                                 onClickAction(
                                                                     q,
                                                                     key,
-                                                                    constValue
-                                                                        .TAB_QUESTIONS
-                                                                        .UP_VOTE
+                                                                    q.isUserLiked
+                                                                        ? constValue
+                                                                              .TAB_QUESTIONS
+                                                                              .DOWN_VOTE
+                                                                        : constValue
+                                                                              .TAB_QUESTIONS
+                                                                              .UP_VOTE
                                                                 )
                                                             }
-                                                            icon={<LikeIcon />}
+                                                            icon={
+                                                                q.isUserLiked ? (
+                                                                    <LikeIcon />
+                                                                ) : (
+                                                                    <LikeIcon
+                                                                        outline
+                                                                    />
+                                                                )
+                                                            }
                                                             className="like-icon-size"
                                                             iconOnly
                                                             text
@@ -223,6 +241,17 @@ const QuestionsList: React.FunctionComponent<QuestionsListProps> = (props) => {
                 </React.Fragment>
             )
         );
+    };
+
+    const isUserLikedQuestion = (idsArray, userId) => {
+        let response = false;
+        if (idsArray.length > 0 && userId) {
+            const isUserLiked = idsArray.includes(userId);
+            if (isUserLiked) {
+                response = true;
+            }
+        }
+        return response;
     };
 
     /**

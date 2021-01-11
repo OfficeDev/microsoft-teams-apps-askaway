@@ -27,7 +27,7 @@ describe('Meeting Panel Component', () => {
     it('should render loader when showloader value is true', () => {
         const component = shallow(
             <MeetingPanel
-                teamsTabContext={{}}
+                teamsTabContext={{ entityId: '', locale: '' }}
                 httpService={httpServiceIns}
                 appInsights={telemetryService.appInsights}
                 helper={Helper}
@@ -42,7 +42,7 @@ describe('Meeting Panel Component', () => {
     it('should render meeting panel when activeSessionData is present', () => {
         const component = shallow(
             <MeetingPanel
-                teamsTabContext={{}}
+                teamsTabContext={{ entityId: '', locale: '' }}
                 httpService={httpServiceIns}
                 appInsights={telemetryService.appInsights}
                 helper={Helper}
@@ -58,7 +58,7 @@ describe('Meeting Panel Component', () => {
     it('should render createSessionLayout when activeSessionData is not present', () => {
         const component = shallow(
             <MeetingPanel
-                teamsTabContext={{}}
+                teamsTabContext={{ entityId: '', locale: '' }}
                 httpService={httpServiceIns}
                 appInsights={telemetryService.appInsights}
                 helper={Helper}

@@ -6,9 +6,10 @@ import * as React from 'react';
 import { shallow, configure } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import Adapter from 'enzyme-adapter-react-16';
-import { TabContent } from '../TabContent';
+import TabContent from '../TabContent';
 import { telemetryService } from '../../telemetryService';
 import { HttpService } from '../shared/HttpService';
+import * as microsoftTeams from '@microsoft/teams-js';
 import Helper from '../shared/Helper';
 import { Button, Text } from '@fluentui/react-northstar';
 
@@ -28,7 +29,7 @@ describe('TabContent Component', () => {
     it('should match the snapshot', () => {
         const wrapper = shallow(
             <TabContent
-                teamsTabContext={{}}
+                teamsTabContext={{ entityId: '', locale: '' }}
                 httpService={httpServiceIns}
                 appInsights={telemetryService.appInsights}
                 helper={Helper}
@@ -40,7 +41,7 @@ describe('TabContent Component', () => {
     it('should render TabContent', () => {
         const component = shallow(
             <TabContent
-                teamsTabContext={{}}
+                teamsTabContext={{ entityId: '', locale: '' }}
                 httpService={httpServiceIns}
                 appInsights={telemetryService.appInsights}
                 helper={Helper}
