@@ -1,12 +1,14 @@
 import Express from 'express';
 import { IConversationDataService, qnaSessionDataService, IUser, IQnASession_populated, IQuestionPopulatedUser } from 'msteams-app-questionly.data';
-import { patchActionForQuestion, getTeamsUserId, ensureUserIsPartOfMeetingConversation, ensureConversationBelongsToMeetingChat, getAndEnsureRequestBodyContainsParameter } from 'src/routes/restUtils';
+import { getTeamsUserId, ensureUserIsPartOfMeetingConversation, ensureConversationBelongsToMeetingChat, getAndEnsureRequestBodyContainsParameter } from 'src/routes/restUtils';
 import { getParticipantRole } from 'src/util/meetingsUtility';
 import { StatusCodes } from 'http-status-codes';
 import { downvoteQuestion, endQnASession, markQuestionAsAnswered, startQnASession, submitNewQuestion, upvoteQuestion } from 'src/controller';
 import { createResponseForBadRequest } from 'src/routes/responseUtility';
 import { ClientDataContract } from 'src/contracts/clientDataContract';
 import { formatQnaSessionDataArrayAsPerClientDataContract, formatQnaSessionDataAsPerClientDataContract, formatQuestionDataAsPerClientDataContract } from 'src/util/clientDataContractFormatter';
+import { QuestionPatchAction } from 'src/enums/questionPatchAction';
+import { QnaSessionPatchAction } from 'src/enums/qnaSessionPatchAction';
 
 export const router = Express.Router();
 let conversationDataService: IConversationDataService;
@@ -122,11 +124,18 @@ router.patch('/:conversationId/sessions/:sessionId', async (req: Express.Request
     try {
         const action = getAndEnsureRequestBodyContainsParameter(req, 'action');
 
+        const allowedPatchActions = Object.values(QnaSessionPatchAction).map((value) => value.toString());
+
+        if (!allowedPatchActions.includes(action)) {
+            createResponseForBadRequest(res, `action ${action} is not supported`);
+            return;
+        }
+
         const user: IUser = <IUser>req.user;
         const sessionId = req.params['sessionId'];
         const conversationId = req.params['conversationId'];
 
-        if (action === 'end') {
+        if (action === QnaSessionPatchAction.End) {
             const conversationData = await conversationDataService.getConversationData(conversationId);
 
             ensureConversationBelongsToMeetingChat(conversationData);
@@ -144,9 +153,6 @@ router.patch('/:conversationId/sessions/:sessionId', async (req: Express.Request
                 user.userName,
                 endedByUserId
             );
-        } else {
-            createResponseForBadRequest(res, `action ${action} is not supported`);
-            return;
         }
 
         res.status(StatusCodes.NO_CONTENT).send();
@@ -213,7 +219,9 @@ router.patch('/:conversationId/sessions/:sessionId/questions/:questionId', async
     try {
         const action = getAndEnsureRequestBodyContainsParameter(req, 'action');
 
-        if (!patchActionForQuestion.includes(action.trim())) {
+        const allowedPatchActions = Object.values(QuestionPatchAction).map((value) => value.toString());
+
+        if (!allowedPatchActions.includes(action)) {
             createResponseForBadRequest(res, `action ${action} is not supported`);
             return;
         }
@@ -227,19 +235,19 @@ router.patch('/:conversationId/sessions/:sessionId/questions/:questionId', async
 
         let question: IQuestionPopulatedUser;
 
-        if (action === 'upvote') {
+        if (action === QuestionPatchAction.Upvote) {
             await ensureUserIsPartOfMeetingConversation(conversationData, user._id);
 
             question = await upvoteQuestion(conversationId, sessionId, questionId, user._id, user.userName);
 
             res.status(StatusCodes.OK).send(formatQuestionDataAsPerClientDataContract(question));
-        } else if (action === 'downvote') {
+        } else if (action === QuestionPatchAction.Downvote) {
             await ensureUserIsPartOfMeetingConversation(conversationData, user._id);
 
             question = await downvoteQuestion(conversationId, sessionId, questionId, user._id);
 
             res.status(StatusCodes.OK).send(formatQuestionDataAsPerClientDataContract(question));
-        } else if (action === 'markAnswered') {
+        } else if (action === QuestionPatchAction.MarkAnswered) {
             ensureConversationBelongsToMeetingChat(conversationData);
 
             question = await markQuestionAsAnswered(

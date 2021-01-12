@@ -40,7 +40,7 @@ export const getAndEnsureRequestBodyContainsParameter = (req: Request, parameter
         throw new ParameterMissingInRequestError(parameterName);
     }
 
-    return req.body[parameterName];
+    return req.body[parameterName]?.trim();
 };
 
 /**
@@ -70,8 +70,6 @@ export const ensureUserIsPartOfMeetingConversation = async (conversationData: IC
         throw new UserIsNotPartOfConversationError();
     }
 };
-
-export const patchActionForQuestion = ['upvote', 'downvote', 'markAnswered'];
 
 /**
  * Get teams member id from teams member info. This is the 29:xxx ID for the user.
