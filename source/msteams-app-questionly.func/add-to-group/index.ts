@@ -24,8 +24,8 @@ const httpTrigger: AzureFunction = async function (
 ): Promise<void> {
   const conversationId: string = req.body?.conversationId;
   const connectionId: string = req.body?.connectionId;
-  const userId: string = req[userIdParameterConstant];
   const operationId: string = req.body?.operationId;
+  let userId: string;
 
   try {
     // Validate request parameters.
@@ -60,6 +60,7 @@ const httpTrigger: AzureFunction = async function (
     // Initiate db connection if not initiated already.
     await initiateDBConnection();
 
+    userId = req[userIdParameterConstant];
     const conversation: IConversation = await getConversationData(
       conversationId
     );

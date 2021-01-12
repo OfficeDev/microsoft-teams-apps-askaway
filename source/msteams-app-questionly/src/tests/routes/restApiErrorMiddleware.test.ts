@@ -14,11 +14,6 @@ import { restApiErrorMiddleware } from 'src/routes/restApiErrorMiddleware';
 const request = {
     path: '/api/conversations',
 } as Request;
-request.params = {
-    conversationId: 'sampleConversationId',
-    sessionId: 'sampleSessionId',
-    questionId: 'sampleQuestionId',
-};
 
 // tslint:disable-next-line
 const response = {
@@ -116,6 +111,11 @@ test('restApiErrorMiddleware - handle ParameterMissingInRequestError', async () 
 test('restApiErrorMiddleware - handle generic error', async () => {
     const testErrorMessage = 'testErrorMessage';
     const error = new Error(testErrorMessage);
+    request.params = {
+        conversationId: 'sampleConversationId',
+        sessionId: 'sampleSessionId',
+        questionId: 'sampleQuestionId',
+    };
     restApiErrorMiddleware(error, request, response, next);
 
     expect(next).toBeCalledTimes(1);
