@@ -7,13 +7,17 @@ import { useState } from 'react';
 import { HttpService } from '../shared/HttpService';
 import * as microsoftTeams from '@microsoft/teams-js';
 import { ActiveSessionData } from '../types';
-export interface QuestionProps {
+
+/**
+ * Properties for the NewQuestion React component
+ */
+export interface NewQuestionProps {
     activeSessionData: ActiveSessionData;
     httpService: HttpService;
     teamsTabContext: microsoftTeams.Context;
     onAddNewQuestion: Function;
 }
-const Question: React.FunctionComponent<QuestionProps> = (props) => {
+const NewQuestion: React.FunctionComponent<NewQuestionProps> = (props) => {
     const [question, setQuestion] = useState('');
 
     /**
@@ -22,10 +26,7 @@ const Question: React.FunctionComponent<QuestionProps> = (props) => {
     const submitQuestion = () => {
         if (question) {
             props.httpService
-                .post(
-                    `/conversations/${props.teamsTabContext.chatId}/sessions/${props.activeSessionData.sessionId}/questions`,
-                    { questionContent: question }
-                )
+                .post(`/conversations/${props.teamsTabContext.chatId}/sessions/${props.activeSessionData.sessionId}/questions`, { questionContent: question })
                 .then((response: any) => {
                     if (response && response.data && response.data.id) {
                         setQuestion('');
@@ -51,20 +52,10 @@ const Question: React.FunctionComponent<QuestionProps> = (props) => {
                     value={question}
                 />
                 <FlexItem push>
-                    <Button
-                        className="send-button"
-                        icon={
-                            <SendIcon
-                                size="large"
-                                onClick={() => submitQuestion()}
-                            />
-                        }
-                        text
-                        iconOnly
-                    />
+                    <Button className="send-button" icon={<SendIcon size="large" onClick={() => submitQuestion()} />} text iconOnly />
                 </FlexItem>
             </Flex>
         </div>
     );
 };
-export default Question;
+export default NewQuestion;

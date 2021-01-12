@@ -1,21 +1,10 @@
 // tslint:disable-next-line:no-relative-imports
 import './../index.scss';
 import * as React from 'react';
-import {
-    Provider,
-    Flex,
-    Text,
-    Button,
-    Form,
-    Input,
-    TextArea,
-    FlexItem,
-} from '@fluentui/react-northstar';
+import { Provider, Flex, Text, Button, Form, Input, TextArea, FlexItem } from '@fluentui/react-northstar';
 // tslint:disable-next-line:no-relative-imports
 import * as microsoftTeams from '@microsoft/teams-js';
-import msteamsReactBaseComponent, {
-    ITeamsBaseComponentState,
-} from 'msteams-react-base-component';
+import msteamsReactBaseComponent, { ITeamsBaseComponentState } from 'msteams-react-base-component';
 export interface CreateSessionProps {}
 export interface CreateSessionState extends ITeamsBaseComponentState {
     theme: any;
@@ -29,12 +18,7 @@ export interface CreateSessionState extends ITeamsBaseComponentState {
     };
 }
 
-export interface CreateSessionProps {}
-
-export class CreateSession extends msteamsReactBaseComponent<
-    CreateSessionProps,
-    CreateSessionState
-> {
+export class CreateSession extends msteamsReactBaseComponent<CreateSessionProps, CreateSessionState> {
     constructor(props) {
         super(props);
         this.state = {
@@ -122,22 +106,10 @@ export class CreateSession extends msteamsReactBaseComponent<
                             fluid
                             placeholder="Type a name"
                             styles={{ color: '#c8c6c4' }}
-                            onKeyUp={(e) =>
-                                this.validateCreateSessionField(
-                                    this.state.input.title,
-                                    'isTitle'
-                                )
-                            }
+                            onKeyUp={(e) => this.validateCreateSessionField(this.state.input.title, 'isTitle')}
                             onChange={(e) => this.appendInput(e, 'title')}
                         />
-                        {this.state.error.isTitle && (
-                            <Text
-                                styles={{ display: 'inline-flex' }}
-                                error
-                                content="Title is required*"
-                                size="small"
-                            />
-                        )}
+                        {this.state.error.isTitle && <Text styles={{ display: 'inline-flex' }} error content="Title is required*" size="small" />}
                     </div>
                     <div className="form-grid">
                         <Text content="Description*" size="small" />
@@ -145,32 +117,15 @@ export class CreateSession extends msteamsReactBaseComponent<
                             fluid
                             styles={{ marginTop: '0.25rem' }}
                             placeholder="Type a description"
-                            onKeyUp={(e) =>
-                                this.validateCreateSessionField(
-                                    this.state.input.description,
-                                    'isDescription'
-                                )
-                            }
+                            onKeyUp={(e) => this.validateCreateSessionField(this.state.input.description, 'isDescription')}
                             onChange={(e) => this.appendInput(e, 'description')}
                         />
-                        {this.state.error.isDescription && (
-                            <Text
-                                styles={{ display: 'inline-flex' }}
-                                error
-                                content="Description is required*"
-                                size="small"
-                            />
-                        )}
+                        {this.state.error.isDescription && <Text styles={{ display: 'inline-flex' }} error content="Description is required*" size="small" />}
                     </div>
                     <div className="form-grid">
                         <Flex>
                             <FlexItem push>
-                                <Button
-                                    primary
-                                    type="submit"
-                                    className="btn-create-session"
-                                    size="small"
-                                >
+                                <Button primary type="submit" className="btn-create-session" size="small">
                                     <Button.Content>Create</Button.Content>
                                 </Button>
                             </FlexItem>
@@ -188,9 +143,7 @@ export class CreateSession extends msteamsReactBaseComponent<
         return (
             <Provider theme={this.state.theme}>
                 <React.Fragment>
-                    <div style={{ padding: '1rem 2rem' }}>
-                        {this.showCreateSessionForm()}
-                    </div>
+                    <div style={{ padding: '1rem 2rem' }}>{this.showCreateSessionForm()}</div>
                 </React.Fragment>
             </Provider>
         );

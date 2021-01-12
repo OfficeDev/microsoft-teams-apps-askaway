@@ -12,7 +12,7 @@ export class Helper {
         }
     }
 
-    public emptyActiveSessionData() {
+    public createEmptyActiveSessionData() {
         return {
             sessionId: '',
             title: '',

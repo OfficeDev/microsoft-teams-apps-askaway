@@ -7,7 +7,7 @@
         position: absolute;
     }
     .create-session {
-        top: 30%;
+        top: 35%;
         left: 50%;
         transform: translate(-50%, -50%);
         position: absolute;
@@ -79,14 +79,15 @@
         .text-caption-panel {
             font-size: 12px;
             line-height: 16px;
-            top: 52%;
+            top: 55%;
             position: absolute;
             text-align: center;
             width: 70%;
-            left: 17%;
+            left: 25%;
+            max-inline-size: 9rem;
         }
         .create-session {
-            top: 30%;
+            top: 35%;
             left: 50%;
             transform: translate(-50%, -50%);
             position: absolute;
@@ -110,7 +111,8 @@
         height: 20rem;
         overflow-x: hidden;
         .card-divider {
-            border-bottom: 1px solid #979797;
+            border-bottom: 1px solid #3b3a39;
+            height: 4.5rem;
             .card-layout {
                 width: 100%;
                 padding: 0.5rem;
@@ -129,7 +131,7 @@
                 .card-body-question {
                     font-size: 14px;
                     line-height: 20px;
-                    margin-top: 0.75rem;
+                    margin-top: 0.4rem;
                 }
             }
         }
@@ -148,7 +150,7 @@
         bottom: 0.75rem;
         width: 94%;
         .text-question {
-            height: auto;
+            height: 2.5rem;
             margin-right: -0.5rem;
             word-break: break-word;
         }
