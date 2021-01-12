@@ -80,7 +80,7 @@ export const startQnASession = async (sessionParameters: {
         isChannel: sessionParameters.isChannel,
         meetingId: sessionParameters.meetingId,
         conversationId: sessionParameters.conversationId,
-        title: sessionParameters.title,
+        sessionTitle: sessionParameters.title,
     });
 
     await triggerBackgroundJobForQnaSessionCreatedEvent(response);
