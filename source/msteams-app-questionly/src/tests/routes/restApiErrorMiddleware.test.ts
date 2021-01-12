@@ -2,10 +2,7 @@ import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { ConversationDoesNotBelongToMeetingChatError } from 'src/errors/conversationDoesNotBelongToMeetingChatError';
 import { errorMessages } from 'src/errors/errorMessages';
-import {
-    UnauthorizedAccessError,
-    UnauthorizedAccessErrorCode,
-} from 'src/errors/unauthorizedAccessError';
+import { UnauthorizedAccessError, UnauthorizedAccessErrorCode } from 'src/errors/unauthorizedAccessError';
 import { ParameterMissingInRequestError } from 'src/errors/parameterMissingInRequestError';
 import { UserIsNotPartOfConversationError } from 'src/errors/userIsNotPartOfConversationError';
 import { restApiErrorMiddleware } from 'src/routes/restApiErrorMiddleware';
@@ -41,31 +38,23 @@ beforeEach(() => {
 });
 
 test('restApiErrorMiddleware - handle InsufficientPermissionsToCreateOrEndQnASessionError', async () => {
-    const error = new UnauthorizedAccessError(
-        UnauthorizedAccessErrorCode.InsufficientPermissionsToCreateOrEndQnASession
-    );
+    const error = new UnauthorizedAccessError(UnauthorizedAccessErrorCode.InsufficientPermissionsToCreateOrEndQnASession);
     restApiErrorMiddleware(error, request, response, next);
 
     expect(next).toBeCalledTimes(1);
     expect(next).toBeCalledWith(error);
     expect(response.statusCode).toEqual(StatusCodes.FORBIDDEN);
-    expect(response.statusMessage).toEqual(
-        errorMessages.InsufficientPermissionsToCreateOrEndQnASessionErrorMessage
-    );
+    expect(response.statusMessage).toEqual(errorMessages.InsufficientPermissionsToCreateOrEndQnASessionErrorMessage);
 });
 
 test('restApiErrorMiddleware - handle InsufficientPermissionsToMarkQuestionAsAnsweredError', async () => {
-    const error = new UnauthorizedAccessError(
-        UnauthorizedAccessErrorCode.InsufficientPermissionsToMarkQuestionAsAnswered
-    );
+    const error = new UnauthorizedAccessError(UnauthorizedAccessErrorCode.InsufficientPermissionsToMarkQuestionAsAnswered);
     restApiErrorMiddleware(error, request, response, next);
 
     expect(next).toBeCalledTimes(1);
     expect(next).toBeCalledWith(error);
     expect(response.statusCode).toEqual(StatusCodes.FORBIDDEN);
-    expect(response.statusMessage).toEqual(
-        errorMessages.InsufficientPermissionsToMarkQuestionAsAnsweredErrorMessage
-    );
+    expect(response.statusMessage).toEqual(errorMessages.InsufficientPermissionsToMarkQuestionAsAnsweredErrorMessage);
 });
 
 test('restApiErrorMiddleware - handle ConversationDoesNotBelongToMeetingChatError', async () => {
@@ -75,9 +64,7 @@ test('restApiErrorMiddleware - handle ConversationDoesNotBelongToMeetingChatErro
     expect(next).toBeCalledTimes(1);
     expect(next).toBeCalledWith(error);
     expect(response.statusCode).toEqual(StatusCodes.FORBIDDEN);
-    expect(response.statusMessage).toEqual(
-        errorMessages.ConversationDoesNotBelongToMeetingChatErrorMessage
-    );
+    expect(response.statusMessage).toEqual(errorMessages.ConversationDoesNotBelongToMeetingChatErrorMessage);
 });
 
 test('restApiErrorMiddleware - handle UserIsNotPartOfConversationError', async () => {
@@ -87,9 +74,7 @@ test('restApiErrorMiddleware - handle UserIsNotPartOfConversationError', async (
     expect(next).toBeCalledTimes(1);
     expect(next).toBeCalledWith(error);
     expect(response.statusCode).toEqual(StatusCodes.FORBIDDEN);
-    expect(response.statusMessage).toEqual(
-        errorMessages.UserIsNotPartOfConversationErrorMessage
-    );
+    expect(response.statusMessage).toEqual(errorMessages.UserIsNotPartOfConversationErrorMessage);
 });
 
 test('restApiErrorMiddleware - handle ParameterMissingInRequestError', async () => {
@@ -100,12 +85,7 @@ test('restApiErrorMiddleware - handle ParameterMissingInRequestError', async () 
     expect(next).toBeCalledTimes(1);
     expect(next).toBeCalledWith(error);
     expect(response.statusCode).toEqual(StatusCodes.BAD_REQUEST);
-    expect(response.statusMessage).toEqual(
-        errorMessages.ParameterMissingInRequestErrorMessage.replace(
-            '{0}',
-            testParamName
-        )
-    );
+    expect(response.statusMessage).toEqual(errorMessages.ParameterMissingInRequestErrorMessage.replace('{0}', testParamName));
 });
 
 test('restApiErrorMiddleware - handle generic error', async () => {

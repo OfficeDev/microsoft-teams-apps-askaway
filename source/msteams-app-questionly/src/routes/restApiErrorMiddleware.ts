@@ -4,11 +4,7 @@ import { ConversationDoesNotBelongToMeetingChatError } from 'src/errors/conversa
 import { ParameterMissingInRequestError } from 'src/errors/parameterMissingInRequestError';
 import { UserIsNotPartOfConversationError } from 'src/errors/userIsNotPartOfConversationError';
 import { exceptionLogger } from 'src/util/exceptionTracking';
-import {
-    createResponseForBadRequest,
-    createResponseForForbiddenAccess,
-    createResponseForInternalServerError,
-} from 'src/routes/responseUtility';
+import { createResponseForBadRequest, createResponseForForbiddenAccess, createResponseForInternalServerError } from 'src/routes/responseUtility';
 import { IUser } from 'msteams-app-questionly.data';
 import { TelemetryExceptions } from 'src/constants/telemetryConstants';
 
@@ -19,12 +15,7 @@ import { TelemetryExceptions } from 'src/constants/telemetryConstants';
  * @param response - response object.
  * @param next - next function.
  */
-export const restApiErrorMiddleware = (
-    error: Error,
-    request: Request,
-    response: Response,
-    next: NextFunction
-) => {
+export const restApiErrorMiddleware = (error: Error, request: Request, response: Response, next: NextFunction) => {
     // More details will be logged as part of server side telemetry story.
     const user = <IUser>request.user;
     exceptionLogger(error, {
@@ -38,11 +29,7 @@ export const restApiErrorMiddleware = (
         exceptionName: TelemetryExceptions.RestApiCallFailed,
     });
 
-    if (
-        error instanceof UnauthorizedAccessError ||
-        error instanceof ConversationDoesNotBelongToMeetingChatError ||
-        error instanceof UserIsNotPartOfConversationError
-    ) {
+    if (error instanceof UnauthorizedAccessError || error instanceof ConversationDoesNotBelongToMeetingChatError || error instanceof UserIsNotPartOfConversationError) {
         createResponseForForbiddenAccess(response, error.message);
     } else if (error instanceof ParameterMissingInRequestError) {
         createResponseForBadRequest(response, error.message);

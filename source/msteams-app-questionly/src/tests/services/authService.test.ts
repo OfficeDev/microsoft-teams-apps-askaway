@@ -1,19 +1,11 @@
-import {
-    getBearerStrategy,
-    getIdentityMetadata,
-    getValidIssuers,
-    getValidAudiance,
-} from 'src/services/authService';
+import { getBearerStrategy, getIdentityMetadata, getValidIssuers, getValidAudiance } from 'src/services/authService';
 
 describe('authentication options tests', () => {
     beforeEach(() => {
         process.env.AzureAd_ClientId = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
-        process.env.AzureAd_ApplicationIdUri =
-            'api://example.com/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
-        process.env.AzureAd_Metadata_Endpoint =
-            'https://login.microsoftonline.com/TENANT_ID/v2.0/.well-known/openid-configuration';
-        process.env.AzureAd_ValidIssuers =
-            'https://login.microsoftonline.com/TENANT_ID/v2.0,https://sts.windows.net/TENANT_ID/';
+        process.env.AzureAd_ApplicationIdUri = 'api://example.com/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+        process.env.AzureAd_Metadata_Endpoint = 'https://login.microsoftonline.com/TENANT_ID/v2.0/.well-known/openid-configuration';
+        process.env.AzureAd_ValidIssuers = 'https://login.microsoftonline.com/TENANT_ID/v2.0,https://sts.windows.net/TENANT_ID/';
         process.env.TenantId = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
     });
 
@@ -55,30 +47,23 @@ describe('authentication options tests', () => {
 describe('identity metadata url tests', () => {
     it('get identity metadata url', () => {
         process.env.TenantId = 'testTenant';
-        process.env.AzureAd_Metadata_Endpoint =
-            'https://login.microsoftonline.com/TENANT_ID/v2.0/.well-known/openid-configuration';
+        process.env.AzureAd_Metadata_Endpoint = 'https://login.microsoftonline.com/TENANT_ID/v2.0/.well-known/openid-configuration';
 
         // Make sure tenant id is replaced in url properly.
-        expect(getIdentityMetadata()).toEqual(
-            'https://login.microsoftonline.com/testTenant/v2.0/.well-known/openid-configuration'
-        );
+        expect(getIdentityMetadata()).toEqual('https://login.microsoftonline.com/testTenant/v2.0/.well-known/openid-configuration');
     });
 
     it('get identity metadata url, spaces trimmed', () => {
         process.env.TenantId = ' testTenant ';
-        process.env.AzureAd_Metadata_Endpoint =
-            '  https://login.microsoftonline.com/TENANT_ID/v2.0/.well-known/openid-configuration  ';
+        process.env.AzureAd_Metadata_Endpoint = '  https://login.microsoftonline.com/TENANT_ID/v2.0/.well-known/openid-configuration  ';
 
         // Make sure tenant id is replaced in url properly.
-        expect(getIdentityMetadata()).toEqual(
-            'https://login.microsoftonline.com/testTenant/v2.0/.well-known/openid-configuration'
-        );
+        expect(getIdentityMetadata()).toEqual('https://login.microsoftonline.com/testTenant/v2.0/.well-known/openid-configuration');
     });
 
     it('get identity metadata url, tenant id is missing', () => {
         delete process.env.TenantId;
-        process.env.AzureAd_Metadata_Endpoint =
-            'https://login.microsoftonline.com/TENANT_ID/v2.0/.well-known/openid-configuration';
+        process.env.AzureAd_Metadata_Endpoint = 'https://login.microsoftonline.com/TENANT_ID/v2.0/.well-known/openid-configuration';
 
         expect(() => {
             getIdentityMetadata();
@@ -98,27 +83,21 @@ describe('identity metadata url tests', () => {
 describe('valid issuers tests', () => {
     it('get valid issuers', () => {
         process.env.TenantId = 'testTenant';
-        process.env.AzureAd_ValidIssuers =
-            'https://login.microsoftonline.com/TENANT_ID/v2.0,https://sts.windows.net/TENANT_ID/';
+        process.env.AzureAd_ValidIssuers = 'https://login.microsoftonline.com/TENANT_ID/v2.0,https://sts.windows.net/TENANT_ID/';
 
         const validIssuers = getValidIssuers();
         expect(validIssuers.length).toEqual(2);
-        expect(validIssuers).toContain(
-            'https://login.microsoftonline.com/testTenant/v2.0'
-        );
+        expect(validIssuers).toContain('https://login.microsoftonline.com/testTenant/v2.0');
         expect(validIssuers).toContain('https://sts.windows.net/testTenant/');
     });
 
     it('get valid issuers, spaces trimmed', () => {
         process.env.TenantId = ' testTenant  ';
-        process.env.AzureAd_ValidIssuers =
-            'https://login.microsoftonline.com/TENANT_ID/v2.0 ,  https://sts.windows.net/TENANT_ID/';
+        process.env.AzureAd_ValidIssuers = 'https://login.microsoftonline.com/TENANT_ID/v2.0 ,  https://sts.windows.net/TENANT_ID/';
 
         const validIssuers = getValidIssuers();
         expect(validIssuers.length).toEqual(2);
-        expect(validIssuers).toContain(
-            'https://login.microsoftonline.com/testTenant/v2.0'
-        );
+        expect(validIssuers).toContain('https://login.microsoftonline.com/testTenant/v2.0');
         expect(validIssuers).toContain('https://sts.windows.net/testTenant/');
     });
 
@@ -133,8 +112,7 @@ describe('valid issuers tests', () => {
 
     it('get valid issuers, tenant id is missing', () => {
         delete process.env.TenantId;
-        process.env.AzureAd_ValidIssuers =
-            'https://login.microsoftonline.com/TENANT_ID/v2.0,https://sts.windows.net/TENANT_ID/';
+        process.env.AzureAd_ValidIssuers = 'https://login.microsoftonline.com/TENANT_ID/v2.0,https://sts.windows.net/TENANT_ID/';
 
         expect(() => {
             getIdentityMetadata();
@@ -145,8 +123,7 @@ describe('valid issuers tests', () => {
 describe('azure ad valid audiance tests', () => {
     it('get azure ad valid audiance', () => {
         process.env.AzureAd_ClientId = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
-        process.env.AzureAd_ApplicationIdUri =
-            'api://example.com/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+        process.env.AzureAd_ApplicationIdUri = 'api://example.com/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 
         const validAudiance = getValidAudiance();
         expect(validAudiance.length).toEqual(2);
@@ -155,23 +132,18 @@ describe('azure ad valid audiance tests', () => {
     });
 
     it('get azure ad valid audiance, spaces trimmed', () => {
-        process.env.AzureAd_ClientId =
-            ' aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa  ';
-        process.env.AzureAd_ApplicationIdUri =
-            '  api://example.com/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa  ';
+        process.env.AzureAd_ClientId = ' aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa  ';
+        process.env.AzureAd_ApplicationIdUri = '  api://example.com/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa  ';
 
         const validAudiance = getValidAudiance();
         expect(validAudiance.length).toEqual(2);
         expect(validAudiance).toContain('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa');
-        expect(validAudiance).toContain(
-            'api://example.com/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'
-        );
+        expect(validAudiance).toContain('api://example.com/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa');
     });
 
     it('get azure ad valid audiance, azure ad client id is missing', () => {
         delete process.env.AzureAd_ClientId;
-        process.env.AzureAd_ApplicationIdUri =
-            'api://example.com/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+        process.env.AzureAd_ApplicationIdUri = 'api://example.com/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 
         expect(() => {
             getValidAudiance();
