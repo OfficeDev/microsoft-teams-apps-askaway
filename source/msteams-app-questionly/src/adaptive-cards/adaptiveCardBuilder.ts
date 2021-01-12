@@ -7,10 +7,7 @@ import seedrandom from 'seedrandom';
 import * as jwt from 'jsonwebtoken';
 import { startQnACard } from 'src/adaptive-cards/startQnACard';
 import { endQnAConfirmationCard } from 'src/adaptive-cards/endQnAConfirmationCard';
-import {
-    leaderboardCard,
-    leaderboardEmptyCard,
-} from 'src/adaptive-cards/leaderboardCard';
+import { leaderboardCard, leaderboardEmptyCard } from 'src/adaptive-cards/leaderboardCard';
 import { newQuestionCard } from 'src/adaptive-cards/newQuestionCard';
 import { errorCard } from 'src/adaptive-cards/errorCard';
 import { getAvatarKey } from 'src/util/keyvault';
@@ -19,11 +16,7 @@ import { IQuestionPopulatedUser } from 'msteams-app-questionly.data';
 /**
  * @returns The adaptive card used to collect data to create the QnA session
  */
-export const getStartQnACard = (
-    title = '',
-    description = '',
-    errorMessage = ''
-): AdaptiveCard => {
+export const getStartQnACard = (title = '', description = '', errorMessage = ''): AdaptiveCard => {
     const template = new ACData.Template(startQnACard()).expand({
         $root: {
             title,
@@ -66,39 +59,25 @@ export const generateLeaderboard = async (
     isActiveQnA: boolean,
     theme: string
 ): Promise<AdaptiveCard> => {
-    if (!questionData.length)
-        return generateEmptyLeaderboard(qnaSessionId, isHost, isActiveQnA);
+    if (!questionData.length) return generateEmptyLeaderboard(qnaSessionId, isHost, isActiveQnA);
 
     const leaderboardTemplate = leaderboardCard();
 
-    questionData = questionData
-        .sort(
-            (a: IQuestionPopulatedUser, b: IQuestionPopulatedUser) =>
-                a.voters.length - b.voters.length
-        )
-        .reverse();
+    questionData = questionData.sort((a: IQuestionPopulatedUser, b: IQuestionPopulatedUser) => a.voters.length - b.voters.length).reverse();
 
     questionData = await Promise.all(
         questionData.map(async (question) => {
             const questionObject = <any>question.toObject();
             questionObject.upvotes = questionObject.voters.length;
-            questionObject.upvotable =
-                aadObjectId !== questionObject.userId._id;
-            questionObject.upvoted = questionObject.voters.includes(
-                aadObjectId
-            );
-            questionObject.userId.picture = await getPersonImage(
-                questionObject.userId.userName,
-                question.userId._id
-            );
+            questionObject.upvotable = aadObjectId !== questionObject.userId._id;
+            questionObject.upvoted = questionObject.voters.includes(aadObjectId);
+            questionObject.userId.picture = await getPersonImage(questionObject.userId.userName, question.userId._id);
             questionObject.isActive = isActiveQnA;
 
             return questionObject;
         })
     );
-    const userQuestions = questionData.filter(
-        (question) => question.userId._id === aadObjectId
-    );
+    const userQuestions = questionData.filter((question) => question.userId._id === aadObjectId);
 
     const data = {
         $root: {
@@ -116,9 +95,7 @@ export const generateLeaderboard = async (
         },
     };
 
-    const leaderboardPopulated = new ACData.Template(
-        leaderboardTemplate
-    ).expand(data);
+    const leaderboardPopulated = new ACData.Template(leaderboardTemplate).expand(data);
 
     return _adaptiveCard(leaderboardPopulated);
 };
@@ -129,11 +106,7 @@ export const generateLeaderboard = async (
  * @param isHost - boolean value indicating if user is the host of this current QnA session
  * @param isActiveQnA - boolean value indicating if current QnA session is active
  */
-const generateEmptyLeaderboard = (
-    qnaSessionId: string,
-    isHost?: boolean,
-    isActiveQnA?: boolean
-): AdaptiveCard => {
+const generateEmptyLeaderboard = (qnaSessionId: string, isHost?: boolean, isActiveQnA?: boolean): AdaptiveCard => {
     const leaderboardTemplate = leaderboardEmptyCard();
 
     const data = {
@@ -144,9 +117,7 @@ const generateEmptyLeaderboard = (
         },
     };
 
-    const emptyLeaderboard = new ACData.Template(leaderboardTemplate).expand(
-        data
-    );
+    const emptyLeaderboard = new ACData.Template(leaderboardTemplate).expand(data);
 
     return _adaptiveCard(emptyLeaderboard);
 };
@@ -181,9 +152,7 @@ export const _adaptiveCard = (template: IAdaptiveCard): AdaptiveCard => {
  * @param qnaSessionId - id of the current QnA session
  * @returns Adaptive Card for confirming end of QnA
  */
-export const getEndQnAConfirmationCard = (
-    qnaSessionId: string
-): AdaptiveCard => {
+export const getEndQnAConfirmationCard = (qnaSessionId: string): AdaptiveCard => {
     const template = new ACData.Template(endQnAConfirmationCard()).expand({
         $root: {
             qnaId: qnaSessionId,
@@ -198,10 +167,7 @@ export const getEndQnAConfirmationCard = (
  * @param questionContent - question asked that failed to save when error occured
  * @returns Adaptive Card with question asked inside text box
  */
-export const getResubmitQuestionErrorCard = (
-    qnaSessionId: string,
-    questionContent: string
-): AdaptiveCard => {
+export const getResubmitQuestionErrorCard = (qnaSessionId: string, questionContent: string): AdaptiveCard => {
     const template = new ACData.Template(newQuestionCard()).expand({
         $root: {
             qnaId: qnaSessionId,
@@ -216,10 +182,7 @@ export const getResubmitQuestionErrorCard = (
  * @param name - Name of the user who's initials avatar url is being retrieved
  * @param aadObjectId - aadObjectId of user who's initials avatar url is being retrieved
  */
-export const getPersonImage = async (
-    name: string,
-    aadObjectId: string
-): Promise<string> => {
+export const getPersonImage = async (name: string, aadObjectId: string): Promise<string> => {
     if (!name) return `https://${process.env.HostName}/images/anon_avatar.png`;
 
     let initials = '';
@@ -236,14 +199,11 @@ export const getPersonImage = async (
             pCount--;
             space = false;
         } else if (space && pCount === 0) {
-            initials.length === 0
-                ? (initials = char)
-                : (initials = initials[0] + char);
+            initials.length === 0 ? (initials = char) : (initials = initials[0] + char);
             space = false;
         }
     }
-    if (initials === '')
-        return `https://${process.env.HostName}/images/anon_avatar.png`;
+    if (initials === '') return `https://${process.env.HostName}/images/anon_avatar.png`;
 
     random.use(seedrandom(aadObjectId));
 
@@ -254,15 +214,10 @@ export const getPersonImage = async (
 
     const avatarKey = await getAvatarKey();
 
-    if (!avatarKey)
-        return `https://${process.env.HostName}/images/anon_avatar.png`;
+    if (!avatarKey) return `https://${process.env.HostName}/images/anon_avatar.png`;
 
-    const token = jwt.sign(
-        data,
-        Buffer.from(avatarKey, 'utf8').toString('hex'),
-        {
-            noTimestamp: true,
-        }
-    );
+    const token = jwt.sign(data, Buffer.from(avatarKey, 'utf8').toString('hex'), {
+        noTimestamp: true,
+    });
     return `https://${process.env.HostName}/avatar/${token}`;
 };

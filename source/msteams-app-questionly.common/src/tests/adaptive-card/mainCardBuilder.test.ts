@@ -15,6 +15,9 @@ describe("main card", () => {
   const sampleSessionId = "sessionid";
   const sampleUserAADObjId = "useraadobjid";
   const sampleHostUserId = "sampleHostUserId";
+  const sampleEndedById = "sampleEndedById";
+  const sampleEndedByName = "sampleEndedByName";
+  const sampleEndedByUserId = "sampleEndedByUserId";
 
   test("get title and description", async () => {
     const result: any = await getMainCard(
@@ -243,7 +246,13 @@ describe("main card", () => {
       sampleUserAADObjId,
       sampleHostUserId,
       undefined,
-      true
+      true,
+      undefined,
+      undefined,
+      undefined,
+      sampleEndedById,
+      sampleEndedByName,
+      sampleEndedByUserId
     );
     const expected = {
       type: "Container",
@@ -251,7 +260,7 @@ describe("main card", () => {
         {
           type: "TextBlock",
           text: mainCardStrings("sessionEndedNoMoreQuestions", {
-            user: `**<at>${sampleUserName}</at>**`,
+            user: `**<at>${sampleEndedByName}</at>**`,
           }),
           wrap: true,
         },
@@ -341,7 +350,13 @@ describe("main card", () => {
       sampleUserAADObjId,
       sampleHostUserId,
       undefined,
-      true
+      true,
+      undefined,
+      undefined,
+      undefined,
+      sampleEndedById,
+      sampleEndedByName,
+      sampleEndedByUserId
     );
     const expected = [
       {
@@ -354,7 +369,7 @@ describe("main card", () => {
           },
           id: "viewLeaderboard",
           qnaSessionId: sampleSessionId,
-          aadObjectId: sampleUserAADObjId,
+          aadObjectId: sampleEndedById,
         },
       },
     ];

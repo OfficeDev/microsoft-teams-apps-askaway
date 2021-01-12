@@ -1,9 +1,5 @@
 import { IAdaptiveCard } from 'adaptivecards';
-import {
-    askQuestionStrings,
-    genericStrings,
-    errorStrings,
-} from 'src/localization/locale';
+import { askQuestionStrings, genericStrings, errorStrings } from 'src/localization/locale';
 import { CardConstants } from 'src/adaptive-cards/constants/cardConstants';
 
 /**

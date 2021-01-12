@@ -13,6 +13,7 @@
   "dependencies": {
     "adaptivecards": "^1.2.6",
     "adaptivecards-templating": "^1.0.0-rc.0",
+    "applicationinsights": "^1.8.8",
     "axios": "^0.20.0",
     "azure-ad-jwt-lite": "^1.1.0",
     "botbuilder": "^4.10.4",

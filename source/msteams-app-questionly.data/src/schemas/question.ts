@@ -2,33 +2,36 @@ import * as mongoose from "mongoose";
 import { IQnASession } from "./qnASession";
 import { IUser } from "./user";
 
-const QuestionSchema = new mongoose.Schema({
-  qnaSessionId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "QnASession",
-    required: true,
+const QuestionSchema = new mongoose.Schema(
+  {
+    qnaSessionId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "QnASession",
+      required: true,
+    },
+    userId: {
+      type: String,
+      ref: "User",
+      required: true,
+    },
+    content: {
+      type: String,
+      required: true,
+      minlength: 1,
+      trim: true,
+    },
+    voters: [{ type: String, ref: "User" }],
+    dateTimeCreated: {
+      type: Date,
+      default: () => new Date(),
+    },
+    isAnswered: {
+      type: Boolean,
+      required: true,
+    },
   },
-  userId: {
-    type: String,
-    ref: "User",
-    required: true,
-  },
-  content: {
-    type: String,
-    required: true,
-    minlength: 1,
-    trim: true,
-  },
-  voters: [{ type: String, ref: "User" }],
-  dateTimeCreated: {
-    type: Date,
-    default: () => new Date(),
-  },
-  isAnswered: {
-    type: Boolean,
-    required: true,
-  },
-});
+  { optimisticConcurrency: true }
+);
 
 interface IQuestionBase extends mongoose.Document {
   content: string;

@@ -3,25 +3,8 @@ import './index.scss';
 // tslint:disable-next-line:no-relative-imports
 import * as React from 'react';
 import * as microsoftTeams from '@microsoft/teams-js';
-import {
-    Flex,
-    Text,
-    Button,
-    Image,
-    TextArea,
-    FlexItem,
-    SendIcon,
-    Loader,
-    Menu,
-    menuAsToolbarBehavior,
-    ShorthandCollection,
-    MenuItemProps,
-} from '@fluentui/react-northstar';
-import {
-    MoreIcon,
-    LeaveIcon,
-    RetryIcon,
-} from '@fluentui/react-icons-northstar';
+import { Flex, Text, Button, Image, TextArea, FlexItem, SendIcon, Loader, Menu, menuAsToolbarBehavior, ShorthandCollection, MenuItemProps } from '@fluentui/react-northstar';
+import { MoreIcon, LeaveIcon, RetryIcon } from '@fluentui/react-icons-northstar';
 import { CONST } from './shared/ConfigVariables';
 import { ApplicationInsights } from '@microsoft/applicationinsights-web';
 import { HttpService } from './shared/HttpService';
@@ -43,10 +26,7 @@ export interface MeetingPanelState {
         postQuestion: string;
     };
 }
-class MeetingPanel extends React.Component<
-    MeetingPanelProps,
-    MeetingPanelState
-> {
+class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState> {
     /**
      * signalR component instance which is used later to refresh the connection.
      */
@@ -76,9 +56,7 @@ class MeetingPanel extends React.Component<
     private getActiveSession() {
         this.setState({ showLoader: true });
         this.props.httpService
-            .get(
-                `/conversations/${this.props.teamsTabContext.chatId}/activesessions`
-            )
+            .get(`/conversations/${this.props.teamsTabContext.chatId}/activesessions`)
             .then((response: any) => {
                 if (response && response.data && response.data.length > 0) {
                     this.setState({
@@ -100,10 +78,7 @@ class MeetingPanel extends React.Component<
         if (this.state?.activeSessionData?.sessionId) {
             this.setState({ showLoader: true });
             this.props.httpService
-                .patch(
-                    `/conversations/${this.props.teamsTabContext.chatId}/sessions/${this.state.activeSessionData.sessionId}`,
-                    { action: 'end' }
-                )
+                .patch(`/conversations/${this.props.teamsTabContext.chatId}/sessions/${this.state.activeSessionData.sessionId}`, { action: 'end' })
                 .then((response: any) => {
                     this.setState({
                         showLoader: false,
@@ -141,16 +116,9 @@ class MeetingPanel extends React.Component<
                     isChannel: false,
                 };
                 this.props.httpService
-                    .post(
-                        `/conversations/${this.props.teamsTabContext.chatId}/sessions`,
-                        { ...this.state.input, ...createSessionData }
-                    )
+                    .post(`/conversations/${this.props.teamsTabContext.chatId}/sessions`, { ...this.state.input, ...createSessionData })
                     .then((response: any) => {
-                        if (
-                            response &&
-                            response['data'] &&
-                            response['data']['sessionId']
-                        ) {
+                        if (response && response['data'] && response['data']['sessionId']) {
                             this.showAlertModel(true);
                             this.setState({
                                 activeSessionData: response.data,
@@ -235,8 +203,7 @@ class MeetingPanel extends React.Component<
                         },
                         {
                             type: 'TextBlock',
-                            text:
-                                'something went wrong. You should try again later.',
+                            text: 'something went wrong. You should try again later.',
                             horizontalAlignment: 'center',
                             weight: 'bolder',
                             size: 'large',
@@ -274,10 +241,7 @@ class MeetingPanel extends React.Component<
     private createNewSessionLayout() {
         return (
             <Flex hAlign="center" vAlign="center">
-                {this.noQuestionDesign(
-                    EmptySessionImage,
-                    'Ready to field questions?'
-                )}
+                {this.noQuestionDesign(EmptySessionImage, 'Ready to field questions?')}
                 <Flex.Item align="center">
                     <Button className="button" onClick={this.onShowTaskModule}>
                         <Button.Content>Start a Q&A session</Button.Content>
@@ -326,20 +290,10 @@ class MeetingPanel extends React.Component<
 
         return (
             <Flex vAlign="start">
-                <Text
-                    className="session-title"
-                    content={sessionTitle}
-                    size="medium"
-                />
+                <Text className="session-title" content={sessionTitle} size="medium" />
                 <FlexItem push>
                     <div className="menuHeader">
-                        <Menu
-                            defaultActiveIndex={0}
-                            items={menuItems}
-                            iconOnly
-                            accessibility={menuAsToolbarBehavior}
-                            aria-label="Compose Editor"
-                        />
+                        <Menu defaultActiveIndex={0} items={menuItems} iconOnly accessibility={menuAsToolbarBehavior} aria-label="Compose Editor" />
                     </div>
                 </FlexItem>
             </Flex>
@@ -352,10 +306,7 @@ class MeetingPanel extends React.Component<
     submitQuestion() {
         if (this.state.input.postQuestion) {
             this.props.httpService
-                .post(
-                    `/conversations/${this.props.teamsTabContext.chatId}/sessions/${this.state.activeSessionData.sessionId}/questions`,
-                    { questionContent: this.state.input.postQuestion }
-                )
+                .post(`/conversations/${this.props.teamsTabContext.chatId}/sessions/${this.state.activeSessionData.sessionId}/questions`, { questionContent: this.state.input.postQuestion })
                 .then((response: any) => {
                     if (response && response.data && response.data.id) {
                         this.setState({
@@ -364,11 +315,7 @@ class MeetingPanel extends React.Component<
                         this.setState({
                             activeSessionData: {
                                 ...this.state.activeSessionData,
-                                unansweredQuestions: [
-                                    response.data,
-                                    ...this.state.activeSessionData
-                                        .unansweredQuestions,
-                                ],
+                                unansweredQuestions: [response.data, ...this.state.activeSessionData.unansweredQuestions],
                             },
                         });
                     }
@@ -386,10 +333,7 @@ class MeetingPanel extends React.Component<
             case 'qnaSessionCreatedEvent': {
                 // Check if `activeSessionData` is not populated already with right session data.
                 // This can happen for user who has created the session.
-                if (
-                    this.state.activeSessionData?.sessionId !==
-                    dataEvent.data.sessionId
-                ) {
+                if (this.state.activeSessionData?.sessionId !== dataEvent.data.sessionId) {
                     this.setState({
                         activeSessionData: dataEvent.data,
                     });
@@ -409,25 +353,14 @@ class MeetingPanel extends React.Component<
      * Display session questions
      */
     showSessionQuestions(stateVal) {
-        const sessionTitle =
-            stateVal.activeSessionData.title ?? stateVal.input.title;
+        const sessionTitle = stateVal.activeSessionData.title ?? stateVal.input.title;
         return (
             <React.Fragment>
                 {this.showMenubar(sessionTitle)}
-                {stateVal.activeSessionData &&
-                (stateVal.activeSessionData.unansweredQuestions.length > 0 ||
-                    stateVal.activeSessionData.answeredQuestions.length > 0) ? (
-                    <ActiveSessionData
-                        activeSessionData={stateVal.activeSessionData}
-                        constValue={CONST}
-                        httpService={this.props.httpService}
-                        teamsTabContext={this.props.teamsTabContext}
-                    />
+                {stateVal.activeSessionData && (stateVal.activeSessionData.unansweredQuestions.length > 0 || stateVal.activeSessionData.answeredQuestions.length > 0) ? (
+                    <ActiveSessionData activeSessionData={stateVal.activeSessionData} constValue={CONST} httpService={this.props.httpService} teamsTabContext={this.props.teamsTabContext} />
                 ) : (
-                    this.noQuestionDesign(
-                        EmptySessionImage,
-                        'Q & A session is live...Ask away!'
-                    )
+                    this.noQuestionDesign(EmptySessionImage, 'Q & A session is live...Ask away!')
                 )}
                 <div className="input-text-field">
                     <Flex gap="gap.small">
@@ -441,17 +374,7 @@ class MeetingPanel extends React.Component<
                             value={stateVal.input.postQuestion}
                         />
                         <FlexItem push>
-                            <Button
-                                className="send-button"
-                                icon={
-                                    <SendIcon
-                                        size="large"
-                                        onClick={() => this.submitQuestion()}
-                                    />
-                                }
-                                text
-                                iconOnly
-                            />
+                            <Button className="send-button" icon={<SendIcon size="large" onClick={() => this.submitQuestion()} />} text iconOnly />
                         </FlexItem>
                     </Flex>
                 </div>
@@ -474,8 +397,7 @@ class MeetingPanel extends React.Component<
      */
     public render() {
         const stateVal = this.state;
-        if (stateVal.showLoader)
-            return <Loader label="Loading Meeting Information" />;
+        if (stateVal.showLoader) return <Loader label="Loading Meeting Information" />;
 
         return (
             <React.Fragment>
@@ -488,11 +410,7 @@ class MeetingPanel extends React.Component<
                         this.signalRComponent = instance;
                     }}
                 />
-                <div className="meeting-panel">
-                    {stateVal.activeSessionData
-                        ? this.showSessionQuestions(stateVal)
-                        : this.createNewSessionLayout()}
-                </div>
+                <div className="meeting-panel">{stateVal.activeSessionData ? this.showSessionQuestions(stateVal) : this.createNewSessionLayout()}</div>
             </React.Fragment>
         );
     }

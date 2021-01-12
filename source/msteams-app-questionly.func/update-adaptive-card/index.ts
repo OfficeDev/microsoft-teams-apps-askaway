@@ -28,6 +28,7 @@ import {
   width,
   title,
 } from "../src/constants/notificationBubbleConstants";
+import { exceptionLogger } from "../src/utils/exceptionTracking";
 
 let adapter = new BotFrameworkAdapter({
   appId: process.env.MicrosoftAppId.toString(),
@@ -43,6 +44,7 @@ const activityFunction: AzureFunction = async function (
   const eventData: IDataEvent = context.bindings.name.eventData;
   const isSessionEnded = eventData.type === DataEventType.qnaSessionEndedEvent;
   const meetingId = context.bindings.name.meetingId;
+  const operationId: string = context.bindings.name.operationId;
   // Adapter is injected as dependency for UTs.
   adapter = context.bindings.name.botFrameworkAdapter ?? adapter;
 
@@ -134,6 +136,12 @@ const activityFunction: AzureFunction = async function (
     }
   } catch (error) {
     context.log.error(error, "Error occurred while updating adaptive card");
+    exceptionLogger(error, operationId, {
+      conversationId: conversationId,
+      qnaSessionId: qnaSessionId,
+      meetingId: meetingId,
+      filename: module.id,
+    });
   }
 };
 

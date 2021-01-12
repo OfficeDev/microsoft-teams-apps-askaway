@@ -1,35 +1,20 @@
 import { ClientDataContract } from 'src/contracts/clientDataContract';
 import { exceptionLogger } from 'src/util/exceptionTracking';
-import {
-    IQnASession_populated,
-    IQuestionPopulatedUser,
-    IUser,
-    questionDataService,
-    userDataService,
-} from 'msteams-app-questionly.data';
+import { IQnASession_populated, IQuestionPopulatedUser, IUser, questionDataService, userDataService } from 'msteams-app-questionly.data';
 
 /**
  * Formats qna session data as per client data contract.
  * @param qnaSessionData - qna session document.
  * @returns - qna session data as per client data contract.
  */
-export const formatQnaSessionDataAsPerClientDataContract = async (
-    qnaSessionData: IQnASession_populated
-): Promise<ClientDataContract.QnaSession> => {
-    const questionData: IQuestionPopulatedUser[] = await questionDataService.getQuestionData(
-        qnaSessionData._id
-    );
+export const formatQnaSessionDataAsPerClientDataContract = async (qnaSessionData: IQnASession_populated): Promise<ClientDataContract.QnaSession> => {
+    const questionData: IQuestionPopulatedUser[] = await questionDataService.getQuestionData(qnaSessionData._id);
 
-    const voteSortedQuestions: IQuestionPopulatedUser[] = questionData.sort(
-        (a, b) => {
-            const diff = b.voters.length - a.voters.length;
-            if (diff !== 0) return diff;
-            return (
-                new Date(b.dateTimeCreated).getTime() -
-                new Date(a.dateTimeCreated).getTime()
-            );
-        }
-    );
+    const voteSortedQuestions: IQuestionPopulatedUser[] = questionData.sort((a, b) => {
+        const diff = b.voters.length - a.voters.length;
+        if (diff !== 0) return diff;
+        return new Date(b.dateTimeCreated).getTime() - new Date(a.dateTimeCreated).getTime();
+    });
 
     let hostUser: IUser;
     try {
@@ -46,12 +31,8 @@ export const formatQnaSessionDataAsPerClientDataContract = async (
         dateTimeCreated: qnaSessionData.dateTimeCreated,
         dateTimeEnded: qnaSessionData.dateTimeEnded,
         hostUser: { id: hostUser._id, name: hostUser.userName },
-        answeredQuestions: formatQuestionDataArrayAsPerClientDataContract(
-            voteSortedQuestions.filter((question) => question.isAnswered)
-        ),
-        unansweredQuestions: formatQuestionDataArrayAsPerClientDataContract(
-            voteSortedQuestions.filter((question) => !question.isAnswered)
-        ),
+        answeredQuestions: formatQuestionDataArrayAsPerClientDataContract(voteSortedQuestions.filter((question) => question.isAnswered)),
+        unansweredQuestions: formatQuestionDataArrayAsPerClientDataContract(voteSortedQuestions.filter((question) => !question.isAnswered)),
     };
 };
 
@@ -60,17 +41,8 @@ export const formatQnaSessionDataAsPerClientDataContract = async (
  * @param qnaSessionData - qna session document array.
  * @returns - qna session data array as per client data contract.
  */
-export const formatQnaSessionDataArrayAsPerClientDataContract = async (
-    qnaSessionDataArray: IQnASession_populated[]
-): Promise<ClientDataContract.QnaSession[]> => {
-    return await Promise.all(
-        qnaSessionDataArray.map(
-            async (qnaSessionData) =>
-                await formatQnaSessionDataAsPerClientDataContract(
-                    qnaSessionData
-                )
-        )
-    );
+export const formatQnaSessionDataArrayAsPerClientDataContract = async (qnaSessionDataArray: IQnASession_populated[]): Promise<ClientDataContract.QnaSession[]> => {
+    return await Promise.all(qnaSessionDataArray.map(async (qnaSessionData) => await formatQnaSessionDataAsPerClientDataContract(qnaSessionData)));
 };
 
 /**
@@ -78,12 +50,8 @@ export const formatQnaSessionDataArrayAsPerClientDataContract = async (
  * @param questionDataArray - question document array.
  * @returns - question data array as per client data contract.
  */
-export const formatQuestionDataArrayAsPerClientDataContract = (
-    questionDataArray: IQuestionPopulatedUser[]
-): ClientDataContract.Question[] => {
-    return questionDataArray.map((questionData) =>
-        formatQuestionDataAsPerClientDataContract(questionData)
-    );
+export const formatQuestionDataArrayAsPerClientDataContract = (questionDataArray: IQuestionPopulatedUser[]): ClientDataContract.Question[] => {
+    return questionDataArray.map((questionData) => formatQuestionDataAsPerClientDataContract(questionData));
 };
 
 /**
@@ -91,9 +59,7 @@ export const formatQuestionDataArrayAsPerClientDataContract = (
  * @param questionData - question document.
  * @returns - question data as per client data contract.
  */
-export const formatQuestionDataAsPerClientDataContract = (
-    questionData: IQuestionPopulatedUser
-): ClientDataContract.Question => {
+export const formatQuestionDataAsPerClientDataContract = (questionData: IQuestionPopulatedUser): ClientDataContract.Question => {
     return {
         id: questionData._id,
         sessionId: questionData.qnaSessionId,
@@ -105,5 +71,6 @@ export const formatQuestionDataAsPerClientDataContract = (
             name: questionData.userId.userName,
         },
         votesCount: questionData.voters.length,
+        voterAadObjectIds: questionData.voters,
     };
 };

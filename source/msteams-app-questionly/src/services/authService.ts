@@ -64,9 +64,7 @@ export const getIdentityMetadata = (): string => {
 
     const tenantId = getTenantId();
 
-    return process.env.AzureAd_Metadata_Endpoint.toString()
-        .replace('TENANT_ID', tenantId)
-        .trim();
+    return process.env.AzureAd_Metadata_Endpoint.toString().replace('TENANT_ID', tenantId).trim();
 };
 
 /**
@@ -81,9 +79,7 @@ export const getValidIssuers = (): string[] => {
 
     let validIssuers: string[] = [];
 
-    const validIssuerFromSettings = process.env.AzureAd_ValidIssuers?.toString().split(
-        ','
-    );
+    const validIssuerFromSettings = process.env.AzureAd_ValidIssuers?.toString().split(',');
 
     const tenantId = getTenantId();
 
@@ -106,22 +102,16 @@ export const getBearerStrategy = (): passportAzureAd.BearerStrategy => {
     };
 
     // Bearer strategy.
-    return new passportAzureAd.BearerStrategy(
-        options,
-        (
-            token: passportAzureAd.ITokenPayload,
-            done: passportAzureAd.VerifyCallback
-        ) => {
-            done(
-                null,
-                new User({
-                    _id: token.oid,
-                    userName: token.name,
-                }),
-                token
-            );
-        }
-    );
+    return new passportAzureAd.BearerStrategy(options, (token: passportAzureAd.ITokenPayload, done: passportAzureAd.VerifyCallback) => {
+        done(
+            null,
+            new User({
+                _id: token.oid,
+                userName: token.name,
+            }),
+            token
+        );
+    });
 };
 
 /**
