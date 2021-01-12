@@ -21,9 +21,9 @@ export const restApiErrorMiddleware = (error: Error, request: Request, response:
     exceptionLogger(error, {
         httpMethod: request?.method,
         apiPath: request?.path,
-        conversationId: request?.params['conversationId'],
-        qnaSessionId: request?.params['sessionId'],
-        questionId: request?.params['questionId'],
+        conversationId: request?.params?.conversationId,
+        qnaSessionId: request?.params?.sessionId,
+        questionId: request?.params?.questionId,
         userAadObjectId: user?._id,
         filename: module.id,
         exceptionName: TelemetryExceptions.RestApiCallFailed,
