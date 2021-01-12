@@ -61,15 +61,10 @@ export interface StartQnA {
     taskModuleTitleEdit: string;
 }
 
-export const initLocalization = async (
-    testing = false,
-    testStrings?: Strings
-) => {
+export const initLocalization = async (testing = false, testStrings?: Strings) => {
     const config = {
         language: process.env.Language ? process.env.Language : 'en',
-        fallbackLanguage: process.env.FallbackLanguage
-            ? process.env.FallbackLanguage
-            : 'en',
+        fallbackLanguage: process.env.FallbackLanguage ? process.env.FallbackLanguage : 'en',
         defaultStrings: enJson,
         debug: false,
     };

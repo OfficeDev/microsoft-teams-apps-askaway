@@ -19,9 +19,7 @@ describe('AskAwayTabRemove Component', () => {
 
     it('should render the tab', () => {
         const component = shallow(<AskAwayTabRemove />);
-        const divResult = component.containsMatchingElement(
-            <Header content="You're about to remove your tab..." />
-        );
+        const divResult = component.containsMatchingElement(<Header content="You're about to remove your tab..." />);
 
         expect(divResult).toBeTruthy();
     });

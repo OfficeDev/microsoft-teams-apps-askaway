@@ -19,19 +19,15 @@ export class UnauthorizedAccessError extends Error {
 
         switch (code) {
             case UnauthorizedAccessErrorCode.InsufficientPermissionsToCreateOrEndQnASession: {
-                errorMessage =
-                    errorMessages.InsufficientPermissionsToCreateOrEndQnASessionErrorMessage;
+                errorMessage = errorMessages.InsufficientPermissionsToCreateOrEndQnASessionErrorMessage;
                 break;
             }
             case UnauthorizedAccessErrorCode.InsufficientPermissionsToMarkQuestionAsAnswered: {
-                errorMessage =
-                    errorMessages.InsufficientPermissionsToMarkQuestionAsAnsweredErrorMessage;
+                errorMessage = errorMessages.InsufficientPermissionsToMarkQuestionAsAnsweredErrorMessage;
                 break;
             }
             default: {
-                throw new Error(
-                    `code ${code} is not supported for UnauthorizedAccessError.`
-                );
+                throw new Error(`code ${code} is not supported for UnauthorizedAccessError.`);
             }
         }
 
