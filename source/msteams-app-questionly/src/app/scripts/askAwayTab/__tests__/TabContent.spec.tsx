@@ -27,37 +27,16 @@ describe('TabContent Component', () => {
     });
 
     it('should match the snapshot', () => {
-        const wrapper = shallow(
-            <TabContent
-                teamsTabContext={{ entityId: '', locale: '' }}
-                httpService={httpServiceIns}
-                appInsights={telemetryService.appInsights}
-                helper={Helper}
-            />
-        );
+        const wrapper = shallow(<TabContent teamsTabContext={{ entityId: '', locale: '' }} httpService={httpServiceIns} appInsights={telemetryService.appInsights} helper={Helper} />);
         expect(toJson(wrapper)).toMatchSnapshot();
     });
 
     it('should render TabContent', () => {
-        const component = shallow(
-            <TabContent
-                teamsTabContext={{ entityId: '', locale: '' }}
-                httpService={httpServiceIns}
-                appInsights={telemetryService.appInsights}
-                helper={Helper}
-            />
-        );
+        const component = shallow(<TabContent teamsTabContext={{ entityId: '', locale: '' }} httpService={httpServiceIns} appInsights={telemetryService.appInsights} helper={Helper} />);
 
-        const buttonEle = component.containsMatchingElement(
-            <Button.Content>Create an ask away</Button.Content>
-        );
+        const buttonEle = component.containsMatchingElement(<Button.Content>Create an ask away</Button.Content>);
 
-        const textEle = component.containsMatchingElement(
-            <Text
-                className="text-caption"
-                content="Welcome to Ask Away! We’re glad you’re here."
-            />
-        );
+        const textEle = component.containsMatchingElement(<Text className="text-caption" content="Welcome to Ask Away! We’re glad you’re here." />);
 
         expect(buttonEle).toBeTruthy();
         expect(textEle).toBeTruthy();

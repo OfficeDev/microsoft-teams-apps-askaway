@@ -19,9 +19,7 @@ describe('AskAwayTabConfig Component', () => {
 
     it('should render the tab', () => {
         const component = shallow(<AskAwayTabConfig />);
-        const divResult = component.containsMatchingElement(
-            <Text content="Select save to finish adding ask away to the meeting" />
-        );
+        const divResult = component.containsMatchingElement(<Text content="Select save to finish adding ask away to the meeting" />);
         expect(divResult).toBeTruthy();
     });
 });

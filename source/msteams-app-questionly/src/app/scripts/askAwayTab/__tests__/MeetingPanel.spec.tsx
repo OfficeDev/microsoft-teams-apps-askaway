@@ -25,14 +25,7 @@ describe('Meeting Panel Component', () => {
     });
 
     it('should render loader when showloader value is true', () => {
-        const component = shallow(
-            <MeetingPanel
-                teamsTabContext={{ entityId: '', locale: '' }}
-                httpService={httpServiceIns}
-                appInsights={telemetryService.appInsights}
-                helper={Helper}
-            />
-        );
+        const component = shallow(<MeetingPanel teamsTabContext={{ entityId: '', locale: '' }} httpService={httpServiceIns} appInsights={telemetryService.appInsights} helper={Helper} />);
         const stateVal = { showLoader: true };
         component.setState(stateVal);
 
@@ -40,14 +33,7 @@ describe('Meeting Panel Component', () => {
     });
 
     it('should render meeting panel when activeSessionData is present', () => {
-        const component = shallow(
-            <MeetingPanel
-                teamsTabContext={{ entityId: '', locale: '' }}
-                httpService={httpServiceIns}
-                appInsights={telemetryService.appInsights}
-                helper={Helper}
-            />
-        );
+        const component = shallow(<MeetingPanel teamsTabContext={{ entityId: '', locale: '' }} httpService={httpServiceIns} appInsights={telemetryService.appInsights} helper={Helper} />);
         const stateVal = { showLoader: false, activeSessionData: true };
         component.setState(stateVal);
         const divEle = component.find('div.meeting-panel');
@@ -56,19 +42,10 @@ describe('Meeting Panel Component', () => {
     });
 
     it('should render createSessionLayout when activeSessionData is not present', () => {
-        const component = shallow(
-            <MeetingPanel
-                teamsTabContext={{ entityId: '', locale: '' }}
-                httpService={httpServiceIns}
-                appInsights={telemetryService.appInsights}
-                helper={Helper}
-            />
-        );
+        const component = shallow(<MeetingPanel teamsTabContext={{ entityId: '', locale: '' }} httpService={httpServiceIns} appInsights={telemetryService.appInsights} helper={Helper} />);
         const stateVal = { showLoader: false };
         component.setState(stateVal);
-        const buttonEle = component.containsMatchingElement(
-            <Button.Content>Start a Q&A session</Button.Content>
-        );
+        const buttonEle = component.containsMatchingElement(<Button.Content>Start a Q&A session</Button.Content>);
 
         expect(buttonEle).toBeTruthy();
     });

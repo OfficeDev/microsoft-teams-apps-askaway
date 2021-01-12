@@ -1,9 +1,6 @@
 import { TelemetryEvents } from 'src/constants/telemetryConstants';
 import { getApplicationInsightsInstrumentationKeyURI } from 'src/util/keyvault';
-import {
-    initiateAndGetAppInsights,
-    TraceData,
-} from 'msteams-app-questionly.common';
+import { initiateAndGetAppInsights, TraceData } from 'msteams-app-questionly.common';
 import * as appInsights from 'applicationinsights';
 
 let aiClient: appInsights.TelemetryClient;
@@ -14,9 +11,7 @@ let aiClient: appInsights.TelemetryClient;
 export const initiateAIClient = async () => {
     if (!aiClient) {
         const applicationInsightsInstrumentationKey = await getApplicationInsightsInstrumentationKeyURI();
-        aiClient = initiateAndGetAppInsights(
-            applicationInsightsInstrumentationKey
-        );
+        aiClient = initiateAndGetAppInsights(applicationInsightsInstrumentationKey);
     }
 };
 
@@ -33,10 +28,7 @@ export const getOperationIdForCurrentRequest = () => {
  * @param error  - error to be logged.
  * @param traceData - custom properties logged for this exception.
  */
-export const exceptionLogger = (
-    error: Error | string,
-    traceData?: TraceData
-) => {
+export const exceptionLogger = (error: Error | string, traceData?: TraceData) => {
     if (process.env.debugMode === 'true') {
         // eslint-disable-next-line no-console
         console.error(error);

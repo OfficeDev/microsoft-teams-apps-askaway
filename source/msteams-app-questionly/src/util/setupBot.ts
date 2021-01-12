@@ -20,10 +20,7 @@ interface AvatarRequest {
     index: number;
 }
 
-const setupBotAdapterAndRouting = async (
-    app: ExpressType,
-    conversationDataService: IConversationDataService
-) => {
+const setupBotAdapterAndRouting = async (app: ExpressType, conversationDataService: IConversationDataService) => {
     const bot: ActivityHandler = new AskAway(conversationDataService);
     const adapter = new BotFrameworkAdapter({
         appId: process.env.MicrosoftAppId,
@@ -58,10 +55,7 @@ const setupBotAdapterAndRouting = async (
 
 const setupConnectorClient = () => {
     // Override ConnecterClient to update ExponentialRetryPolicy configuration
-    (<any>BotFrameworkAdapter.prototype).createConnectorClientInternal = (
-        serviceUrl,
-        credentials
-    ) => {
+    (<any>BotFrameworkAdapter.prototype).createConnectorClientInternal = (serviceUrl, credentials) => {
         const retryAfterMs = ifNumber(process.env.ExponentialRetryAfterMs, 500);
         const factories = requestPolicyHelper(credentials, {
             retryCount: ifNumber(process.env.DefaultMaxRetryCount, 5),
@@ -84,35 +78,20 @@ const setupAvtarKeyEndpoint = (app: ExpressType) => {
 
         const avatarKey = await getAvatarKey();
 
-        if (!avatarKey)
-            return res.sendFile(
-                join(__dirname, 'public/images/anon_avatar.png')
-            );
-        jwt.verify(
-            token,
-            Buffer.from(avatarKey, 'utf8').toString('hex'),
-            (err, data: AvatarRequest) => {
-                if (err)
-                    return res.sendFile(
-                        join(__dirname, 'public/images/anon_avatar.png')
-                    );
-                generateInitialsImage(data.initials, data.index).then(
-                    (image) => {
-                        image.getBuffer(jimp.MIME_PNG, (err, buffer) => {
-                            res.set('Content-Type', jimp.MIME_PNG);
-                            return res.send(buffer);
-                        });
-                    }
-                );
-            }
-        );
+        if (!avatarKey) return res.sendFile(join(__dirname, 'public/images/anon_avatar.png'));
+        jwt.verify(token, Buffer.from(avatarKey, 'utf8').toString('hex'), (err, data: AvatarRequest) => {
+            if (err) return res.sendFile(join(__dirname, 'public/images/anon_avatar.png'));
+            generateInitialsImage(data.initials, data.index).then((image) => {
+                image.getBuffer(jimp.MIME_PNG, (err, buffer) => {
+                    res.set('Content-Type', jimp.MIME_PNG);
+                    return res.send(buffer);
+                });
+            });
+        });
     });
 };
 
-export const setupBot = async (
-    app: ExpressType,
-    conversationDataService: IConversationDataService
-) => {
+export const setupBot = async (app: ExpressType, conversationDataService: IConversationDataService) => {
     setupConnectorClient();
     await setupBotAdapterAndRouting(app, conversationDataService);
     setupAvtarKeyEndpoint(app);

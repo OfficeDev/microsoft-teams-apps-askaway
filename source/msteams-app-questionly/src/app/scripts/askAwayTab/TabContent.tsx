@@ -30,9 +30,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
 
     private getActiveSession() {
         this.props.httpService
-            .get(
-                `/conversations/${this.props.teamsTabContext.chatId}/activesessions`
-            )
+            .get(`/conversations/${this.props.teamsTabContext.chatId}/activesessions`)
             .then((response: any) => {})
             .catch((error) => {
                 // TODO: handle this gracefully.
@@ -88,8 +86,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                         },
                         {
                             type: 'TextBlock',
-                            text:
-                                'something went wrong. You should try again later.',
+                            text: 'something went wrong. You should try again later.',
                             horizontalAlignment: 'center',
                             weight: 'bolder',
                             size: 'large',
@@ -123,16 +120,9 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                     isChannel: false,
                 };
                 this.props.httpService
-                    .post(
-                        `/conversations/${this.props.teamsTabContext.chatId}/sessions`,
-                        createSessionData
-                    )
+                    .post(`/conversations/${this.props.teamsTabContext.chatId}/sessions`, createSessionData)
                     .then((response: any) => {
-                        if (
-                            response &&
-                            response['data'] &&
-                            response['data']['sessionId']
-                        ) {
+                        if (response && response['data'] && response['data']['sessionId']) {
                             this.showAlertModel(true);
                         } else {
                             this.showAlertModel(false);
@@ -165,29 +155,15 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
     private crateNewSessionLayout() {
         return (
             <Flex hAlign="center" vAlign="center" className="screen">
-                <Image
-                    className="create-session"
-                    alt="image"
-                    src={require('./../../web/assets/create_session.png')}
-                />
+                <Image className="create-session" alt="image" src={require('./../../web/assets/create_session.png')} />
                 <Flex.Item align="center">
-                    <Text
-                        className="text-caption"
-                        content="Welcome to Ask Away! We’re glad you’re here."
-                    />
+                    <Text className="text-caption" content="Welcome to Ask Away! We’re glad you’re here." />
                 </Flex.Item>
                 <Flex.Item align="center">
-                    <Text
-                        className="text-subcaption"
-                        content="Ask away is your tool to create and manage Q&A sessions."
-                    />
+                    <Text className="text-subcaption" content="Ask away is your tool to create and manage Q&A sessions." />
                 </Flex.Item>
                 <Flex.Item align="center">
-                    <Button
-                        primary
-                        className="button"
-                        onClick={this.onShowTaskModule}
-                    >
+                    <Button primary className="button" onClick={this.onShowTaskModule}>
                         <Button.Content>Create an ask away</Button.Content>
                     </Button>
                 </Flex.Item>
@@ -212,9 +188,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                     </Button>
                     <Button text>
                         <SwitchIcon outline xSpacing="after" />
-                        <Button.Content>
-                            Switch to different sessions
-                        </Button.Content>
+                        <Button.Content>Switch to different sessions</Button.Content>
                     </Button>
                 </Flex>
             </div>

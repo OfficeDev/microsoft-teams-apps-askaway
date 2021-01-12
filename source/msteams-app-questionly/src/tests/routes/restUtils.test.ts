@@ -1,16 +1,7 @@
 import { generateUniqueId } from 'adaptivecards';
 import { BotFrameworkAdapter } from 'botbuilder';
-import {
-    questionDataService,
-    userDataService,
-    IConversation,
-} from 'msteams-app-questionly.data';
-import {
-    getTeamsUserId,
-    getMemberInfo,
-    getAndEnsureRequestBodyContainsParameter,
-    ensureUserIsPartOfMeetingConversation,
-} from 'src/routes/restUtils';
+import { questionDataService, userDataService, IConversation } from 'msteams-app-questionly.data';
+import { getTeamsUserId, getMemberInfo, getAndEnsureRequestBodyContainsParameter, ensureUserIsPartOfMeetingConversation } from 'src/routes/restUtils';
 import { getMicrosoftAppPassword } from 'src/util/keyvault';
 import { Request } from 'express';
 import { ParameterMissingInRequestError } from 'src/errors/parameterMissingInRequestError';
@@ -91,15 +82,13 @@ describe('test process QnA sesssions for meeting tab', () => {
 
     it('validates process QnA sesssions for meeting tab', async () => {
         const qnaSessionsData = [testQnAData1, testQnAData2];
-        (<any>questionDataService.getQuestionData).mockImplementation(
-            (qnaid) => {
-                if (qnaid === testQnAData1._id) {
-                    return [question1, question2];
-                } else if (qnaid === testQnAData2._id) {
-                    return [];
-                }
+        (<any>questionDataService.getQuestionData).mockImplementation((qnaid) => {
+            if (qnaid === testQnAData1._id) {
+                return [question1, question2];
+            } else if (qnaid === testQnAData2._id) {
+                return [];
             }
-        );
+        });
         (<any>userDataService.getUser).mockImplementation((id) => {
             if (id == testQnAData1.hostId) {
                 return user1;
@@ -107,20 +96,14 @@ describe('test process QnA sesssions for meeting tab', () => {
                 return user2;
             }
         });
-        const result = await formatQnaSessionDataArrayAsPerClientDataContract(
-            qnaSessionsData
-        );
+        const result = await formatQnaSessionDataArrayAsPerClientDataContract(qnaSessionsData);
         expect(result.length).toEqual(2);
         expect(result[0].title).toEqual(testQnAData1.title);
         expect(result[0].isActive).toEqual(testQnAData1.isActive);
         expect(result[0].hostUser.id).toEqual(user1._id);
         expect(result[0].hostUser.name).toEqual(user1.userName);
-        expect(result[0].unansweredQuestions?.[0].content).toEqual(
-            question2.content
-        );
-        expect(result[0].answeredQuestions?.[0].content).toEqual(
-            question1.content
-        );
+        expect(result[0].unansweredQuestions?.[0].content).toEqual(question2.content);
+        expect(result[0].answeredQuestions?.[0].content).toEqual(question1.content);
         expect(result[1].title).toEqual(testQnAData2.title);
         expect(result[1].isActive).toEqual(testQnAData2.isActive);
         expect(result[1].hostUser.id).toEqual(user2._id);
@@ -131,32 +114,26 @@ describe('test process QnA sesssions for meeting tab', () => {
 
     it('validates process QnA sesssions for meeting tab - no qna session data', async () => {
         const qnaSessionsData = [];
-        const result = await formatQnaSessionDataArrayAsPerClientDataContract(
-            qnaSessionsData
-        );
+        const result = await formatQnaSessionDataArrayAsPerClientDataContract(qnaSessionsData);
 
         expect(result.length).toEqual(0);
     });
 
     it('validates process QnA sesssions for meeting tab - error while getting user data', async () => {
         const sampleError: Error = new Error();
-        (<any>questionDataService.getQuestionData).mockImplementation(
-            (qnaid) => {
-                if (qnaid === testQnAData1._id) {
-                    return [question1, question2];
-                } else if (qnaid === testQnAData2._id) {
-                    return [];
-                }
+        (<any>questionDataService.getQuestionData).mockImplementation((qnaid) => {
+            if (qnaid === testQnAData1._id) {
+                return [question1, question2];
+            } else if (qnaid === testQnAData2._id) {
+                return [];
             }
-        );
+        });
         (<any>userDataService.getUser).mockImplementationOnce(() => {
             throw sampleError;
         });
 
         const qnaSessionsData = [testQnAData1, testQnAData2];
-        await formatQnaSessionDataArrayAsPerClientDataContract(
-            qnaSessionsData
-        ).catch((err) => {
+        await formatQnaSessionDataArrayAsPerClientDataContract(qnaSessionsData).catch((err) => {
             expect(err).toEqual(sampleError);
         });
         expect(questionDataService.getQuestionData).toBeCalled();
@@ -165,15 +142,11 @@ describe('test process QnA sesssions for meeting tab', () => {
 
     it('validates process QnA sesssions for meeting tab - error while getting question data', async () => {
         const sampleError: Error = new Error();
-        (<any>questionDataService.getQuestionData).mockImplementationOnce(
-            () => {
-                throw sampleError;
-            }
-        );
+        (<any>questionDataService.getQuestionData).mockImplementationOnce(() => {
+            throw sampleError;
+        });
         const qnaSessionsData = [testQnAData1, testQnAData2];
-        await formatQnaSessionDataArrayAsPerClientDataContract(
-            qnaSessionsData
-        ).catch((err) => {
+        await formatQnaSessionDataArrayAsPerClientDataContract(qnaSessionsData).catch((err) => {
             expect(err).toEqual(sampleError);
         });
         expect(questionDataService.getQuestionData).toBeCalled();
@@ -202,11 +175,7 @@ describe('test getHostUserId', () => {
                 id: sampleId,
             };
         });
-        const result = await getTeamsUserId(
-            sampleUserId,
-            sampleConversationId,
-            sampleServiceUrl
-        );
+        const result = await getTeamsUserId(sampleUserId, sampleConversationId, sampleServiceUrl);
 
         expect(result).toBeTruthy();
         expect(result).toEqual(sampleId);
@@ -221,14 +190,8 @@ describe('test getHostUserId', () => {
             return undefined;
         });
 
-        await getTeamsUserId(
-            sampleUserId,
-            sampleConversationId,
-            sampleServiceUrl
-        ).catch((err) => {
-            expect(err).toEqual(
-                new Error('Could not get member info for teams user')
-            );
+        await getTeamsUserId(sampleUserId, sampleConversationId, sampleServiceUrl).catch((err) => {
+            expect(err).toEqual(new Error('Could not get member info for teams user'));
         });
     });
 });
@@ -247,12 +210,7 @@ describe('tests getAndEnsureRequestBodyContainsParameter', () => {
             getAndEnsureRequestBodyContainsParameter(request, testParamName);
         } catch (error) {
             expect(error instanceof ParameterMissingInRequestError);
-            expect(error.message).toEqual(
-                errorMessages.ParameterMissingInRequestErrorMessage.replace(
-                    '{0}',
-                    testParamName
-                )
-            );
+            expect(error.message).toEqual(errorMessages.ParameterMissingInRequestErrorMessage.replace('{0}', testParamName));
         }
     });
 
@@ -267,12 +225,7 @@ describe('tests getAndEnsureRequestBodyContainsParameter', () => {
             getAndEnsureRequestBodyContainsParameter(request, testParamName);
         } catch (error) {
             expect(error instanceof ParameterMissingInRequestError);
-            expect(error.message).toEqual(
-                errorMessages.ParameterMissingInRequestErrorMessage.replace(
-                    '{0}',
-                    testParamName
-                )
-            );
+            expect(error.message).toEqual(errorMessages.ParameterMissingInRequestErrorMessage.replace('{0}', testParamName));
         }
     });
 
@@ -287,12 +240,7 @@ describe('tests getAndEnsureRequestBodyContainsParameter', () => {
             getAndEnsureRequestBodyContainsParameter(request, testParamName);
         } catch (error) {
             expect(error instanceof ParameterMissingInRequestError);
-            expect(error.message).toEqual(
-                errorMessages.ParameterMissingInRequestErrorMessage.replace(
-                    '{0}',
-                    testParamName
-                )
-            );
+            expect(error.message).toEqual(errorMessages.ParameterMissingInRequestErrorMessage.replace('{0}', testParamName));
         }
     });
 
@@ -303,9 +251,7 @@ describe('tests getAndEnsureRequestBodyContainsParameter', () => {
             testParamName: 'test',
         };
 
-        expect(
-            getAndEnsureRequestBodyContainsParameter(request, testParamName)
-        ).toEqual('test');
+        expect(getAndEnsureRequestBodyContainsParameter(request, testParamName)).toEqual('test');
     });
 });
 
@@ -329,17 +275,10 @@ describe('tests ensureUserIsPartOfMeetingConversation', () => {
         } as IConversation;
 
         try {
-            await ensureUserIsPartOfMeetingConversation(
-                conversationData,
-                'testUserId'
-            );
+            await ensureUserIsPartOfMeetingConversation(conversationData, 'testUserId');
         } catch (error) {
-            expect(
-                error instanceof ConversationDoesNotBelongToMeetingChatError
-            );
-            expect(error.message).toEqual(
-                errorMessages.ConversationDoesNotBelongToMeetingChatErrorMessage
-            );
+            expect(error instanceof ConversationDoesNotBelongToMeetingChatError);
+            expect(error.message).toEqual(errorMessages.ConversationDoesNotBelongToMeetingChatErrorMessage);
         }
 
         expect(<any>getMicrosoftAppPassword).toBeCalledTimes(0);
@@ -360,15 +299,10 @@ describe('tests ensureUserIsPartOfMeetingConversation', () => {
         });
 
         try {
-            await ensureUserIsPartOfMeetingConversation(
-                conversationData,
-                'testUserId'
-            );
+            await ensureUserIsPartOfMeetingConversation(conversationData, 'testUserId');
         } catch (error) {
             expect(error instanceof UserIsNotPartOfConversationError);
-            expect(error.message).toEqual(
-                errorMessages.UserIsNotPartOfConversationErrorMessage
-            );
+            expect(error.message).toEqual(errorMessages.UserIsNotPartOfConversationErrorMessage);
         }
 
         expect(<any>getMicrosoftAppPassword).toBeCalledTimes(1);
@@ -388,10 +322,7 @@ describe('tests ensureUserIsPartOfMeetingConversation', () => {
             return true;
         });
 
-        await ensureUserIsPartOfMeetingConversation(
-            conversationData,
-            'testUserId'
-        );
+        await ensureUserIsPartOfMeetingConversation(conversationData, 'testUserId');
 
         expect(<any>getMicrosoftAppPassword).toBeCalledTimes(1);
         expect(<any>verifyUserFromConversationId).toBeCalledTimes(1);

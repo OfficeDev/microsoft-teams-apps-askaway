@@ -1,16 +1,7 @@
 /* eslint-disable @typescript-eslint/tslint/config */
 import { AskAway } from 'src/askAway';
 import { TaskModuleRequest } from 'botframework-connector/lib/connectorApi/models';
-import {
-    submitNewQuestion,
-    updateUpvote,
-    getErrorCard,
-    endQnASession,
-    startQnASession,
-    getMainCard,
-    getStartQnACard,
-    validateConversationId,
-} from 'src/Controller';
+import { submitNewQuestion, updateUpvote, getErrorCard, endQnASession, startQnASession, getMainCard, getStartQnACard, validateConversationId } from 'src/Controller';
 import { errorStrings, initLocalization } from 'src/localization/locale';
 import { ConversationDataService } from 'msteams-app-questionly.data';
 import { getMeetingIdFromContext } from 'src/util/meetingsUtility';
@@ -49,13 +40,9 @@ describe('teams task module fetch', () => {
 
         await handler.handleTeamsTaskModuleFetch(context, taskModuleRequest);
 
-        expect(
-            handler.handleTeamsTaskModuleFetchViewLeaderboard
-        ).toBeCalledTimes(1);
+        expect(handler.handleTeamsTaskModuleFetchViewLeaderboard).toBeCalledTimes(1);
 
-        expect(handler.handleTeamsTaskModuleFetchAskQuestion).toBeCalledTimes(
-            0
-        );
+        expect(handler.handleTeamsTaskModuleFetchAskQuestion).toBeCalledTimes(0);
     });
 
     it('ask question handler triggered', async () => {
@@ -67,13 +54,9 @@ describe('teams task module fetch', () => {
 
         await handler.handleTeamsTaskModuleFetch(context, taskModuleRequest);
 
-        expect(
-            handler.handleTeamsTaskModuleFetchViewLeaderboard
-        ).toBeCalledTimes(0);
+        expect(handler.handleTeamsTaskModuleFetchViewLeaderboard).toBeCalledTimes(0);
 
-        expect(handler.handleTeamsTaskModuleFetchAskQuestion).toBeCalledTimes(
-            1
-        );
+        expect(handler.handleTeamsTaskModuleFetchAskQuestion).toBeCalledTimes(1);
     });
 
     it('returns failed task module fetch', async () => {
@@ -86,13 +69,9 @@ describe('teams task module fetch', () => {
 
         await handler.handleTeamsTaskModuleFetch(context, taskModuleRequest);
 
-        expect(
-            handler.handleTeamsTaskModuleFetchViewLeaderboard
-        ).toBeCalledTimes(0);
+        expect(handler.handleTeamsTaskModuleFetchViewLeaderboard).toBeCalledTimes(0);
 
-        expect(handler.handleTeamsTaskModuleFetchAskQuestion).toBeCalledTimes(
-            0
-        );
+        expect(handler.handleTeamsTaskModuleFetchAskQuestion).toBeCalledTimes(0);
 
         expect(handler.handleTeamsTaskModuleFetchError).toBeCalledTimes(1);
     });
@@ -132,12 +111,8 @@ describe('teams task module submit', () => {
 
         expect(handler.handleTeamsTaskModuleSubmitQuestion).toBeCalledTimes(1);
         expect(handler.handleTeamsTaskModuleSubmitUpvote).toBeCalledTimes(0);
-        expect(
-            handler.handleTeamsTaskModuleSubmitRefreshLeaderboard
-        ).toBeCalledTimes(0);
-        expect(
-            handler.handleTeamsTaskModuleSubmitConfirmEndQnA
-        ).toBeCalledTimes(0);
+        expect(handler.handleTeamsTaskModuleSubmitRefreshLeaderboard).toBeCalledTimes(0);
+        expect(handler.handleTeamsTaskModuleSubmitConfirmEndQnA).toBeCalledTimes(0);
         expect(handler.handleTeamsTaskModuleSubmitEndQnA).toBeCalledTimes(0);
     });
 
@@ -151,12 +126,8 @@ describe('teams task module submit', () => {
 
         expect(handler.handleTeamsTaskModuleSubmitQuestion).toBeCalledTimes(0);
         expect(handler.handleTeamsTaskModuleSubmitUpvote).toBeCalledTimes(1);
-        expect(
-            handler.handleTeamsTaskModuleSubmitRefreshLeaderboard
-        ).toBeCalledTimes(0);
-        expect(
-            handler.handleTeamsTaskModuleSubmitConfirmEndQnA
-        ).toBeCalledTimes(0);
+        expect(handler.handleTeamsTaskModuleSubmitRefreshLeaderboard).toBeCalledTimes(0);
+        expect(handler.handleTeamsTaskModuleSubmitConfirmEndQnA).toBeCalledTimes(0);
         expect(handler.handleTeamsTaskModuleSubmitEndQnA).toBeCalledTimes(0);
     });
 
@@ -170,12 +141,8 @@ describe('teams task module submit', () => {
 
         expect(handler.handleTeamsTaskModuleSubmitQuestion).toBeCalledTimes(0);
         expect(handler.handleTeamsTaskModuleSubmitUpvote).toBeCalledTimes(0);
-        expect(
-            handler.handleTeamsTaskModuleSubmitRefreshLeaderboard
-        ).toBeCalledTimes(1);
-        expect(
-            handler.handleTeamsTaskModuleSubmitConfirmEndQnA
-        ).toBeCalledTimes(0);
+        expect(handler.handleTeamsTaskModuleSubmitRefreshLeaderboard).toBeCalledTimes(1);
+        expect(handler.handleTeamsTaskModuleSubmitConfirmEndQnA).toBeCalledTimes(0);
         expect(handler.handleTeamsTaskModuleSubmitEndQnA).toBeCalledTimes(0);
     });
 
@@ -189,12 +156,8 @@ describe('teams task module submit', () => {
 
         expect(handler.handleTeamsTaskModuleSubmitQuestion).toBeCalledTimes(0);
         expect(handler.handleTeamsTaskModuleSubmitUpvote).toBeCalledTimes(0);
-        expect(
-            handler.handleTeamsTaskModuleSubmitRefreshLeaderboard
-        ).toBeCalledTimes(0);
-        expect(
-            handler.handleTeamsTaskModuleSubmitConfirmEndQnA
-        ).toBeCalledTimes(1);
+        expect(handler.handleTeamsTaskModuleSubmitRefreshLeaderboard).toBeCalledTimes(0);
+        expect(handler.handleTeamsTaskModuleSubmitConfirmEndQnA).toBeCalledTimes(1);
         expect(handler.handleTeamsTaskModuleSubmitEndQnA).toBeCalledTimes(0);
     });
 
@@ -208,12 +171,8 @@ describe('teams task module submit', () => {
 
         expect(handler.handleTeamsTaskModuleSubmitQuestion).toBeCalledTimes(0);
         expect(handler.handleTeamsTaskModuleSubmitUpvote).toBeCalledTimes(0);
-        expect(
-            handler.handleTeamsTaskModuleSubmitRefreshLeaderboard
-        ).toBeCalledTimes(0);
-        expect(
-            handler.handleTeamsTaskModuleSubmitConfirmEndQnA
-        ).toBeCalledTimes(0);
+        expect(handler.handleTeamsTaskModuleSubmitRefreshLeaderboard).toBeCalledTimes(0);
+        expect(handler.handleTeamsTaskModuleSubmitConfirmEndQnA).toBeCalledTimes(0);
         expect(handler.handleTeamsTaskModuleSubmitEndQnA).toBeCalledTimes(1);
     });
 
@@ -227,12 +186,8 @@ describe('teams task module submit', () => {
 
         expect(handler.handleTeamsTaskModuleSubmitQuestion).toBeCalledTimes(0);
         expect(handler.handleTeamsTaskModuleSubmitUpvote).toBeCalledTimes(0);
-        expect(
-            handler.handleTeamsTaskModuleSubmitRefreshLeaderboard
-        ).toBeCalledTimes(0);
-        expect(
-            handler.handleTeamsTaskModuleSubmitConfirmEndQnA
-        ).toBeCalledTimes(0);
+        expect(handler.handleTeamsTaskModuleSubmitRefreshLeaderboard).toBeCalledTimes(0);
+        expect(handler.handleTeamsTaskModuleSubmitConfirmEndQnA).toBeCalledTimes(0);
         expect(handler.handleTeamsTaskModuleSubmitEndQnA).toBeCalledTimes(1);
     });
 
@@ -247,12 +202,8 @@ describe('teams task module submit', () => {
 
         expect(handler.handleTeamsTaskModuleSubmitQuestion).toBeCalledTimes(0);
         expect(handler.handleTeamsTaskModuleSubmitUpvote).toBeCalledTimes(0);
-        expect(
-            handler.handleTeamsTaskModuleSubmitRefreshLeaderboard
-        ).toBeCalledTimes(0);
-        expect(
-            handler.handleTeamsTaskModuleSubmitConfirmEndQnA
-        ).toBeCalledTimes(0);
+        expect(handler.handleTeamsTaskModuleSubmitRefreshLeaderboard).toBeCalledTimes(0);
+        expect(handler.handleTeamsTaskModuleSubmitConfirmEndQnA).toBeCalledTimes(0);
         expect(handler.handleTeamsTaskModuleSubmitEndQnA).toBeCalledTimes(0);
         expect(handler.handleTeamsTaskModuleSubmitError).toBeCalledTimes(1);
     });
@@ -297,22 +248,10 @@ describe('handle submit question', () => {
             return true;
         });
 
-        expect(
-            await handler.handleTeamsTaskModuleSubmitQuestion(
-                context,
-                user,
-                taskModuleRequest
-            )
-        ).toBe(null);
+        expect(await handler.handleTeamsTaskModuleSubmitQuestion(context, user, taskModuleRequest)).toBe(null);
 
         expect(submitNewQuestion).toBeCalledTimes(1);
-        expect(submitNewQuestion).toBeCalledWith(
-            taskModuleRequest.data.qnaSessionId,
-            user.aadObjectId,
-            user.name,
-            taskModuleRequest.data.usertext,
-            context.activity.conversation.id
-        );
+        expect(submitNewQuestion).toBeCalledWith(taskModuleRequest.data.qnaSessionId, user.aadObjectId, user.name, taskModuleRequest.data.usertext, context.activity.conversation.id);
     });
 
     it('empty question', async () => {
@@ -332,17 +271,9 @@ describe('handle submit question', () => {
             return true;
         });
 
-        expect(
-            await handler.handleTeamsTaskModuleSubmitQuestion(
-                context,
-                user,
-                taskModuleRequest
-            )
-        ).not.toBe(null);
+        expect(await handler.handleTeamsTaskModuleSubmitQuestion(context, user, taskModuleRequest)).not.toBe(null);
 
-        expect(handler.handleTeamsTaskModuleResubmitQuestion).toBeCalledTimes(
-            1
-        );
+        expect(handler.handleTeamsTaskModuleResubmitQuestion).toBeCalledTimes(1);
         expect(submitNewQuestion).toBeCalledTimes(0);
         expect(handler._updateMainCard).toBeCalledTimes(0);
     });
@@ -364,17 +295,9 @@ describe('handle submit question', () => {
             throw new Error();
         });
 
-        expect(
-            await handler.handleTeamsTaskModuleSubmitQuestion(
-                context,
-                user,
-                taskModuleRequest
-            )
-        ).not.toEqual(null);
+        expect(await handler.handleTeamsTaskModuleSubmitQuestion(context, user, taskModuleRequest)).not.toEqual(null);
 
-        expect(handler.handleTeamsTaskModuleResubmitQuestion).toBeCalledTimes(
-            1
-        );
+        expect(handler.handleTeamsTaskModuleResubmitQuestion).toBeCalledTimes(1);
         expect(submitNewQuestion).toBeCalledTimes(1);
         expect(handler._updateMainCard).toBeCalledTimes(0);
     });
@@ -509,10 +432,7 @@ test('bot message preview send', async () => {
 
     (<any>startQnASession).mockImplementation(() => true);
 
-    await handler.handleTeamsMessagingExtensionBotMessagePreviewSend(
-        context,
-        action
-    );
+    await handler.handleTeamsMessagingExtensionBotMessagePreviewSend(context, action);
 
     expect(startQnASession).toBeCalledTimes(1);
     expect(startQnASession).toBeCalledWith({
@@ -556,20 +476,10 @@ describe('messaging extension submit', () => {
             },
         };
 
-        const result = await handler.handleTeamsMessagingExtensionSubmitAction(
-            context,
-            action
-        );
+        const result = await handler.handleTeamsMessagingExtensionSubmitAction(context, action);
 
         expect(getMainCard).toBeCalledTimes(1);
-        expect(getMainCard).toBeCalledWith(
-            action.data.title,
-            action.data.description,
-            context.activity.from.name,
-            '',
-            context.activity.from.aadObjectId,
-            context.activity.from.id
-        );
+        expect(getMainCard).toBeCalledWith(action.data.title, action.data.description, context.activity.from.name, '', context.activity.from.aadObjectId, context.activity.from.id);
         expect(result.composeExtension.type).toBe('botMessagePreview');
     });
 
@@ -581,18 +491,11 @@ describe('messaging extension submit', () => {
             },
         };
 
-        await handler.handleTeamsMessagingExtensionSubmitAction(
-            context,
-            action
-        );
+        await handler.handleTeamsMessagingExtensionSubmitAction(context, action);
 
         expect(getMainCard).toBeCalledTimes(0);
         expect(getStartQnACard).toBeCalledTimes(1);
-        expect(getStartQnACard).toBeCalledWith(
-            action.data.title,
-            action.data.description,
-            errorStrings('missingFields')
-        );
+        expect(getStartQnACard).toBeCalledWith(action.data.title, action.data.description, errorStrings('missingFields'));
     });
 
     test('filled title and unfilled description', async () => {
@@ -603,17 +506,10 @@ describe('messaging extension submit', () => {
             },
         };
 
-        await handler.handleTeamsMessagingExtensionSubmitAction(
-            context,
-            action
-        );
+        await handler.handleTeamsMessagingExtensionSubmitAction(context, action);
 
         expect(getMainCard).toBeCalledTimes(0);
         expect(getStartQnACard).toBeCalledTimes(1);
-        expect(getStartQnACard).toBeCalledWith(
-            action.data.title,
-            action.data.description,
-            errorStrings('missingFields')
-        );
+        expect(getStartQnACard).toBeCalledWith(action.data.title, action.data.description, errorStrings('missingFields'));
     });
 });
