@@ -36,12 +36,12 @@ const getAzureAdClientId = (): string => {
  * @returns - Azure AD ApplicationId Uri.
  */
 const getAzureAdApplicationIdUri = (): string => {
-    if (process.env.AzureAd_ApplicationIdUri === undefined) {
+    if (process.env.ASKAWAYTAB_APP_URI === undefined) {
         exceptionLogger('AzureAd ApplicationIdUri is missing in the settings.');
         throw new Error('AzureAd ApplicationIdUri is missing in the settings.');
     }
 
-    return process.env.AzureAd_ApplicationIdUri.toString().trim();
+    return process.env.ASKAWAYTAB_APP_URI.toString().trim();
 };
 
 /**

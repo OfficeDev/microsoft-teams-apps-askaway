@@ -3,7 +3,7 @@ import { getBearerStrategy, getIdentityMetadata, getValidIssuers, getValidAudian
 describe('authentication options tests', () => {
     beforeEach(() => {
         process.env.AzureAd_ClientId = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
-        process.env.AzureAd_ApplicationIdUri = 'api://example.com/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+        process.env.ASKAWAYTAB_APP_URI = 'api://example.com/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
         process.env.AzureAd_Metadata_Endpoint = 'https://login.microsoftonline.com/TENANT_ID/v2.0/.well-known/openid-configuration';
         process.env.AzureAd_ValidIssuers = 'https://login.microsoftonline.com/TENANT_ID/v2.0,https://sts.windows.net/TENANT_ID/';
         process.env.TenantId = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
@@ -23,7 +23,7 @@ describe('authentication options tests', () => {
     });
 
     it('validate authentication options, azure ad application id url is not set', () => {
-        delete process.env.AzureAd_ApplicationIdUri;
+        delete process.env.ASKAWAYTAB_APP_URI;
         expect(() => {
             getBearerStrategy();
         }).toThrow();
@@ -123,17 +123,17 @@ describe('valid issuers tests', () => {
 describe('azure ad valid audiance tests', () => {
     it('get azure ad valid audiance', () => {
         process.env.AzureAd_ClientId = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
-        process.env.AzureAd_ApplicationIdUri = 'api://example.com/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+        process.env.ASKAWAYTAB_APP_URI = 'api://example.com/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 
         const validAudiance = getValidAudiance();
         expect(validAudiance.length).toEqual(2);
         expect(validAudiance).toContain(process.env.AzureAd_ClientId);
-        expect(validAudiance).toContain(process.env.AzureAd_ApplicationIdUri);
+        expect(validAudiance).toContain(process.env.ASKAWAYTAB_APP_URI);
     });
 
     it('get azure ad valid audiance, spaces trimmed', () => {
         process.env.AzureAd_ClientId = ' aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa  ';
-        process.env.AzureAd_ApplicationIdUri = '  api://example.com/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa  ';
+        process.env.ASKAWAYTAB_APP_URI = '  api://example.com/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa  ';
 
         const validAudiance = getValidAudiance();
         expect(validAudiance.length).toEqual(2);
@@ -143,7 +143,7 @@ describe('azure ad valid audiance tests', () => {
 
     it('get azure ad valid audiance, azure ad client id is missing', () => {
         delete process.env.AzureAd_ClientId;
-        process.env.AzureAd_ApplicationIdUri = 'api://example.com/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+        process.env.ASKAWAYTAB_APP_URI = 'api://example.com/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 
         expect(() => {
             getValidAudiance();
@@ -152,7 +152,7 @@ describe('azure ad valid audiance tests', () => {
 
     it('get azure ad valid audiance, application id url is missing', () => {
         process.env.AzureAd_ClientId = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
-        delete process.env.AzureAd_ApplicationIdUri;
+        delete process.env.ASKAWAYTAB_APP_URI;
 
         expect(() => {
             getIdentityMetadata();
