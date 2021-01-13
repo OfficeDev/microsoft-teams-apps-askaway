@@ -72,12 +72,10 @@ export class CreateSession extends msteamsReactBaseComponent<CreateSessionProps,
      * @param field
      */
     private validateCreateSessionField(input, field) {
-        const errorInput = this.state;
-        errorInput['error'][field] = true;
-        if (input) {
-            errorInput['error'][field] = false;
-        }
-        this.setState(errorInput);
+        this.setState((state) => {
+            state.error[field] = input ? false : true;
+            return state;
+        });
     }
 
     private onSubmitCreateSession(e) {

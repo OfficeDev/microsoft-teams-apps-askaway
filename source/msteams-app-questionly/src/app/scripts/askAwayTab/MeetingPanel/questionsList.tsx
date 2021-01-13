@@ -6,8 +6,7 @@ import * as microsoftTeams from '@microsoft/teams-js';
 import { HttpService } from '../shared/HttpService';
 import { ActiveSessionData } from '../types';
 import TabHeader from './TabHeader';
-import AnsweredQuestions from './AnsweredQuestions';
-import UnansweredQuestions from './UnansweredQuestions';
+import Question from './Question';
 import { CONST } from '../shared/Constants';
 
 /**
@@ -40,31 +39,24 @@ const QuestionsList: React.FunctionComponent<QuestionsListProps> = (props) => {
 
     /**
      * On click like icon in the answered and unanswered questions
-     * @param question - answered / unanswered data
-     * @param key - answeredQuestions / unansweredQuestions
-     * @param actionValue - upvote/downvote/markAnswered
+     * @param event - question, key, actionValue
      */
     const handleOnClickAction = (event) => {
         props.httpService
             .patch(`/conversations/${props.teamsTabContext.chatId}/sessions/${activeSessionData.sessionId}/questions/${event.question['id']}`, { action: event.actionValue })
             .then((response: any) => {
                 if (response.data && response.data.id) {
-                    const questions = activeSessionData[event.key];
+                    let questions = activeSessionData[event.key];
                     const index = questions.findIndex((q) => q.id === response.data.id);
-                    questions.splice(index, 1);
-                    if (event.actionValue !== CONST.TAB_QUESTIONS.MARK_ANSWERED) {
-                        questions[index] = response.data;
-                        activeSessionData[event.key] = questions;
-                        setActiveSessionData(activeSessionData);
+                    if (event.actionValue === CONST.TAB_QUESTIONS.MARK_ANSWERED && event.key === CONST.TAB_QUESTIONS.UNANSWERED_Q) {
+                        questions.splice(index, 1);
+                        setActiveSessionData({ ...activeSessionData, ...questions });
+                        let questionsAnswered = activeSessionData[CONST.TAB_QUESTIONS.ANSWERED_Q];
+                        questionsAnswered.unshift(response.data);
+                        setActiveSessionData({ ...activeSessionData, ...questionsAnswered });
                     } else {
-                        activeSessionData[event.key] = questions;
-                        setActiveSessionData(activeSessionData);
-                        if (event.key === CONST.TAB_QUESTIONS.UNANSWERED_Q) {
-                            let questionsAnswered = activeSessionData[CONST.TAB_QUESTIONS.ANSWERED_Q];
-                            questionsAnswered = [response.data, ...questionsAnswered];
-                            activeSessionData[CONST.TAB_QUESTIONS.ANSWERED_Q] = questionsAnswered;
-                        }
-                        setActiveSessionData(activeSessionData);
+                        questions[index] = response.data;
+                        setActiveSessionData({ ...activeSessionData, ...questions });
                     }
                 }
             })
@@ -96,22 +88,22 @@ const QuestionsList: React.FunctionComponent<QuestionsListProps> = (props) => {
     return (
         <React.Fragment>
             <TabHeader onSelectActiveTab={setActiveLiveTab} tabActiveIndex={liveTab.defaultActiveIndex} />
-            {/* <AnsweredQuestions answeredQuesrions, onClickAction />
-            <UnanswertedQuestions unansweredQuesrions, onClickAction, OnHoverAction/> */}
             {liveTab.selectedTab === CONST.TAB_QUESTIONS.ANSWERED_Q && (
-                <AnsweredQuestions
-                    answeredData={activeSessionData[CONST.TAB_QUESTIONS.ANSWERED_Q]}
+                <Question
+                    questionData={activeSessionData[CONST.TAB_QUESTIONS.ANSWERED_Q]}
                     isUserLikedQuestion={handleIsUserLikedQuestions}
                     teamsTabContext={props.teamsTabContext}
                     onClickAction={handleOnClickAction}
+                    questionTab={CONST.TAB_QUESTIONS.ANSWERED_Q}
                 />
             )}
             {liveTab.selectedTab === CONST.TAB_QUESTIONS.UNANSWERED_Q && (
-                <UnansweredQuestions
-                    unansweredData={activeSessionData[CONST.TAB_QUESTIONS.UNANSWERED_Q]}
+                <Question
+                    questionData={activeSessionData[CONST.TAB_QUESTIONS.UNANSWERED_Q]}
                     isUserLikedQuestion={handleIsUserLikedQuestions}
                     teamsTabContext={props.teamsTabContext}
                     onClickAction={handleOnClickAction}
+                    questionTab={CONST.TAB_QUESTIONS.UNANSWERED_Q}
                 />
             )}
         </React.Fragment>

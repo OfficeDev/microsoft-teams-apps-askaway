@@ -125,16 +125,16 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
                     .post(`/conversations/${this.props.teamsTabContext.chatId}/sessions`, { ...this.state.input, ...createSessionData })
                     .then((response: any) => {
                         if (response && response['data'] && response['data']['sessionId']) {
-                            this.showAlertModel(true);
+                            this.showAlertModal(true);
                             this.setState({
                                 activeSessionData: response.data,
                             });
                         } else {
-                            this.showAlertModel(false);
+                            this.showAlertModal(false);
                         }
                     })
                     .catch((error) => {
-                        this.showAlertModel(false);
+                        this.showAlertModal(false);
                     });
             }
         };
@@ -144,7 +144,7 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
     /**
      * Display's success and failure screens for AMA session
      */
-    private showAlertModel(isSuccess = false) {
+    private showAlertModal(isSuccess = false) {
         let taskInfo: any = {
             fallbackUrl: '',
             appID: process.env.MicrosoftAppId,
