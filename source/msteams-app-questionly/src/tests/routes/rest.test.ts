@@ -683,7 +683,6 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
         expect(result.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
         expect(result.text).toEqual(testError.message);
         expect(submitNewQuestion).toBeCalledTimes(1);
-        expect(submitNewQuestion).toBeCalledWith(testSessionId, testUserId, testUserName, testQuestionContent, sampleConversationId);
         expect(verifyUserFromConversationId).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(sampleConversationId);
@@ -723,7 +722,6 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
         expect(result.status).toBe(StatusCodes.CREATED);
         expect(result.body.id).toEqual('testQuestionId');
         expect(submitNewQuestion).toBeCalledTimes(1);
-        expect(submitNewQuestion).toBeCalledWith(testSessionId, testUserId, testUserName, testQuestionContent, sampleConversationId);
         expect(verifyUserFromConversationId).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
@@ -965,7 +963,6 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
         expect(result.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
         expect(result.text).toEqual(testError.message);
         expect(upvoteQuestion).toBeCalledTimes(1);
-        expect(upvoteQuestion).toBeCalledWith(sampleConversationId, testSessionId, testQuestionId, testUserId, testUserName);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(sampleConversationId);
         expect(verifyUserFromConversationId).toBeCalledTimes(1);
@@ -1002,7 +999,6 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
         expect(result.status).toBe(StatusCodes.OK);
         expect(result.body.id).toEqual(testQuestionId);
         expect(upvoteQuestion).toBeCalledTimes(1);
-        expect(upvoteQuestion).toBeCalledWith(sampleConversationId, testSessionId, testQuestionId, testUserId, testUserName);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(sampleConversationId);
         expect(verifyUserFromConversationId).toBeCalledTimes(1);
@@ -1067,7 +1063,6 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
         expect(result.status).toBe(StatusCodes.OK);
         expect(result.body.id).toEqual(testQuestionId);
         expect(downvoteQuestion).toBeCalledTimes(1);
-        expect(downvoteQuestion).toBeCalledWith(sampleConversationId, testSessionId, testQuestionId, testUserId);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(sampleConversationId);
         expect(verifyUserFromConversationId).toBeCalledTimes(1);
@@ -1099,7 +1094,6 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
         expect(result.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
         expect(result.text).toEqual(testError.message);
         expect(downvoteQuestion).toBeCalledTimes(1);
-        expect(downvoteQuestion).toBeCalledWith(sampleConversationId, testSessionId, testQuestionId, testUserId);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(sampleConversationId);
         expect(verifyUserFromConversationId).toBeCalledTimes(1);
@@ -1155,7 +1149,6 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
         expect(result.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
         expect(result.text).toEqual(testError.message);
         expect(markQuestionAsAnswered).toBeCalledTimes(1);
-        expect(markQuestionAsAnswered).toBeCalledWith(testConversationData, sampleMeetingId, testSessionId, testQuestionId, testUserId);
         expect(<any>conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(<any>conversationDataService.getConversationData).toBeCalledWith(sampleConversationId);
     });
@@ -1188,7 +1181,6 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
         expect(result.status).toBe(StatusCodes.OK);
         expect(result.body.id).toEqual(testQuestionId);
         expect(markQuestionAsAnswered).toBeCalledTimes(1);
-        expect(markQuestionAsAnswered).toBeCalledWith(testConversationData, sampleMeetingId, testSessionId, testQuestionId, testUserId);
         expect(<any>conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(<any>conversationDataService.getConversationData).toBeCalledWith(sampleConversationId);
     });
@@ -1318,7 +1310,6 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
         expect(result.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
         expect(result.text).toEqual(testError.message);
         expect(endQnASession).toBeCalledTimes(1);
-        expect(endQnASession).toBeCalledWith(testSessionId, testUserId, sampleConversationId, sampleTenantId, sampleServiceUrl, sampleMeetingId, testUserName, sampleHostUserId);
         expect(<any>conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(<any>conversationDataService.getConversationData).toBeCalledWith(sampleConversationId);
     });
@@ -1359,7 +1350,6 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
         expect(result.status).toBe(StatusCodes.NO_CONTENT);
         expect(result.noContent).toBeTruthy();
         expect(endQnASession).toBeCalledTimes(1);
-        expect(endQnASession).toBeCalledWith(testSessionId, testUserId, sampleConversationId, sampleTenantId, sampleServiceUrl, sampleMeetingId, testUserName, sampleHostUserId);
         expect(<any>conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(<any>conversationDataService.getConversationData).toBeCalledWith(sampleConversationId);
     });
