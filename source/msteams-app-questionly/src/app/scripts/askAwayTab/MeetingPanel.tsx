@@ -148,7 +148,7 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
         let taskInfo: any = {
             fallbackUrl: '',
             appID: process.env.MicrosoftAppId,
-            card: isSuccess ? this.successModel() : this.failureModel(),
+            card: isSuccess ? this.successModal() : this.failureModal(),
         };
         microsoftTeams.tasks.startTask(taskInfo);
     }
@@ -156,7 +156,7 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
     /**
      * Display's success screen when AMA session is successfully created
      */
-    private successModel() {
+    private successModal() {
         return {
             $schema: 'https://adaptivecards.io/schemas/adaptive-card.json',
             type: 'AdaptiveCard',
@@ -189,7 +189,7 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
     /**
      * display's failure screen when creating AMA session is unsuccessful
      */
-    private failureModel() {
+    private failureModal() {
         return {
             $schema: 'https://adaptivecards.io/schemas/adaptive-card.json',
             type: 'AdaptiveCard',

@@ -45,25 +45,22 @@ export class CreateSession extends msteamsReactBaseComponent<CreateSessionProps,
      * @param key - state key value
      */
     private appendInput = (e, key) => {
-        const inputValues = this.state;
-        inputValues.input[key] = e.target.value;
-        this.setState(inputValues);
+        const { value } = e.target;
+        this.setState((state) => {
+            state.input[key] = value ? value.trim() : '';
+            return state;
+        });
     };
 
     /**
      * Validate Create Sesion Form
      */
     private validateCreateSession(inputData) {
-        const errorInput = this.state;
-        errorInput['error']['isTitle'] = false;
-        errorInput['error']['isDescription'] = false;
-        if (!inputData['title']) {
-            errorInput['error']['isTitle'] = true;
-        }
-        if (!inputData['description']) {
-            errorInput['error']['isDescription'] = true;
-        }
-        this.setState(errorInput);
+        this.setState((state) => {
+            state.error.isTitle = !inputData.title ? true : false;
+            state.error.isDescription = !inputData.description ? true : false;
+            return state;
+        });
     }
 
     /**
@@ -90,12 +87,7 @@ export class CreateSession extends msteamsReactBaseComponent<CreateSessionProps,
     private showCreateSessionForm() {
         return (
             <Flex column>
-                <Form
-                    // tslint:disable-next-line:react-this-binding-issue
-                    onSubmit={(e) => this.onSubmitCreateSession(e)}
-                    className="sidepanel-form"
-                    styles={{ display: 'flex', flexDirection: 'column' }}
-                >
+                <Form onSubmit={(e) => this.onSubmitCreateSession(e)} className="sidepanel-form" styles={{ display: 'flex', flexDirection: 'column' }}>
                     <div className="form-grid">
                         <Text content="Title Name*" size="small" />
                         <Input
