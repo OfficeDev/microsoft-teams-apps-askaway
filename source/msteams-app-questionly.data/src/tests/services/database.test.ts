@@ -120,6 +120,7 @@ test("can create qna session", async () => {
     scopeId: data.scopeId,
     hostUserId: data.hostUserId,
     isChannel: data.isChannel,
+    isMeetingGroupChat: true,
   });
 
   expect(result._id).toBeTruthy();
@@ -719,6 +720,7 @@ test("checking if inactive QnA is currently active", async () => {
     scopeId: data.scopeId,
     hostUserId: data.hostUserId,
     isChannel: data.isChannel,
+    isMeetingGroupChat: true,
   });
 
   await qnaSessionDataService.endQnASession(
