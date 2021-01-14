@@ -16,6 +16,7 @@ import {
     triggerBackgroundJobForQuestionUpvotedEvent,
 } from 'src/background-job/backgroundJobTrigger';
 import * as maincardBuilder from 'msteams-app-questionly.common';
+import { isValidStringParameter } from 'src/util/typeUtility';
 
 export const getMainCard = maincardBuilder.getMainCard;
 export const getStartQnACard = adaptiveCardBuilder.getStartQnACard;
@@ -36,6 +37,8 @@ const avatarColors: string[] = ['#B3DBF2', '#A7CFE8', '#92E0EA', '#ABDDD3', '#F7
  * scopeId - channel id or group chat id
  * hostUserId - MS Teams Id of user who created the QnA (used for at-mentions)
  * isChannel - whether the QnA session was started in a channel or group chat
+ * serviceUrl - bot service url.
+ * meetingId - meeting id.
  * @returns qna session document.
  */
 export const startQnASession = async (sessionParameters: {
@@ -50,13 +53,23 @@ export const startQnASession = async (sessionParameters: {
     hostUserId: string;
     isChannel: boolean;
     serviceUrl: string;
-    meetingId: string;
+    meetingId?: string;
 }): Promise<IQnASession_populated> => {
+    const isMeetingGroupChat = isValidStringParameter(sessionParameters.meetingId);
+
     // Only a presenter or organizer can create a new QnA session in the meeting.
-    if (sessionParameters.meetingId) {
-        if (!(await isPresenterOrOrganizer(sessionParameters.meetingId, sessionParameters.userAadObjectId, sessionParameters.tenantId, sessionParameters.serviceUrl))) {
-            throw new UnauthorizedAccessError(UnauthorizedAccessErrorCode.InsufficientPermissionsToCreateOrEndQnASession);
-        }
+
+    if (
+        isMeetingGroupChat &&
+        !(await isPresenterOrOrganizer(
+            // `isMeetingGroupChat` makes sure that meetingId is valid.
+            <string>sessionParameters.meetingId,
+            sessionParameters.userAadObjectId,
+            sessionParameters.tenantId,
+            sessionParameters.serviceUrl
+        ))
+    ) {
+        throw new UnauthorizedAccessError(UnauthorizedAccessErrorCode.InsufficientPermissionsToCreateOrEndQnASession);
     }
 
     // save data to db
@@ -71,6 +84,7 @@ export const startQnASession = async (sessionParameters: {
         scopeId: sessionParameters.scopeId,
         hostUserId: sessionParameters.hostUserId,
         isChannel: sessionParameters.isChannel,
+        isMeetingGroupChat: isMeetingGroupChat,
     });
 
     trackCreateQnASessionEvent({
@@ -83,7 +97,7 @@ export const startQnASession = async (sessionParameters: {
         sessionTitle: sessionParameters.title,
     });
 
-    await triggerBackgroundJobForQnaSessionCreatedEvent(response);
+    await triggerBackgroundJobForQnaSessionCreatedEvent(response, sessionParameters.serviceUrl, sessionParameters.meetingId);
 
     return response;
 };
@@ -136,9 +150,19 @@ export const getNewQuestionCard = (qnaSessionId: string): AdaptiveCard => {
  * @param userName - name of the user
  * @param questionContent - question content asked by the user
  * @param conversationId - conversation id.
+ * @param serviceUrl - bot service url.
+ * @param meetingId - meeting id.
  * @returns Returns ok object if successful, otherwise returns error
  */
-export const submitNewQuestion = async (qnaSessionId: string, userAadObjId: string, userName: string, questionContent: string, conversationId: string): Promise<IQuestion> => {
+export const submitNewQuestion = async (
+    qnaSessionId: string,
+    userAadObjId: string,
+    userName: string,
+    questionContent: string,
+    conversationId: string,
+    serviceUrl: string,
+    meetingId?: string
+): Promise<IQuestion> => {
     try {
         const question: IQuestion = await questionDataService.createQuestion(qnaSessionId, <string>userAadObjId, userName, questionContent, conversationId);
 
@@ -149,7 +173,7 @@ export const submitNewQuestion = async (qnaSessionId: string, userAadObjId: stri
             questionContent: questionContent,
         });
 
-        triggerBackgroundJobForQuestionPostedEvent(conversationId, question, qnaSessionId, userAadObjId);
+        triggerBackgroundJobForQuestionPostedEvent(conversationId, question, qnaSessionId, userAadObjId, serviceUrl, meetingId);
 
         return question;
     } catch (error) {
@@ -165,13 +189,21 @@ export const submitNewQuestion = async (qnaSessionId: string, userAadObjId: stri
  * @param qnaSessionId - qnasession id.
  * @param questionId - question id.
  * @param aadObjectId - aad object id of user who marked question as answered.
+ * @param serviceUrl - bot service url.
  * @returns - question document.
  */
-export const markQuestionAsAnswered = async (conversationData: IConversation, meetingId: string, qnaSessionId: string, questionId: string, aadObjectId: string): Promise<IQuestionPopulatedUser> => {
+export const markQuestionAsAnswered = async (
+    conversationData: IConversation,
+    meetingId: string,
+    qnaSessionId: string,
+    questionId: string,
+    aadObjectId: string,
+    serviceUrl: string
+): Promise<IQuestionPopulatedUser> => {
     if (await isPresenterOrOrganizer(meetingId, aadObjectId, conversationData.tenantId, conversationData.serviceUrl)) {
         const questionData = await questionDataService.markQuestionAsAnswered(conversationData._id, qnaSessionId, questionId);
 
-        await triggerBackgroundJobForQuestionMarkedAsAnsweredEvent(conversationData._id, questionId, qnaSessionId, aadObjectId);
+        await triggerBackgroundJobForQuestionMarkedAsAnsweredEvent(conversationData._id, questionId, qnaSessionId, aadObjectId, serviceUrl, meetingId);
 
         return questionData;
     } else {
@@ -186,12 +218,22 @@ export const markQuestionAsAnswered = async (conversationData: IConversation, me
  * @param questionId - question id.
  * @param aadObjectId - aad object id of user who upvoted question.
  * @param userName - name of user who upvoted the question.
+ * @param serviceUrl - bot service url.
+ * @param meetingId - meeting id.
  * @returns - question document.
  */
-export const upvoteQuestion = async (conversationId: string, qnaSessionId: string, questionId: string, aadObjectId: string, userName: string): Promise<IQuestionPopulatedUser> => {
+export const upvoteQuestion = async (
+    conversationId: string,
+    qnaSessionId: string,
+    questionId: string,
+    aadObjectId: string,
+    userName: string,
+    serviceUrl: string,
+    meetingId?: string
+): Promise<IQuestionPopulatedUser> => {
     const questionData = await questionDataService.upVoteQuestion(conversationId, qnaSessionId, questionId, aadObjectId, userName);
 
-    await triggerBackgroundJobForQuestionUpvotedEvent(conversationId, questionId, qnaSessionId, aadObjectId);
+    await triggerBackgroundJobForQuestionUpvotedEvent(conversationId, questionId, qnaSessionId, aadObjectId, serviceUrl, meetingId);
 
     return questionData;
 };
@@ -202,12 +244,21 @@ export const upvoteQuestion = async (conversationId: string, qnaSessionId: strin
  * @param qnaSessionId - qnasession id.
  * @param questionId - question id.
  * @param aadObjectId - aad object id of user who downvoted question.
+ * @param serviceUrl - bot service url.
+ * @param meetingId - meeting id.
  * @returns - question document.
  */
-export const downvoteQuestion = async (conversationId: string, qnaSessionId: string, questionId: string, aadObjectId: string): Promise<IQuestionPopulatedUser> => {
+export const downvoteQuestion = async (
+    conversationId: string,
+    qnaSessionId: string,
+    questionId: string,
+    aadObjectId: string,
+    serviceUrl: string,
+    meetingId?: string
+): Promise<IQuestionPopulatedUser> => {
     const questionData = await questionDataService.downVoteQuestion(conversationId, qnaSessionId, questionId, aadObjectId);
 
-    await triggerBackgroundJobForQuestionDownvotedEvent(conversationId, questionId, qnaSessionId, aadObjectId);
+    await triggerBackgroundJobForQuestionDownvotedEvent(conversationId, questionId, qnaSessionId, aadObjectId, serviceUrl, meetingId);
 
     return questionData;
 };
@@ -218,15 +269,26 @@ export const downvoteQuestion = async (conversationId: string, qnaSessionId: str
  * @param aadObjectId - aadObjectId of the user upvoting the question
  * @param name - Name of the user upvoting the question
  * @param theme - Teams theme of the user upvoting. Options are 'default', 'dark', or 'high-contrast'
+ * @param serviceUrl - bot service url.
+ * @param meetingId - meeting id.
  */
-export const updateUpvote = async (qnaSessionId: string, questionId: string, aadObjectId: string, name: string, conversationId: string, theme: string): Promise<AdaptiveCard> => {
+export const updateUpvote = async (
+    qnaSessionId: string,
+    questionId: string,
+    aadObjectId: string,
+    name: string,
+    conversationId: string,
+    theme: string,
+    serviceUrl: string,
+    meetingId?: string
+): Promise<AdaptiveCard> => {
     try {
         const response = await questionDataService.updateUpvote(questionId, aadObjectId, name);
 
         if (response.upvoted) {
-            await triggerBackgroundJobForQuestionUpvotedEvent(conversationId, response.question._id, qnaSessionId, aadObjectId);
+            await triggerBackgroundJobForQuestionUpvotedEvent(conversationId, response.question._id, qnaSessionId, aadObjectId, serviceUrl, meetingId);
         } else {
-            await triggerBackgroundJobForQuestionDownvotedEvent(conversationId, response.question._id, qnaSessionId, aadObjectId);
+            await triggerBackgroundJobForQuestionDownvotedEvent(conversationId, response.question._id, qnaSessionId, aadObjectId, serviceUrl, meetingId);
         }
 
         return generateLeaderboard(response.question.qnaSessionId, aadObjectId, theme);
@@ -247,31 +309,36 @@ export const getEndQnAConfirmationCard = (qnaSessionId: string): AdaptiveCard =>
 
 /**
  * Communicates with database to end the QnA and retrieves details
- * @param qnaSessionId - id of the current QnA session
- * @param aadObjectId - aadObjectId of the user attempting to end the QnA session
- * @param conversationId - conversation id
- * @returns Ok object with updated Master Card
+ * @param sessionParameters - object with parameters needed in order to end a session
+ * qnaSessionId - id of the current QnA session
+ * aadObjectId - aadObjectId of the user attempting to end the QnA session
+ * conversationId - conversation id
+ * tenantId - tenant id
+ * serviceURL - bot service url
+ * endedByUserId - aad object id of user who is ending the session
+ * meetingId - meeting id
  */
-export const endQnASession = async (
-    qnaSessionId: string,
-    aadObjectId: string,
-    conversationId: string,
-    tenantId: string,
-    serviceURL: string,
-    meetingId: string,
-    userName: string,
-    endedByUserId: string
-): Promise<void> => {
-    const isActive = await qnaSessionDataService.isActiveQnA(qnaSessionId);
+export const endQnASession = async (sessionParameters: {
+    qnaSessionId: string;
+    aadObjectId: string;
+    conversationId: string;
+    tenantId: string;
+    serviceURL: string;
+    userName: string;
+    endedByUserId: string;
+    meetingId?: string;
+}): Promise<void> => {
+    const isActive = await qnaSessionDataService.isActiveQnA(sessionParameters.qnaSessionId);
     if (!isActive) {
         throw new Error('The QnA session has already ended');
     }
 
-    const isHost = await qnaSessionDataService.isHost(qnaSessionId, aadObjectId);
+    const isHost = await qnaSessionDataService.isHost(sessionParameters.qnaSessionId, sessionParameters.aadObjectId);
 
     //Only a Presenter or an Organizer can end QnA session in the meeting.
-    if (meetingId) {
-        const canEndQnASession = await isPresenterOrOrganizer(meetingId, aadObjectId, tenantId, serviceURL);
+    if (sessionParameters.meetingId) {
+        const canEndQnASession = await isPresenterOrOrganizer(sessionParameters.meetingId, sessionParameters.aadObjectId, sessionParameters.tenantId, sessionParameters.serviceURL);
+
         if (!canEndQnASession) {
             throw new UnauthorizedAccessError(UnauthorizedAccessErrorCode.InsufficientPermissionsToCreateOrEndQnASession);
         }
@@ -281,9 +348,21 @@ export const endQnASession = async (
         }
     }
 
-    await qnaSessionDataService.endQnASession(qnaSessionId, conversationId, aadObjectId, userName, endedByUserId);
+    await qnaSessionDataService.endQnASession(
+        sessionParameters.qnaSessionId,
+        sessionParameters.conversationId,
+        sessionParameters.aadObjectId,
+        sessionParameters.userName,
+        sessionParameters.endedByUserId
+    );
 
-    await triggerBackgroundJobForQnaSessionEndedEvent(conversationId, qnaSessionId, aadObjectId);
+    await triggerBackgroundJobForQnaSessionEndedEvent(
+        sessionParameters.conversationId,
+        sessionParameters.qnaSessionId,
+        sessionParameters.aadObjectId,
+        sessionParameters.serviceURL,
+        sessionParameters.meetingId
+    );
 };
 
 /**

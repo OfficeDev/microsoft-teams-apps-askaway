@@ -251,7 +251,6 @@ describe('handle submit question', () => {
         expect(await handler.handleTeamsTaskModuleSubmitQuestion(context, user, taskModuleRequest)).toBe(null);
 
         expect(submitNewQuestion).toBeCalledTimes(1);
-        expect(submitNewQuestion).toBeCalledWith(taskModuleRequest.data.qnaSessionId, user.aadObjectId, user.name, taskModuleRequest.data.usertext, context.activity.conversation.id);
     });
 
     it('empty question', async () => {
@@ -332,14 +331,6 @@ test('handle submit upvote', async () => {
     await handler.handleTeamsTaskModuleSubmitUpvote(context, taskModuleRequest);
 
     expect(updateUpvote).toBeCalledTimes(1);
-    expect(updateUpvote).toBeCalledWith(
-        taskModuleRequest.data.qnaSessionId,
-        taskModuleRequest.data.questionId,
-        context.activity.from.aadObjectId,
-        context.activity.from.name,
-        context.activity.conversation.id,
-        'default'
-    );
     expect(handler._buildTaskModuleContinueResponse).toBeCalledTimes(1);
     expect(getErrorCard).toBeCalledTimes(1);
     expect(getErrorCard).toBeCalledWith(errorStrings('upvoting'));
@@ -383,16 +374,6 @@ test('handle submit end qna', async () => {
     await handler.handleTeamsTaskModuleSubmitEndQnA(taskModuleRequest, context);
 
     expect(endQnASession).toBeCalledTimes(1);
-    expect(endQnASession).toBeCalledWith(
-        taskModuleRequest.data.qnaSessionId,
-        context.activity.from.aadObjectId,
-        context.activity.conversation.id,
-        context.activity.conversation.tenantId,
-        context.activity.serviceUrl,
-        sampleMeetingId,
-        context.activity.from.name,
-        context.activity.from.id
-    );
 });
 
 test('bot message preview send', async () => {
