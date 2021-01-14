@@ -56,10 +56,12 @@ export class CreateSession extends msteamsReactBaseComponent<CreateSessionProps,
      * Validate Create Sesion Form
      */
     private validateCreateSession(inputData) {
-        this.setState((state) => {
-            state.error.isTitle = !inputData.title ? true : false;
-            state.error.isDescription = !inputData.description ? true : false;
-            return state;
+        debugger;
+        this.setState({
+            error: {
+                isTitle: !inputData.title,
+                isDescription: !inputData.description,
+            },
         });
     }
 
@@ -69,9 +71,12 @@ export class CreateSession extends msteamsReactBaseComponent<CreateSessionProps,
      * @param field
      */
     private validateCreateSessionField(input, field) {
-        this.setState((state) => {
-            state.error[field] = input ? false : true;
-            return state;
+        debugger;
+        this.setState({
+            error: {
+                ...this.state.error,
+                [field]: !input,
+            },
         });
     }
 
@@ -130,6 +135,7 @@ export class CreateSession extends msteamsReactBaseComponent<CreateSessionProps,
      * The render() method to create the UI of the tab
      */
     public render() {
+        debugger;
         return (
             <Provider theme={this.state.theme}>
                 <React.Fragment>

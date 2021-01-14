@@ -2,93 +2,72 @@
 import './../index.scss';
 import * as React from 'react';
 import { Card, Flex, Button, Text, Avatar } from '@fluentui/react-northstar';
-import { LikeIcon, AcceptIcon } from '@fluentui/react-icons-northstar';
-import { LikeIconFilled } from './../shared/Icons/LikeIconFilled';
-import * as microsoftTeams from '@microsoft/teams-js';
-import { CONST } from './../shared/Constants';
-import { useState, useEffect } from 'react';
+import { LikeIcon } from '@fluentui/react-icons-northstar';
+import { LikeIconFilled } from '../shared/Icons/LikeIconFilled';
+import { CONST } from '../shared/Constants';
+import { useState } from 'react';
+import { QuestionProps } from '../types';
 
+type QuestionCompProps = {
+    question: QuestionProps;
+    isUserLikedQuestion: boolean;
+    renderHoverElement?: any;
+    questionId: string;
+    questionTab: string;
+    onClickAction: any;
+    userId: string;
+};
 /**
  * Properties for the UnansweredQuestions React component
  */
-export interface QuestionProps {
-    questionData: Array<any>;
-    teamsTabContext: microsoftTeams.Context;
-    isUserLikedQuestion: Function;
-    onClickAction: Function;
-    questionTab: string;
-}
-const Question: React.FunctionComponent<QuestionProps> = (props) => {
-    const [isHoveredQuestionIndex, setIsHoveredQuestionIndex] = useState(-1);
 
-    const renderAcceptButton = (data: object) => {
-        return (
-            <div>
-                <Button icon={<AcceptIcon />} onClick={() => props.onClickAction(data)} className="like-icon-size answered-icon" iconOnly text />
-            </div>
-        );
-    };
+const Question: React.FunctionComponent<QuestionCompProps> = (props) => {
+    const { question, isUserLikedQuestion, renderHoverElement, questionId, questionTab, onClickAction, userId } = props;
+    const [isMouseHovered, setMouseHover] = useState(false);
 
     return (
-        <React.Fragment>
-            {props.questionData.length > 0 && (
-                <div className="question-card">
-                    {props.questionData.map((q, index) => {
-                        q['isUserLiked'] = props.isUserLikedQuestion({ idsArray: q.voterAadObjectIds, userId: props.teamsTabContext.userObjectId });
-                        return (
-                            <div
-                                className="card-divider"
-                                key={q.id}
-                                onMouseEnter={() => {
-                                    if (props.questionTab === CONST.TAB_QUESTIONS.UNANSWERED_Q) {
-                                        setIsHoveredQuestionIndex(index);
+        <div
+            className="card-divider"
+            key={questionId}
+            onMouseEnter={() => {
+                setMouseHover(true);
+            }}
+            onMouseLeave={() => {
+                setMouseHover(false);
+            }}
+        >
+            <Card aria-roledescription="card avatar" className="card-layout">
+                <Card.Header fitted>
+                    <Flex gap="gap.small">
+                        <Avatar size={'smaller'} name={question.author.name} />
+                        <Flex>
+                            <Text className="author-name" content={question.author.name} weight="regular" />
+                            <Flex vAlign="center" className="like-icon">
+                                {isMouseHovered && renderHoverElement}
+                                <Button
+                                    disabled={userId === question.author.id}
+                                    onClick={() =>
+                                        onClickAction({
+                                            question,
+                                            key: questionTab,
+                                            actionValue: isUserLikedQuestion ? CONST.TAB_QUESTIONS.DOWN_VOTE : CONST.TAB_QUESTIONS.UP_VOTE,
+                                        })
                                     }
-                                }}
-                                onMouseLeave={() => {
-                                    if (props.questionTab === CONST.TAB_QUESTIONS.UNANSWERED_Q) {
-                                        setIsHoveredQuestionIndex(-1);
-                                    }
-                                }}
-                            >
-                                <Card aria-roledescription="card avatar" className="card-layout">
-                                    <Card.Header fitted>
-                                        <Flex gap="gap.small">
-                                            <Avatar size={'smaller'} name={q.author.name} />
-                                            <Flex>
-                                                <Text className="author-name" content={q.author.name} weight="regular" />
-                                                <Flex vAlign="center" className="like-icon">
-                                                    {isHoveredQuestionIndex === index &&
-                                                        props.questionTab === CONST.TAB_QUESTIONS.UNANSWERED_Q &&
-                                                        renderAcceptButton({ question: q, key: CONST.TAB_QUESTIONS.UNANSWERED_Q, actionValue: CONST.TAB_QUESTIONS.MARK_ANSWERED })}
-                                                    <Button
-                                                        // disabled={props.teamsTabContext.userObjectId === q.author.id}
-                                                        onClick={() =>
-                                                            props.onClickAction({
-                                                                question: q,
-                                                                key: CONST.TAB_QUESTIONS.UNANSWERED_Q,
-                                                                actionValue: q.isUserLiked ? CONST.TAB_QUESTIONS.DOWN_VOTE : CONST.TAB_QUESTIONS.UP_VOTE,
-                                                            })
-                                                        }
-                                                        icon={q.isUserLiked ? <LikeIconFilled /> : <LikeIcon outline />}
-                                                        className="like-icon-size"
-                                                        iconOnly
-                                                        text
-                                                    />
-                                                    <Text content={q.votesCount} />
-                                                </Flex>
-                                            </Flex>
-                                        </Flex>
-                                    </Card.Header>
-                                    <Card.Body>
-                                        <Text content={q.content} className="card-body-question" />
-                                    </Card.Body>
-                                </Card>
-                            </div>
-                        );
-                    })}
-                </div>
-            )}
-        </React.Fragment>
+                                    icon={isUserLikedQuestion ? <LikeIconFilled /> : <LikeIcon outline />}
+                                    className="like-icon-size"
+                                    iconOnly
+                                    text
+                                />
+                                <Text content={question.votesCount} />
+                            </Flex>
+                        </Flex>
+                    </Flex>
+                </Card.Header>
+                <Card.Body>
+                    <Text content={question.content} className="card-body-question" />
+                </Card.Body>
+            </Card>
+        </div>
     );
 };
 export default Question;

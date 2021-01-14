@@ -4,7 +4,9 @@ import * as React from 'react';
 import { useState, useMemo } from 'react';
 import * as microsoftTeams from '@microsoft/teams-js';
 import { HttpService } from '../shared/HttpService';
-import { ActiveSessionData } from '../types';
+import { AcceptIcon } from '@fluentui/react-icons-northstar';
+import { Button } from '@fluentui/react-northstar';
+import { ActiveSessionData, QuestionProps } from '../types';
 import TabHeader from './TabHeader';
 import Question from './Question';
 import { CONST } from '../shared/Constants';
@@ -74,38 +76,55 @@ const QuestionsList: React.FunctionComponent<QuestionsListProps> = (props) => {
         });
     };
 
-    const handleIsUserLikedQuestions = (event) => {
-        let response = false;
-        if (event.idsArray.length > 0 && event.userId) {
-            const isUserLiked = event.idsArray.includes(event.userId);
-            if (isUserLiked) {
-                response = true;
-            }
+    const checkIsUserLikedQuestion = (event) => {
+        const userId = props.teamsTabContext.userObjectId;
+        if (event.idsArray.length > 0 && userId) {
+            return event.idsArray.includes(userId);
         }
-        return response;
+        return false;
     };
 
+    const renderAcceptButton = (data: object) => {
+        return (
+            <div>
+                <Button icon={<AcceptIcon />} onClick={() => handleOnClickAction(data)} className="like-icon-size answered-icon" iconOnly text />
+            </div>
+        );
+    };
     return (
         <React.Fragment>
             <TabHeader onSelectActiveTab={setActiveLiveTab} tabActiveIndex={liveTab.defaultActiveIndex} />
-            {liveTab.selectedTab === CONST.TAB_QUESTIONS.ANSWERED_Q && (
-                <Question
-                    questionData={activeSessionData[CONST.TAB_QUESTIONS.ANSWERED_Q]}
-                    isUserLikedQuestion={handleIsUserLikedQuestions}
-                    teamsTabContext={props.teamsTabContext}
-                    onClickAction={handleOnClickAction}
-                    questionTab={CONST.TAB_QUESTIONS.ANSWERED_Q}
-                />
-            )}
-            {liveTab.selectedTab === CONST.TAB_QUESTIONS.UNANSWERED_Q && (
-                <Question
-                    questionData={activeSessionData[CONST.TAB_QUESTIONS.UNANSWERED_Q]}
-                    isUserLikedQuestion={handleIsUserLikedQuestions}
-                    teamsTabContext={props.teamsTabContext}
-                    onClickAction={handleOnClickAction}
-                    questionTab={CONST.TAB_QUESTIONS.UNANSWERED_Q}
-                />
-            )}
+            <div className="question-card">
+                {liveTab.selectedTab === CONST.TAB_QUESTIONS.ANSWERED_Q &&
+                    activeSessionData.answeredQuestions.map((question: QuestionProps) => {
+                        const isUserLikedQuestion = checkIsUserLikedQuestion({ idsArray: question.voterAadObjectIds });
+                        return (
+                            <Question
+                                questionId={question.id}
+                                question={question}
+                                onClickAction={handleOnClickAction}
+                                isUserLikedQuestion={isUserLikedQuestion}
+                                questionTab={CONST.TAB_QUESTIONS.ANSWERED_Q}
+                                userId={props.teamsTabContext.userObjectId || ''}
+                            />
+                        );
+                    })}
+                {liveTab.selectedTab === CONST.TAB_QUESTIONS.UNANSWERED_Q &&
+                    activeSessionData.unansweredQuestions.map((question: QuestionProps) => {
+                        const isUserLikedQuestion = checkIsUserLikedQuestion({ idsArray: question.voterAadObjectIds });
+                        return (
+                            <Question
+                                questionId={question.id}
+                                question={question}
+                                onClickAction={handleOnClickAction}
+                                isUserLikedQuestion={isUserLikedQuestion}
+                                questionTab={CONST.TAB_QUESTIONS.UNANSWERED_Q}
+                                userId={props.teamsTabContext.userObjectId || ''}
+                                renderHoverElement={renderAcceptButton({ question, key: CONST.TAB_QUESTIONS.UNANSWERED_Q, actionValue: CONST.TAB_QUESTIONS.MARK_ANSWERED })}
+                            />
+                        );
+                    })}
+            </div>
         </React.Fragment>
     );
 };
