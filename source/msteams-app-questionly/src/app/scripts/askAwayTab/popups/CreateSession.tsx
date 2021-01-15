@@ -56,7 +56,6 @@ export class CreateSession extends msteamsReactBaseComponent<CreateSessionProps,
      * Validate Create Sesion Form
      */
     private validateCreateSession(inputData) {
-        debugger;
         this.setState({
             error: {
                 isTitle: !inputData.title,
@@ -71,7 +70,6 @@ export class CreateSession extends msteamsReactBaseComponent<CreateSessionProps,
      * @param field
      */
     private validateCreateSessionField(input, field) {
-        debugger;
         this.setState({
             error: {
                 ...this.state.error,
@@ -135,7 +133,6 @@ export class CreateSession extends msteamsReactBaseComponent<CreateSessionProps,
      * The render() method to create the UI of the tab
      */
     public render() {
-        debugger;
         return (
             <Provider theme={this.state.theme}>
                 <React.Fragment>
