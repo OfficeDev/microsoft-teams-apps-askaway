@@ -1,7 +1,6 @@
-import { IBackgroundJobPayload } from 'src/background-job/backgroundJobPayload';
-import { IDataEvent } from 'msteams-app-questionly.common';
+import { IBackgroundJobPayload, IDataEvent } from 'msteams-app-questionly.common';
 import axios, { AxiosRequestConfig } from 'axios';
-import { exceptionLogger } from 'src/util/exceptionTracking';
+import { exceptionLogger, getOperationIdForCurrentRequest } from 'src/util/exceptionTracking';
 import { getBackgroundFunctionKey } from 'src/util/keyvault';
 import { IQnASession_populated, IQuestion } from 'msteams-app-questionly.data';
 import {
@@ -13,6 +12,7 @@ import {
     createQuestionUpvotedEvent,
 } from 'src/background-job/events/dataEventUtility';
 import { StatusCodes } from 'http-status-codes';
+import { TelemetryExceptions } from 'src/constants/telemetryConstants';
 
 const axiosConfig: AxiosRequestConfig = axios.defaults;
 let backgroundJobUri: string;
@@ -33,12 +33,12 @@ export const initBackgroundJobSetup = async () => {
 /**
  * Triggers background job for new qnaSession created event.
  * @param session - Newly created qnaSession document.
+ * @param serviceUrl - bot service url.
+ * @param meetingId - meeting id.
  */
-export const triggerBackgroundJobForQnaSessionCreatedEvent = async (
-    session: IQnASession_populated
-): Promise<void> => {
+export const triggerBackgroundJobForQnaSessionCreatedEvent = async (session: IQnASession_populated, serviceUrl: string, meetingId?: string): Promise<void> => {
     const eventData = createQnaSessionCreatedEvent(session);
-    await triggerBackgroundJob(session.conversationId, session._id, eventData);
+    await triggerBackgroundJob(session.conversationId, session._id, eventData, serviceUrl, meetingId);
 };
 
 /**
@@ -46,17 +46,12 @@ export const triggerBackgroundJobForQnaSessionCreatedEvent = async (
  * @param conversationId - conversation id.
  * @param qnaSessionId - qnaSession id.
  * @param endedByUserAadObjectId - AadObject id of user who ended the session.
+ * @param serviceUrl - bot service url.
+ * @param meetingId - meeting id.
  */
-export const triggerBackgroundJobForQnaSessionEndedEvent = async (
-    conversationId: string,
-    qnaSessionId: string,
-    endedByUserId: string
-) => {
-    const eventData = await createQnaSessionEndedEvent(
-        qnaSessionId,
-        endedByUserId
-    );
-    await triggerBackgroundJob(conversationId, qnaSessionId, eventData);
+export const triggerBackgroundJobForQnaSessionEndedEvent = async (conversationId: string, qnaSessionId: string, endedByUserId: string, serviceUrl: string, meetingId?: string) => {
+    const eventData = await createQnaSessionEndedEvent(qnaSessionId, endedByUserId);
+    await triggerBackgroundJob(conversationId, qnaSessionId, eventData, serviceUrl, meetingId);
 };
 
 /**
@@ -65,19 +60,19 @@ export const triggerBackgroundJobForQnaSessionEndedEvent = async (
  * @param questionId - question id.
  * @param qnaSessionId - qnaSession id.
  * @param upvotedByUserId - AadObject id of user who upvoted the question.
+ * @param serviceUrl - bot service url.
+ * @param meetingId - meeting id.
  */
 export const triggerBackgroundJobForQuestionUpvotedEvent = async (
     conversationId: string,
     questionId: string,
     qnaSessionId: string,
-    upvotedByUserId: string
+    upvotedByUserId: string,
+    serviceUrl: string,
+    meetingId?: string
 ) => {
-    const eventData = await createQuestionUpvotedEvent(
-        qnaSessionId,
-        questionId,
-        upvotedByUserId
-    );
-    await triggerBackgroundJob(conversationId, qnaSessionId, eventData);
+    const eventData = await createQuestionUpvotedEvent(qnaSessionId, questionId, upvotedByUserId);
+    await triggerBackgroundJob(conversationId, qnaSessionId, eventData, serviceUrl, meetingId);
 };
 
 /**
@@ -86,19 +81,19 @@ export const triggerBackgroundJobForQuestionUpvotedEvent = async (
  * @param questionId - question id.
  * @param qnaSessionId - qnaSession id.
  * @param downvotedByUserId - AadObject id of user who downvoted the question.
+ * @param serviceUrl - bot service url.
+ * @param meetingId - meeting id.
  */
 export const triggerBackgroundJobForQuestionDownvotedEvent = async (
     conversationId: string,
     questionId: string,
     qnaSessionId: string,
-    downvotedByUserId: string
+    downvotedByUserId: string,
+    serviceUrl: string,
+    meetingId?: string
 ) => {
-    const eventData = await createQuestionDownvotedEvent(
-        qnaSessionId,
-        questionId,
-        downvotedByUserId
-    );
-    await triggerBackgroundJob(conversationId, qnaSessionId, eventData);
+    const eventData = await createQuestionDownvotedEvent(qnaSessionId, questionId, downvotedByUserId);
+    await triggerBackgroundJob(conversationId, qnaSessionId, eventData, serviceUrl, meetingId);
 };
 
 /**
@@ -107,19 +102,12 @@ export const triggerBackgroundJobForQuestionDownvotedEvent = async (
  * @param question - question document.
  * @param qnaSessionId - qnaSession id.
  * @param postedByUserId - AadObject id of user who posted the question.
+ * @param serviceUrl - bot service url.
+ * @param meetingId - meeting id.
  */
-export const triggerBackgroundJobForQuestionPostedEvent = async (
-    conversationId: string,
-    question: IQuestion,
-    qnaSessionId: string,
-    postedByUserId: string
-) => {
-    const eventData = await createQuestionAddedEvent(
-        qnaSessionId,
-        question,
-        postedByUserId
-    );
-    await triggerBackgroundJob(conversationId, qnaSessionId, eventData);
+export const triggerBackgroundJobForQuestionPostedEvent = async (conversationId: string, question: IQuestion, qnaSessionId: string, postedByUserId: string, serviceUrl: string, meetingId?: string) => {
+    const eventData = await createQuestionAddedEvent(qnaSessionId, question, postedByUserId);
+    await triggerBackgroundJob(conversationId, qnaSessionId, eventData, serviceUrl, meetingId);
 };
 
 /**
@@ -128,19 +116,19 @@ export const triggerBackgroundJobForQuestionPostedEvent = async (
  * @param questionId - question id.
  * @param qnaSessionId - qnaSession id.
  * @param markedAnsweredByUserAadObjectId - AadObject id of user who marked the question as answered.
+ * @param serviceUrl - bot service url.
+ * @param meetingId - meeting id.
  */
 export const triggerBackgroundJobForQuestionMarkedAsAnsweredEvent = async (
     conversationId: string,
     questionId: string,
     qnaSessionId: string,
-    markedAnsweredByUserAadObjectId: string
+    markedAnsweredByUserAadObjectId: string,
+    serviceUrl: string,
+    meetingId?: string
 ) => {
-    const eventData = await createQuestionMarkedAsAnsweredEvent(
-        qnaSessionId,
-        questionId,
-        markedAnsweredByUserAadObjectId
-    );
-    await triggerBackgroundJob(conversationId, qnaSessionId, eventData);
+    const eventData = await createQuestionMarkedAsAnsweredEvent(qnaSessionId, questionId, markedAnsweredByUserAadObjectId);
+    await triggerBackgroundJob(conversationId, qnaSessionId, eventData, serviceUrl, meetingId);
 };
 
 /**
@@ -148,31 +136,31 @@ export const triggerBackgroundJobForQuestionMarkedAsAnsweredEvent = async (
  * @param conversationId - conversation id.
  * @param qnaSessionId - qnaSession id.
  * @param dataEvent - data event for clients to update UX real time.
+ * @param serviceUrl - bot service url.
+ * @param meetingId - meeting id.
  */
-const triggerBackgroundJob = async (
-    conversationId: string,
-    qnaSessionId: string,
-    dataEvent: IDataEvent
-): Promise<void> => {
+const triggerBackgroundJob = async (conversationId: string, qnaSessionId: string, dataEvent: IDataEvent, serviceUrl: string, meetingId?: string): Promise<void> => {
     const backgroundJobPayload: IBackgroundJobPayload = {
         conversationId: conversationId,
         qnaSessionId: qnaSessionId,
         eventData: dataEvent,
+        operationId: getOperationIdForCurrentRequest(),
+        serviceUrl: serviceUrl,
+        meetingId: meetingId,
     };
 
     try {
-        const res = await axios.post(
-            backgroundJobUri,
-            backgroundJobPayload,
-            axiosConfig
-        );
+        const res = await axios.post(backgroundJobUri, backgroundJobPayload, axiosConfig);
 
         if (res.status != StatusCodes.ACCEPTED) {
-            throw new Error(
-                `Error in scheduling background job for conversation id ${conversationId}. returned status: ${res.status}, data: ${res.data}`
-            );
+            throw new Error(`Error in scheduling background job for conversation id ${conversationId}. returned status: ${res.status}, data: ${res.data}`);
         }
     } catch (error) {
-        exceptionLogger(error);
+        exceptionLogger(error, {
+            conversationId: conversationId,
+            qnaSessionId: qnaSessionId,
+            filename: module.id,
+            exceptionName: TelemetryExceptions.TriggerBackgroundJobFailed,
+        });
     }
 };

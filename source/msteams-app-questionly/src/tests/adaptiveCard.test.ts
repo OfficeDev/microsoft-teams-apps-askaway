@@ -9,15 +9,7 @@ import {
     generateLeaderboard,
     getPersonImage,
 } from 'src/adaptive-cards/adaptiveCardBuilder';
-import {
-    initLocalization,
-    errorStrings,
-    askQuestionStrings,
-    leaderboardStrings,
-    endQnAStrings,
-    startQnAStrings,
-    genericStrings,
-} from 'src/localization/locale';
+import { initLocalization, errorStrings, askQuestionStrings, leaderboardStrings, endQnAStrings, startQnAStrings, genericStrings } from 'src/localization/locale';
 import { IAdaptiveCard } from 'adaptivecards/lib/schema';
 import random from 'random';
 import seedrandom from 'seedrandom';
@@ -66,38 +58,28 @@ describe('get start qna card', () => {
                                         },
                                         {
                                             type: 'TextBlock',
-                                            text: startQnAStrings(
-                                                'titleFieldLabel'
-                                            ),
+                                            text: startQnAStrings('titleFieldLabel'),
                                             wrap: true,
                                         },
                                         {
                                             type: 'Input.Text',
                                             id: 'title',
                                             value: '',
-                                            maxLength:
-                                                CardConstants.qnaSessionTitleCharLimit,
+                                            maxLength: CardConstants.qnaSessionTitleCharLimit,
                                         },
                                         {
                                             type: 'TextBlock',
-                                            text: startQnAStrings(
-                                                'descriptionFieldLabel',
-                                                {
-                                                    maxCharCount:
-                                                        CardConstants.qnaSessionDescriptioCharLimit,
-                                                }
-                                            ),
+                                            text: startQnAStrings('descriptionFieldLabel', {
+                                                maxCharCount: CardConstants.qnaSessionDescriptioCharLimit,
+                                            }),
                                             wrap: true,
                                         },
                                         {
                                             type: 'Input.Text',
                                             id: 'description',
                                             value: '',
-                                            maxLength:
-                                                CardConstants.qnaSessionDescriptioCharLimit,
-                                            placeholder: startQnAStrings(
-                                                'descriptionFieldExample'
-                                            ),
+                                            maxLength: CardConstants.qnaSessionDescriptioCharLimit,
+                                            placeholder: startQnAStrings('descriptionFieldExample'),
                                         },
                                     ],
                                 },
@@ -118,11 +100,7 @@ describe('get start qna card', () => {
     });
 
     test('get start qna card with filled in fields', () => {
-        const result = getStartQnACard(
-            sampleTitle,
-            sampleDescription,
-            sampleErrorMessage
-        );
+        const result = getStartQnACard(sampleTitle, sampleDescription, sampleErrorMessage);
         const expected = <IAdaptiveCard>{
             $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
             type: 'AdaptiveCard',
@@ -145,38 +123,28 @@ describe('get start qna card', () => {
                                         },
                                         {
                                             type: 'TextBlock',
-                                            text: startQnAStrings(
-                                                'titleFieldLabel'
-                                            ),
+                                            text: startQnAStrings('titleFieldLabel'),
                                             wrap: true,
                                         },
                                         {
                                             type: 'Input.Text',
                                             id: 'title',
                                             value: sampleTitle,
-                                            maxLength:
-                                                CardConstants.qnaSessionTitleCharLimit,
+                                            maxLength: CardConstants.qnaSessionTitleCharLimit,
                                         },
                                         {
                                             type: 'TextBlock',
-                                            text: startQnAStrings(
-                                                'descriptionFieldLabel',
-                                                {
-                                                    maxCharCount:
-                                                        CardConstants.qnaSessionDescriptioCharLimit,
-                                                }
-                                            ),
+                                            text: startQnAStrings('descriptionFieldLabel', {
+                                                maxCharCount: CardConstants.qnaSessionDescriptioCharLimit,
+                                            }),
                                             wrap: true,
                                         },
                                         {
                                             type: 'Input.Text',
                                             id: 'description',
                                             value: sampleDescription,
-                                            maxLength:
-                                                CardConstants.qnaSessionDescriptioCharLimit,
-                                            placeholder: startQnAStrings(
-                                                'descriptionFieldExample'
-                                            ),
+                                            maxLength: CardConstants.qnaSessionDescriptioCharLimit,
+                                            placeholder: startQnAStrings('descriptionFieldExample'),
                                         },
                                     ],
                                 },
@@ -336,14 +304,7 @@ describe('empty leaderboard tests', () => {
     });
 
     test('get empty leaderboard as active and not host', async () => {
-        const result = await generateLeaderboard(
-            [],
-            sampleUserAADObjId1,
-            sampleQnASessionID,
-            false,
-            true,
-            'default'
-        );
+        const result = await generateLeaderboard([], sampleUserAADObjId1, sampleQnASessionID, false, true, 'default');
         const expected = <IAdaptiveCard>{
             $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
             type: 'AdaptiveCard',
@@ -383,14 +344,7 @@ describe('empty leaderboard tests', () => {
     });
 
     test('get empty leaderboard as active and host', async () => {
-        const result = await generateLeaderboard(
-            [],
-            sampleUserAADObjId1,
-            sampleQnASessionID,
-            true,
-            true,
-            'default'
-        );
+        const result = await generateLeaderboard([], sampleUserAADObjId1, sampleQnASessionID, true, true, 'default');
         const expected = <IAdaptiveCard>{
             $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
             type: 'AdaptiveCard',
@@ -430,14 +384,7 @@ describe('empty leaderboard tests', () => {
     });
 
     test('get empty leaderboard as inactive and not host', async () => {
-        const result = await generateLeaderboard(
-            [],
-            sampleUserAADObjId1,
-            sampleQnASessionID,
-            false,
-            false,
-            'default'
-        );
+        const result = await generateLeaderboard([], sampleUserAADObjId1, sampleQnASessionID, false, false, 'default');
         const expected = <IAdaptiveCard>{
             $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
             type: 'AdaptiveCard',
@@ -453,14 +400,7 @@ describe('empty leaderboard tests', () => {
     });
 
     test('get empty leaderboard as inactive and host', async () => {
-        const result = await generateLeaderboard(
-            [],
-            sampleUserAADObjId1,
-            sampleQnASessionID,
-            true,
-            false,
-            'default'
-        );
+        const result = await generateLeaderboard([], sampleUserAADObjId1, sampleQnASessionID, true, false, 'default');
         const expected = <IAdaptiveCard>{
             $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
             type: 'AdaptiveCard',
@@ -491,8 +431,7 @@ describe('initials avatar generation tests', () => {
         random.use(seedrandom(sampleUserAADObjId1));
         const colorIndex = random.int(0, 13);
 
-        if (!process.env.AvatarKey)
-            return fail('AvatarKey not defined in env variable');
+        if (!process.env.AvatarKey) return fail('AvatarKey not defined in env variable');
 
         const token = jwt.sign(
             {
@@ -536,8 +475,7 @@ describe('initials avatar generation tests', () => {
         random.use(seedrandom(sampleUserAADObjId1));
         const colorIndex = random.int(0, 13);
 
-        if (!process.env.AvatarKey)
-            return fail('AvatarKey not defined in env variable');
+        if (!process.env.AvatarKey) return fail('AvatarKey not defined in env variable');
 
         const token = jwt.sign(
             {
@@ -561,8 +499,7 @@ describe('initials avatar generation tests', () => {
         random.use(seedrandom(sampleUserAADObjId1));
         const colorIndex = random.int(0, 13);
 
-        if (!process.env.AvatarKey)
-            return fail('AvatarKey not defined in env variable');
+        if (!process.env.AvatarKey) return fail('AvatarKey not defined in env variable');
 
         const token = jwt.sign(
             {
@@ -586,8 +523,7 @@ describe('initials avatar generation tests', () => {
         random.use(seedrandom(sampleUserAADObjId1));
         const colorIndex = random.int(0, 13);
 
-        if (!process.env.AvatarKey)
-            return fail('AvatarKey not defined in env variable');
+        if (!process.env.AvatarKey) return fail('AvatarKey not defined in env variable');
 
         const token = jwt.sign(
             {
@@ -611,8 +547,7 @@ describe('initials avatar generation tests', () => {
         random.use(seedrandom(sampleUserAADObjId1));
         const colorIndex = random.int(0, 13);
 
-        if (!process.env.AvatarKey)
-            return fail('AvatarKey not defined in env variable');
+        if (!process.env.AvatarKey) return fail('AvatarKey not defined in env variable');
 
         const token = jwt.sign(
             {
@@ -657,14 +592,7 @@ describe('non-empty leaderboard tests', () => {
 
         const questions: IQuestionPopulatedUser[] = [question];
 
-        const result = await generateLeaderboard(
-            questions,
-            sampleUserAADObjId1,
-            '456',
-            false,
-            true,
-            'default'
-        );
+        const result = await generateLeaderboard(questions, sampleUserAADObjId1, '456', false, true, 'default');
 
         const expected = <IAdaptiveCard>{
             $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
@@ -688,10 +616,7 @@ describe('non-empty leaderboard tests', () => {
                                     items: [
                                         {
                                             type: 'Image',
-                                            url: await getPersonImage(
-                                                question.userId.userName,
-                                                question.userId._id
-                                            ),
+                                            url: await getPersonImage(question.userId.userName, question.userId._id),
                                             style: 'Person',
                                             size: 'Small',
                                         },
@@ -706,9 +631,7 @@ describe('non-empty leaderboard tests', () => {
                                             items: [
                                                 {
                                                     type: 'TextBlock',
-                                                    text:
-                                                        question.userId
-                                                            .userName,
+                                                    text: question.userId.userName,
                                                     weight: 'Bolder',
                                                     size: 'Small',
                                                 },
@@ -757,10 +680,7 @@ describe('non-empty leaderboard tests', () => {
                                             type: 'Image',
                                             style: 'Person',
                                             size: 'Small',
-                                            url: await getPersonImage(
-                                                question.userId.userName,
-                                                question.userId._id
-                                            ),
+                                            url: await getPersonImage(question.userId.userName, question.userId._id),
                                         },
                                     ],
                                 },
@@ -773,9 +693,7 @@ describe('non-empty leaderboard tests', () => {
                                             items: [
                                                 {
                                                     type: 'TextBlock',
-                                                    text:
-                                                        question.userId
-                                                            .userName,
+                                                    text: question.userId.userName,
                                                     weight: 'Bolder',
                                                     size: 'Small',
                                                 },
@@ -873,14 +791,7 @@ describe('non-empty leaderboard tests', () => {
 
         const questions: IQuestionPopulatedUser[] = [question];
 
-        const result = await generateLeaderboard(
-            questions,
-            sampleUserAADObjId1,
-            '456',
-            false,
-            true,
-            'default'
-        );
+        const result = await generateLeaderboard(questions, sampleUserAADObjId1, '456', false, true, 'default');
 
         const expected = <IAdaptiveCard>{
             $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
@@ -906,10 +817,7 @@ describe('non-empty leaderboard tests', () => {
                                             type: 'Image',
                                             style: 'Person',
                                             size: 'Small',
-                                            url: await getPersonImage(
-                                                question.userId.userName,
-                                                question.userId._id
-                                            ),
+                                            url: await getPersonImage(question.userId.userName, question.userId._id),
                                         },
                                     ],
                                 },
@@ -922,9 +830,7 @@ describe('non-empty leaderboard tests', () => {
                                             items: [
                                                 {
                                                     type: 'TextBlock',
-                                                    text:
-                                                        question.userId
-                                                            .userName,
+                                                    text: question.userId.userName,
                                                     weight: 'Bolder',
                                                     size: 'Small',
                                                 },
@@ -953,16 +859,12 @@ describe('non-empty leaderboard tests', () => {
                                                             url: `https://${process.env.HostName}/images/thumbs_up_default.png`,
                                                             width: '20px',
                                                             selectAction: {
-                                                                type:
-                                                                    'Action.Submit',
+                                                                type: 'Action.Submit',
                                                                 id: 'upvote',
                                                                 data: {
-                                                                    id:
-                                                                        'upvote',
-                                                                    questionId:
-                                                                        '123',
-                                                                    qnaSessionId:
-                                                                        '456',
+                                                                    id: 'upvote',
+                                                                    questionId: '123',
+                                                                    qnaSessionId: '456',
                                                                 },
                                                             },
                                                         },
@@ -1050,14 +952,7 @@ describe('non-empty leaderboard tests', () => {
 
         const questions: IQuestionPopulatedUser[] = [question];
 
-        const result = await generateLeaderboard(
-            questions,
-            sampleUserAADObjId1,
-            '456',
-            false,
-            true,
-            'default'
-        );
+        const result = await generateLeaderboard(questions, sampleUserAADObjId1, '456', false, true, 'default');
 
         const expected = <IAdaptiveCard>{
             $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
@@ -1083,10 +978,7 @@ describe('non-empty leaderboard tests', () => {
                                             type: 'Image',
                                             style: 'Person',
                                             size: 'Small',
-                                            url: await getPersonImage(
-                                                question.userId.userName,
-                                                question.userId._id
-                                            ),
+                                            url: await getPersonImage(question.userId.userName, question.userId._id),
                                         },
                                     ],
                                 },
@@ -1099,9 +991,7 @@ describe('non-empty leaderboard tests', () => {
                                             items: [
                                                 {
                                                     type: 'TextBlock',
-                                                    text:
-                                                        question.userId
-                                                            .userName,
+                                                    text: question.userId.userName,
                                                     weight: 'Bolder',
                                                     size: 'Small',
                                                 },
@@ -1130,16 +1020,12 @@ describe('non-empty leaderboard tests', () => {
                                                             url: `https://${process.env.HostName}/images/thumbs_up_filled.png`,
                                                             width: '20px',
                                                             selectAction: {
-                                                                type:
-                                                                    'Action.Submit',
+                                                                type: 'Action.Submit',
                                                                 id: 'upvote',
                                                                 data: {
-                                                                    id:
-                                                                        'upvote',
-                                                                    questionId:
-                                                                        '123',
-                                                                    qnaSessionId:
-                                                                        '456',
+                                                                    id: 'upvote',
+                                                                    questionId: '123',
+                                                                    qnaSessionId: '456',
                                                                 },
                                                             },
                                                         },
@@ -1229,14 +1115,7 @@ describe('non-empty leaderboard tests', () => {
 
         const questions: IQuestionPopulatedUser[] = [question];
 
-        const result = await generateLeaderboard(
-            questions,
-            sampleUserAADObjId1,
-            '456',
-            false,
-            false,
-            'default'
-        );
+        const result = await generateLeaderboard(questions, sampleUserAADObjId1, '456', false, false, 'default');
 
         const expected = <IAdaptiveCard>{
             $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
@@ -1262,10 +1141,7 @@ describe('non-empty leaderboard tests', () => {
                                             type: 'Image',
                                             style: 'Person',
                                             size: 'Small',
-                                            url: await getPersonImage(
-                                                question.userId.userName,
-                                                question.userId._id
-                                            ),
+                                            url: await getPersonImage(question.userId.userName, question.userId._id),
                                         },
                                     ],
                                 },
@@ -1278,9 +1154,7 @@ describe('non-empty leaderboard tests', () => {
                                             items: [
                                                 {
                                                     type: 'TextBlock',
-                                                    text:
-                                                        question.userId
-                                                            .userName,
+                                                    text: question.userId.userName,
                                                     weight: 'Bolder',
                                                     size: 'Small',
                                                 },
@@ -1354,14 +1228,7 @@ describe('non-empty leaderboard tests', () => {
 
         const questions: IQuestionPopulatedUser[] = [question];
 
-        const result = await generateLeaderboard(
-            questions,
-            sampleUserAADObjId1,
-            '456',
-            false,
-            false,
-            'default'
-        );
+        const result = await generateLeaderboard(questions, sampleUserAADObjId1, '456', false, false, 'default');
 
         const expected = <IAdaptiveCard>{
             $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
@@ -1387,10 +1254,7 @@ describe('non-empty leaderboard tests', () => {
                                             type: 'Image',
                                             style: 'Person',
                                             size: 'Small',
-                                            url: await getPersonImage(
-                                                question.userId.userName,
-                                                question.userId._id
-                                            ),
+                                            url: await getPersonImage(question.userId.userName, question.userId._id),
                                         },
                                     ],
                                 },
@@ -1403,9 +1267,7 @@ describe('non-empty leaderboard tests', () => {
                                             items: [
                                                 {
                                                     type: 'TextBlock',
-                                                    text:
-                                                        question.userId
-                                                            .userName,
+                                                    text: question.userId.userName,
                                                     weight: 'Bolder',
                                                     size: 'Small',
                                                 },

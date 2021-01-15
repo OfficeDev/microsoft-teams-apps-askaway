@@ -6,10 +6,7 @@ import { StatusCodes } from 'http-status-codes';
  * @param res - response object.
  * @param errorMessage - error message.
  */
-export const createResponseForBadRequest = (
-    res: Response,
-    errorMessage: string
-) => {
+export const createResponseForBadRequest = (res: Response, errorMessage: string) => {
     res.status(StatusCodes.BAD_REQUEST).send(errorMessage);
 };
 
@@ -18,10 +15,7 @@ export const createResponseForBadRequest = (
  * @param res - response object.
  * @param errorMessage - error message.
  */
-export const createResponseForInternalServerError = (
-    res: Response,
-    errorMessage: string
-) => {
+export const createResponseForInternalServerError = (res: Response, errorMessage: string) => {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(errorMessage);
 };
 
@@ -30,9 +24,6 @@ export const createResponseForInternalServerError = (
  * @param res - response object.
  * @param errorMessage - error message.
  */
-export const createResponseForForbiddenAccess = (
-    res: Response,
-    errorMessage: string
-) => {
+export const createResponseForForbiddenAccess = (res: Response, errorMessage: string) => {
     res.status(StatusCodes.FORBIDDEN).send(errorMessage);
 };

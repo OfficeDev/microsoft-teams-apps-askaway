@@ -10,3 +10,12 @@ export const ifNumber = (value, otherwise: number) => {
         return otherwise;
     }
 };
+
+/**
+ * Checks if a given parameter is a valid string.
+ * @param param - parameter.
+ * @returns - true if parameter is a valid string.
+ */
+export const isValidStringParameter = (param: string | undefined | null): boolean => {
+    return param !== undefined && param !== null && param !== '';
+};

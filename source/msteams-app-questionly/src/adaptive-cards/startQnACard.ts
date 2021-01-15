@@ -28,38 +28,28 @@ export const startQnACard = () =>
                                     },
                                     {
                                         type: 'TextBlock',
-                                        text: startQnAStrings(
-                                            'titleFieldLabel'
-                                        ),
+                                        text: startQnAStrings('titleFieldLabel'),
                                         wrap: true,
                                     },
                                     {
                                         type: 'Input.Text',
                                         id: 'title',
                                         value: '${title}',
-                                        maxLength:
-                                            CardConstants.qnaSessionTitleCharLimit,
+                                        maxLength: CardConstants.qnaSessionTitleCharLimit,
                                     },
                                     {
                                         type: 'TextBlock',
-                                        text: startQnAStrings(
-                                            'descriptionFieldLabel',
-                                            {
-                                                maxCharCount:
-                                                    CardConstants.qnaSessionDescriptioCharLimit,
-                                            }
-                                        ),
+                                        text: startQnAStrings('descriptionFieldLabel', {
+                                            maxCharCount: CardConstants.qnaSessionDescriptioCharLimit,
+                                        }),
                                         wrap: true,
                                     },
                                     {
                                         type: 'Input.Text',
                                         id: 'description',
                                         value: '${description}',
-                                        maxLength:
-                                            CardConstants.qnaSessionDescriptioCharLimit,
-                                        placeholder: startQnAStrings(
-                                            'descriptionFieldExample'
-                                        ),
+                                        maxLength: CardConstants.qnaSessionDescriptioCharLimit,
+                                        placeholder: startQnAStrings('descriptionFieldExample'),
                                     },
                                 ],
                             },

@@ -18,16 +18,7 @@ import {
 } from 'src/localization/locale';
 import i18next from 'i18next';
 
-const _stringFunctionsTest = (
-    stringsObject:
-        | Errors
-        | Generic
-        | Leaderboard
-        | AskQuestion
-        | StartQnA
-        | EndQnA,
-    stringFunction
-) => {
+const _stringFunctionsTest = (stringsObject: Errors | Generic | Leaderboard | AskQuestion | StartQnA | EndQnA, stringFunction) => {
     Object.keys(stringsObject).forEach((key: keyof typeof stringsObject) => {
         expect(stringsObject[key]).toBeTruthy();
         expect(stringFunction(key)).toBe(stringsObject[key]);
