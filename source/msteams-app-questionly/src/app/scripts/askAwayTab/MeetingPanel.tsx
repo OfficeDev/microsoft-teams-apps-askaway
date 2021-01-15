@@ -11,7 +11,7 @@ import QuestionsList from './MeetingPanel/QuestionsList';
 import NewQuestion from './MeetingPanel/NewQuestion';
 import QnASessionHeader from './MeetingPanel/QnASessionHeader';
 import { Helper } from './shared/Helper';
-import { ActiveSessionData } from './types';
+import { ClientDataContract } from '../../../../src/contracts/clientDataContract';
 
 const EmptySessionImage = require('./../../web/assets/create_session.png');
 /**
@@ -28,7 +28,7 @@ export interface MeetingPanelProps {
  * State for the MeetingPanel React component
  */
 export interface MeetingPanelState {
-    activeSessionData: ActiveSessionData;
+    activeSessionData: ClientDataContract.QnaSession;
     showLoader: boolean;
     input: {
         title: string;

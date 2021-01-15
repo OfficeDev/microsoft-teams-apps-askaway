@@ -6,13 +6,13 @@ import { SendIcon } from '@fluentui/react-icons-northstar';
 import { useState } from 'react';
 import { HttpService } from '../shared/HttpService';
 import * as microsoftTeams from '@microsoft/teams-js';
-import { ActiveSessionData } from '../types';
+import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
 
 /**
  * Properties for the NewQuestion React component
  */
 export interface NewQuestionProps {
-    activeSessionData: ActiveSessionData;
+    activeSessionData: ClientDataContract.QnaSession;
     httpService: HttpService;
     teamsTabContext: microsoftTeams.Context;
     onAddNewQuestion: Function;

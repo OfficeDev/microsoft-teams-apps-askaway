@@ -6,16 +6,16 @@ import * as microsoftTeams from '@microsoft/teams-js';
 import { HttpService } from '../shared/HttpService';
 import { AcceptIcon } from '@fluentui/react-icons-northstar';
 import { Button } from '@fluentui/react-northstar';
-import { ActiveSessionData, QuestionProps } from '../types';
 import TabHeader from './TabHeader';
 import Question from './Question';
 import { CONST } from '../shared/Constants';
+import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
 
 /**
  * Properties for the QuestionsList React component
  */
 export interface QuestionsListProps {
-    activeSessionData: ActiveSessionData;
+    activeSessionData: ClientDataContract.QnaSession;
     httpService: HttpService;
     teamsTabContext: microsoftTeams.Context;
 }
@@ -96,7 +96,7 @@ const QuestionsList: React.FunctionComponent<QuestionsListProps> = (props) => {
             <TabHeader onSelectActiveTab={setActiveLiveTab} tabActiveIndex={liveTab.defaultActiveIndex} />
             <div className="question-card">
                 {liveTab.selectedTab === CONST.TAB_QUESTIONS.ANSWERED_Q &&
-                    activeSessionData.answeredQuestions.map((question: QuestionProps) => {
+                    activeSessionData.answeredQuestions.map((question: ClientDataContract.Question) => {
                         const isUserLikedQuestion = checkIsUserLikedQuestion({ idsArray: question.voterAadObjectIds });
                         return (
                             <Question
@@ -110,7 +110,7 @@ const QuestionsList: React.FunctionComponent<QuestionsListProps> = (props) => {
                         );
                     })}
                 {liveTab.selectedTab === CONST.TAB_QUESTIONS.UNANSWERED_Q &&
-                    activeSessionData.unansweredQuestions.map((question: QuestionProps) => {
+                    activeSessionData.unansweredQuestions.map((question: ClientDataContract.Question) => {
                         const isUserLikedQuestion = checkIsUserLikedQuestion({ idsArray: question.voterAadObjectIds });
                         return (
                             <Question

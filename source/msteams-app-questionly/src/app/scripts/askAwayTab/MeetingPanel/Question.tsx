@@ -6,10 +6,10 @@ import { LikeIcon } from '@fluentui/react-icons-northstar';
 import { LikeIconFilled } from '../shared/Icons/LikeIconFilled';
 import { CONST } from '../shared/Constants';
 import { useState } from 'react';
-import { QuestionProps } from '../types';
+import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
 
 type QuestionCompProps = {
-    question: QuestionProps;
+    question: ClientDataContract.Question;
     isUserLikedQuestion: boolean;
     renderHoverElement?: any;
     questionId: string;
