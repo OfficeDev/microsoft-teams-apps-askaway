@@ -54,7 +54,7 @@ export interface SignalRLifecycleProps {
     /**
      * conversation id of the group chat.
      */
-    conversationId: string;
+    conversationId?: string;
 
     /**
      * callback function from caller, which recives update on events.
