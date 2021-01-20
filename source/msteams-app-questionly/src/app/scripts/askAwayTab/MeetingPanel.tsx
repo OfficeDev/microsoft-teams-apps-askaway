@@ -1,6 +1,5 @@
-// tslint:disable-next-line:no-relative-imports
+// tslint:disable:no-relative-imports
 import './index.scss';
-// tslint:disable-next-line:no-relative-imports
 import * as React from 'react';
 import * as microsoftTeams from '@microsoft/teams-js';
 import { Flex, Text, Button, Image, Loader } from '@fluentui/react-northstar';
