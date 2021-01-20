@@ -1,22 +1,36 @@
 import msteamsReactBaseComponent, {
     ITeamsBaseComponentState,
 } from 'msteams-react-base-component';
+import * as microsoftTeams from '@microsoft/teams-js';
 import * as React from 'react';
 import './../index.scss';
-import { Button } from '@fluentui/react-northstar';
+import { Button, Provider, Flex, Text } from '@fluentui/react-northstar';
 
 export interface QnaSessionCreatedNotificationProps {}
+
+export interface QnaSessionCreatedNotificationState
+    extends ITeamsBaseComponentState {
+    theme: any;
+}
 
 /**
  * React component for qna session created event notification bubble.
  */
 export class QnaSessionCreatedNotification extends msteamsReactBaseComponent<
     QnaSessionCreatedNotificationProps,
-    ITeamsBaseComponentState
+    QnaSessionCreatedNotificationState
 > {
+    constructor(props) {
+        super(props);
+        microsoftTeams.initialize();
+    }
+
     public async componentWillMount() {
         microsoftTeams.initialize();
-        this.updateTheme(this.getQueryVariable('theme'));
+        const theme = this.getQueryVariable('theme')
+            ? this.getQueryVariable('theme')
+            : 'dark';
+        this.updateTheme(theme);
     }
 
     /**
@@ -27,39 +41,35 @@ export class QnaSessionCreatedNotification extends msteamsReactBaseComponent<
     }
 
     public render() {
-        {
-            const searchParams = new URL(
-                decodeURIComponent(window.location.href)
-            ).searchParams;
+        const searchParams = new URL(decodeURIComponent(window.location.href))
+            .searchParams;
 
-            const sessionTitle = searchParams.get('title');
-            const userName = searchParams.get('username');
+        const sessionTitle = searchParams.get('title');
+        const userName = searchParams.get('username');
 
-            // TODO: Localize these.
-            const notificationBubbleTitle = `${userName} started a Q&A session`;
-            const notificationBubbleText = `Select the Ask Away icon at the top of the meeting view to participate`;
-
-            return (
-                <div>
-                    <p style={{ color: 'white' }}>
-                        {' '}
-                        {notificationBubbleTitle}{' '}
-                    </p>
-                    <hr></hr>
-                    <p style={{ color: 'white' }}>{sessionTitle}</p>
-                    <p style={{ color: 'white' }}>{notificationBubbleText}</p>
-                    <hr></hr>
-                    <Button
-                        primary
-                        type="submit"
-                        className="btn-create-session"
-                        size="small"
-                        onClick={this.onSubmit}
-                    >
-                        <Button.Content>Ok</Button.Content>
-                    </Button>
-                </div>
-            );
-        }
+        // TODO: Localize these.
+        const notificationBubbleTitle = `${userName} started a Q&A session`;
+        const notificationBubbleText = `Select the Ask Away icon at the top of the meeting view to participate`;
+        return (
+            <Provider style={{ background: 'unset' }} theme={this.state.theme}>
+                <Flex column>
+                    <Text content={notificationBubbleTitle} />
+                    <div className="notification-title">
+                        <Text content={sessionTitle} weight="bold" />
+                    </div>
+                    <Flex gap="gap.large" vAlign="center">
+                        <Text content={notificationBubbleText} />
+                        <Button
+                            primary
+                            type="submit"
+                            size="small"
+                            onClick={this.onSubmit}
+                        >
+                            <Button.Content>Ok</Button.Content>
+                        </Button>
+                    </Flex>
+                </Flex>
+            </Provider>
+        );
     }
 }
