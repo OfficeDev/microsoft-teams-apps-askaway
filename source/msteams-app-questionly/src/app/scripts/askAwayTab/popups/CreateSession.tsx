@@ -1,4 +1,4 @@
-// tslint:disable-next-line:no-relative-imports
+// tslint:disable:no-relative-imports
 import './../index.scss';
 import * as React from 'react';
 import {
@@ -11,7 +11,7 @@ import {
     TextArea,
     FlexItem,
 } from '@fluentui/react-northstar';
-// tslint:disable-next-line:no-relative-imports
+// tslint:disable:no-relative-imports
 import * as microsoftTeams from '@microsoft/teams-js';
 import msteamsReactBaseComponent, {
     ITeamsBaseComponentState,
