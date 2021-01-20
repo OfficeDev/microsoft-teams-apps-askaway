@@ -98,7 +98,7 @@ router.post('/:conversationId/sessions/:sessionId/questions', async (req: Expres
 
         await ensureUserIsPartOfMeetingConversation(conversationData, userId);
 
-        const result = await submitNewQuestion(req.params['sessionId'], user._id, user.userName, questionContent, conversationId);
+        const result = await submitNewQuestion(req.params['sessionId'], user._id, user.userName, questionContent, conversationId, conversationData.serviceUrl, conversationData.meetingId);
 
         const response: ClientDataContract.Question = {
             id: result._id,
@@ -142,17 +142,17 @@ router.patch('/:conversationId/sessions/:sessionId', async (req: Express.Request
 
             const endedByUserId = await getTeamsUserId(user._id, conversationId, conversationData.serviceUrl);
 
-            await endQnASession(
-                sessionId,
-                user._id,
-                conversationId,
-                conversationData.tenantId,
-                conversationData.serviceUrl,
+            await endQnASession({
+                qnaSessionId: sessionId,
+                aadObjectId: user._id,
+                conversationId: conversationId,
+                tenantId: conversationData.tenantId,
+                serviceURL: conversationData.serviceUrl,
                 // `ensureConversationBelongsToMeetingChat` makes sure meeting id is available
-                <string>conversationData.meetingId,
-                user.userName,
-                endedByUserId
-            );
+                meetingId: <string>conversationData.meetingId,
+                userName: user.userName,
+                endedByUserId: endedByUserId,
+            });
         }
 
         res.status(StatusCodes.NO_CONTENT).send();
@@ -238,13 +238,13 @@ router.patch('/:conversationId/sessions/:sessionId/questions/:questionId', async
         if (action === QuestionPatchAction.Upvote) {
             await ensureUserIsPartOfMeetingConversation(conversationData, user._id);
 
-            question = await upvoteQuestion(conversationId, sessionId, questionId, user._id, user.userName);
+            question = await upvoteQuestion(conversationId, sessionId, questionId, user._id, user.userName, conversationData.serviceUrl, conversationData.meetingId);
 
             res.status(StatusCodes.OK).send(formatQuestionDataAsPerClientDataContract(question));
         } else if (action === QuestionPatchAction.Downvote) {
             await ensureUserIsPartOfMeetingConversation(conversationData, user._id);
 
-            question = await downvoteQuestion(conversationId, sessionId, questionId, user._id);
+            question = await downvoteQuestion(conversationId, sessionId, questionId, user._id, conversationData.serviceUrl, conversationData.meetingId);
 
             res.status(StatusCodes.OK).send(formatQuestionDataAsPerClientDataContract(question));
         } else if (action === QuestionPatchAction.MarkAnswered) {
@@ -256,7 +256,8 @@ router.patch('/:conversationId/sessions/:sessionId/questions/:questionId', async
                 <string>conversationData.meetingId,
                 sessionId,
                 questionId,
-                user._id
+                user._id,
+                conversationData.serviceUrl
             );
 
             res.status(StatusCodes.OK).send(formatQuestionDataAsPerClientDataContract(question));

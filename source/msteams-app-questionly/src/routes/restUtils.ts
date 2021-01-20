@@ -8,15 +8,7 @@ import { ConversationDoesNotBelongToMeetingChatError } from 'src/errors/conversa
 import { Request } from 'express';
 import { ParameterMissingInRequestError } from 'src/errors/parameterMissingInRequestError';
 import { TelemetryExceptions } from 'src/constants/telemetryConstants';
-
-/**
- * Checks if a given parameter is a valid string.
- * @param param - parameter.
- * @returns - true if parameter is a valid string.
- */
-const isValidStringParameter = (param: string | undefined | null): boolean => {
-    return param !== undefined && param !== null && param !== '';
-};
+import { isValidStringParameter } from 'src/util/typeUtility';
 
 /**
  * Ensures if conversation belongs to meeting chat.

@@ -17,12 +17,12 @@ import {
 import {
   DataEventType,
   getUpdatedMainCard,
+  IDataEvent,
 } from "msteams-app-questionly.common";
 import {
   qnaSessionDataService,
   questionDataService,
 } from "msteams-app-questionly.data";
-import { IDataEvent } from "msteams-app-questionly.common";
 import {
   height,
   width,

@@ -236,7 +236,7 @@ export class AskAway extends TeamsActivityHandler {
         }
 
         try {
-            await controller.submitNewQuestion(qnaSessionId, userAadObjectId, userName, questionContent, conversationId);
+            await controller.submitNewQuestion(qnaSessionId, userAadObjectId, userName, questionContent, conversationId, context.activity.serviceUrl, getMeetingIdFromContext(context));
         } catch (error) {
             exceptionLogger(error, {
                 conversationId: conversationId,
@@ -261,7 +261,9 @@ export class AskAway extends TeamsActivityHandler {
                 <string>context.activity.from.aadObjectId,
                 context.activity.from.name,
                 context.activity.conversation.id,
-                taskModuleRequest.context ? <string>taskModuleRequest.context.theme : 'default'
+                taskModuleRequest.context ? <string>taskModuleRequest.context.theme : 'default',
+                context.activity.serviceUrl,
+                getMeetingIdFromContext(context)
             );
 
             return this._buildTaskModuleContinueResponse(updatedLeaderboard);
@@ -297,16 +299,16 @@ export class AskAway extends TeamsActivityHandler {
 
         if (taskModuleRequest.data.id == 'submitEndQnA') {
             try {
-                await controller.endQnASession(
-                    qnaSessionId,
-                    <string>context.activity.from.aadObjectId,
-                    context.activity.conversation.id,
-                    conversation.tenantId,
-                    context.activity.serviceUrl,
-                    meetingId,
-                    context.activity.from.name,
-                    context.activity.from.id
-                );
+                await controller.endQnASession({
+                    qnaSessionId: qnaSessionId,
+                    aadObjectId: <string>context.activity.from.aadObjectId,
+                    conversationId: context.activity.conversation.id,
+                    tenantId: conversation.tenantId,
+                    serviceURL: context.activity.serviceUrl,
+                    userName: context.activity.from.name,
+                    endedByUserId: context.activity.from.id,
+                    meetingId: meetingId,
+                });
             } catch (error) {
                 exceptionLogger(error, {
                     conversationId: context.activity.conversation.id,
