@@ -8,9 +8,7 @@ import MeetingPanel from './MeetingPanel';
 import TabContent from './TabContent';
 import * as React from 'react';
 import { Provider } from '@fluentui/react-northstar';
-import msteamsReactBaseComponent, {
-    ITeamsBaseComponentState,
-} from 'msteams-react-base-component';
+import msteamsReactBaseComponent, { ITeamsBaseComponentState } from 'msteams-react-base-component';
 import * as microsoftTeams from '@microsoft/teams-js';
 // tslint:disable-next-line:no-relative-imports
 import i18next from './../askAwayTab/shared/i18next';
@@ -47,10 +45,7 @@ export interface IAskAwayTabProps {}
 /**
  * Implementation of the askAway Tab content page
  */
-export class AskAwayTab extends msteamsReactBaseComponent<
-    IAskAwayTabProps,
-    IAskAwayTabState
-> {
+export class AskAwayTab extends msteamsReactBaseComponent<IAskAwayTabProps, IAskAwayTabState> {
     private httpService: HttpService;
 
     constructor(props) {
@@ -92,18 +87,14 @@ export class AskAwayTab extends msteamsReactBaseComponent<
                     failureCallback: (message: string) => {
                         this.setState({ error: message });
                         microsoftTeams.appInitialization.notifyFailure({
-                            reason:
-                                microsoftTeams.appInitialization.FailedReason
-                                    .AuthFailed,
+                            reason: microsoftTeams.appInitialization.FailedReason.AuthFailed,
                             message,
                         });
                         telemetryService.appInsights.trackTrace({
-                            message:
-                                'Authentication failure. Could not get authentication token.',
+                            message: 'Authentication failure. Could not get authentication token.',
                             severityLevel: SeverityLevel.Error,
                         });
                     },
-                    resources: [process.env.ASKAWAYTAB_APP_URI as string],
                 });
             });
         } else {
@@ -118,25 +109,13 @@ export class AskAwayTab extends msteamsReactBaseComponent<
      */
     public render() {
         return (
-            <Provider theme={this.state.theme}>
+            <Provider style={{ background: 'unset' }} theme={this.state.theme}>
                 {this.state.dataEvent && <h1>{this.state.dataEvent.type}</h1>}
-                {this.state.frameContext ===
-                    microsoftTeams.FrameContexts.sidePanel && (
-                    <MeetingPanel
-                        teamsTabContext={this.state.teamContext}
-                        httpService={this.httpService}
-                        appInsights={telemetryService.appInsights}
-                        helper={Helper}
-                    />
+                {this.state.frameContext === microsoftTeams.FrameContexts.sidePanel && (
+                    <MeetingPanel teamsTabContext={this.state.teamContext} httpService={this.httpService} appInsights={telemetryService.appInsights} helper={Helper} />
                 )}
-                {this.state.frameContext ===
-                    microsoftTeams.FrameContexts.content && (
-                    <TabContent
-                        teamsTabContext={this.state.teamContext}
-                        httpService={this.httpService}
-                        appInsights={telemetryService.appInsights}
-                        helper={Helper}
-                    />
+                {this.state.frameContext === microsoftTeams.FrameContexts.content && (
+                    <TabContent teamsTabContext={this.state.teamContext} httpService={this.httpService} appInsights={telemetryService.appInsights} helper={Helper} />
                 )}
             </Provider>
         );

@@ -1,4 +1,4 @@
-// tslint:disable-next-line:no-relative-imports
+// tslint:disable:no-relative-imports
 import './index.scss';
 import * as React from 'react';
 import { withTranslation } from 'react-i18next';
@@ -8,16 +8,17 @@ import { AddIcon, RetryIcon } from '@fluentui/react-icons-northstar';
 import * as microsoftTeams from '@microsoft/teams-js';
 import { ApplicationInsights } from '@microsoft/applicationinsights-web';
 import { HttpService } from './shared/HttpService';
+import { Helper } from './shared/Helper';
 
 export interface TabContentProps {
-    teamsTabContext: any;
+    teamsTabContext: microsoftTeams.Context;
     httpService: HttpService;
     appInsights: ApplicationInsights;
-    helper: any;
+    helper: Helper;
 }
 export interface TabContentState {}
 
-export class TabContent extends React.Component<TabContentProps, TabContentState> {
+class TabContent extends React.Component<TabContentProps, TabContentState> {
     constructor(props) {
         super(props);
         this.onShowTaskModule = this.onShowTaskModule.bind(this);
