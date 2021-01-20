@@ -2,8 +2,8 @@
 import './index.scss';
 import * as React from 'react';
 import * as microsoftTeams from '@microsoft/teams-js';
-import { Flex, Text, Button, Image, Loader } from '@fluentui/react-northstar';
-import { ApplicationInsights } from '@microsoft/applicationinsights-web';
+import { Flex, Text, Button, Image, Loader, ArrowUpIcon } from '@fluentui/react-northstar';
+import { ApplicationInsights, SeverityLevel } from '@microsoft/applicationinsights-web';
 import { HttpService } from './shared/HttpService';
 import { SignalRLifecycle } from './signalR/SignalRLifecycle';
 import QuestionsList from './MeetingPanel/QuestionsList';
@@ -11,6 +11,8 @@ import NewQuestion from './MeetingPanel/NewQuestion';
 import QnASessionHeader from './MeetingPanel/QnASessionHeader';
 import { Helper } from './shared/Helper';
 import { ClientDataContract } from '../../../../src/contracts/clientDataContract';
+import { DataEventHandlerFactory } from './dataEventHandling/dataEventHandlerFactory';
+import { IDataEvent } from 'msteams-app-questionly.common';
 
 const EmptySessionImage = require('./../../web/assets/create_session.png');
 /**
@@ -33,15 +35,22 @@ export interface MeetingPanelState {
         title: string;
         description: string;
     };
+    /**
+     * state variable denoting if there are new updates on qna session.
+     */
+    showNewUpdatesButton: boolean;
 }
 class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState> {
     /**
      * signalR component instance which is used later to refresh the connection.
      */
     private signalRComponent: SignalRLifecycle | null;
+    private dataEventFactory: DataEventHandlerFactory;
 
     constructor(props) {
         super(props);
+        this.dataEventFactory = new DataEventHandlerFactory();
+
         this.state = {
             activeSessionData: this.props.helper.createEmptyActiveSessionData(),
             showLoader: false,
@@ -49,18 +58,55 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
                 title: '',
                 description: '',
             },
+            showNewUpdatesButton: false,
         };
     }
 
     componentDidMount() {
-        this.getActiveSession();
+        this.updateContent();
     }
+
+    /**
+     * Shows loader and updates entire content of the screen.
+     */
+    private updateContent = () => {
+        this.signalRComponent?.refreshConnection();
+        this.setState({ showLoader: true });
+        this.setState({ showNewUpdatesButton: false });
+        this.getActiveSession();
+    };
+
+    /**
+     * Updates only qna session content without showing loader.
+     */
+    private updateQnASessionContent = () => {
+        this.setState({ showNewUpdatesButton: false });
+        this.getActiveSession();
+    };
+
+    /**
+     * Shows `new updates` button on the screen.
+     */
+    private showNewUpdatesButton = () => {
+        this.setState({ showNewUpdatesButton: true });
+    };
+
+    /**
+     * Updates current active session data.
+     * @param sessionData - session data.
+     */
+    private updateActiveSessionData = (sessionData: ClientDataContract.QnaSession | null) => {
+        if (sessionData === null) {
+            this.setState({ activeSessionData: this.props.helper.createEmptyActiveSessionData() });
+        } else {
+            this.setState({ activeSessionData: sessionData });
+        }
+    };
 
     /**
      * To Identify Active Session
      */
     getActiveSession = () => {
-        this.setState({ showLoader: true });
         this.props.httpService
             .get(`/conversations/${this.props.teamsTabContext.chatId}/activesessions`)
             .then((response: any) => {
@@ -245,7 +291,7 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
     private createNewSessionLayout() {
         return (
             <React.Fragment>
-                <QnASessionHeader title={'Start a Q&A session'} onClickRefreshSession={this.getActiveSession} onClickEndSession={this.endActiveSession} showToolBar={false} />
+                <QnASessionHeader title={'Start a Q&A session'} onClickRefreshSession={this.updateContent} onClickEndSession={this.endActiveSession} showToolBar={false} />
                 <Flex hAlign="center" vAlign="center">
                     {this.noQuestionDesign(EmptySessionImage, 'Ready to field questions?')}
                     <Flex.Item align="center">
@@ -262,24 +308,15 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
      * This function is triggered on events from signalR connection.
      * @param dataEvent - event received.
      */
-    private updateEvent = (dataEvent: any) => {
-        switch (dataEvent.type) {
-            case 'qnaSessionCreatedEvent': {
-                // Check if `activeSessionData` is not populated already with right session data.
-                // This can happen for user who has created the session.
-                if (this.state.activeSessionData?.sessionId !== dataEvent.data.sessionId) {
-                    this.setState({
-                        activeSessionData: dataEvent.data,
-                    });
-                }
-                break;
-            }
-            case 'qnaSessionEndedEvent': {
-                this.setState({
-                    activeSessionData: this.props.helper.createEmptyActiveSessionData(),
-                });
-                break;
-            }
+    private updateEvent = (dataEvent: IDataEvent) => {
+        const eventHandler = this.dataEventFactory.createHandler(dataEvent.type);
+        if (eventHandler) {
+            eventHandler.handleEvent(dataEvent, this.state.activeSessionData, this.updateQnASessionContent, this.showNewUpdatesButton, this.updateActiveSessionData);
+        } else {
+            this.props.appInsights.trackException({
+                exception: new Error(`Cant find event handler for ${dataEvent.type}`),
+                severityLevel: SeverityLevel.Error,
+            });
         }
     };
 
@@ -303,7 +340,7 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
         const sessionTitle = stateVal.activeSessionData.title ?? stateVal.input.title;
         return (
             <React.Fragment>
-                <QnASessionHeader title={sessionTitle} onClickRefreshSession={this.getActiveSession} onClickEndSession={this.endActiveSession} showToolBar={true} />
+                <QnASessionHeader title={sessionTitle} onClickRefreshSession={this.updateContent} onClickEndSession={this.endActiveSession} showToolBar={true} />
                 {stateVal.activeSessionData.unansweredQuestions.length > 0 || stateVal.activeSessionData.answeredQuestions.length > 0 ? (
                     <QuestionsList activeSessionData={stateVal.activeSessionData} httpService={this.props.httpService} teamsTabContext={this.props.teamsTabContext} />
                 ) : (
@@ -337,7 +374,15 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
                         this.signalRComponent = instance;
                     }}
                 />
-                <div className="meeting-panel">{stateVal.activeSessionData.sessionId ? this.showSessionQuestions(stateVal) : this.createNewSessionLayout()}</div>
+                <div className="meeting-panel">
+                    {this.state.showNewUpdatesButton && (
+                        <Button onClick={this.updateQnASessionContent} className="newUpdatesButton">
+                            <ArrowUpIcon xSpacing="after"></ArrowUpIcon>
+                            <Button.Content className="newUpdatesButtonContent" content="New updates"></Button.Content>
+                        </Button>
+                    )}
+                    {stateVal.activeSessionData.sessionId ? this.showSessionQuestions(stateVal) : this.createNewSessionLayout()}
+                </div>
             </React.Fragment>
         );
     }
