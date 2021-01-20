@@ -5,18 +5,14 @@
 
 import * as df from "durable-functions";
 import moment = require("moment");
+import { exceptionLogger } from "../src/utils/exceptionTracking";
 import {
   isCardRefreshNeededForQuestionEvent,
   isQnaStartedOrEndedEvent,
   isValidParam,
 } from "../src/utils/requestUtility";
 import { ifNumber } from "../src/utils/typeUtility";
-
-// Retry option for startup activity
-const startupActivityRetryOption: df.RetryOptions = new df.RetryOptions(
-  ifNumber(process.env.StartupActivityRetryInterval, 1000),
-  ifNumber(process.env.StartupActivityRetryAttemptCount, 1)
-);
+import { IBackgroundJobPayload } from "msteams-app-questionly.common";
 
 // Retry option for broadcast message activity
 const broadcastActivityRetryOption: df.RetryOptions = new df.RetryOptions(
@@ -37,44 +33,35 @@ const orchestrator = df.orchestrator(function* (context) {
     );
   }
 
+  // Background job payload.
+  const payload: IBackgroundJobPayload = context.bindingData.input;
+
   // Conversation id from bot flow sometimes contain messageid
-  const conversationId = context.bindingData.input.conversationId.split(";")[0];
+  const conversationId = payload.conversationId.split(";")[0];
+  const serviceUrl = payload.serviceUrl;
+  const meetingId = payload.meetingId;
+
+  // Operation id for telemetry correaltion.
+  const operationId = payload.operationId;
 
   try {
-    // Get conversation data before triggering any background job
-    const startupActivityInput = {
-      conversationId: conversationId,
-    };
-
-    const conversation = yield context.df.callActivityWithRetry(
-      "startup-activities",
-      startupActivityRetryOption,
-      startupActivityInput
-    );
-    if (conversation === undefined && !context.df.isReplaying) {
-      context.log.error(
-        `Could not find conversation data for conversation id ${conversationId}`
-      );
-      return;
-    }
-
     const broadcastActivityInput = {
       conversationId: conversationId,
-      eventData: context.bindingData.input.eventData,
+      eventData: payload.eventData,
     };
 
     const updateAdaptivecardActivityInput = {
       conversationId: conversationId,
-      eventData: context.bindingData.input.eventData,
-      serviceUrl: conversation.serviceUrl,
-      qnaSessionId: context.bindingData.input.qnaSessionId,
-      meetingId: conversation.meetingId,
+      eventData: payload.eventData,
+      serviceUrl: serviceUrl,
+      qnaSessionId: payload.qnaSessionId,
+      meetingId: meetingId,
     };
 
     const parallelTasks = [];
 
     // Broadcast activity is only required in meeting context.
-    if (isValidParam(conversation.meetingId)) {
+    if (isValidParam(meetingId)) {
       // Broadcast events to all clients from a meeting.
       parallelTasks.push(
         context.df.callActivityWithRetry(
@@ -85,7 +72,7 @@ const orchestrator = df.orchestrator(function* (context) {
       );
     }
 
-    if (isQnaStartedOrEndedEvent(context.bindingData.input.eventData)) {
+    if (isQnaStartedOrEndedEvent(payload.eventData)) {
       // Update adaptive card activity.
       parallelTasks.push(
         context.df.callActivityWithRetry(
@@ -145,6 +132,11 @@ const orchestrator = df.orchestrator(function* (context) {
       error,
       "Error occurred while scheduling background tasks"
     );
+    exceptionLogger(error, operationId, {
+      conversationId: conversationId,
+      qnaSessionId: context.bindingData.input.qnaSessionId,
+      filename: module.id,
+    });
   }
 });
 

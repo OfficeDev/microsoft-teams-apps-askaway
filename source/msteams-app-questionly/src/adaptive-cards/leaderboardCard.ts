@@ -201,8 +201,7 @@ const allQuestions = {
                                                 data: {
                                                     id: 'upvote',
                                                     questionId: '${_id}',
-                                                    qnaSessionId:
-                                                        '${qnaSessionId}',
+                                                    qnaSessionId: '${qnaSessionId}',
                                                 },
                                             },
                                             $when: '${!upvoted}',
@@ -217,8 +216,7 @@ const allQuestions = {
                                                 data: {
                                                     id: 'upvote',
                                                     questionId: '${_id}',
-                                                    qnaSessionId:
-                                                        '${qnaSessionId}',
+                                                    qnaSessionId: '${qnaSessionId}',
                                                 },
                                             },
                                             $when: '${upvoted}',

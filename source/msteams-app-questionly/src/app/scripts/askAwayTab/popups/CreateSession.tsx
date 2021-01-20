@@ -1,21 +1,10 @@
 // tslint:disable:no-relative-imports
 import './../index.scss';
 import * as React from 'react';
-import {
-    Provider,
-    Flex,
-    Text,
-    Button,
-    Form,
-    Input,
-    TextArea,
-    FlexItem,
-} from '@fluentui/react-northstar';
+import { Provider, Flex, Text, Button, Form, Input, TextArea, FlexItem } from '@fluentui/react-northstar';
 // tslint:disable:no-relative-imports
 import * as microsoftTeams from '@microsoft/teams-js';
-import msteamsReactBaseComponent, {
-    ITeamsBaseComponentState,
-} from 'msteams-react-base-component';
+import msteamsReactBaseComponent, { ITeamsBaseComponentState } from 'msteams-react-base-component';
 export interface CreateSessionProps {}
 export interface CreateSessionState extends ITeamsBaseComponentState {
     theme: any;
@@ -29,14 +18,11 @@ export interface CreateSessionState extends ITeamsBaseComponentState {
     };
 }
 
-export class CreateSession extends msteamsReactBaseComponent<
-    CreateSessionProps,
-    CreateSessionState
-> {
+export class CreateSession extends msteamsReactBaseComponent<CreateSessionProps, CreateSessionState> {
     constructor(props) {
         super(props);
         this.state = {
-            theme: '',
+            theme: {},
             input: {
                 title: '',
                 description: '',
@@ -59,25 +45,23 @@ export class CreateSession extends msteamsReactBaseComponent<
      * @param key - state key value
      */
     private appendInput = (e, key) => {
-        const inputValues = this.state;
-        inputValues.input[key] = e.target.value;
-        this.setState(inputValues);
+        const { value } = e.target;
+        this.setState((state) => {
+            state.input[key] = value ? value.trim() : '';
+            return state;
+        });
     };
 
     /**
      * Validate Create Sesion Form
      */
     private validateCreateSession(inputData) {
-        const errorInput = this.state;
-        errorInput['error']['isTitle'] = false;
-        errorInput['error']['isDescription'] = false;
-        if (!inputData['title']) {
-            errorInput['error']['isTitle'] = true;
-        }
-        if (!inputData['description']) {
-            errorInput['error']['isDescription'] = true;
-        }
-        this.setState(errorInput);
+        this.setState({
+            error: {
+                isTitle: !inputData.title,
+                isDescription: !inputData.description,
+            },
+        });
     }
 
     /**
@@ -86,12 +70,12 @@ export class CreateSession extends msteamsReactBaseComponent<
      * @param field
      */
     private validateCreateSessionField(input, field) {
-        const errorInput = this.state;
-        errorInput['error'][field] = true;
-        if (input) {
-            errorInput['error'][field] = false;
-        }
-        this.setState(errorInput);
+        this.setState({
+            error: {
+                ...this.state.error,
+                [field]: !input,
+            },
+        });
     }
 
     private onSubmitCreateSession(e) {
@@ -106,12 +90,7 @@ export class CreateSession extends msteamsReactBaseComponent<
     private showCreateSessionForm() {
         return (
             <Flex column>
-                <Form
-                    // tslint:disable-next-line:react-this-binding-issue
-                    onSubmit={(e) => this.onSubmitCreateSession(e)}
-                    className="sidepanel-form"
-                    styles={{ display: 'flex', flexDirection: 'column' }}
-                >
+                <Form onSubmit={(e) => this.onSubmitCreateSession(e)} className="sidepanel-form" styles={{ display: 'flex', flexDirection: 'column' }}>
                     <div className="form-grid">
                         <Text content="Title Name*" size="small" />
                         <Input
@@ -120,22 +99,10 @@ export class CreateSession extends msteamsReactBaseComponent<
                             fluid
                             placeholder="Type a name"
                             styles={{ color: '#c8c6c4' }}
-                            onKeyUp={(e) =>
-                                this.validateCreateSessionField(
-                                    this.state.input.title,
-                                    'isTitle'
-                                )
-                            }
+                            onKeyUp={(e) => this.validateCreateSessionField(this.state.input.title, 'isTitle')}
                             onChange={(e) => this.appendInput(e, 'title')}
                         />
-                        {this.state.error.isTitle && (
-                            <Text
-                                styles={{ display: 'inline-flex' }}
-                                error
-                                content="Title is required*"
-                                size="small"
-                            />
-                        )}
+                        {this.state.error.isTitle && <Text styles={{ display: 'inline-flex' }} error content="Title is required*" size="small" />}
                     </div>
                     <div className="form-grid">
                         <Text content="Description*" size="small" />
@@ -143,32 +110,15 @@ export class CreateSession extends msteamsReactBaseComponent<
                             fluid
                             styles={{ marginTop: '0.25rem' }}
                             placeholder="Type a description"
-                            onKeyUp={(e) =>
-                                this.validateCreateSessionField(
-                                    this.state.input.description,
-                                    'isDescription'
-                                )
-                            }
+                            onKeyUp={(e) => this.validateCreateSessionField(this.state.input.description, 'isDescription')}
                             onChange={(e) => this.appendInput(e, 'description')}
                         />
-                        {this.state.error.isDescription && (
-                            <Text
-                                styles={{ display: 'inline-flex' }}
-                                error
-                                content="Description is required*"
-                                size="small"
-                            />
-                        )}
+                        {this.state.error.isDescription && <Text styles={{ display: 'inline-flex' }} error content="Description is required*" size="small" />}
                     </div>
                     <div className="form-grid">
                         <Flex>
                             <FlexItem push>
-                                <Button
-                                    primary
-                                    type="submit"
-                                    className="btn-create-session"
-                                    size="small"
-                                >
+                                <Button primary type="submit" className="btn-create-session" size="small">
                                     <Button.Content>Create</Button.Content>
                                 </Button>
                             </FlexItem>
@@ -186,9 +136,7 @@ export class CreateSession extends msteamsReactBaseComponent<
         return (
             <Provider theme={this.state.theme}>
                 <React.Fragment>
-                    <div style={{ padding: '1rem 2rem' }}>
-                        {this.showCreateSessionForm()}
-                    </div>
+                    <div style={{ padding: '1rem 2rem' }}>{this.showCreateSessionForm()}</div>
                 </React.Fragment>
             </Provider>
         );

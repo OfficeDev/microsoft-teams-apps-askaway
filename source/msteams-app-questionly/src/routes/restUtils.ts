@@ -1,35 +1,20 @@
 import { IConversation } from 'msteams-app-questionly.data';
 import { exceptionLogger } from 'src/util/exceptionTracking';
 import { getMicrosoftAppPassword } from 'src/util/keyvault';
-import {
-    BotFrameworkAdapter,
-    ConversationAccount,
-    ConversationReference,
-    TeamsChannelAccount,
-    TeamsInfo,
-} from 'botbuilder';
+import { BotFrameworkAdapter, ConversationAccount, ConversationReference, TeamsChannelAccount, TeamsInfo } from 'botbuilder';
 import { verifyUserFromConversationId } from 'msteams-app-questionly.common';
 import { UserIsNotPartOfConversationError } from 'src/errors/userIsNotPartOfConversationError';
 import { ConversationDoesNotBelongToMeetingChatError } from 'src/errors/conversationDoesNotBelongToMeetingChatError';
 import { Request } from 'express';
 import { ParameterMissingInRequestError } from 'src/errors/parameterMissingInRequestError';
-
-/**
- * Checks if a given parameter is a valid string.
- * @param param - parameter.
- * @returns - true if parameter is a valid string.
- */
-const isValidStringParameter = (param: string | undefined | null): boolean => {
-    return param !== undefined && param !== null && param !== '';
-};
+import { TelemetryExceptions } from 'src/constants/telemetryConstants';
+import { isValidStringParameter } from 'src/util/typeUtility';
 
 /**
  * Ensures if conversation belongs to meeting chat.
  * @param conversationData - Conversation data.
  */
-export const ensureConversationBelongsToMeetingChat = (
-    conversationData: IConversation
-) => {
+export const ensureConversationBelongsToMeetingChat = (conversationData: IConversation) => {
     if (!isValidStringParameter(conversationData.meetingId)) {
         throw new ConversationDoesNotBelongToMeetingChatError();
     }
@@ -42,15 +27,12 @@ export const ensureConversationBelongsToMeetingChat = (
  * @returns - parameter value from request.
  * @throws - throws error is valid parameter is not present in the request.
  */
-export const getAndEnsureRequestBodyContainsParameter = (
-    req: Request,
-    parameterName: string
-): string => {
+export const getAndEnsureRequestBodyContainsParameter = (req: Request, parameterName: string): string => {
     if (!isValidStringParameter(req.body[parameterName])) {
         throw new ParameterMissingInRequestError(parameterName);
     }
 
-    return req.body[parameterName];
+    return req.body[parameterName]?.trim();
 };
 
 /**
@@ -59,10 +41,7 @@ export const getAndEnsureRequestBodyContainsParameter = (
  * @param userId - Aad object id of user.
  * @throws - error if user is not part of the conversation.
  */
-export const ensureUserIsPartOfMeetingConversation = async (
-    conversationData: IConversation,
-    userId: string
-): Promise<void> => {
+export const ensureUserIsPartOfMeetingConversation = async (conversationData: IConversation, userId: string): Promise<void> => {
     ensureConversationBelongsToMeetingChat(conversationData);
 
     if (process.env.MicrosoftAppId === undefined) {
@@ -84,19 +63,13 @@ export const ensureUserIsPartOfMeetingConversation = async (
     }
 };
 
-export const patchActionForQuestion = ['upvote', 'downvote', 'markAnswered'];
-
 /**
  * Get teams member id from teams member info. This is the 29:xxx ID for the user.
  * @param userAadObjectId - AAD user id.
  * @param conversationId - conversation id
  * @param serviceUrl - service url.
  */
-export const getTeamsUserId = async (
-    userAadObjectId: string,
-    conversationId: string,
-    serviceUrl: string
-) => {
+export const getTeamsUserId = async (userAadObjectId: string, conversationId: string, serviceUrl: string) => {
     try {
         const conversationReference = {
             serviceUrl: serviceUrl,
@@ -111,33 +84,27 @@ export const getTeamsUserId = async (
             appPassword: await getMicrosoftAppPassword(),
         });
 
-        const teamMember = await getMemberInfo(
-            userAadObjectId,
-            adapter,
-            conversationReference
-        );
+        const teamMember = await getMemberInfo(userAadObjectId, adapter, conversationReference);
         if (teamMember !== undefined) {
             return teamMember.id;
         }
         throw new Error('Could not get member info for teams user');
     } catch (error) {
-        exceptionLogger(error);
+        exceptionLogger(error, {
+            conversationId: conversationId,
+            userAadObjectId: userAadObjectId,
+            filename: module.id,
+            exceptionName: TelemetryExceptions.GetTeamsMemberIdFailed,
+        });
         throw error;
     }
 };
 
 // This function returns teams api to get member info. Added this as a separate function for better UT coverage.
-export const getMemberInfo = async (
-    userId: string,
-    adapter: BotFrameworkAdapter,
-    conversationReference: ConversationReference
-): Promise<TeamsChannelAccount> => {
+export const getMemberInfo = async (userId: string, adapter: BotFrameworkAdapter, conversationReference: ConversationReference): Promise<TeamsChannelAccount> => {
     let teamMember;
-    await adapter.continueConversation(
-        conversationReference,
-        async (context) => {
-            teamMember = await TeamsInfo.getMember(context, userId);
-        }
-    );
+    await adapter.continueConversation(conversationReference, async (context) => {
+        teamMember = await TeamsInfo.getMember(context, userId);
+    });
     return teamMember;
 };

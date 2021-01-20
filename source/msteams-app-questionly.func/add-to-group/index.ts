@@ -16,15 +16,18 @@ import {
 import { isValidParam } from "../src/utils/requestUtility";
 import { errorStrings } from "../src/constants/errorStrings";
 import { StatusCodes } from "http-status-codes";
+import { exceptionLogger } from "../src/utils/exceptionTracking";
 
 const httpTrigger: AzureFunction = async function (
   context: Context,
   req: HttpRequest
 ): Promise<void> {
-  try {
-    const conversationId: string = req.body?.conversationId;
-    const connectionId: string = req.body?.connectionId;
+  const conversationId: string = req.body?.conversationId;
+  const connectionId: string = req.body?.connectionId;
+  const operationId: string = req.body?.operationId;
+  let userId: string;
 
+  try {
     // Validate request parameters.
     if (!isValidParam(conversationId)) {
       createBadRequestResponse(
@@ -57,7 +60,7 @@ const httpTrigger: AzureFunction = async function (
     // Initiate db connection if not initiated already.
     await initiateDBConnection();
 
-    const userId: string = req[userIdParameterConstant];
+    userId = req[userIdParameterConstant];
     const conversation: IConversation = await getConversationData(
       conversationId
     );
@@ -82,6 +85,12 @@ const httpTrigger: AzureFunction = async function (
       await signalRUtility.addConnectionToGroup(connectionId, conversationId);
     } catch (error) {
       context.log.error(error);
+      exceptionLogger(error, operationId, {
+        conversationId: conversationId,
+        tenantId: conversation.tenantId,
+        userAadObjectId: userId,
+        filename: module.id,
+      });
 
       if (error?.response?.status === StatusCodes.NOT_FOUND) {
         context.res = {
@@ -100,6 +109,11 @@ const httpTrigger: AzureFunction = async function (
     };
   } catch (error) {
     context.log.error(error);
+    exceptionLogger(error, operationId, {
+      conversationId: conversationId,
+      userAadObjectId: userId,
+      filename: module.id,
+    });
     createInternalServerErrorResponse(context);
   }
 };
