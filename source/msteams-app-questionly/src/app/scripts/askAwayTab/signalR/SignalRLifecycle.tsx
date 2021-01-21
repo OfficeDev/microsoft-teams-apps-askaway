@@ -2,12 +2,10 @@ import * as React from 'react';
 import * as signalR from '@microsoft/signalr';
 import axios from 'axios';
 import { StatusCodes } from 'http-status-codes';
-import {
-    ApplicationInsights,
-    SeverityLevel,
-} from '@microsoft/applicationinsights-web';
+import { ApplicationInsights, SeverityLevel } from '@microsoft/applicationinsights-web';
 import { HttpService } from './../shared/HttpService';
 import { Alert } from '@fluentui/react-northstar';
+import { IDataEvent } from 'msteams-app-questionly.common';
 
 /**
  * signalR connection status
@@ -54,12 +52,12 @@ export interface SignalRLifecycleProps {
     /**
      * conversation id of the group chat.
      */
-    conversationId: string;
+    conversationId?: string;
 
     /**
      * callback function from caller, which recives update on events.
      */
-    onEvent: (dataEvent: any) => void;
+    onEvent: (dataEvent: IDataEvent) => void;
 
     /**
      * http service.
@@ -89,10 +87,7 @@ export interface SignalRLifecycleState {
     connectionLimit: ConnectionLimit;
 }
 
-export class SignalRLifecycle extends React.Component<
-    SignalRLifecycleProps,
-    SignalRLifecycleState
-> {
+export class SignalRLifecycle extends React.Component<SignalRLifecycleProps, SignalRLifecycleState> {
     /**
      * signalR hub connection.
      */
@@ -118,9 +113,7 @@ export class SignalRLifecycle extends React.Component<
         this.connection.onclose(this.handleConnectionError.bind(this));
         // `onreconnected` callback is called with new connection id.
         this.connection.onreconnected(this.addConnectionToGroup.bind(this));
-        this.connection.onreconnecting(
-            this.showAutoRefreshEstablishingMessage.bind(this)
-        );
+        this.connection.onreconnecting(this.showAutoRefreshEstablishingMessage.bind(this));
     }
 
     /**
@@ -138,9 +131,7 @@ export class SignalRLifecycle extends React.Component<
             this.connection =
                 this.props.connection ??
                 new signalR.HubConnectionBuilder()
-                    .withUrl(
-                        `${process.env.SignalRFunctionBaseUrl}/api?authorization=${token}`
-                    )
+                    .withUrl(`${process.env.SignalRFunctionBaseUrl}/api?authorization=${token}`)
                     // Configures the signalr.HubConnection to automatically attempt to reconnect if the connection is lost.
                     // By default, the client will wait 0, 2, 10 and 30 seconds respectively before trying up to 4 reconnect attempts.
                     .withAutomaticReconnect()
@@ -153,9 +144,7 @@ export class SignalRLifecycle extends React.Component<
                 // Add client to the meeting group.
                 await this.addConnectionToGroup(this.connection.connectionId);
             } else {
-                throw new Error(
-                    `SignalR connection id is not resolved for conersationId: ${this.props.conversationId}`
-                );
+                throw new Error(`SignalR connection id is not resolved for conersationId: ${this.props.conversationId}`);
             }
 
             this.registerCallbacksOnConnection();
@@ -216,16 +205,11 @@ export class SignalRLifecycle extends React.Component<
             conversationId: this.props.conversationId,
         };
 
-        const response = await axios.post(
-            `${process.env.SignalRFunctionBaseUrl}/api/add-to-group?authorization=${token}`,
-            addToGroupInputDate
-        );
+        const response = await axios.post(`${process.env.SignalRFunctionBaseUrl}/api/add-to-group?authorization=${token}`, addToGroupInputDate);
 
         if (response.status !== StatusCodes.OK) {
             this.props.appInsights.trackException({
-                exception: new Error(
-                    `Error in adding connection to the group, conversationId: ${this.props.conversationId}, reason: ${response.statusText}`
-                ),
+                exception: new Error(`Error in adding connection to the group, conversationId: ${this.props.conversationId}, reason: ${response.statusText}`),
                 severityLevel: SeverityLevel.Error,
             });
 
@@ -266,15 +250,8 @@ export class SignalRLifecycle extends React.Component<
     public render() {
         return (
             <div id="alertHolder">
-                {(this.state.connectionStatus ===
-                    ConnectionStatus.NotConnected ||
-                    this.state.connectionStatus ===
-                        ConnectionStatus.Reconnecting) && (
-                    <Alert
-                        id="alert"
-                        content="Connection lost. Refresh to view content. if that doesn't do the trick, try again later."
-                        dismissible
-                    />
+                {(this.state.connectionStatus === ConnectionStatus.NotConnected || this.state.connectionStatus === ConnectionStatus.Reconnecting) && (
+                    <Alert id="alert" content="Connection lost. Refresh to view content. if that doesn't do the trick, try again later." dismissible />
                 )}
             </div>
         );

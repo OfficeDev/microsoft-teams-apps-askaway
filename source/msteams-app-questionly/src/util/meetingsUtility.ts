@@ -60,7 +60,7 @@ const getToken = async () => {
  * Returns meeting id for meeting, if it is defined. Otherwise undefined.
  * @param context - turn context
  */
-export const getMeetingIdFromContext = (context: TurnContext) => {
+export const getMeetingIdFromContext = (context: TurnContext): string | undefined => {
     return context.activity.channelData?.meeting?.id;
 };
 

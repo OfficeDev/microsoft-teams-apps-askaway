@@ -1,69 +1,116 @@
-// tslint:disable-next-line:no-relative-imports
+// tslint:disable:no-relative-imports
 import './index.scss';
-// tslint:disable-next-line:no-relative-imports
 import * as React from 'react';
 import * as microsoftTeams from '@microsoft/teams-js';
-import { Flex, Text, Button, Image, Input, FlexItem, SendIcon, Loader, Menu, menuAsToolbarBehavior, ShorthandCollection, MenuItemProps } from '@fluentui/react-northstar';
-import { MoreIcon, LeaveIcon, RetryIcon } from '@fluentui/react-icons-northstar';
-import { ApplicationInsights } from '@microsoft/applicationinsights-web';
+import { Flex, Text, Button, Image, Loader, ArrowUpIcon } from '@fluentui/react-northstar';
+import { ApplicationInsights, SeverityLevel } from '@microsoft/applicationinsights-web';
 import { HttpService } from './shared/HttpService';
 import { SignalRLifecycle } from './signalR/SignalRLifecycle';
+import QuestionsList from './MeetingPanel/QuestionsList';
+import NewQuestion from './MeetingPanel/NewQuestion';
+import QnASessionHeader from './MeetingPanel/QnASessionHeader';
+import { Helper } from './shared/Helper';
+import { ClientDataContract } from '../../../../src/contracts/clientDataContract';
+import { DataEventHandlerFactory } from './dataEventHandling/dataEventHandlerFactory';
+import { IDataEvent } from 'msteams-app-questionly.common';
 
 const EmptySessionImage = require('./../../web/assets/create_session.png');
+/**
+ * Properties for the MeetingPanel React component
+ */
 export interface MeetingPanelProps {
-    teamsTabContext: any;
+    teamsTabContext: microsoftTeams.Context;
     httpService: HttpService;
     appInsights: ApplicationInsights;
-    helper: any;
+    helper: Helper;
 }
 
+/**
+ * State for the MeetingPanel React component
+ */
 export interface MeetingPanelState {
-    activeSessionData: any;
+    activeSessionData: ClientDataContract.QnaSession;
     showLoader: boolean;
     input: {
         title: string;
         description: string;
     };
-    error: {
-        isTitle: boolean;
-        isDescription: boolean;
-    };
+    /**
+     * state variable denoting if there are new updates on qna session.
+     */
+    showNewUpdatesButton: boolean;
 }
 class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState> {
     /**
      * signalR component instance which is used later to refresh the connection.
      */
     private signalRComponent: SignalRLifecycle | null;
+    private dataEventFactory: DataEventHandlerFactory;
 
     constructor(props) {
         super(props);
+        this.dataEventFactory = new DataEventHandlerFactory();
+
         this.state = {
-            activeSessionData: null,
+            activeSessionData: this.props.helper.createEmptyActiveSessionData(),
             showLoader: false,
             input: {
                 title: '',
                 description: '',
             },
-            error: {
-                isTitle: false,
-                isDescription: false,
-            },
+            showNewUpdatesButton: false,
         };
     }
 
     componentDidMount() {
-        this.getActiveSession();
+        this.updateContent();
     }
+
+    /**
+     * Shows loader and updates entire content of the screen.
+     */
+    private updateContent = () => {
+        this.signalRComponent?.refreshConnection();
+        this.setState({ showLoader: true });
+        this.setState({ showNewUpdatesButton: false });
+        this.getActiveSession();
+    };
+
+    /**
+     * Updates only qna session content without showing loader.
+     */
+    private updateQnASessionContent = () => {
+        this.setState({ showNewUpdatesButton: false });
+        this.getActiveSession();
+    };
+
+    /**
+     * Shows `new updates` button on the screen.
+     */
+    private showNewUpdatesButton = () => {
+        this.setState({ showNewUpdatesButton: true });
+    };
+
+    /**
+     * Updates current active session data.
+     * @param sessionData - session data.
+     */
+    private updateActiveSessionData = (sessionData: ClientDataContract.QnaSession | null) => {
+        if (sessionData === null) {
+            this.setState({ activeSessionData: this.props.helper.createEmptyActiveSessionData() });
+        } else {
+            this.setState({ activeSessionData: sessionData });
+        }
+    };
 
     /**
      * To Identify Active Session
      */
-    private getActiveSession() {
-        this.setState({ showLoader: true });
+    getActiveSession = () => {
         this.props.httpService
             .get(`/conversations/${this.props.teamsTabContext.chatId}/activesessions`)
             .then((response: any) => {
-                if (response && response.data && response.data.length > 0) {
+                if (response?.data?.length > 0) {
                     this.setState({
                         activeSessionData: response.data[0],
                     });
@@ -73,10 +120,11 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
             .catch((error) => {
                 this.setState({ showLoader: false });
             });
-    }
+    };
 
     /**
      * To End the active session
+     * @param e - event
      */
     endActiveSession = (e) => {
         if (this.state?.activeSessionData?.sessionId) {
@@ -86,7 +134,7 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
                 .then((response: any) => {
                     this.setState({
                         showLoader: false,
-                        activeSessionData: null,
+                        activeSessionData: this.props.helper.createEmptyActiveSessionData(),
                     });
                 })
                 .catch((error) => {
@@ -105,12 +153,11 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
             url: `https://${process.env.HostName}/askAwayTab/createsession.html?theme=${this.props.teamsTabContext.theme}&locale=${this.props.teamsTabContext.locale}`,
         };
 
-        let submitHandler = (err: any, result: any) => {
+        let submitHandler = async (err: any, result: any) => {
             result = JSON.parse(result);
             if (result) {
                 this.setState({
                     input: {
-                        ...this.state.input,
                         title: result['title'],
                         description: result['description'],
                     },
@@ -123,31 +170,30 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
                     .post(`/conversations/${this.props.teamsTabContext.chatId}/sessions`, { ...this.state.input, ...createSessionData })
                     .then((response: any) => {
                         if (response && response['data'] && response['data']['sessionId']) {
-                            this.showAlertModel(true);
+                            this.showAlertModal(true);
                             this.setState({
                                 activeSessionData: response.data,
                             });
                         } else {
-                            this.showAlertModel(false);
+                            this.showAlertModal(false);
                         }
                     })
                     .catch((error) => {
-                        this.showAlertModel(false);
+                        this.showAlertModal(false);
                     });
             }
         };
-
         microsoftTeams.tasks.startTask(taskInfo, submitHandler);
     };
 
     /**
      * Display's success and failure screens for AMA session
      */
-    private showAlertModel(isSuccess = false) {
+    private showAlertModal(isSuccess = false) {
         let taskInfo: any = {
             fallbackUrl: '',
             appID: process.env.MicrosoftAppId,
-            card: isSuccess ? this.successModel() : this.failureModel(),
+            card: isSuccess ? this.successModal() : this.failureModal(),
         };
         microsoftTeams.tasks.startTask(taskInfo);
     }
@@ -155,7 +201,7 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
     /**
      * Display's success screen when AMA session is successfully created
      */
-    private successModel() {
+    private successModal() {
         return {
             $schema: 'https://adaptivecards.io/schemas/adaptive-card.json',
             type: 'AdaptiveCard',
@@ -188,7 +234,7 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
     /**
      * display's failure screen when creating AMA session is unsuccessful
      */
-    private failureModel() {
+    private failureModal() {
         return {
             $schema: 'https://adaptivecards.io/schemas/adaptive-card.json',
             type: 'AdaptiveCard',
@@ -231,7 +277,7 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
     private noQuestionDesign(image: string, text: string) {
         return (
             <div className="no-question">
-                <Image className="create-session" alt="image" styles={{ width: '17rem' }} src={image} />
+                <Image className="create-session" alt="image" src={image} />
                 <Flex.Item align="center">
                     <Text className="text-caption-panel" content={text} />
                 </Flex.Item>
@@ -242,121 +288,70 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
     /**
      * Landing page for meeting panel
      */
-    private crateNewSessionLayout() {
+    private createNewSessionLayout() {
         return (
-            <Flex hAlign="center" vAlign="center">
-                {this.noQuestionDesign(EmptySessionImage, 'Ready to field questions?')}
-                <Flex.Item align="center">
-                    <Button className="button" onClick={this.onShowTaskModule}>
-                        <Button.Content>Start a Q&A session</Button.Content>
-                    </Button>
-                </Flex.Item>
-            </Flex>
+            <React.Fragment>
+                <QnASessionHeader title={'Start a Q&A session'} onClickRefreshSession={this.updateContent} onClickEndSession={this.endActiveSession} showToolBar={false} />
+                <Flex hAlign="center" vAlign="center">
+                    {this.noQuestionDesign(EmptySessionImage, 'Ready to field questions?')}
+                    <Flex.Item align="center">
+                        <Button className="button" onClick={this.onShowTaskModule}>
+                            <Button.Content>Start a Q&A session</Button.Content>
+                        </Button>
+                    </Flex.Item>
+                </Flex>
+            </React.Fragment>
         );
     }
-
-    /**
-     * Meeting panel header
-     */
-    // tslint:disable-next-line:max-func-body-length
-    showMenubar = (sessionTitle) => {
-        const menuItems: ShorthandCollection<MenuItemProps> = [
-            {
-                icon: (
-                    <MoreIcon
-                        {...{
-                            outline: false,
-                        }}
-                    />
-                ),
-                key: 'menuButton2',
-                'aria-label': 'More options',
-                indicator: false,
-                menu: {
-                    items: [
-                        {
-                            key: '5',
-                            content: 'Refresh session',
-                            onClick: () => {
-                                this.getActiveSession();
-                            },
-                            icon: <RetryIcon outline />,
-                        },
-                        {
-                            key: '8',
-                            content: 'End session',
-                            onClick: this.endActiveSession,
-                            icon: <LeaveIcon outline />,
-                        },
-                    ],
-                },
-            },
-        ];
-
-        return (
-            <Flex hAlign="start" vAlign="start">
-                <Text
-                    styles={{
-                        fontSize: '18px',
-                        lineHeight: '21px',
-                    }}
-                    content={sessionTitle}
-                    size="medium"
-                />
-                <FlexItem push>
-                    <div className="menuHeader">
-                        <Menu defaultActiveIndex={0} items={menuItems} iconOnly accessibility={menuAsToolbarBehavior} aria-label="Compose Editor" />
-                    </div>
-                </FlexItem>
-            </Flex>
-        );
-    };
 
     /**
      * This function is triggered on events from signalR connection.
      * @param dataEvent - event received.
      */
-    private updateEvent = (dataEvent: any) => {
-        switch (dataEvent.type) {
-            case 'qnaSessionCreatedEvent': {
-                // Check if `activeSessionData` is not populated already with right session data.
-                // This can happen for user who has created the session.
-                if (this.state.activeSessionData?.sessionId !== dataEvent.data.sessionId) {
-                    this.setState({
-                        activeSessionData: dataEvent.data,
-                    });
-                }
-                break;
-            }
-            case 'qnaSessionEndedEvent': {
-                this.setState({
-                    activeSessionData: null,
-                });
-                break;
-            }
+    private updateEvent = (dataEvent: IDataEvent) => {
+        const eventHandler = this.dataEventFactory.createHandler(dataEvent.type);
+        if (eventHandler) {
+            eventHandler.handleEvent(dataEvent, this.state.activeSessionData, this.updateQnASessionContent, this.showNewUpdatesButton, this.updateActiveSessionData);
+        } else {
+            this.props.appInsights.trackException({
+                exception: new Error(`Cant find event handler for ${dataEvent.type}`),
+                severityLevel: SeverityLevel.Error,
+            });
         }
     };
 
     /**
-     * When No question posted yets
+     * Handle on add new question in the question component
+     * @param event
      */
-    postQuestions = () => {
-        const sessionTitle = this.state.input.title ? this.state.input.title : this.state.activeSessionData.title;
+    handleOnAddNewQuestion = (event) => {
+        this.setState({
+            activeSessionData: {
+                ...this.state.activeSessionData,
+                unansweredQuestions: [event, ...this.state.activeSessionData.unansweredQuestions],
+            },
+        });
+    };
+
+    /**
+     * Display session questions
+     */
+    showSessionQuestions = (stateVal) => {
+        const sessionTitle = stateVal.activeSessionData.title ?? stateVal.input.title;
         return (
             <React.Fragment>
-                {this.showMenubar(sessionTitle)}
-                <Flex hAlign="center" vAlign="center">
-                    {this.noQuestionDesign(EmptySessionImage, 'Q & A session is live...Ask away!')}
-                    <div
-                        style={{
-                            position: 'absolute',
-                            bottom: '0.75rem',
-                            width: '100%',
-                        }}
-                    >
-                        <Input fluid placeholder="Type a question here" icon={<SendIcon />} />
-                    </div>
-                </Flex>
+                <QnASessionHeader title={sessionTitle} onClickRefreshSession={this.updateContent} onClickEndSession={this.endActiveSession} showToolBar={true} />
+                {stateVal.activeSessionData.unansweredQuestions.length > 0 || stateVal.activeSessionData.answeredQuestions.length > 0 ? (
+                    <QuestionsList activeSessionData={stateVal.activeSessionData} httpService={this.props.httpService} teamsTabContext={this.props.teamsTabContext} />
+                ) : (
+                    this.noQuestionDesign(EmptySessionImage, 'Q & A session is live...Ask away!')
+                )}
+                <NewQuestion
+                    activeSessionData={stateVal.activeSessionData}
+                    httpService={this.props.httpService}
+                    teamsTabContext={this.props.teamsTabContext}
+                    onAddNewQuestion={this.handleOnAddNewQuestion}
+                />
             </React.Fragment>
         );
     };
@@ -365,6 +360,9 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
      * The render() method to create the UI of the meeting panel
      */
     public render() {
+        const stateVal = this.state;
+        if (stateVal.showLoader) return <Loader label="Loading Meeting Information" />;
+
         return (
             <React.Fragment>
                 <SignalRLifecycle
@@ -376,13 +374,15 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
                         this.signalRComponent = instance;
                     }}
                 />
-                {this.state.showLoader && <Loader label="Loading Meeting Information" />}
-                {!this.state.showLoader && (
-                    <div className="meeting-panel">
-                        {!this.state.activeSessionData && <div>{this.crateNewSessionLayout()}</div>}
-                        {this.state.activeSessionData && <div>{this.postQuestions()}</div>}
-                    </div>
-                )}
+                <div className="meeting-panel">
+                    {this.state.showNewUpdatesButton && (
+                        <Button onClick={this.updateQnASessionContent} className="newUpdatesButton">
+                            <ArrowUpIcon xSpacing="after"></ArrowUpIcon>
+                            <Button.Content className="newUpdatesButtonContent" content="New updates"></Button.Content>
+                        </Button>
+                    )}
+                    {stateVal.activeSessionData.sessionId ? this.showSessionQuestions(stateVal) : this.createNewSessionLayout()}
+                </div>
             </React.Fragment>
         );
     }

@@ -91,7 +91,6 @@ test('start qna session in channel', async () => {
         hostUserId: sampleHostUserId,
         isChannel: true,
         serviceUrl: sampleServiceUrl,
-        meetingId: '',
     });
     expect(qnaSessionDataService.createQnASession).toBeCalledTimes(1);
     expect(qnaSessionDataService.createQnASession).toBeCalledWith({
@@ -105,6 +104,7 @@ test('start qna session in channel', async () => {
         scopeId: sampleScopeId,
         hostUserId: sampleHostUserId,
         isChannel: true,
+        isMeetingGroupChat: false,
     });
     // Make sure background job is triggered.
     expect(<any>triggerBackgroundJobForQnaSessionCreatedEvent).toBeCalledTimes(1);
@@ -148,6 +148,7 @@ test('start qna session in group chat', async () => {
         scopeId: sampleScopeId,
         hostUserId: sampleHostUserId,
         isChannel: false,
+        isMeetingGroupChat: true,
     });
 
     // Make sure background job is triggered.
@@ -212,7 +213,7 @@ test('get new question card', async () => {
 test('submit new question', async () => {
     (<any>triggerBackgroundJobForQuestionPostedEvent) = jest.fn();
 
-    await submitNewQuestion(sampleQnASessionId, sampleUserAADObjId1, sampleUserName, sampleQuestionContent, sampleConversationId);
+    await submitNewQuestion(sampleQnASessionId, sampleUserAADObjId1, sampleUserName, sampleQuestionContent, sampleConversationId, sampleServiceUrl, sampleMeetingId);
     expect(questionDataService.createQuestion).toBeCalledTimes(1);
     expect(questionDataService.createQuestion).toBeCalledWith(sampleQnASessionId, sampleUserAADObjId1, sampleUserName, sampleQuestionContent, sampleConversationId);
 
@@ -232,7 +233,7 @@ test('add upvote', async () => {
 
     (<any>triggerBackgroundJobForQuestionUpvotedEvent) = jest.fn();
 
-    await updateUpvote(sampleQnASessionId, sampleQuestionId, sampleUserAADObjId1, sampleUserName, sampleConversationId, 'default');
+    await updateUpvote(sampleQnASessionId, sampleQuestionId, sampleUserAADObjId1, sampleUserName, sampleConversationId, 'default', sampleServiceUrl, sampleMeetingId);
     expect(questionDataService.updateUpvote).toBeCalledTimes(1);
     expect(questionDataService.updateUpvote).toBeCalledWith(sampleQuestionId, sampleUserAADObjId1, sampleUserName);
 
@@ -252,7 +253,7 @@ test('remove upvote', async () => {
 
     (<any>triggerBackgroundJobForQuestionDownvotedEvent) = jest.fn();
 
-    await updateUpvote(sampleQnASessionId, sampleQuestionId, sampleUserAADObjId1, sampleUserName, sampleConversationId, 'default');
+    await updateUpvote(sampleQnASessionId, sampleQuestionId, sampleUserAADObjId1, sampleUserName, sampleConversationId, 'default', sampleServiceUrl, sampleMeetingId);
     expect(questionDataService.updateUpvote).toBeCalledTimes(1);
     expect(questionDataService.updateUpvote).toBeCalledWith(sampleQuestionId, sampleUserAADObjId1, sampleUserName);
 
@@ -269,7 +270,17 @@ test('get end qna confirmation card', async () => {
 test('end ama session', async () => {
     (<any>triggerBackgroundJobForQnaSessionEndedEvent) = jest.fn();
 
-    await expect(endQnASession(sampleQnASessionId, sampleUserAADObjId1, sampleConversationId, sampleTenantId, sampleServiceUrl, '', sampleUserName, sampleHostUserId)).rejects.toThrow();
+    await expect(
+        endQnASession({
+            qnaSessionId: sampleQnASessionId,
+            aadObjectId: sampleUserAADObjId1,
+            conversationId: sampleConversationId,
+            tenantId: sampleTenantId,
+            serviceURL: sampleServiceUrl,
+            userName: sampleUserName,
+            endedByUserId: sampleHostUserId,
+        })
+    ).rejects.toThrow();
 
     expect(qnaSessionDataService.isActiveQnA).toBeCalledTimes(1);
     expect(qnaSessionDataService.isActiveQnA).toBeCalledWith(sampleQnASessionId);
@@ -290,7 +301,16 @@ test('end ama session - meeting', async () => {
 
     (<any>triggerBackgroundJobForQnaSessionEndedEvent) = jest.fn();
 
-    await endQnASession(sampleQnASessionId, sampleUserAADObjId1, sampleConversationId, sampleTenantId, sampleServiceUrl, sampleMeetingId, sampleUserName, sampleHostUserId);
+    await endQnASession({
+        qnaSessionId: sampleQnASessionId,
+        aadObjectId: sampleUserAADObjId1,
+        conversationId: sampleConversationId,
+        tenantId: sampleTenantId,
+        serviceURL: sampleServiceUrl,
+        meetingId: sampleMeetingId,
+        userName: sampleUserName,
+        endedByUserId: sampleHostUserId,
+    });
     expect(qnaSessionDataService.isActiveQnA).toBeCalledTimes(1);
     expect(qnaSessionDataService.isActiveQnA).toBeCalledWith(sampleQnASessionId);
     expect(isPresenterOrOrganizer).toBeCalledTimes(1);
@@ -312,7 +332,18 @@ test('end ama session - meeting for attendee', async () => {
 
     (<any>triggerBackgroundJobForQnaSessionEndedEvent) = jest.fn();
 
-    await expect(endQnASession(sampleQnASessionId, sampleUserAADObjId1, sampleConversationId, sampleTenantId, sampleServiceUrl, sampleMeetingId, sampleUserName, sampleHostUserId)).rejects.toThrow();
+    await expect(
+        endQnASession({
+            qnaSessionId: sampleQnASessionId,
+            aadObjectId: sampleUserAADObjId1,
+            conversationId: sampleConversationId,
+            tenantId: sampleTenantId,
+            serviceURL: sampleServiceUrl,
+            meetingId: sampleMeetingId,
+            userName: sampleUserName,
+            endedByUserId: sampleHostUserId,
+        })
+    ).rejects.toThrow();
 
     expect(qnaSessionDataService.isActiveQnA).toBeCalledTimes(1);
     expect(qnaSessionDataService.isActiveQnA).toBeCalledWith(sampleQnASessionId);
@@ -369,7 +400,8 @@ test('mark question as answered api - user has sufficient permissions', async ()
         sampleMeetingId,
         sampleQnASessionId,
         sampleQuestionId,
-        sampleUserAADObjId1
+        sampleUserAADObjId1,
+        sampleServiceUrl
     );
 
     expect(<any>questionDataService.markQuestionAsAnswered).toBeCalledTimes(1);
@@ -396,7 +428,8 @@ test('mark question as answered api - user does not have sufficient permissions'
             sampleMeetingId,
             sampleQnASessionId,
             sampleQuestionId,
-            sampleUserAADObjId1
+            sampleUserAADObjId1,
+            sampleServiceUrl
         )
     ).rejects.toThrow();
 

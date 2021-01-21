@@ -31,6 +31,7 @@ class QnASessionDataService {
    * scopeId - channel id or group chat id
    * hostUserId - MS Teams Id of user who created the QnA (used for at-mentions)
    * isChannel - whether the QnA session was started in a channel or group chat
+   * isMeetingGroupChat - whether the QnA session was started in a meeting chat
    */
   public async createQnASession(sessionParameters: {
     title: string;
@@ -43,19 +44,25 @@ class QnASessionDataService {
     scopeId: string;
     hostUserId: string;
     isChannel: boolean;
+    isMeetingGroupChat: boolean;
   }): Promise<IQnASession_populated> {
     if (process.env.NumberOfActiveAMASessions === undefined) {
       throw new Error("Number of active sessions missing in the settings");
     }
-    const currentActiveSessions = await this.getNumberOfActiveSessions(
-      sessionParameters.conversationId
-    );
-    if (
-      currentActiveSessions >= Number(process.env.NumberOfActiveAMASessions)
-    ) {
-      throw new QnASessionLimitExhaustedError(
-        `Could not create a new QnA session. There are ${currentActiveSessions} active session(s) already.`
+
+    // Meeting chat is restricted to have only one active ama session at a time.
+    if (sessionParameters.isMeetingGroupChat) {
+      const currentActiveSessions = await this.getNumberOfActiveSessions(
+        sessionParameters.conversationId
       );
+
+      if (
+        currentActiveSessions >= Number(process.env.NumberOfActiveAMASessions)
+      ) {
+        throw new QnASessionLimitExhaustedError(
+          `Could not create a new QnA session. There are ${currentActiveSessions} active session(s) already.`
+        );
+      }
     }
 
     const hostUser: IUser = await this.userDataService.getUserOrCreate(

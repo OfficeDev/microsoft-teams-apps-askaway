@@ -7,7 +7,7 @@
         position: absolute;
     }
     .create-session {
-        top: 30%;
+        top: 35%;
         left: 50%;
         transform: translate(-50%, -50%);
         position: absolute;
@@ -75,22 +75,41 @@
         top: 67%;
         position: absolute;
     }
+    .newUpdatesButton {
+        top: 12%;
+        display: block;
+        position: absolute;
+        background-color: #6366a5;
+        text-align: center;
+        z-index: 99;
+        transform: translateX(40%);
+    }
+    .newUpdatesButtonContent {
+        font-size: medium;
+        font-weight: normal;
+    }
     .no-question {
         .text-caption-panel {
             font-size: 12px;
             line-height: 16px;
-            top: 52%;
+            top: 55%;
             position: absolute;
             text-align: center;
             width: 70%;
-            left: 17%;
+            left: 25%;
+            max-inline-size: 9rem;
         }
         .create-session {
-            top: 30%;
+            top: 35%;
             left: 50%;
             transform: translate(-50%, -50%);
             position: absolute;
+            width: 17rem;
         }
+    }
+    .session-title {
+        font-size: 18px;
+        line-height: 21px;
     }
     .menuHeader {
         svg {
@@ -100,4 +119,65 @@
             border: none;
         }
     }
+    .question-card {
+        margin-top: 1rem;
+        height: 20rem;
+        overflow-x: hidden;
+        .card-divider {
+            border-bottom: 1px solid #3b3a39;
+            height: 4.5rem;
+            .card-layout {
+                width: 100%;
+                padding: 0.5rem;
+                border-radius: 0rem;
+                .author-name {
+                    font-size: 12px;
+                    line-height: 20px;
+                }
+                .like-icon {
+                    position: absolute;
+                    top: 0.3rem;
+                    right: 1rem;
+                    .like-icon-size {
+                        min-width: 1rem;
+                    }
+                }
+                .card-body-question {
+                    font-size: 14px;
+                    line-height: 20px;
+                    margin-top: 0.4rem;
+                }
+            }
+        }
+    }
+    .menu-bar {
+        border-bottom: none;
+        a {
+            border-bottom-width: medium;
+        }
+        span {
+            padding-bottom: 0.7rem;
+        }
+    }
+    .input-text-field {
+        position: absolute;
+        bottom: 0.75rem;
+        width: 94%;
+        .text-question {
+            height: 2.5rem;
+            margin-right: -0.5rem;
+            word-break: break-word;
+        }
+        .send-button {
+            position: relative;
+            top: 0.25rem;
+            left: 1rem;
+        }
+    }
+}
+.notification-title {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    font-size: 14px;
+    line-height: 20px;
 }
