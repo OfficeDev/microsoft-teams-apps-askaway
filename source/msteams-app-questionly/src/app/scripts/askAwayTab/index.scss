@@ -258,6 +258,7 @@
     line-height: 20px;
 }
 
+/*Dark Theme rules*/
 .dark {
     #post-new-question {
         .ui-card {
@@ -265,6 +266,8 @@
         }
     }
 }
+
+/*Default Theme rules*/
 .default {
     #post-new-question {
         margin: 2rem auto 0 auto;
@@ -275,6 +278,8 @@
         }
     }
 }
+
+/*High contrast Theme rules*/
 .contrast {
     #post-new-question {
         .ui-card {
