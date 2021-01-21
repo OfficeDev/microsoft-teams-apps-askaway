@@ -24,6 +24,17 @@
         "description": "The client secret of the bot Azure AD app."
       }
     },
+    "customDomainOption": {
+      "type": "string",
+      "allowedValues": [
+        "Custom domain name (recommended)",
+      "Azure Front Door"
+      ],
+      "defaultValue": "Azure Front Door",
+      "metadata": {
+        "description": "How the app will be hosted on a domain that is not *.azurewebsites.net. Azure Front Door is an easy option that the template can set up automatically, but it comes with ongoing monthly costs. "
+      }
+    },
     "appDisplayName": {
       "type": "string",
       "minLength": 1,
@@ -95,34 +106,6 @@
         "description": "The branch of the GitHub repository to deploy."
       }
     },
-    "accountName": {
-      "type": "string",
-      "defaultValue": "[concat('mongodb-', uniqueString(resourceGroup().id))]",
-      "metadata": {
-        "description": "Cosmos DB account name"
-      }
-    },
-    "keyvaultName": {
-      "defaultValue": "[concat('keyvault-', uniqueString(resourceGroup().id))]",
-      "type": "string",
-      "metadata": {
-        "description": "Key vault name"
-      }
-    },
-    "signalRName": {
-      "defaultValue": "[concat('signalr-', uniqueString(resourceGroup().id))]",
-      "type": "string",
-      "metadata": {
-        "description": "SignalR name"
-      }
-    },
-    "storageAccountName": {
-      "type": "string",
-      "defaultValue": "[concat('storageacc', uniqueString(resourceGroup().id))]",
-      "metadata": {
-        "description": "Storage account name"
-      }
-    },
     "updateKeyvaultTemplateUrl": {
       "type": "string",
       "defaultValue": "https://raw.githubusercontent.com/shsarda/ask-away/master/deployment/update-keyvault.json",
@@ -137,23 +120,26 @@
     "botAppDomain": "[concat(variables('botAppName'), '.azurewebsites.net')]",
     "botAppUrl": "[concat('https://', variables('botAppDomain'))]",
     "hostingPlanName": "[parameters('baseResourceName')]",
-    "cosmosDbName": "[toLower(parameters('accountName'))]",
+    "cosmosDbName": "[toLower(concat('mongodb-', uniqueString(resourceGroup().id)))]",
     "botAppInsightsName": "[parameters('baseResourceName')]",
     "sharedSkus": ["Free", "Shared"],
     "manifestAppId": "[parameters('botClientId')]",
     "isSharedPlan": "[contains(variables('sharedSkus'), parameters('sku'))]",
     "skuFamily": "[if(equals(parameters('sku'), 'Shared'), 'D', take(parameters('sku'), 1))]",
     "botMessagingUrl": "[concat(variables('botAppUrl'), '/api/messages')]",
-    "accountName": "[toLower(parameters('accountName'))]",
-    "storageAccountName": "[toLower(parameters('storageAccountName'))]",
-    "signalRName": "[toLower(parameters('signalRName'))]",
+    "storageAccountName": "[toLower(concat('storageacc', uniqueString(resourceGroup().id)))]",
+    "signalRName": "[toLower(concat('signalr-', uniqueString(resourceGroup().id)))]",
+    "keyvaultName": "[concat('keyvault-', uniqueString(resourceGroup().id))]",
     "functionAppName": "[concat(parameters('baseResourceName'), '-function')]",
-    "AzureAd_ApplicationIdUri": "[concat('api://', variables('botAppDomain'), '/', parameters('botClientId'))]",
     "AzureAd_ValidIssuers": "[concat('https://login.microsoftonline.com/', parameters('tenantId'), '/v2.0,https://sts.windows.net/', parameters('tenantId'), '/')]",
     "AzureAd_Metadata_Endpoint": "[concat('https://login.microsoftonline.com/', parameters('tenantId'), '/v2.0/.well-known/openid-configuration')]",
     "NotificationBubblePageUrl": "[concat('https://', variables('botAppDomain'), '/askAwayTab/qnasessioncreatednotification.html')]",
     "BackgroundJobUri": "[concat('https://', variables('functionAppName'), '.azurewebsites.net/api/background-Job')]",
-    "SignalRFunctionBaseUrl": "[concat('https://', variables('functionAppName'), '.azurewebsites.net')]"
+    "SignalRFunctionBaseUrl": "[concat('https://', variables('functionAppName'), '.azurewebsites.net')]",
+    "useFrontDoor": "[equals(parameters('customDomainOption'), 'Azure Front Door')]",
+    "frontDoorName": "[parameters('baseResourceName')]",
+    "frontDoorDomain": "[toLower(concat(variables('frontDoorName'), '.azurefd.net'))]",
+    "AzureAd_ApplicationIdUri": "[if(variables('useFrontDoor'), concat('api://', variables('frontDoorDomain'),  '/', parameters('botClientId')), '')]"
   },
   "outputs": {
     "botId": {
@@ -162,7 +148,7 @@
     },
     "appDomain": {
       "type": "string",
-      "value": "[variables('botAppDomain')]"
+      "value": "[if(variables('useFrontDoor'), variables('frontDoorDomain'), concat('Please create a custom domain name for ', variables('botAppDomain'), ' and use that in the manifest'))]"
     }
   },
   "resources": [
@@ -242,7 +228,7 @@
       ]
     },
     {
-      "name": "[variables('accountName')]",
+      "name": "[variables('cosmosDbName')]",
       "type": "Microsoft.DocumentDB/databaseAccounts",
       "apiVersion": "2015-04-08",
       "location": "[parameters('location')]",
@@ -372,7 +358,7 @@
             },
             {
               "name": "KeyVaultName",
-              "value": "[parameters('keyvaultName')]"
+              "value": "[variables('keyvaultName')]"
             },
             {
               "name": "ExpireInMemorySecretsAfterMs",
@@ -407,14 +393,16 @@
               "value": "[variables('SignalRFunctionBaseUrl')]"
             },
             {
-              "name": "ASKAWAYTAB_APP_URI",
-              "value": "[variables('AzureAd_ApplicationIdUri')]"
-            },
-            {
               "name": "ApplicationInsightsInstrumentationKey",
               "value": "[reference(resourceId('Microsoft.Insights/components/', variables('botAppInsightsName')), '2015-05-01').InstrumentationKey]"
             }
-          ]
+          ],
+          "cors": {
+            "supportCredentials": true,
+            "allowedOrigins": [
+              "[concat('https://', variables('frontDoorDomain'))]"
+            ]
+          }
         }
       },
       "dependsOn": [
@@ -458,7 +446,7 @@
     {
       "type": "Microsoft.KeyVault/vaults",
       "apiVersion": "2016-10-01",
-      "name": "[parameters('keyvaultName')]",
+      "name": "[variables('keyvaultName')]",
       "location": "[parameters('location')]",
       "properties": {
         "sku": {
@@ -489,14 +477,14 @@
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
       "apiVersion": "2016-10-01",
-      "name": "[concat(parameters('keyvaultName'), '/MongoDbUri')]",
+      "name": "[concat(variables('keyvaultName'), '/MongoDbUri')]",
       "location": "[parameters('location')]",
       "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', parameters('keyvaultName'))]",
-        "[resourceId('Microsoft.DocumentDB/databaseAccounts', variables('accountName'))]"
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyvaultName'))]",
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', variables('cosmosDbName'))]"
       ],
       "properties": {
-        "value": "[listConnectionStrings(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('accountName')), '2019-12-12').connectionStrings[0].connectionString]",
+        "value": "[listConnectionStrings(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('cosmosDbName')), '2019-12-12').connectionStrings[0].connectionString]",
         "attributes": {
           "enabled": true
         }
@@ -505,10 +493,10 @@
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
       "apiVersion": "2016-10-01",
-      "name": "[concat(parameters('keyvaultName'), '/ApplicationInsightsInstrumentationKey')]",
+      "name": "[concat(variables('keyvaultName'), '/ApplicationInsightsInstrumentationKey')]",
       "location": "[parameters('location')]",
       "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', parameters('keyvaultName'))]",
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyvaultName'))]",
         "[resourceId('Microsoft.Insights/components/', variables('botAppInsightsName'))]"
       ],
       "properties": {
@@ -521,10 +509,10 @@
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
       "apiVersion": "2016-10-01",
-      "name": "[concat(parameters('keyvaultName'), '/MicrosoftAppPassword')]",
+      "name": "[concat(variables('keyvaultName'), '/MicrosoftAppPassword')]",
       "location": "[parameters('location')]",
       "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', parameters('keyvaultName'))]"
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyvaultName'))]"
       ],
       "properties": {
         "value": "[parameters('botClientSecret')]",
@@ -536,10 +524,10 @@
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
       "apiVersion": "2016-10-01",
-      "name": "[concat(parameters('keyvaultName'), '/AvatarKey')]",
+      "name": "[concat(variables('keyvaultName'), '/AvatarKey')]",
       "location": "[parameters('location')]",
       "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', parameters('keyvaultName'))]"
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyvaultName'))]"
       ],
       "properties": {
         "value": "[parameters('botClientSecret')]",
@@ -573,8 +561,124 @@
           }
         ],
         "cors": {
-          "allowedOrigins": ["*"]
+          "allowedOrigins": [
+            "[concat('https://', variables('frontDoorDomain'))]"
+          ]
         }
+      }
+    },
+    {
+      "apiVersion": "2019-04-01",
+      "type": "Microsoft.Network/frontDoors",
+      "name": "[variables('frontDoorName')]",
+      "condition": "[variables('useFrontDoor')]",
+      "location": "Global",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('botAppName'))]"
+      ],
+      "properties": {
+        "backendPools": [
+          {
+            "name": "backendPool1",
+            "properties": {
+              "backends": [
+                {
+                  "address": "[variables('botAppDomain')]",
+                  "backendHostHeader": "[variables('botAppDomain')]",
+                  "httpPort": 80,
+                  "httpsPort": 443,
+                  "priority": 1,
+                  "weight": 50,
+                  "enabledState": "Enabled"
+                }
+              ],
+              "healthProbeSettings": {
+                "id": "[resourceId('Microsoft.Network/frontDoors/healthProbeSettings', variables('frontDoorName'), 'healthProbeSettings1')]"
+              },
+              "loadBalancingSettings": {
+                "id": "[resourceId('Microsoft.Network/frontDoors/loadBalancingSettings', variables('frontDoorName'), 'loadBalancingSettings1')]"
+              },
+              "resourceState": "Enabled"
+            }
+          }
+        ],
+        "healthProbeSettings": [
+          {
+            "name": "healthProbeSettings1",
+            "properties": {
+              "intervalInSeconds": 255,
+              "path": "/health",
+              "protocol": "Https",
+              "resourceState": "Enabled"
+            }
+          }
+        ],
+        "frontendEndpoints": [
+          {
+            "name": "frontendEndpoint1",
+            "properties": {
+              "hostName": "[variables('frontDoorDomain')]",
+              "sessionAffinityEnabledState": "Disabled",
+              "sessionAffinityTtlSeconds": 0
+            }
+          }
+        ],
+        "loadBalancingSettings": [
+          {
+            "name": "loadBalancingSettings1",
+            "properties": {
+              "additionalLatencyMilliseconds": 0,
+              "sampleSize": 4,
+              "successfulSamplesRequired": 2
+            }
+          }
+        ],
+        "routingRules": [
+          {
+            "name": "routingRule1",
+            "properties": {
+              "frontendEndpoints": [
+                {
+                  "id": "[resourceId('Microsoft.Network/frontDoors/frontendEndpoints', variables('frontDoorName'), 'frontendEndpoint1')]"
+                }
+              ],
+              "acceptedProtocols": ["Https"],
+              "patternsToMatch": ["/*"],
+              "routeConfiguration": {
+                "@odata.type": "#Microsoft.Azure.FrontDoor.Models.FrontdoorForwardingConfiguration",
+                "forwardingProtocol": "HttpsOnly",
+                "backendPool": {
+                  "id": "[resourceId('Microsoft.Network/frontDoors/backendPools', variables('frontDoorName'), 'backendPool1')]"
+                }
+              },
+              "enabledState": "Enabled"
+            }
+          },
+          {
+            "name": "routingRule2",
+            "properties": {
+              "frontendEndpoints": [
+                {
+                  "id": "[resourceId('Microsoft.Network/frontDoors/frontendEndpoints', variables('frontDoorName'), 'frontendEndpoint1')]"
+                }
+              ],
+              "acceptedProtocols": ["Https"],
+              "patternsToMatch": ["/api/*"],
+              "routeConfiguration": {
+                "@odata.type": "#Microsoft.Azure.FrontDoor.Models.FrontdoorRedirectConfiguration",
+                "customFragment": null,
+                "customHost": "[variables('botAppDomain')]",
+                "customPath": "",
+                "redirectProtocol": "HttpsOnly",
+                "customQueryString": null,
+                "redirectType": "PermanentRedirect"
+              },
+              "enabledState": "Enabled"
+            }
+          }
+        ],
+        "enabledState": "Enabled",
+        "friendlyName": "[variables('frontDoorName')]"
       }
     },
     {
@@ -582,7 +686,7 @@
       "name": "updateKeyvault",
       "apiVersion": "2015-01-01",
       "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', parameters('keyvaultName'))]",
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyvaultName'))]",
         "[resourceId('Microsoft.Web/sites', variables('functionAppName'))]",
         "[resourceId('Microsoft.Web/sites/sourcecontrols', variables('functionAppName'), 'web')]"
       ],
@@ -594,7 +698,7 @@
         },
         "parameters": {
           "keyvaultName": {
-            "value": "[parameters('keyvaultName')]"
+            "value": "[variables('keyvaultName')]"
           },
           "functionAppName": {
             "value": "[variables('functionAppName')]"
@@ -675,7 +779,7 @@
             },
             {
               "name": "MongoDbUri",
-              "value": "[listConnectionStrings(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('accountName')), '2019-12-12').connectionStrings[0].connectionString]"
+              "value": "[listConnectionStrings(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('cosmosDbName')), '2019-12-12').connectionStrings[0].connectionString]"
             },
             {
               "name": "AzureSignalRConnectionString",
@@ -737,7 +841,7 @@
           "cors": {
             "supportCredentials": true,
             "allowedOrigins": [
-              "[concat('https://', variables('botAppDomain'))]"
+              "[concat('https://', variables('frontDoorDomain'))]"
             ]
           }
         }
