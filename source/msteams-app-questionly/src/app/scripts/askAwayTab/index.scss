@@ -15,7 +15,6 @@
     .text-configtab-caption {
         font-size: 18px;
         line-height: 24px;
-        color: #252423;
         font-weight: bold;
         top: 55%;
         position: absolute;
@@ -23,7 +22,6 @@
     .text-caption {
         font-size: 18px;
         line-height: 24px;
-        color: #252423;
         font-weight: bold;
         top: 52%;
         position: absolute;
@@ -31,7 +29,6 @@
     .text-subcaption {
         font-size: 14px;
         line-height: 20px;
-        color: #000000;
         top: 58%;
         position: absolute;
     }
@@ -185,22 +182,52 @@
     background-color: #979797;
 }
 
+// .high-contrast-container {
+//     #post-new-question {
+//         .ui-card {
+//             background-color:#000
+//         }
+//     }
+
+// }
+
+// .default-container {
+//     #post-new-question {
+//         margin: 2rem auto 0 auto;
+//         width: 80%;
+//         padding: 0.1rem;
+//         .ui-card {
+//             background-color: #fff;
+//         }
+
+//     }
+// }
+
+// .dark-container {
+//     #post-new-question {
+//         .ui-card {
+//             background-color: #2D2C2C
+//         }
+//     }
+// }
 #post-new-question {
     margin: 2rem auto 0 auto;
     width: 80%;
     padding: 0.1rem;
-    .ui-card {
-        &.jn {
-            &:hover {
-                background-color: #292828 !important;
-            }
-        }
-        &.fi {
-            &:hover {
-                background-color: #faf9f8 !important;
-            }
-        }
-    }
+    // background-color: #ffffff;
+    // .ui-card {
+    //     background-color: #F3D6D8;
+    //     &.jn {
+    //         &:hover {
+    //             background-color: #292828 !important;
+    //         }
+    //     }
+    //     &.fi {
+    //         &:hover {
+    //             background-color: #faf9f8 !important;
+    //         }
+    //     }
+    // }
     .card-layout {
         width: 100%;
         .date-content-format {
@@ -209,7 +236,7 @@
             padding-top: 0.15rem;
         }
         .session-title {
-            padding-top: 0.5rem;
+            padding-top: 0.3rem;
             font-size: 18px;
             line-height: 24px;
         }
@@ -229,4 +256,29 @@
     margin-bottom: 1rem;
     font-size: 14px;
     line-height: 20px;
+}
+
+.dark {
+    #post-new-question {
+        .ui-card {
+            background-color: #2d2c2c;
+        }
+    }
+}
+.default {
+    #post-new-question {
+        margin: 2rem auto 0 auto;
+        width: 80%;
+        padding: 0.1rem;
+        .ui-card {
+            background-color: #fff;
+        }
+    }
+}
+.contrast {
+    #post-new-question {
+        .ui-card {
+            background-color: #000;
+        }
+    }
 }

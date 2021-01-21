@@ -14,7 +14,7 @@ export interface TabHeaderProps {
 const TabHeader: React.FunctionComponent<TabHeaderProps> = (props) => {
     return (
         <React.Fragment>
-            <Flex gap="gap.large">
+            <Flex gap="gap.small">
                 <Button
                     text
                     onClick={() => {
@@ -26,11 +26,11 @@ const TabHeader: React.FunctionComponent<TabHeaderProps> = (props) => {
                 </Button>
                 <Button text>
                     <AddIcon outline xSpacing="after" />
-                    <Button.Content>Create a new session</Button.Content>
+                    <Button.Content>Start a Q&A session</Button.Content>
                 </Button>
                 <Button text>
                     <SwitchIcon outline xSpacing="after" />
-                    <Button.Content>Switch to different sessions</Button.Content>
+                    <Button.Content>Switch to another session</Button.Content>
                 </Button>
                 <FlexItem push>
                     <Button

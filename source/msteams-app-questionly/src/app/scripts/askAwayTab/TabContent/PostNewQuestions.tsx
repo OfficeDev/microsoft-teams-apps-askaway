@@ -24,7 +24,7 @@ const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps> = (props)
 
     return (
         <div id="post-new-question">
-            <Card aria-roledescription="card" elevated className="card-layout">
+            <Card aria-roledescription="card" className="card-layout">
                 <Card.Header fitted>
                     <Flex gap="gap.small">
                         <Flex column>
@@ -44,11 +44,11 @@ const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps> = (props)
                 </Card.Body>
                 <Card.Footer>
                     <Divider />
-                    <Flex gap="gap.small" vAlign="center">
+                    <Flex styles={{ paddingTop: '0.3rem', marginBottom: '-1rem' }} gap="gap.small" vAlign="center">
                         <Avatar size="medium" name={props.activeSessionData.hostUser.name} />
-                        <TextArea fluid placeholder="Type a question here" />
+                        <TextArea styles={{ paddingBottom: '0rem' }} fluid placeholder="Type a question here" />
                         <FlexItem push>
-                            <Button type="submit" size="medium">
+                            <Button size="medium">
                                 <Button.Content>Post</Button.Content>
                             </Button>
                         </FlexItem>

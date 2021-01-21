@@ -65,11 +65,23 @@ export class AskAwayTab extends msteamsReactBaseComponent<IAskAwayTabProps, IAsk
     async initializeTeams() {
         if (await this.inTeams()) {
             microsoftTeams.initialize();
-            microsoftTeams.registerOnThemeChangeHandler(this.updateTheme);
+            microsoftTeams.registerOnThemeChangeHandler((theme: string) => {
+                this.updateTheme(theme);
+                this.setState(
+                    (prevState) => ({
+                        teamContext: {
+                            ...prevState.teamContext,
+                            theme: theme!,
+                        },
+                    }),
+                    () => {
+                        this.forceUpdate();
+                    }
+                );
+            });
             microsoftTeams.getContext((context) => {
                 // Set Language for Localization
                 Helper.setI18nextLocale(i18next, context.locale);
-                this.updateTheme(context.theme);
                 microsoftTeams.authentication.getAuthToken({
                     successCallback: (token: string) => {
                         microsoftTeams.appInitialization.notifySuccess();
@@ -110,12 +122,16 @@ export class AskAwayTab extends msteamsReactBaseComponent<IAskAwayTabProps, IAsk
     public render() {
         return (
             <Provider style={{ background: 'unset' }} theme={this.state.theme}>
-                {this.state.dataEvent && <h1>{this.state.dataEvent.type}</h1>}
-                {this.state.frameContext === microsoftTeams.FrameContexts.sidePanel && (
-                    <MeetingPanel teamsTabContext={this.state.teamContext} httpService={this.httpService} appInsights={telemetryService.appInsights} helper={Helper} />
-                )}
-                {this.state.frameContext === microsoftTeams.FrameContexts.content && (
-                    <TabContent teamsTabContext={this.state.teamContext} httpService={this.httpService} appInsights={telemetryService.appInsights} helper={Helper} />
+                {this.state.teamContext && (
+                    <div className={`${this.state.teamContext.theme}`}>
+                        {this.state.dataEvent && <h1>{this.state.dataEvent.type}</h1>}
+                        {this.state.frameContext === microsoftTeams.FrameContexts.sidePanel && (
+                            <MeetingPanel teamsTabContext={this.state.teamContext} httpService={this.httpService} appInsights={telemetryService.appInsights} helper={Helper} />
+                        )}
+                        {this.state.frameContext === microsoftTeams.FrameContexts.content && (
+                            <TabContent teamsTabContext={this.state.teamContext} httpService={this.httpService} appInsights={telemetryService.appInsights} helper={Helper} />
+                        )}
+                    </div>
                 )}
             </Provider>
         );
