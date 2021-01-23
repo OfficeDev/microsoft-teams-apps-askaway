@@ -4,11 +4,13 @@ import * as React from 'react';
 import { withTranslation } from 'react-i18next';
 import * as microsoftTeams from '@microsoft/teams-js';
 import { ApplicationInsights } from '@microsoft/applicationinsights-web';
+import { Flex } from '@fluentui/react-northstar';
 import { HttpService } from './shared/HttpService';
 import { Helper } from './shared/Helper';
 import TabHeader from './TabContent/TabHeader';
 import PostNewQuestions from './TabContent/PostNewQuestions';
 import NoQuestionDesign from './TabContent/NoQuestionDesign';
+import TabQuestions from './TabContent/TabQuestions';
 import CreateSession from './TabContent/CreateSession';
 import { ClientDataContract } from '../../../../src/contracts/clientDataContract';
 
@@ -185,6 +187,41 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
         microsoftTeams.tasks.startTask(taskInfo, submitHandler);
     }
 
+    private handlePostNewQuestions = (event) => {
+        this.props.httpService
+            .post(`/conversations/${this.props.teamsTabContext.chatId}/sessions/${this.state.activeSessionData.sessionId}/questions`, { questionContent: event })
+            .then((response: any) => {
+                if (response && response.data && response.data.id) {
+                    this.setState({
+                        activeSessionData: {
+                            ...this.state.activeSessionData,
+                            unansweredQuestions: [response.data, ...this.state.activeSessionData.unansweredQuestions],
+                        },
+                    });
+                }
+            })
+            .catch((error) => {});
+    };
+
+    private handleClickAction = (event) => {
+        this.props.httpService
+            .patch(`/conversations/${this.props.teamsTabContext.chatId}/sessions/${this.state.activeSessionData.sessionId}/questions/${event.q['id']}`, { action: event.actionValue })
+            .then((response: any) => {
+                if (response.data && response.data.id) {
+                    let questions = this.state.activeSessionData[event.key];
+                    const index = questions.findIndex((q) => q.id === response.data.id);
+                    questions[index] = response.data;
+                    this.setState((prevState) => ({
+                        activeSessionData: {
+                            ...prevState.activeSessionData,
+                            ...questions,
+                        },
+                    }));
+                }
+            })
+            .catch((error) => {});
+    };
+
     /**
      * The render() method to create the UI of the tab
      */
@@ -192,12 +229,18 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
         const { activeSessionData } = this.state;
         return (
             <div className="tab-content">
-                <TabHeader refreshSession={this.getActiveSession} endSession={this.endActiveSession} />
+                <TabHeader activeSessionData={activeSessionData} refreshSession={this.getActiveSession} endSession={this.endActiveSession} showTaskModule={this.onShowTaskModule} />
                 {activeSessionData.sessionId ? (
-                    <React.Fragment>
-                        <PostNewQuestions activeSessionData={activeSessionData} />
-                        <NoQuestionDesign />
-                    </React.Fragment>
+                    <Flex column>
+                        <div className="tab-container">
+                            <PostNewQuestions activeSessionData={activeSessionData} onPostNewQuestion={this.handlePostNewQuestions} />
+                            {activeSessionData.unansweredQuestions.length > 0 || activeSessionData.answeredQuestions.length > 0 ? (
+                                <TabQuestions onClickAction={this.handleClickAction} activeSessionData={activeSessionData} teamsTabContext={this.props.teamsTabContext} />
+                            ) : (
+                                <NoQuestionDesign />
+                            )}
+                        </div>
+                    </Flex>
                 ) : (
                     <CreateSession showTaskModule={this.onShowTaskModule} />
                 )}
