@@ -5,6 +5,7 @@ import { StatusCodes } from 'http-status-codes';
 import { ApplicationInsights, SeverityLevel } from '@microsoft/applicationinsights-web';
 import { HttpService } from './../shared/HttpService';
 import { Alert } from '@fluentui/react-northstar';
+import { IDataEvent } from 'msteams-app-questionly.common';
 
 /**
  * signalR connection status
@@ -56,7 +57,7 @@ export interface SignalRLifecycleProps {
     /**
      * callback function from caller, which recives update on events.
      */
-    onEvent: (dataEvent: any) => void;
+    onEvent: (dataEvent: IDataEvent) => void;
 
     /**
      * http service.

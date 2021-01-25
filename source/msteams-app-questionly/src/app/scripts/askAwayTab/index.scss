@@ -72,6 +72,19 @@
         top: 67%;
         position: absolute;
     }
+    .newUpdatesButton {
+        top: 12%;
+        display: block;
+        position: absolute;
+        background-color: #6366a5;
+        text-align: center;
+        z-index: 99;
+        transform: translateX(40%);
+    }
+    .newUpdatesButtonContent {
+        font-size: medium;
+        font-weight: normal;
+    }
     .no-question {
         .text-caption-panel {
             font-size: 12px;

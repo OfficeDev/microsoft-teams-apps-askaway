@@ -61,7 +61,7 @@ export const createQnaSessionEndedEvent = async (qnaSessionId: string, endedByUs
  */
 export const createQuestionAddedEvent = async (qnaSessionId: string, question: IQuestion, postedByUserAadObjectId: string): Promise<IDataEvent> => {
     const data = {
-        question: question,
+        questionId: question._id,
         postedByUserAadObjectId: postedByUserAadObjectId,
     };
 
