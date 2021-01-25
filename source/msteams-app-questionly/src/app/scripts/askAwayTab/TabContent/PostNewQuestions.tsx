@@ -1,10 +1,9 @@
 import './../index.scss';
 import * as React from 'react';
 import { Flex, Text, Button, Image, FlexItem, Card, Divider, Avatar, TextArea } from '@fluentui/react-northstar';
-import Badge from '../TabContent/Badge';
+import Badge from '../shared/Badge';
 import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
-
-const icon = require('./../../../web/assets/icon.png');
+import { Helper } from '../shared/Helper';
 
 /**
  * Properties for the PostNewQuestions React component
@@ -13,15 +12,6 @@ export interface PostNewQuestionsProps {
     activeSessionData: ClientDataContract.QnaSession;
 }
 const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps> = (props) => {
-    const formatDate = (dateTimeCreated) => {
-        if (dateTimeCreated) {
-            const date = new Date(dateTimeCreated);
-            return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
-        } else {
-            return ' ';
-        }
-    };
-
     return (
         <div id="post-new-question">
             <Card aria-roledescription="card" elevated className="card-layout">
@@ -31,7 +21,7 @@ const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps> = (props)
                             <Badge className={props.activeSessionData.isActive ? 'badge--success' : 'badge--disabled'} text={props.activeSessionData.isActive ? 'Live' : 'Closed'} />
                             <Text
                                 className="date-content-format"
-                                content={`Created on ${formatDate(props.activeSessionData.dateTimeCreated)} by ${props.activeSessionData.hostUser.name}`}
+                                content={`Created on ${Helper.formatDateMMDDYYYY(props.activeSessionData.dateTimeCreated)} by ${props.activeSessionData.hostUser.name}`}
                                 size="small"
                             />
                         </Flex>
