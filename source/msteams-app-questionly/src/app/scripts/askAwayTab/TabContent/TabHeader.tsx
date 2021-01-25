@@ -3,6 +3,7 @@ import * as React from 'react';
 import { Flex, Button, FlexItem } from '@fluentui/react-northstar';
 import { SwitchIcon } from '../shared/Icons/SwitchIcon';
 import { AddIcon, RetryIcon } from '@fluentui/react-icons-northstar';
+import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
 
 /**
  * Properties for the TabHeader React component
@@ -10,7 +11,7 @@ import { AddIcon, RetryIcon } from '@fluentui/react-icons-northstar';
 export interface TabHeaderProps {
     refreshSession: Function;
     endSession: Function;
-    activeSessionData: any;
+    activeSessionData: ClientDataContract.QnaSession;
     showTaskModule: Function;
 }
 const TabHeader: React.FunctionComponent<TabHeaderProps> = (props) => {

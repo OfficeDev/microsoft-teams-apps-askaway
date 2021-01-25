@@ -5,8 +5,6 @@ import Badge from '../TabContent/Badge';
 import { useState } from 'react';
 import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
 
-const icon = require('./../../../web/assets/icon.png');
-
 /**
  * Properties for the PostNewQuestions React component
  */

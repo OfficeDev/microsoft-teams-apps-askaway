@@ -6,13 +6,13 @@ import { LikeIcon, ChevronDownMediumIcon, ChevronEndMediumIcon } from '@fluentui
 import { LikeIconFilled } from '../shared/Icons/LikeIconFilled';
 import { CONST } from '../shared/Constants';
 import { useState } from 'react';
-
+import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
 /**
  * Properties for the TabQuestions React component
  */
 export interface TabQuestionsProps {
-    activeSessionData: any;
-    teamsTabContext: any;
+    activeSessionData: ClientDataContract.QnaSession;
+    teamsTabContext: microsoftTeams.Context;
     onClickAction: Function;
 }
 const TabQuestions: React.FunctionComponent<TabQuestionsProps> = (props) => {
