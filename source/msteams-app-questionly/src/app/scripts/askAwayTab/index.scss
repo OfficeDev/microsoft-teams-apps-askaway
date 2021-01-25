@@ -182,34 +182,6 @@
     background-color: #979797;
 }
 
-// .high-contrast-container {
-//     #post-new-question {
-//         .ui-card {
-//             background-color:#000
-//         }
-//     }
-
-// }
-
-// .default-container {
-//     #post-new-question {
-//         margin: 2rem auto 0 auto;
-//         width: 80%;
-//         padding: 0.1rem;
-//         .ui-card {
-//             background-color: #fff;
-//         }
-
-//     }
-// }
-
-// .dark-container {
-//     #post-new-question {
-//         .ui-card {
-//             background-color: #2D2C2C
-//         }
-//     }
-// }
 #post-new-question {
     margin: 2rem auto 0 auto;
     width: 80%;
@@ -259,31 +231,31 @@
 }
 
 /*Dark Theme rules*/
-.dark {
-    #post-new-question {
-        .ui-card {
-            background-color: #2d2c2c;
-        }
-    }
-}
+// .dark {
+//     #post-new-question {
+//         .ui-card {
+//             background-color: #2d2c2c;
+//         }
+//     }
+// }
 
-/*Default Theme rules*/
-.default {
-    #post-new-question {
-        margin: 2rem auto 0 auto;
-        width: 80%;
-        padding: 0.1rem;
-        .ui-card {
-            background-color: #fff;
-        }
-    }
-}
+// /*Default Theme rules*/
+// .default {
+//     #post-new-question {
+//         margin: 2rem auto 0 auto;
+//         width: 80%;
+//         padding: 0.1rem;
+//         .ui-card {
+//             background-color: #fff;
+//         }
+//     }
+// }
 
-/*High contrast Theme rules*/
-.contrast {
-    #post-new-question {
-        .ui-card {
-            background-color: #000;
-        }
-    }
-}
+// /*High contrast Theme rules*/
+// .contrast {
+//     #post-new-question {
+//         .ui-card {
+//             background-color: #000;
+//         }
+//     }
+// }
