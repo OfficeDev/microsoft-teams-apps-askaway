@@ -1,7 +1,7 @@
 // tslint:disable-next-line:no-relative-imports
 import './index.scss';
 import * as React from 'react';
-import { withTranslation } from 'react-i18next';
+import { withTranslation, WithTranslation } from 'react-i18next';
 import { Flex, Text, Button, Image } from '@fluentui/react-northstar';
 import { SwitchIcon } from './../askAwayTab/shared/Icons/SwitchIcon';
 import { AddIcon, RetryIcon } from '@fluentui/react-icons-northstar';
@@ -9,8 +9,9 @@ import * as microsoftTeams from '@microsoft/teams-js';
 import { ApplicationInsights } from '@microsoft/applicationinsights-web';
 import { HttpService } from './shared/HttpService';
 import { Helper } from './shared/Helper';
+import { TFunction } from 'i18next';
 
-export interface TabContentProps {
+export interface TabContentProps extends WithTranslation {
     teamsTabContext: microsoftTeams.Context;
     httpService: HttpService;
     appInsights: ApplicationInsights;
@@ -19,9 +20,11 @@ export interface TabContentProps {
 export interface TabContentState {}
 
 class TabContent extends React.Component<TabContentProps, TabContentState> {
+    public localize: TFunction;
     constructor(props) {
         super(props);
         this.onShowTaskModule = this.onShowTaskModule.bind(this);
+        this.localize = this.props.t;
     }
 
     componentDidMount() {
@@ -56,7 +59,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                         },
                         {
                             type: 'TextBlock',
-                            text: 'New session successfully created',
+                            text: this.localize('Tab.SuccessText'),
                             horizontalAlignment: 'center',
                             weight: 'bolder',
                             size: 'large',
@@ -86,7 +89,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                         },
                         {
                             type: 'TextBlock',
-                            text: 'something went wrong. You should try again later.',
+                            text: this.localize('Tab.FailureText'),
                             horizontalAlignment: 'center',
                             weight: 'bolder',
                             size: 'large',

@@ -1,0 +1,6 @@
+{
+    "Tab": {
+        "SuccessText": "New session successfully created",
+        "FailureText": "something went wrong. You should try again later."
+    }
+}
