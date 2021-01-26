@@ -5,12 +5,12 @@ import { Flex, Text, Button, Image } from '@fluentui/react-northstar';
 const createSessionImage = require('./../../../web/assets/create_session.png');
 
 /**
- * Properties for the Badge React component
+ * Properties for the TabCreateSession React component
  */
-export interface CreateSessionProps {
+export interface TabCreateSessionProps {
     showTaskModule: Function;
 }
-const CreateSession: React.FunctionComponent<CreateSessionProps> = (props) => {
+const TabCreateSession: React.FunctionComponent<TabCreateSessionProps> = (props) => {
     return (
         <Flex hAlign="center" vAlign="center" className="screen">
             <Image className="create-session" alt="image" src={createSessionImage} />
@@ -34,4 +34,4 @@ const CreateSession: React.FunctionComponent<CreateSessionProps> = (props) => {
         </Flex>
     );
 };
-export default CreateSession;
+export default TabCreateSession;
