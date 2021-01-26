@@ -175,6 +175,68 @@
         }
     }
 }
+.badge {
+    color: #fff;
+    width: 3.75rem;
+    font-family: Segoe UI;
+    font-size: 12px;
+    padding: 0.55em 0.5em;
+    line-height: 0.35rem;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.75rem;
+    text-align: center;
+    margin-bottom: 0.25rem;
+}
+.badge--success {
+    background-color: #92c353;
+}
+.badge--primary {
+    background-color: #6264a7;
+}
+.badge--disabled {
+    background-color: #979797;
+}
+
+#post-new-question {
+    margin: 2rem auto 0 auto;
+    width: 80%;
+    padding: 0.1rem;
+    .ui-card {
+        &.jn {
+            &:hover {
+                background-color: #292828 !important;
+            }
+        }
+        &.fi {
+            &:hover {
+                background-color: #faf9f8 !important;
+            }
+        }
+    }
+    .card-layout {
+        width: 100%;
+        .date-content-format {
+            font-size: 12px;
+            line-height: 16px;
+            padding-top: 0.15rem;
+        }
+        .session-title {
+            padding-top: 0.5rem;
+            font-size: 18px;
+            line-height: 24px;
+        }
+    }
+}
+.no-question-layout {
+    margin: 0 auto;
+    width: 25%;
+    text-align: center;
+    .sub-text {
+        width: 62%;
+        margin: 0 auto;
+    }
+}
 .notification-title {
     margin-top: 1rem;
     margin-bottom: 1rem;
