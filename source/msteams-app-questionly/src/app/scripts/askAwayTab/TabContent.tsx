@@ -2,9 +2,6 @@
 import './index.scss';
 import * as React from 'react';
 import { withTranslation, WithTranslation } from 'react-i18next';
-import { Flex, Text, Button, Image } from '@fluentui/react-northstar';
-import { SwitchIcon } from './../askAwayTab/shared/Icons/SwitchIcon';
-import { AddIcon, RetryIcon } from '@fluentui/react-icons-northstar';
 import * as microsoftTeams from '@microsoft/teams-js';
 import { ApplicationInsights } from '@microsoft/applicationinsights-web';
 import { HttpService } from './shared/HttpService';
