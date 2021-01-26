@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { Flex, Text, Button, FlexItem, Card, Divider, Avatar, TextArea, ThemePrepared } from '@fluentui/react-northstar';
-// import * as moment from "moment";
 import Badge from '../shared/Badge';
 import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
 import { withTheme } from '../shared/WithTheme';
@@ -27,7 +26,14 @@ const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps & ThemePro
                 <Card.Header fitted>
                     <Flex gap="gap.small">
                         <Flex column>
-                            <Badge className={props.activeSessionData.isActive ? 'badge--success' : 'badge--disabled'} text={props.activeSessionData.isActive ? 'Live' : 'Closed'} />
+                            <Badge
+                                styles={
+                                    props.activeSessionData.isActive
+                                        ? { backgroundColor: colorScheme.green.background, color: colorScheme.green.foreground1 }
+                                        : { backgroundColor: colorScheme.default.background5, color: colorScheme.green.foreground4 }
+                                }
+                                text={props.activeSessionData.isActive ? 'Live' : 'Closed'}
+                            />
                             <Text
                                 className="date-content-format"
                                 content={`Created on ${moment(props.activeSessionData.dateTimeCreated).format('MM/DD/YYYY')} by ${props.activeSessionData.hostUser.name}`}

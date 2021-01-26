@@ -173,7 +173,6 @@
     }
 }
 .badge {
-    color: #fff;
     width: 3.75rem;
     font-family: Segoe UI;
     font-size: 12px;
@@ -184,15 +183,6 @@
     border-radius: 0.75rem;
     text-align: center;
     margin-bottom: 0.25rem;
-}
-.badge--success {
-    background-color: #92c353;
-}
-.badge--primary {
-    background-color: #6264a7;
-}
-.badge--disabled {
-    background-color: #979797;
 }
 
 #post-new-question {
