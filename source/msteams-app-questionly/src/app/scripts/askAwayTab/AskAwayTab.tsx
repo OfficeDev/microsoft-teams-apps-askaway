@@ -120,20 +120,17 @@ export class AskAwayTab extends msteamsReactBaseComponent<IAskAwayTabProps, IAsk
      * The render() method to create the UI of the tab
      */
     public render() {
-        console.log('theme@@@', this.state.theme);
         return (
             <Provider style={{ background: 'unset' }} theme={this.state.theme}>
-                {this.state.teamContext && (
-                    <div>
-                        {this.state.dataEvent && <h1>{this.state.dataEvent.type}</h1>}
-                        {this.state.frameContext === microsoftTeams.FrameContexts.sidePanel && (
-                            <MeetingPanel teamsTabContext={this.state.teamContext} httpService={this.httpService} appInsights={telemetryService.appInsights} helper={Helper} />
-                        )}
-                        {this.state.frameContext === microsoftTeams.FrameContexts.content && (
-                            <TabContent teamsTabContext={this.state.teamContext} httpService={this.httpService} appInsights={telemetryService.appInsights} helper={Helper} />
-                        )}
-                    </div>
-                )}
+                <div>
+                    {this.state.dataEvent && <h1>{this.state.dataEvent.type}</h1>}
+                    {this.state.frameContext === microsoftTeams.FrameContexts.sidePanel && (
+                        <MeetingPanel teamsTabContext={this.state.teamContext} httpService={this.httpService} appInsights={telemetryService.appInsights} helper={Helper} />
+                    )}
+                    {this.state.frameContext === microsoftTeams.FrameContexts.content && (
+                        <TabContent teamsTabContext={this.state.teamContext} httpService={this.httpService} appInsights={telemetryService.appInsights} helper={Helper} />
+                    )}
+                </div>
             </Provider>
         );
     }

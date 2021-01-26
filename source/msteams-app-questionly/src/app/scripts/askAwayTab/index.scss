@@ -199,20 +199,7 @@
     margin: 2rem auto 0 auto;
     width: 80%;
     padding: 0.1rem;
-    // background-color: #ffffff;
-    // .ui-card {
-    //     background-color: #F3D6D8;
-    //     &.jn {
-    //         &:hover {
-    //             background-color: #292828 !important;
-    //         }
-    //     }
-    //     &.fi {
-    //         &:hover {
-    //             background-color: #faf9f8 !important;
-    //         }
-    //     }
-    // }
+
     .card-layout {
         width: 100%;
         .date-content-format {
@@ -242,33 +229,3 @@
     font-size: 14px;
     line-height: 20px;
 }
-
-/*Dark Theme rules*/
-// .dark {
-//     #post-new-question {
-//         .ui-card {
-//             background-color: #2d2c2c;
-//         }
-//     }
-// }
-
-// /*Default Theme rules*/
-// .default {
-//     #post-new-question {
-//         margin: 2rem auto 0 auto;
-//         width: 80%;
-//         padding: 0.1rem;
-//         .ui-card {
-//             background-color: #fff;
-//         }
-//     }
-// }
-
-// /*High contrast Theme rules*/
-// .contrast {
-//     #post-new-question {
-//         .ui-card {
-//             background-color: #000;
-//         }
-//     }
-// }
