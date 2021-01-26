@@ -1,4 +1,4 @@
-// tslint:disable-next-line:no-relative-imports
+// tslint:disable:no-relative-imports
 import './../index.scss';
 import * as React from 'react';
 import { Card, Flex, Button, Text, Avatar } from '@fluentui/react-northstar';

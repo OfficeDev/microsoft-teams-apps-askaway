@@ -26,6 +26,15 @@ export class Helper {
             unansweredQuestions: [],
         };
     }
+
+    public formatDateMMDDYYYY(dateTimeCreated) {
+        if (dateTimeCreated) {
+            const date = new Date(dateTimeCreated);
+            return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+        } else {
+            return ' ';
+        }
+    }
 }
 // tslint:disable-next-line:export-name
 export default new Helper();
