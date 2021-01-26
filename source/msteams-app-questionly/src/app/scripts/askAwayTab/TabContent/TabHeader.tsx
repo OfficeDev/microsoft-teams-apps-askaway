@@ -10,6 +10,7 @@ import { AddIcon, RetryIcon } from '@fluentui/react-icons-northstar';
 export interface TabHeaderProps {
     refreshSession: Function;
     endSession: Function;
+    t: Function;
 }
 const TabHeader: React.FunctionComponent<TabHeaderProps> = (props) => {
     return (
@@ -22,15 +23,15 @@ const TabHeader: React.FunctionComponent<TabHeaderProps> = (props) => {
                     }}
                 >
                     <RetryIcon xSpacing="after" />
-                    <Button.Content>Refresh</Button.Content>
+                    <Button.Content>{props.t('Tab.Refresh')}</Button.Content>
                 </Button>
                 <Button text>
                     <AddIcon outline xSpacing="after" />
-                    <Button.Content>Create a new session</Button.Content>
+                    <Button.Content>{props.t('Tab.StartSession')}</Button.Content>
                 </Button>
                 <Button text>
                     <SwitchIcon outline xSpacing="after" />
-                    <Button.Content>Switch to different sessions</Button.Content>
+                    <Button.Content>{props.t('Tab.SwitchSession')}</Button.Content>
                 </Button>
                 <FlexItem push>
                     <Button
@@ -39,7 +40,7 @@ const TabHeader: React.FunctionComponent<TabHeaderProps> = (props) => {
                             props.endSession(e);
                         }}
                         size="small"
-                        content="End session"
+                        content={props.t('Tab.EndButton')}
                     />
                 </FlexItem>
             </Flex>

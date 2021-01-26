@@ -196,14 +196,14 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
         const { activeSessionData } = this.state;
         return (
             <div className="tab-content">
-                <TabHeader refreshSession={this.getActiveSession} endSession={this.endActiveSession} />
+                <TabHeader t={this.localize} refreshSession={this.getActiveSession} endSession={this.endActiveSession} />
                 {activeSessionData.sessionId ? (
                     <React.Fragment>
-                        <PostNewQuestions activeSessionData={activeSessionData} />
-                        <NoQuestionDesign />
+                        <PostNewQuestions t={this.localize} activeSessionData={activeSessionData} />
+                        <NoQuestionDesign t={this.localize} />
                     </React.Fragment>
                 ) : (
-                    <TabCreateSession showTaskModule={this.onShowTaskModule} />
+                    <TabCreateSession t={this.localize} showTaskModule={this.onShowTaskModule} />
                 )}
             </div>
         );

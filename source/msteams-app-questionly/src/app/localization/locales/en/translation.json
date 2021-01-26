@@ -1,6 +1,29 @@
 {
     "Tab": {
-        "SuccessText": "New session successfully created",
-        "FailureText": "something went wrong. You should try again later."
+        "SuccessText": "Q&A session started",
+        "FailureText": "something went wrong. You should try again later.",
+        "NoQuestionsPosted": "Q&A session is live... Ask away!",
+        "Refresh": "Refresh",
+        "WelcomeText": "Welcome to Ask Away! We’re glad you’re here.",
+        "Created": "Created on",
+        "By": "by",
+        "LiveStatus": "Live",
+        "ClosedStatus": "Closed",
+        "Placeholder": "Type a question here",
+        "PostButton": "Post",
+        "WelcomeSubText": "Ask away is your tool to create and manage Q&A sessions.",
+        "CreateButton": "Create an ask away",
+        "StartSession": "Start a Q&A session",
+        "SwitchSession": "Switch to another session",
+        "EndButton": "End session"
+    },
+    "MeetingPanel": {
+        "SuccessText": "Q&A session started",
+        "FailureText": "something went wrong. You should try again later.",
+        "PanelTitle": "Start a Q&A session",
+        "WelcomeText": "Ready to field questions?",
+        "CreateButton": "Start a Q&A session",
+        "LoaderText": "Loading Meeting Information",
+        "NoQuestions": "Q & A session is live...Ask away!"
     }
 }

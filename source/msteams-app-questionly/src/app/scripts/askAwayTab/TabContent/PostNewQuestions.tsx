@@ -1,15 +1,16 @@
 import './../index.scss';
 import * as React from 'react';
-import { Flex, Text, Button, Image, FlexItem, Card, Divider, Avatar, TextArea } from '@fluentui/react-northstar';
+import { Flex, Text, Button, FlexItem, Card, Divider, Avatar, TextArea } from '@fluentui/react-northstar';
 import Badge from '../shared/Badge';
 import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
-import { Helper } from '../shared/Helper';
+import Helper from '../shared/Helper';
 
 /**
  * Properties for the PostNewQuestions React component
  */
 export interface PostNewQuestionsProps {
     activeSessionData: ClientDataContract.QnaSession;
+    t: Function;
 }
 const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps> = (props) => {
     return (
@@ -18,10 +19,15 @@ const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps> = (props)
                 <Card.Header fitted>
                     <Flex gap="gap.small">
                         <Flex column>
-                            <Badge className={props.activeSessionData.isActive ? 'badge--success' : 'badge--disabled'} text={props.activeSessionData.isActive ? 'Live' : 'Closed'} />
+                            <Badge
+                                className={props.activeSessionData.isActive ? 'badge--success' : 'badge--disabled'}
+                                text={props.activeSessionData.isActive ? props.t('Tab.LiveStatus') : props.t('Tab.ClosedStatus')}
+                            />
                             <Text
                                 className="date-content-format"
-                                content={`Created on ${Helper.formatDateMMDDYYYY(props.activeSessionData.dateTimeCreated)} by ${props.activeSessionData.hostUser.name}`}
+                                content={`${props.t('Tab.Created')} ${Helper.formatDateMMDDYYYY(props.activeSessionData.dateTimeCreated)} ${props.t('Tab.By')} ${
+                                    props.activeSessionData.hostUser.name
+                                }`}
                                 size="small"
                             />
                         </Flex>
@@ -36,10 +42,10 @@ const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps> = (props)
                     <Divider />
                     <Flex gap="gap.small" vAlign="center">
                         <Avatar size="medium" name={props.activeSessionData.hostUser.name} />
-                        <TextArea fluid placeholder="Type a question here" />
+                        <TextArea fluid placeholder={props.t('Tab.Placeholder')} />
                         <FlexItem push>
                             <Button type="submit" size="medium">
-                                <Button.Content>Post</Button.Content>
+                                <Button.Content>{props.t('Tab.PostButton')}</Button.Content>
                             </Button>
                         </FlexItem>
                     </Flex>

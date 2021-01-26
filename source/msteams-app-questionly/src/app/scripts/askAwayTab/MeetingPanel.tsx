@@ -2,6 +2,8 @@
 import './index.scss';
 import * as React from 'react';
 import * as microsoftTeams from '@microsoft/teams-js';
+import { withTranslation, WithTranslation } from 'react-i18next';
+import { TFunction } from 'i18next';
 import { Flex, Text, Button, Image, Loader, ArrowUpIcon } from '@fluentui/react-northstar';
 import { ApplicationInsights, SeverityLevel } from '@microsoft/applicationinsights-web';
 import { HttpService } from './shared/HttpService';
@@ -18,7 +20,7 @@ const EmptySessionImage = require('./../../web/assets/create_session.png');
 /**
  * Properties for the MeetingPanel React component
  */
-export interface MeetingPanelProps {
+export interface MeetingPanelProps extends WithTranslation {
     teamsTabContext: microsoftTeams.Context;
     httpService: HttpService;
     appInsights: ApplicationInsights;
@@ -41,6 +43,7 @@ export interface MeetingPanelState {
     showNewUpdatesButton: boolean;
 }
 class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState> {
+    public localize: TFunction;
     /**
      * signalR component instance which is used later to refresh the connection.
      */
@@ -49,6 +52,7 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
 
     constructor(props) {
         super(props);
+        this.localize = this.props.t;
         this.dataEventFactory = new DataEventHandlerFactory();
 
         this.state = {
@@ -220,7 +224,7 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
                         },
                         {
                             type: 'TextBlock',
-                            text: 'New session successfully created',
+                            text: this.localize('MeetingPanel.SuccessText'),
                             horizontalAlignment: 'center',
                             weight: 'bolder',
                             size: 'large',
@@ -253,7 +257,7 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
                         },
                         {
                             type: 'TextBlock',
-                            text: 'something went wrong. You should try again later.',
+                            text: this.localize('MeetingPanel.FailureText'),
                             horizontalAlignment: 'center',
                             weight: 'bolder',
                             size: 'large',
@@ -291,12 +295,12 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
     private createNewSessionLayout() {
         return (
             <React.Fragment>
-                <QnASessionHeader title={'Start a Q&A session'} onClickRefreshSession={this.updateContent} onClickEndSession={this.endActiveSession} showToolBar={false} />
+                <QnASessionHeader title={this.localize('MeetingPanel.PanelTitle')} onClickRefreshSession={this.updateContent} onClickEndSession={this.endActiveSession} showToolBar={false} />
                 <Flex hAlign="center" vAlign="center">
-                    {this.noQuestionDesign(EmptySessionImage, 'Ready to field questions?')}
+                    {this.noQuestionDesign(EmptySessionImage, this.localize('MeetingPanel.WelcomeText'))}
                     <Flex.Item align="center">
                         <Button className="button" onClick={this.onShowTaskModule}>
-                            <Button.Content>Start a Q&A session</Button.Content>
+                            <Button.Content>{this.localize('MeetingPanel.CreateButton')}</Button.Content>
                         </Button>
                     </Flex.Item>
                 </Flex>
@@ -344,7 +348,7 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
                 {stateVal.activeSessionData.unansweredQuestions.length > 0 || stateVal.activeSessionData.answeredQuestions.length > 0 ? (
                     <QuestionsList activeSessionData={stateVal.activeSessionData} httpService={this.props.httpService} teamsTabContext={this.props.teamsTabContext} />
                 ) : (
-                    this.noQuestionDesign(EmptySessionImage, 'Q & A session is live...Ask away!')
+                    this.noQuestionDesign(EmptySessionImage, this.localize('MeetingPanel.NoQuestions'))
                 )}
                 <NewQuestion
                     activeSessionData={stateVal.activeSessionData}
@@ -361,7 +365,7 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
      */
     public render() {
         const stateVal = this.state;
-        if (stateVal.showLoader) return <Loader label="Loading Meeting Information" />;
+        if (stateVal.showLoader) return <Loader label={this.localize('MeetingPanel.LoaderText')} />;
 
         return (
             <React.Fragment>
@@ -387,4 +391,4 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
         );
     }
 }
-export default MeetingPanel;
+export default withTranslation()(MeetingPanel);
