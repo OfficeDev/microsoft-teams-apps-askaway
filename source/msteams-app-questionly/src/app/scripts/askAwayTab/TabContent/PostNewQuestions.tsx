@@ -51,7 +51,7 @@ const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps & ThemePro
                     <Divider />
                     <Flex styles={{ paddingTop: '0.3rem', marginBottom: '-1rem' }} gap="gap.small" vAlign="center">
                         <Avatar size="medium" name={props.activeSessionData.hostUser.name} />
-                        <TextArea styles={{ paddingBottom: '0rem' }} fluid placeholder="Type a question here" />
+                        <TextArea styles={{ paddingBottom: '0rem', height: '2.3rem' }} fluid placeholder="Type a question here" />
                         <FlexItem push>
                             <Button size="medium">
                                 <Button.Content>Post</Button.Content>

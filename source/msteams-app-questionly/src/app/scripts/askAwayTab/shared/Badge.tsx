@@ -10,6 +10,10 @@ export interface BadgeProps {
     styles: CSSProperties;
 }
 const Badge: React.FunctionComponent<BadgeProps> = (props) => {
-    return <span style={props.styles} className={`badge`}>{`${props.text}`}</span>;
+    return (
+        <span style={props.styles} className={`badge`}>
+            {props.text}
+        </span>
+    );
 };
 export default Badge;
