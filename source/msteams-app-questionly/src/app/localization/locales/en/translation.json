@@ -15,7 +15,10 @@
         "CreateButton": "Create an ask away",
         "StartSession": "Start a Q&A session",
         "SwitchSession": "Switch to another session",
-        "EndButton": "End session"
+        "EndButton": "End session",
+        "ConfigTabText": "Select save to finish adding ask away to the meeting",
+        "RemoveTextNotification": "You can just add stuff here if you want to clean up when removing the tab. For instance, if you have stored data in an external repository, you can delete or archive it here. If you don't need this remove page you can remove it.",
+        "RemoveHeaderText": "You're about to remove your tab..."
     },
     "MeetingPanel": {
         "SuccessText": "Q&A session started",
@@ -32,5 +35,17 @@
         "EndButton": "End session",
         "PendingQ": "Pending questions",
         "AnsweredQ": "Answered questions"
+    },
+    "popups": {
+        "sessionTitle": "Title Name*",
+        "titlePlaceholder": "Type a name",
+        "titleValidationError": "Title is required*",
+        "sessionDescription": "Description*",
+        "descriptionPlaceholder": "Type a description",
+        "descriptionValidationError": "Description is required*",
+        "createQnAButton": "Create",
+        "notificationTitle": "started a Q&A session",
+        "notificationContent": "Select the Ask Away icon at the top of the meeting view to participate",
+        "notificationButton": "Ok"
     }
 }

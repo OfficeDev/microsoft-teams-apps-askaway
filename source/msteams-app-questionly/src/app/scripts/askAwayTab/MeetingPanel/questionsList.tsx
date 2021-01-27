@@ -94,7 +94,7 @@ const QuestionsList: React.FunctionComponent<QuestionsListProps> = (props) => {
     };
     return (
         <React.Fragment>
-            <TabHeader onSelectActiveTab={setActiveLiveTab} tabActiveIndex={liveTab.defaultActiveIndex} />
+            <TabHeader t={props.t} onSelectActiveTab={setActiveLiveTab} tabActiveIndex={liveTab.defaultActiveIndex} />
             <div className="question-card">
                 {liveTab.selectedTab === CONST.TAB_QUESTIONS.ANSWERED_Q &&
                     activeSessionData.answeredQuestions.map((question: ClientDataContract.Question) => {
