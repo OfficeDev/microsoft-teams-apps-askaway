@@ -24,6 +24,13 @@
         "WelcomeText": "Ready to field questions?",
         "CreateButton": "Start a Q&A session",
         "LoaderText": "Loading Meeting Information",
-        "NoQuestions": "Q & A session is live...Ask away!"
+        "NoQuestions": "Q & A session is live...Ask away!",
+        "Update": "New updates",
+        "BannerText": "Connection lost. Refresh to view content. if that doesn't do the trick, try again later.",
+        "InputPlaceholder": "Type a question here",
+        "RefreshButton": "Refresh session",
+        "EndButton": "End session",
+        "PendingQ": "Pending questions",
+        "AnsweredQ": "Answered questions"
     }
 }

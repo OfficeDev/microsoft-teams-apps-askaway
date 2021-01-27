@@ -18,6 +18,7 @@ export interface QuestionsListProps {
     activeSessionData: ClientDataContract.QnaSession;
     httpService: HttpService;
     teamsTabContext: microsoftTeams.Context;
+    t: Function;
 }
 export interface QuestionTab {
     selectedTab: string;

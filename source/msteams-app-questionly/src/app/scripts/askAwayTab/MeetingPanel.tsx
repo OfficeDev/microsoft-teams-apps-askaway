@@ -295,7 +295,13 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
     private createNewSessionLayout() {
         return (
             <React.Fragment>
-                <QnASessionHeader title={this.localize('MeetingPanel.PanelTitle')} onClickRefreshSession={this.updateContent} onClickEndSession={this.endActiveSession} showToolBar={false} />
+                <QnASessionHeader
+                    t={this.localize}
+                    title={this.localize('MeetingPanel.PanelTitle')}
+                    onClickRefreshSession={this.updateContent}
+                    onClickEndSession={this.endActiveSession}
+                    showToolBar={false}
+                />
                 <Flex hAlign="center" vAlign="center">
                     {this.noQuestionDesign(EmptySessionImage, this.localize('MeetingPanel.WelcomeText'))}
                     <Flex.Item align="center">
@@ -344,13 +350,14 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
         const sessionTitle = stateVal.activeSessionData.title ?? stateVal.input.title;
         return (
             <React.Fragment>
-                <QnASessionHeader title={sessionTitle} onClickRefreshSession={this.updateContent} onClickEndSession={this.endActiveSession} showToolBar={true} />
+                <QnASessionHeader t={this.localize} title={sessionTitle} onClickRefreshSession={this.updateContent} onClickEndSession={this.endActiveSession} showToolBar={true} />
                 {stateVal.activeSessionData.unansweredQuestions.length > 0 || stateVal.activeSessionData.answeredQuestions.length > 0 ? (
-                    <QuestionsList activeSessionData={stateVal.activeSessionData} httpService={this.props.httpService} teamsTabContext={this.props.teamsTabContext} />
+                    <QuestionsList t={this.localize} activeSessionData={stateVal.activeSessionData} httpService={this.props.httpService} teamsTabContext={this.props.teamsTabContext} />
                 ) : (
                     this.noQuestionDesign(EmptySessionImage, this.localize('MeetingPanel.NoQuestions'))
                 )}
                 <NewQuestion
+                    t={this.localize}
                     activeSessionData={stateVal.activeSessionData}
                     httpService={this.props.httpService}
                     teamsTabContext={this.props.teamsTabContext}
@@ -370,6 +377,7 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
         return (
             <React.Fragment>
                 <SignalRLifecycle
+                    t={this.localize}
                     conversationId={this.props.teamsTabContext.chatId}
                     onEvent={this.updateEvent}
                     httpService={this.props.httpService}
@@ -382,7 +390,7 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
                     {this.state.showNewUpdatesButton && (
                         <Button onClick={this.updateQnASessionContent} className="newUpdatesButton">
                             <ArrowUpIcon xSpacing="after"></ArrowUpIcon>
-                            <Button.Content className="newUpdatesButtonContent" content="New updates"></Button.Content>
+                            <Button.Content className="newUpdatesButtonContent" content={this.localize('MeetingPanel.Update')}></Button.Content>
                         </Button>
                     )}
                     {stateVal.activeSessionData.sessionId ? this.showSessionQuestions(stateVal) : this.createNewSessionLayout()}

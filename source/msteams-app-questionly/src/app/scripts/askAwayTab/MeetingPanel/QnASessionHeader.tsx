@@ -12,6 +12,7 @@ export interface QnASessionHeaderProps {
     onClickRefreshSession: Function;
     onClickEndSession: Function;
     showToolBar: boolean;
+    t: Function;
 }
 const QnASessionHeader: React.FunctionComponent<QnASessionHeaderProps> = (props) => {
     const menuItems: ShorthandCollection<MenuItemProps> = [
@@ -30,7 +31,7 @@ const QnASessionHeader: React.FunctionComponent<QnASessionHeaderProps> = (props)
                 items: [
                     {
                         key: 'Refresh session',
-                        content: 'Refresh session',
+                        content: props.t('MeetingPanel.RefreshButton'),
                         onClick: () => {
                             props.onClickRefreshSession();
                         },
@@ -38,7 +39,7 @@ const QnASessionHeader: React.FunctionComponent<QnASessionHeaderProps> = (props)
                     },
                     {
                         key: 'End session',
-                        content: 'End session',
+                        content: props.t('MeetingPanel.EndButton'),
                         onClick: () => {
                             props.onClickEndSession();
                         },
