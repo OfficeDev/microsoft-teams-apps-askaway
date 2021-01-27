@@ -15,7 +15,6 @@
     .text-configtab-caption {
         font-size: 18px;
         line-height: 24px;
-        color: #252423;
         font-weight: bold;
         top: 55%;
         position: absolute;
@@ -23,7 +22,6 @@
     .text-caption {
         font-size: 18px;
         line-height: 24px;
-        color: #252423;
         font-weight: bold;
         top: 52%;
         position: absolute;
@@ -31,7 +29,6 @@
     .text-subcaption {
         font-size: 14px;
         line-height: 20px;
-        color: #000000;
         top: 58%;
         position: absolute;
     }
@@ -176,7 +173,6 @@
     }
 }
 .badge {
-    color: #fff;
     width: 3.75rem;
     font-family: Segoe UI;
     font-size: 12px;
@@ -188,32 +184,12 @@
     text-align: center;
     margin-bottom: 0.25rem;
 }
-.badge--success {
-    background-color: #92c353;
-}
-.badge--primary {
-    background-color: #6264a7;
-}
-.badge--disabled {
-    background-color: #979797;
-}
 
 #post-new-question {
     margin: 2rem auto 0 auto;
     width: 80%;
     padding: 0.1rem;
-    .ui-card {
-        &.jn {
-            &:hover {
-                background-color: #292828 !important;
-            }
-        }
-        &.fi {
-            &:hover {
-                background-color: #faf9f8 !important;
-            }
-        }
-    }
+
     .card-layout {
         width: 100%;
         .date-content-format {
@@ -222,7 +198,7 @@
             padding-top: 0.15rem;
         }
         .session-title {
-            padding-top: 0.5rem;
+            padding-top: 0.3rem;
             font-size: 18px;
             line-height: 24px;
         }

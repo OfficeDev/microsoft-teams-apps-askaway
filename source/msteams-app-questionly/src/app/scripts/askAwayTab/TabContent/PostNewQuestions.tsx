@@ -1,27 +1,42 @@
-import './../index.scss';
 import * as React from 'react';
-import { Flex, Text, Button, Image, FlexItem, Card, Divider, Avatar, TextArea } from '@fluentui/react-northstar';
+import { Flex, Text, Button, FlexItem, Card, Divider, Avatar, TextArea, ThemePrepared } from '@fluentui/react-northstar';
 import Badge from '../shared/Badge';
 import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
-import { Helper } from '../shared/Helper';
+import { withTheme } from '../shared/WithTheme';
+import './../index.scss';
 
+let moment = require('moment');
+/**
+ * Theme properties taken from context
+ */
+interface ThemeProps {
+    theme: ThemePrepared;
+}
 /**
  * Properties for the PostNewQuestions React component
  */
 export interface PostNewQuestionsProps {
     activeSessionData: ClientDataContract.QnaSession;
 }
-const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps> = (props) => {
+const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps & ThemeProps> = (props) => {
+    const colorScheme = props.theme.siteVariables.colorScheme;
     return (
         <div id="post-new-question">
-            <Card aria-roledescription="card" elevated className="card-layout">
+            <Card aria-roledescription="card" style={{ backgroundColor: colorScheme.default.background }} className="card-layout">
                 <Card.Header fitted>
                     <Flex gap="gap.small">
                         <Flex column>
-                            <Badge className={props.activeSessionData.isActive ? 'badge--success' : 'badge--disabled'} text={props.activeSessionData.isActive ? 'Live' : 'Closed'} />
+                            <Badge
+                                styles={
+                                    props.activeSessionData.isActive
+                                        ? { backgroundColor: colorScheme.green.background, color: colorScheme.green.foreground1 }
+                                        : { backgroundColor: colorScheme.default.background5, color: colorScheme.green.foreground4 }
+                                }
+                                text={props.activeSessionData.isActive ? 'Live' : 'Closed'}
+                            />
                             <Text
                                 className="date-content-format"
-                                content={`Created on ${Helper.formatDateMMDDYYYY(props.activeSessionData.dateTimeCreated)} by ${props.activeSessionData.hostUser.name}`}
+                                content={`Created on ${moment(props.activeSessionData.dateTimeCreated).format('L')} by ${props.activeSessionData.hostUser.name}`}
                                 size="small"
                             />
                         </Flex>
@@ -34,11 +49,11 @@ const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps> = (props)
                 </Card.Body>
                 <Card.Footer>
                     <Divider />
-                    <Flex gap="gap.small" vAlign="center">
+                    <Flex styles={{ paddingTop: '0.3rem', marginBottom: '-1rem' }} gap="gap.small" vAlign="center">
                         <Avatar size="medium" name={props.activeSessionData.hostUser.name} />
-                        <TextArea fluid placeholder="Type a question here" />
+                        <TextArea styles={{ paddingBottom: '0rem', height: '2.3rem' }} fluid placeholder="Type a question here" />
                         <FlexItem push>
-                            <Button type="submit" size="medium">
+                            <Button size="medium">
                                 <Button.Content>Post</Button.Content>
                             </Button>
                         </FlexItem>
@@ -48,4 +63,4 @@ const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps> = (props)
         </div>
     );
 };
-export default PostNewQuestions;
+export default withTheme(PostNewQuestions);
