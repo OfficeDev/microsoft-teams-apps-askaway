@@ -1,4 +1,5 @@
 import './../index.scss';
+import { Properties as CSSProperties } from 'csstype';
 import * as React from 'react';
 
 /**
@@ -6,7 +7,7 @@ import * as React from 'react';
  */
 export interface BadgeProps {
     text: string;
-    styles: object;
+    styles: CSSProperties;
 }
 const Badge: React.FunctionComponent<BadgeProps> = (props) => {
     return <span style={props.styles} className={`badge`}>{`${props.text}`}</span>;

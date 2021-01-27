@@ -36,7 +36,7 @@ const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps & ThemePro
                             />
                             <Text
                                 className="date-content-format"
-                                content={`Created on ${moment(props.activeSessionData.dateTimeCreated).format('MM/DD/YYYY')} by ${props.activeSessionData.hostUser.name}`}
+                                content={`Created on ${moment(props.activeSessionData.dateTimeCreated).format('L')} by ${props.activeSessionData.hostUser.name}`}
                                 size="small"
                             />
                         </Flex>

@@ -67,17 +67,12 @@ export class AskAwayTab extends msteamsReactBaseComponent<IAskAwayTabProps, IAsk
             microsoftTeams.initialize();
             microsoftTeams.registerOnThemeChangeHandler((theme: string) => {
                 this.updateTheme(theme);
-                this.setState(
-                    (prevState) => ({
-                        teamContext: {
-                            ...prevState.teamContext,
-                            theme: theme!,
-                        },
-                    }),
-                    () => {
-                        this.forceUpdate();
-                    }
-                );
+                this.setState((prevState) => ({
+                    teamContext: {
+                        ...prevState.teamContext,
+                        theme: theme!,
+                    },
+                }));
             });
             microsoftTeams.getContext((context) => {
                 // Set Language for Localization
