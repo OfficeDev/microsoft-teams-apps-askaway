@@ -11,7 +11,7 @@ import TabHeader from './TabContent/TabHeader';
 import PostNewQuestions from './TabContent/PostNewQuestions';
 import NoQuestionDesign from './TabContent/NoQuestionDesign';
 import TabQuestions from './TabContent/TabQuestions';
-import CreateSession from './TabContent/CreateSession';
+import TabCreateSession from './TabContent/TabCreateSession';
 import { ClientDataContract } from '../../../../src/contracts/clientDataContract';
 
 export interface TabContentProps {
@@ -242,7 +242,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                         </div>
                     </Flex>
                 ) : (
-                    <CreateSession showTaskModule={this.onShowTaskModule} />
+                    <TabCreateSession showTaskModule={this.onShowTaskModule} />
                 )}
             </div>
         );

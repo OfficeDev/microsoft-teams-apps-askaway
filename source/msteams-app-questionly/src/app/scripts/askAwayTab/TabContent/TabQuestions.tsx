@@ -1,21 +1,27 @@
 import './../index.scss';
 import * as React from 'react';
-import { Flex, Avatar, FlexItem, Text, Button, Image, Reaction } from '@fluentui/react-northstar';
-import Badge from '../TabContent/Badge';
+import { Flex, Avatar, ThemePrepared, FlexItem, Text, Button, Image, Reaction } from '@fluentui/react-northstar';
+import Badge from '../shared/Badge';
 import { LikeIcon, ChevronDownMediumIcon, ChevronEndMediumIcon } from '@fluentui/react-icons-northstar';
 import { LikeIconFilled } from '../shared/Icons/LikeIconFilled';
 import { CONST } from '../shared/Constants';
 import { useState } from 'react';
 import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
+import { withTheme } from '../shared/WithTheme';
+
 /**
  * Properties for the TabQuestions React component
  */
+
+interface ThemeProps {
+    theme: ThemePrepared;
+}
 export interface TabQuestionsProps {
     activeSessionData: ClientDataContract.QnaSession;
     teamsTabContext: microsoftTeams.Context;
     onClickAction: Function;
 }
-const TabQuestions: React.FunctionComponent<TabQuestionsProps> = (props) => {
+const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (props) => {
     const [isPendingTabOpen, setPendingTabOpen] = useState(true);
 
     const [isAnsweredTabOpen, setAnsweredTabOpen] = useState(true);
@@ -31,6 +37,8 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps> = (props) => {
      * @param tabValue - true/false
      */
     const showQuestions = (questions, questionType, tabValue) => {
+        const colorScheme = props.theme.siteVariables.colorScheme;
+
         if (questions.length > 0) {
             return (
                 <React.Fragment>
@@ -46,7 +54,11 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps> = (props) => {
                                                     <Avatar name={q.author.name} />
                                                     <Text content={q.author.name} />
                                                     <Badge
-                                                        className={CONST.TAB_QUESTIONS.UNANSWERED_Q === questionType ? 'badge--primary badge-font-10' : 'badge--success badge-font-10'}
+                                                        styles={
+                                                            CONST.TAB_QUESTIONS.UNANSWERED_Q === questionType
+                                                                ? { backgroundColor: colorScheme.brand.background, color: colorScheme.brand.foreground4 }
+                                                                : { backgroundColor: colorScheme.green.background, color: colorScheme.green.foreground1 }
+                                                        }
                                                         text={CONST.TAB_QUESTIONS.UNANSWERED_Q === questionType ? 'PENDING' : 'ANSWERED'}
                                                     />
                                                 </Flex>
@@ -133,4 +145,4 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps> = (props) => {
         </div>
     );
 };
-export default TabQuestions;
+export default withTheme(TabQuestions);
