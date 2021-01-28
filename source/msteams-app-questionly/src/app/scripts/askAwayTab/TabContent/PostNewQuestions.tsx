@@ -34,7 +34,7 @@ const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps & ThemePro
                                         ? { backgroundColor: colorScheme.green.background, color: colorScheme.green.foreground1 }
                                         : { backgroundColor: colorScheme.default.background5, color: colorScheme.green.foreground4 }
                                 }
-                                text={props.activeSessionData.isActive ? 'Live' : 'Closed'}
+                                text={props.activeSessionData.isActive ? props.t('tab.liveStatus') : props.t('tab.closedStatus')}
                             />
                             <Text
                                 className="date-content-format"
