@@ -1,6 +1,6 @@
 import './../index.scss';
 import * as React from 'react';
-import { Flex, Text, Button, Image, FlexItem, Card, Divider, Avatar, TextArea, ThemePrepared } from '@fluentui/react-northstar';
+import { Flex, Text, Button, FlexItem, Card, Divider, Avatar, TextArea, ThemePrepared } from '@fluentui/react-northstar';
 import Badge from '../shared/Badge';
 import { useState } from 'react';
 import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
@@ -60,9 +60,10 @@ const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps & ThemePro
                 {props.activeSessionData.isActive && (
                     <Card.Footer>
                         <Divider />
-                        <Flex gap="gap.small" vAlign="center">
+                        <Flex styles={{ paddingTop: '0.3rem', marginBottom: '-1rem' }} gap="gap.small" vAlign="center">
                             <Avatar size="medium" name={props.activeSessionData.hostUser.name} />
                             <TextArea
+                                styles={{ paddingBottom: '0rem', height: '2.3rem' }}
                                 fluid
                                 maxLength={250}
                                 placeholder="Type a question here"

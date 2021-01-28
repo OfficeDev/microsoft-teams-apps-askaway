@@ -1,6 +1,6 @@
 import './../index.scss';
 import * as React from 'react';
-import { Flex, Avatar, ThemePrepared, FlexItem, Text, Button, Image, Reaction } from '@fluentui/react-northstar';
+import { Flex, Avatar, ThemePrepared, Text, Button } from '@fluentui/react-northstar';
 import Badge from '../shared/Badge';
 import { LikeIcon, ChevronDownMediumIcon, ChevronEndMediumIcon } from '@fluentui/react-icons-northstar';
 import { LikeIconFilled } from '../shared/Icons/LikeIconFilled';
