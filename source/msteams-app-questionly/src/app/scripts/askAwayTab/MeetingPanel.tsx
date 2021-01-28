@@ -1,8 +1,15 @@
 // tslint:disable:no-relative-imports
 import './index.scss';
 import * as React from 'react';
+import { ArrowUpIcon, Flex, Button, Loader } from '@fluentui/react-northstar';
+import {
+    handleTaskModuleErrorForCreateQnASessionFlow,
+    handleTaskModuleErrorForEndQnASessionFlow,
+    handleTaskModuleResponseForSuccessfulCreateQnASessionFlow,
+    openStartQnASessionTaskModule,
+    handleEndQnASessionFlow,
+} from './task-modules-utility/taskModuleHelper';
 import * as microsoftTeams from '@microsoft/teams-js';
-import { Flex, Button, Loader, ArrowUpIcon } from '@fluentui/react-northstar';
 import { ApplicationInsights, SeverityLevel } from '@microsoft/applicationinsights-web';
 import { HttpService } from './shared/HttpService';
 import { SignalRLifecycle } from './signalR/SignalRLifecycle';
@@ -166,7 +173,7 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
      * To End the active session
      * @param e - event
      */
-    endActiveSession = (e) => {
+    endActiveSession = (e?: any) => {
         if (this.state?.activeSessionData?.sessionId) {
             this.setState({ showLoader: true });
             this.props.httpService
@@ -179,21 +186,23 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
                     });
                 })
                 .catch((error) => {
+                    handleTaskModuleErrorForEndQnASessionFlow(error);
                     this.setState({ showLoader: false });
                 });
         }
     };
 
     /**
+     * Takes user through end session journey, prompts end qna session message and calls end session callback if necessary.
+     */
+    private handleEndQnaSessionFlow = () => {
+        handleEndQnASessionFlow(this.endActiveSession);
+    };
+
+    /**
      * Display Create AMA session form
      */
     private onShowTaskModule = () => {
-        let taskInfo: any = {
-            fallbackUrl: '',
-            appId: process.env.MicrosoftAppId,
-            url: `https://${process.env.HostName}/askAwayTab/createsession.html?theme=${this.props.teamsTabContext.theme}&locale=${this.props.teamsTabContext.locale}`,
-        };
-
         let submitHandler = async (err: any, result: any) => {
             result = JSON.parse(result);
             if (result) {
@@ -211,106 +220,22 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
                     .post(`/conversations/${this.props.teamsTabContext.chatId}/sessions`, { ...this.state.input, ...createSessionData })
                     .then((response: any) => {
                         if (response && response['data'] && response['data']['sessionId']) {
-                            this.showAlertModal(true);
+                            handleTaskModuleResponseForSuccessfulCreateQnASessionFlow();
                             this.setState({
                                 activeSessionData: response.data,
                             });
                         } else {
-                            this.showAlertModal(false);
+                            handleTaskModuleErrorForCreateQnASessionFlow(new Error('Invalid response'), this.endActiveSession);
                         }
                     })
                     .catch((error) => {
-                        this.showAlertModal(false);
+                        handleTaskModuleErrorForCreateQnASessionFlow(error, this.endActiveSession);
                     });
             }
         };
-        microsoftTeams.tasks.startTask(taskInfo, submitHandler);
+
+        openStartQnASessionTaskModule(submitHandler, this.props.teamsTabContext.locale, this.props.teamsTabContext.theme);
     };
-
-    /**
-     * Display's success and failure screens for AMA session
-     */
-    private showAlertModal(isSuccess = false) {
-        let taskInfo: any = {
-            fallbackUrl: '',
-            appID: process.env.MicrosoftAppId,
-            card: isSuccess ? this.successModal() : this.failureModal(),
-        };
-        microsoftTeams.tasks.startTask(taskInfo);
-    }
-
-    /**
-     * Display's success screen when AMA session is successfully created
-     */
-    private successModal() {
-        return {
-            $schema: 'https://adaptivecards.io/schemas/adaptive-card.json',
-            type: 'AdaptiveCard',
-            version: '1.2',
-            body: [
-                {
-                    type: 'Container',
-                    minHeight: '150px',
-                    verticalContentAlignment: 'center',
-                    items: [
-                        {
-                            type: 'Image',
-                            url: `https://${process.env.HostName}/images/success_image.png`,
-                            width: '75px',
-                            horizontalAlignment: 'center',
-                        },
-                        {
-                            type: 'TextBlock',
-                            text: 'New session successfully created',
-                            horizontalAlignment: 'center',
-                            weight: 'bolder',
-                            size: 'large',
-                        },
-                    ],
-                },
-            ],
-        };
-    }
-
-    /**
-     * display's failure screen when creating AMA session is unsuccessful
-     */
-    private failureModal() {
-        return {
-            $schema: 'https://adaptivecards.io/schemas/adaptive-card.json',
-            type: 'AdaptiveCard',
-            version: '1.2',
-            body: [
-                {
-                    type: 'Container',
-                    minHeight: '150px',
-                    verticalContentAlignment: 'center',
-                    items: [
-                        {
-                            type: 'Image',
-                            url: `https://${process.env.HostName}/images/failure_image.png`,
-                            width: '160px',
-                            horizontalAlignment: 'center',
-                        },
-                        {
-                            type: 'TextBlock',
-                            text: 'something went wrong. You should try again later.',
-                            horizontalAlignment: 'center',
-                            weight: 'bolder',
-                            size: 'large',
-                        },
-                    ],
-                },
-            ],
-            actions: [
-                {
-                    id: 'submit',
-                    type: 'Action.Submit',
-                    title: ' Ok ',
-                },
-            ],
-        };
-    }
 
     /**
      * Landing page for meeting panel
@@ -341,7 +266,7 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
                     userRole={this.state.userRole}
                     title={'Start a Q&A session'}
                     onClickRefreshSession={this.updateContent}
-                    onClickEndSession={this.endActiveSession}
+                    onClickEndSession={this.handleEndQnaSessionFlow}
                     showToolBar={false}
                 />
                 <Flex hAlign="center" vAlign="center">
@@ -394,7 +319,7 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
         const sessionTitle = stateVal.activeSessionData.title ?? stateVal.input.title;
         return (
             <React.Fragment>
-                <QnASessionHeader userRole={this.state.userRole} title={sessionTitle} onClickRefreshSession={this.updateContent} onClickEndSession={this.endActiveSession} showToolBar={true} />
+                <QnASessionHeader userRole={this.state.userRole} title={sessionTitle} onClickRefreshSession={this.updateContent} onClickEndSession={this.handleEndQnaSessionFlow} showToolBar={true} />
                 {stateVal.activeSessionData.unansweredQuestions.length > 0 || stateVal.activeSessionData.answeredQuestions.length > 0 ? (
                     <QuestionsList userRole={stateVal.userRole} activeSessionData={stateVal.activeSessionData} httpService={this.props.httpService} teamsTabContext={this.props.teamsTabContext} />
                 ) : (

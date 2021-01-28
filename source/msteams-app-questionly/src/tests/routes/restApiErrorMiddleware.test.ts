@@ -21,8 +21,8 @@ const next = jest.fn();
 
 beforeAll(() => {
     response.send = jest.fn();
-    (<any>response).send.mockImplementation((statusMessage?: string) => {
-        response.statusMessage = statusMessage ?? '';
+    (<any>response).send.mockImplementation((statusMessage?: any) => {
+        response.statusMessage = JSON.stringify(statusMessage);
         return response;
     });
 
@@ -44,7 +44,7 @@ test('restApiErrorMiddleware - handle InsufficientPermissionsToCreateOrEndQnASes
     expect(next).toBeCalledTimes(1);
     expect(next).toBeCalledWith(error);
     expect(response.statusCode).toEqual(StatusCodes.FORBIDDEN);
-    expect(response.statusMessage).toEqual(errorMessages.InsufficientPermissionsToCreateOrEndQnASessionErrorMessage);
+    expect(JSON.parse(response.statusMessage).message).toEqual(errorMessages.InsufficientPermissionsToCreateOrEndQnASessionErrorMessage);
 });
 
 test('restApiErrorMiddleware - handle InsufficientPermissionsToMarkQuestionAsAnsweredError', async () => {
@@ -54,7 +54,7 @@ test('restApiErrorMiddleware - handle InsufficientPermissionsToMarkQuestionAsAns
     expect(next).toBeCalledTimes(1);
     expect(next).toBeCalledWith(error);
     expect(response.statusCode).toEqual(StatusCodes.FORBIDDEN);
-    expect(response.statusMessage).toEqual(errorMessages.InsufficientPermissionsToMarkQuestionAsAnsweredErrorMessage);
+    expect(JSON.parse(response.statusMessage).message).toEqual(errorMessages.InsufficientPermissionsToMarkQuestionAsAnsweredErrorMessage);
 });
 
 test('restApiErrorMiddleware - handle ConversationDoesNotBelongToMeetingChatError', async () => {
@@ -64,7 +64,7 @@ test('restApiErrorMiddleware - handle ConversationDoesNotBelongToMeetingChatErro
     expect(next).toBeCalledTimes(1);
     expect(next).toBeCalledWith(error);
     expect(response.statusCode).toEqual(StatusCodes.FORBIDDEN);
-    expect(response.statusMessage).toEqual(errorMessages.ConversationDoesNotBelongToMeetingChatErrorMessage);
+    expect(JSON.parse(response.statusMessage).message).toEqual(errorMessages.ConversationDoesNotBelongToMeetingChatErrorMessage);
 });
 
 test('restApiErrorMiddleware - handle UserIsNotPartOfConversationError', async () => {
@@ -74,7 +74,7 @@ test('restApiErrorMiddleware - handle UserIsNotPartOfConversationError', async (
     expect(next).toBeCalledTimes(1);
     expect(next).toBeCalledWith(error);
     expect(response.statusCode).toEqual(StatusCodes.FORBIDDEN);
-    expect(response.statusMessage).toEqual(errorMessages.UserIsNotPartOfConversationErrorMessage);
+    expect(JSON.parse(response.statusMessage).message).toEqual(errorMessages.UserIsNotPartOfConversationErrorMessage);
 });
 
 test('restApiErrorMiddleware - handle ParameterMissingInRequestError', async () => {
@@ -85,7 +85,7 @@ test('restApiErrorMiddleware - handle ParameterMissingInRequestError', async () 
     expect(next).toBeCalledTimes(1);
     expect(next).toBeCalledWith(error);
     expect(response.statusCode).toEqual(StatusCodes.BAD_REQUEST);
-    expect(response.statusMessage).toEqual(errorMessages.ParameterMissingInRequestErrorMessage.replace('{0}', testParamName));
+    expect(JSON.parse(response.statusMessage).message).toEqual(errorMessages.ParameterMissingInRequestErrorMessage.replace('{0}', testParamName));
 });
 
 test('restApiErrorMiddleware - handle generic error', async () => {
@@ -101,5 +101,5 @@ test('restApiErrorMiddleware - handle generic error', async () => {
     expect(next).toBeCalledTimes(1);
     expect(next).toBeCalledWith(error);
     expect(response.statusCode).toEqual(StatusCodes.INTERNAL_SERVER_ERROR);
-    expect(response.statusMessage).toEqual(testErrorMessage);
+    expect(JSON.parse(response.statusMessage).message).toEqual(testErrorMessage);
 });

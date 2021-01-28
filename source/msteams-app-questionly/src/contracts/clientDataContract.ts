@@ -89,4 +89,19 @@ export namespace ClientDataContract {
          */
         voterAadObjectIds: string[];
     }
+
+    /**
+     * Contract for error response for rest api errors.
+     */
+    export interface errorResponse {
+        /**
+         * Error message.
+         */
+        message: string;
+
+        /**
+         * Error code.
+         */
+        code?: string;
+    }
 }
