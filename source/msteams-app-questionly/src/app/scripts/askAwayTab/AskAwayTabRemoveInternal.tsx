@@ -14,8 +14,8 @@ const AskAwayTabRemoveInternal: React.FunctionComponent<AskAwayTabRemoveInternal
         <Flex fill={true}>
             <Flex.Item>
                 <div>
-                    <Header content={t('Tab.RemoveHeaderText')} />
-                    <Text content={t('Tab.RemoveTextNotification')} />
+                    <Header content={t('tab.removeHeaderText')} />
+                    <Text content={t('tab.removeTextNotification')} />
                 </div>
             </Flex.Item>
         </Flex>

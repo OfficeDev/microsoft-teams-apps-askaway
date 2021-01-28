@@ -46,7 +46,7 @@ const NewQuestion: React.FunctionComponent<NewQuestionProps> = (props) => {
                     inverted
                     fluid
                     maxLength={250}
-                    placeholder={props.t('MeetingPanel.InputPlaceholder')}
+                    placeholder={props.t('meetingPanel.inputPlaceholder')}
                     onChange={(e) => {
                         setQuestion(e.target['value']);
                     }}

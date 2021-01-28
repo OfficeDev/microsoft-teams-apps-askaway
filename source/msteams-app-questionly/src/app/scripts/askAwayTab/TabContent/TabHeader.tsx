@@ -23,15 +23,15 @@ const TabHeader: React.FunctionComponent<TabHeaderProps> = (props) => {
                     }}
                 >
                     <RetryIcon xSpacing="after" />
-                    <Button.Content>{props.t('Tab.Refresh')}</Button.Content>
+                    <Button.Content>{props.t('tab.refreshButton')}</Button.Content>
                 </Button>
                 <Button text>
                     <AddIcon outline xSpacing="after" />
-                    <Button.Content>Start a Q&A session</Button.Content>
+                    <Button.Content>{props.t('tab.startNewSession')}</Button.Content>
                 </Button>
                 <Button text>
                     <SwitchIcon outline xSpacing="after" />
-                    <Button.Content>Switch to another session</Button.Content>
+                    <Button.Content>{props.t('tab.switchSession')}</Button.Content>
                 </Button>
                 <FlexItem push>
                     <Button
@@ -40,7 +40,7 @@ const TabHeader: React.FunctionComponent<TabHeaderProps> = (props) => {
                             props.endSession(e);
                         }}
                         size="small"
-                        content={props.t('Tab.EndButton')}
+                        content={props.t('tab.endSessionButton')}
                     />
                 </FlexItem>
             </Flex>

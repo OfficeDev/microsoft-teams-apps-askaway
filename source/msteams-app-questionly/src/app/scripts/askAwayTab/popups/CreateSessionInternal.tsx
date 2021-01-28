@@ -71,34 +71,34 @@ const CreateSessionInternal: React.FunctionComponent<CreateSessionInternalProps>
             <Flex column>
                 <Form onSubmit={(e) => submitCreateSession(e)} className="sidepanel-form" styles={{ display: 'flex', flexDirection: 'column' }}>
                     <div className="form-grid">
-                        <Text content="Title Name*" size="small" />
+                        <Text content={t('popups.sessionTitle')} size="small" />
                         <Input
                             label=""
                             as="div"
                             fluid
-                            placeholder="Type a name"
+                            placeholder={t('popups.sessionTitlePlaceholder')}
                             styles={{ color: '#c8c6c4' }}
                             onKeyUp={(e) => validateCreateSessionField(input.title, 'isTitle')}
                             onChange={(e) => appendInput(e, 'title')}
                         />
-                        {error.isTitle && <Text styles={{ display: 'inline-flex' }} error content="Title is required*" size="small" />}
+                        {error.isTitle && <Text styles={{ display: 'inline-flex' }} error content={t('popups.fieldRequiredMessageTitle')} size="small" />}
                     </div>
                     <div className="form-grid">
-                        <Text content="Description*" size="small" />
+                        <Text content={t('popups.sessionDescription')} size="small" />
                         <TextArea
                             fluid
                             styles={{ marginTop: '0.25rem' }}
-                            placeholder="Type a description"
+                            placeholder={t('popups.sessionDescriptionPlaceholder')}
                             onKeyUp={(e) => validateCreateSessionField(input.description, 'isDescription')}
                             onChange={(e) => appendInput(e, 'description')}
                         />
-                        {error.isDescription && <Text styles={{ display: 'inline-flex' }} error content="Description is required*" size="small" />}
+                        {error.isDescription && <Text styles={{ display: 'inline-flex' }} error content={t('popups.fieldRequiredMessageDescription')} size="small" />}
                     </div>
                     <div className="form-grid">
                         <Flex>
                             <FlexItem push>
                                 <Button primary type="submit" className="btn-create-session" size="small">
-                                    <Button.Content>Create</Button.Content>
+                                    <Button.Content>{t('popups.createQnaSessionButton')}</Button.Content>
                                 </Button>
                             </FlexItem>
                         </Flex>

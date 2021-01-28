@@ -15,7 +15,7 @@ const NoQuestionDesign: React.FunctionComponent<NoQuestionDesignProps> = (props)
             <Flex column>
                 <Image src={NoQuestionImage} />
                 <div className="sub-text">
-                    <Text weight="bold" content={props.t('Tab.NoQuestionsPosted')} />
+                    <Text weight="bold" content={props.t('tab.noQuestionsPosted')} />
                 </div>
             </Flex>
         </div>

@@ -16,14 +16,14 @@ const TabHeader: React.FunctionComponent<TabHeaderProps> = (props) => {
     const items = [
         {
             key: CONST.TAB_QUESTIONS.UNANSWERED_Q,
-            content: props.t('Tab.PendingQ'),
+            content: props.t('meetingPanel.showPendingQuestions'),
             onClick: () => {
                 props.onSelectActiveTab(CONST.TAB_QUESTIONS.UNANSWERED_Q);
             },
         },
         {
             key: CONST.TAB_QUESTIONS.ANSWERED_Q,
-            content: props.t('Tab.AnsweredQ'),
+            content: props.t('meetingPanel.showAnsweredQuestions'),
             onClick: () => {
                 props.onSelectActiveTab(CONST.TAB_QUESTIONS.ANSWERED_Q);
             },

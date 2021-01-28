@@ -73,7 +73,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                         },
                         {
                             type: 'TextBlock',
-                            text: this.localize('Tab.SuccessText'),
+                            text: this.localize('tab.successText'),
                             horizontalAlignment: 'center',
                             weight: 'bolder',
                             size: 'large',
@@ -103,7 +103,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                         },
                         {
                             type: 'TextBlock',
-                            text: this.localize('Tab.FailureText'),
+                            text: this.localize('tab.failureText'),
                             horizontalAlignment: 'center',
                             weight: 'bolder',
                             size: 'large',
@@ -115,7 +115,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                 {
                     id: 'submit',
                     type: 'Action.Submit',
-                    title: ' Ok ',
+                    title: this.localize('tab.ok'),
                 },
             ],
         };

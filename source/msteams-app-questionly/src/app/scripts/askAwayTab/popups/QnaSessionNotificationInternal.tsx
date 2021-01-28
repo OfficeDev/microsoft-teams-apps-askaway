@@ -23,7 +23,7 @@ const QnaSessionNotificationInternal: React.FunctionComponent<QnaSessionNotifica
                 <Text content={sessionTitle} weight="bold" />
             </div>
             <Flex gap="gap.large" vAlign="center">
-                <Text content={t('popups.notificationContent')} />
+                <Text content={t('popups.notificationMessage')} />
                 <Button
                     primary
                     type="submit"

@@ -31,7 +31,7 @@ const QnASessionHeader: React.FunctionComponent<QnASessionHeaderProps> = (props)
                 items: [
                     {
                         key: 'Refresh session',
-                        content: props.t('MeetingPanel.RefreshButton'),
+                        content: props.t('meetingPanel.refreshSessionButton'),
                         onClick: () => {
                             props.onClickRefreshSession();
                         },
@@ -39,7 +39,7 @@ const QnASessionHeader: React.FunctionComponent<QnASessionHeaderProps> = (props)
                     },
                     {
                         key: 'End session',
-                        content: props.t('MeetingPanel.EndButton'),
+                        content: props.t('meetingPanel.endSessionButton'),
                         onClick: () => {
                             props.onClickEndSession();
                         },

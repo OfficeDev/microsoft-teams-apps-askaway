@@ -255,7 +255,7 @@ export class SignalRLifecycle extends React.Component<SignalRLifecycleProps, Sig
         return (
             <div id="alertHolder">
                 {(this.state.connectionStatus === ConnectionStatus.NotConnected || this.state.connectionStatus === ConnectionStatus.Reconnecting) && (
-                    <Alert id="alert" content={this.props.t('MeetingPanel.BannerText')} dismissible />
+                    <Alert id="alert" content={this.props.t('meetingPanel.bannerText')} dismissible />
                 )}
             </div>
         );

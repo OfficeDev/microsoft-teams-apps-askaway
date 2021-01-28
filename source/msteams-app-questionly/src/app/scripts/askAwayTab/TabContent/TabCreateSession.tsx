@@ -16,10 +16,10 @@ const TabCreateSession: React.FunctionComponent<TabCreateSessionProps> = (props)
         <Flex hAlign="center" vAlign="center" className="screen">
             <Image className="create-session" alt="image" src={createSessionImage} />
             <Flex.Item align="center">
-                <Text className="text-caption" content={props.t('Tab.WelcomeText')} />
+                <Text className="text-caption" content={props.t('tab.welcomeText')} />
             </Flex.Item>
             <Flex.Item align="center">
-                <Text className="text-subcaption" content={props.t('Tab.WelcomeSubText')} />
+                <Text className="text-subcaption" content={props.t('tab.welcomeSubText')} />
             </Flex.Item>
             <Flex.Item align="center">
                 <Button
@@ -29,7 +29,7 @@ const TabCreateSession: React.FunctionComponent<TabCreateSessionProps> = (props)
                         props.showTaskModule();
                     }}
                 >
-                    <Button.Content>{props.t('Tab.CreateButton')}</Button.Content>
+                    <Button.Content>{props.t('tab.createButton')}</Button.Content>
                 </Button>
             </Flex.Item>
         </Flex>

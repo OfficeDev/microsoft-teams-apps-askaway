@@ -224,7 +224,7 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
                         },
                         {
                             type: 'TextBlock',
-                            text: this.localize('MeetingPanel.SuccessText'),
+                            text: this.localize('meetingPanel.successText'),
                             horizontalAlignment: 'center',
                             weight: 'bolder',
                             size: 'large',
@@ -257,7 +257,7 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
                         },
                         {
                             type: 'TextBlock',
-                            text: this.localize('MeetingPanel.FailureText'),
+                            text: this.localize('meetingPanel.failureText'),
                             horizontalAlignment: 'center',
                             weight: 'bolder',
                             size: 'large',
@@ -269,7 +269,7 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
                 {
                     id: 'submit',
                     type: 'Action.Submit',
-                    title: ' Ok ',
+                    title: this.localize('meetingPanel.ok'),
                 },
             ],
         };
@@ -297,16 +297,16 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
             <React.Fragment>
                 <QnASessionHeader
                     t={this.localize}
-                    title={this.localize('MeetingPanel.PanelTitle')}
+                    title={this.localize('meetingPanel.panelTitle')}
                     onClickRefreshSession={this.updateContent}
                     onClickEndSession={this.endActiveSession}
                     showToolBar={false}
                 />
                 <Flex hAlign="center" vAlign="center">
-                    {this.noQuestionDesign(EmptySessionImage, this.localize('MeetingPanel.WelcomeText'))}
+                    {this.noQuestionDesign(EmptySessionImage, this.localize('meetingPanel.welcomeText'))}
                     <Flex.Item align="center">
                         <Button className="button" onClick={this.onShowTaskModule}>
-                            <Button.Content>{this.localize('MeetingPanel.CreateButton')}</Button.Content>
+                            <Button.Content>{this.localize('meetingPanel.createQnaSessionButton')}</Button.Content>
                         </Button>
                     </Flex.Item>
                 </Flex>
@@ -354,7 +354,7 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
                 {stateVal.activeSessionData.unansweredQuestions.length > 0 || stateVal.activeSessionData.answeredQuestions.length > 0 ? (
                     <QuestionsList t={this.localize} activeSessionData={stateVal.activeSessionData} httpService={this.props.httpService} teamsTabContext={this.props.teamsTabContext} />
                 ) : (
-                    this.noQuestionDesign(EmptySessionImage, this.localize('MeetingPanel.NoQuestions'))
+                    this.noQuestionDesign(EmptySessionImage, this.localize('meetingPanel.noQuestionsPosted'))
                 )}
                 <NewQuestion
                     t={this.localize}
@@ -372,7 +372,7 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
      */
     public render() {
         const stateVal = this.state;
-        if (stateVal.showLoader) return <Loader label={this.localize('MeetingPanel.LoaderText')} />;
+        if (stateVal.showLoader) return <Loader label={this.localize('meetingPanel.loaderText')} />;
 
         return (
             <React.Fragment>
@@ -390,7 +390,7 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
                     {this.state.showNewUpdatesButton && (
                         <Button onClick={this.updateQnASessionContent} className="newUpdatesButton">
                             <ArrowUpIcon xSpacing="after"></ArrowUpIcon>
-                            <Button.Content className="newUpdatesButtonContent" content={this.localize('MeetingPanel.Update')}></Button.Content>
+                            <Button.Content className="newUpdatesButtonContent" content={this.localize('meetingPanel.updatemessage')}></Button.Content>
                         </Button>
                     )}
                     {stateVal.activeSessionData.sessionId ? this.showSessionQuestions(stateVal) : this.createNewSessionLayout()}

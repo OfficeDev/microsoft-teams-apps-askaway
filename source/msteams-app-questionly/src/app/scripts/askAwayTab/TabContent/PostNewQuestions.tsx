@@ -38,7 +38,7 @@ const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps & ThemePro
                             />
                             <Text
                                 className="date-content-format"
-                                content={`Created on ${moment(props.activeSessionData.dateTimeCreated).format('L')} by ${props.activeSessionData.hostUser.name}`}
+                                content={`${props.t('tab.createdOn')} ${moment(props.activeSessionData.dateTimeCreated).format('L')} ${props.t('tab.by')} ${props.activeSessionData.hostUser.name}`}
                                 size="small"
                             />
                         </Flex>
@@ -53,10 +53,10 @@ const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps & ThemePro
                     <Divider />
                     <Flex styles={{ paddingTop: '0.3rem', marginBottom: '-1rem' }} gap="gap.small" vAlign="center">
                         <Avatar size="medium" name={props.activeSessionData.hostUser.name} />
-                        <TextArea styles={{ paddingBottom: '0rem', height: '2.3rem' }} fluid placeholder="Type a question here" />
+                        <TextArea styles={{ paddingBottom: '0rem', height: '2.3rem' }} fluid placeholder={props.t('tab.questionPlaceholder')} />
                         <FlexItem push>
                             <Button size="medium">
-                                <Button.Content>Post</Button.Content>
+                                <Button.Content>{props.t('tab.postQuestionButton')}</Button.Content>
                             </Button>
                         </FlexItem>
                     </Flex>
