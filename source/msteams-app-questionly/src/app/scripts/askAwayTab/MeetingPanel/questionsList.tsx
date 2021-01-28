@@ -9,7 +9,8 @@ import { Button } from '@fluentui/react-northstar';
 import TabHeader from './TabHeader';
 import Question from './Question';
 import { CONST } from '../shared/Constants';
-import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
+import { ClientDataContract } from '../../../../contracts/clientDataContract';
+import { ParticipantRoles } from '../../../../enums/ParticipantRoles';
 
 /**
  * Properties for the QuestionsList React component
@@ -18,6 +19,7 @@ export interface QuestionsListProps {
     activeSessionData: ClientDataContract.QnaSession;
     httpService: HttpService;
     teamsTabContext: microsoftTeams.Context;
+    userRole: ParticipantRoles;
 }
 export interface QuestionTab {
     selectedTab: string;
@@ -106,6 +108,7 @@ const QuestionsList: React.FunctionComponent<QuestionsListProps> = (props) => {
                                 isUserLikedQuestion={isUserLikedQuestion}
                                 questionTab={CONST.TAB_QUESTIONS.ANSWERED_Q}
                                 userId={props.teamsTabContext.userObjectId || ''}
+                                userRole={props.userRole}
                             />
                         );
                     })}
@@ -121,6 +124,7 @@ const QuestionsList: React.FunctionComponent<QuestionsListProps> = (props) => {
                                 questionTab={CONST.TAB_QUESTIONS.UNANSWERED_Q}
                                 userId={props.teamsTabContext.userObjectId || ''}
                                 renderHoverElement={renderAcceptButton({ question, key: CONST.TAB_QUESTIONS.UNANSWERED_Q, actionValue: CONST.TAB_QUESTIONS.MARK_ANSWERED })}
+                                userRole={props.userRole}
                             />
                         );
                     })}

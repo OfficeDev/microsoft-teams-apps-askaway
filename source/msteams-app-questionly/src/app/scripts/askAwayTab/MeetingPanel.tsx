@@ -2,7 +2,7 @@
 import './index.scss';
 import * as React from 'react';
 import * as microsoftTeams from '@microsoft/teams-js';
-import { Flex, Text, Button, Image, Loader, ArrowUpIcon } from '@fluentui/react-northstar';
+import { Flex, Button, Loader, ArrowUpIcon } from '@fluentui/react-northstar';
 import { ApplicationInsights, SeverityLevel } from '@microsoft/applicationinsights-web';
 import { HttpService } from './shared/HttpService';
 import { SignalRLifecycle } from './signalR/SignalRLifecycle';
@@ -13,8 +13,13 @@ import { Helper } from './shared/Helper';
 import { ClientDataContract } from '../../../../src/contracts/clientDataContract';
 import { DataEventHandlerFactory } from './dataEventHandling/dataEventHandlerFactory';
 import { IDataEvent } from 'msteams-app-questionly.common';
+import { ParticipantRoles } from '../../../enums/ParticipantRoles';
+import { getCurrentParticipantRole, isPresenterOrOrganizer } from './shared/meetingUtility';
+import EmptyTile from './MeetingPanel/EmptyTile';
 
-const EmptySessionImage = require('./../../web/assets/create_session.png');
+const collaborationImage = require('./../../web/assets/collaboration.png');
+const noSessionImageForAttendees = require('./../../web/assets/relax_and_wait.png');
+
 /**
  * Properties for the MeetingPanel React component
  */
@@ -39,6 +44,14 @@ export interface MeetingPanelState {
      * state variable denoting if there are new updates on qna session.
      */
     showNewUpdatesButton: boolean;
+    /**
+     * current user's role in meeting.
+     */
+    userRole: ParticipantRoles;
+    /**
+     * boolean representing if any active session is ended.
+     */
+    isActiveSessionEnded: boolean;
 }
 class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState> {
     /**
@@ -59,6 +72,8 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
                 description: '',
             },
             showNewUpdatesButton: false,
+            userRole: ParticipantRoles.Attendee,
+            isActiveSessionEnded: false,
         };
     }
 
@@ -67,9 +82,31 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
     }
 
     /**
+     * Fetches current user role and sets state accordingly.
+     */
+    private async updateUserRole() {
+        try {
+            const userRole = await getCurrentParticipantRole(this.props.httpService, this.props.teamsTabContext.chatId);
+            this.setState({ userRole: userRole });
+        } catch (error) {
+            // TODO: handle this as part of error handling story, Task:1475400.
+            this.props.appInsights.trackException({
+                exception: error,
+                severityLevel: SeverityLevel.Error,
+                properties: {
+                    meetingId: this.props.teamsTabContext.meetingId,
+                    userAadObjectId: this.props.teamsTabContext.userObjectId,
+                },
+            });
+        }
+    }
+
+    /**
      * Shows loader and updates entire content of the screen.
      */
-    private updateContent = () => {
+    private updateContent = async () => {
+        this.setState({ showLoader: true });
+        await this.updateUserRole();
         this.signalRComponent?.refreshConnection();
         this.setState({ showLoader: true });
         this.setState({ showNewUpdatesButton: false });
@@ -97,7 +134,10 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
      */
     private updateActiveSessionData = (sessionData: ClientDataContract.QnaSession | null) => {
         if (sessionData === null) {
-            this.setState({ activeSessionData: this.props.helper.createEmptyActiveSessionData() });
+            this.setState({
+                activeSessionData: this.props.helper.createEmptyActiveSessionData(),
+                isActiveSessionEnded: true,
+            });
         } else {
             this.setState({ activeSessionData: sessionData });
         }
@@ -134,6 +174,7 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
                 .then((response: any) => {
                     this.setState({
                         showLoader: false,
+                        isActiveSessionEnded: true,
                         activeSessionData: this.props.helper.createEmptyActiveSessionData(),
                     });
                 })
@@ -272,33 +313,46 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
     }
 
     /**
-     * Show this screen when no questions posted
-     */
-    private noQuestionDesign(image: string, text: string) {
-        return (
-            <div className="no-question">
-                <Image className="create-session" alt="image" src={image} />
-                <Flex.Item align="center">
-                    <Text className="text-caption-panel" content={text} />
-                </Flex.Item>
-            </div>
-        );
-    }
-
-    /**
      * Landing page for meeting panel
      */
     private createNewSessionLayout() {
+        const isUserPresenterOrOrganizer = isPresenterOrOrganizer(this.state.userRole);
+        let image: string;
+        let text1: string;
+        let text2: string | undefined;
+
+        if (isUserPresenterOrOrganizer) {
+            image = collaborationImage;
+            text1 = 'Ready to field questions?';
+        } else {
+            image = noSessionImageForAttendees;
+
+            if (this.state.isActiveSessionEnded) {
+                text1 = 'Q&A session ended';
+                text2 = 'Thanks to everyone who participated';
+            } else {
+                text1 = "Once the Q&A starts, you'll be able to ask and upvote questions here";
+            }
+        }
+
         return (
             <React.Fragment>
-                <QnASessionHeader title={'Start a Q&A session'} onClickRefreshSession={this.updateContent} onClickEndSession={this.endActiveSession} showToolBar={false} />
+                <QnASessionHeader
+                    userRole={this.state.userRole}
+                    title={'Start a Q&A session'}
+                    onClickRefreshSession={this.updateContent}
+                    onClickEndSession={this.endActiveSession}
+                    showToolBar={false}
+                />
                 <Flex hAlign="center" vAlign="center">
-                    {this.noQuestionDesign(EmptySessionImage, 'Ready to field questions?')}
-                    <Flex.Item align="center">
-                        <Button className="button" onClick={this.onShowTaskModule}>
-                            <Button.Content>Start a Q&A session</Button.Content>
-                        </Button>
-                    </Flex.Item>
+                    <EmptyTile image={image} line1={text1} line2={text2} />
+                    {isUserPresenterOrOrganizer && (
+                        <Flex.Item align="center">
+                            <Button className="button" onClick={this.onShowTaskModule}>
+                                <Button.Content>Start a Q&A session</Button.Content>
+                            </Button>
+                        </Flex.Item>
+                    )}
                 </Flex>
             </React.Fragment>
         );
@@ -340,11 +394,11 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
         const sessionTitle = stateVal.activeSessionData.title ?? stateVal.input.title;
         return (
             <React.Fragment>
-                <QnASessionHeader title={sessionTitle} onClickRefreshSession={this.updateContent} onClickEndSession={this.endActiveSession} showToolBar={true} />
+                <QnASessionHeader userRole={this.state.userRole} title={sessionTitle} onClickRefreshSession={this.updateContent} onClickEndSession={this.endActiveSession} showToolBar={true} />
                 {stateVal.activeSessionData.unansweredQuestions.length > 0 || stateVal.activeSessionData.answeredQuestions.length > 0 ? (
-                    <QuestionsList activeSessionData={stateVal.activeSessionData} httpService={this.props.httpService} teamsTabContext={this.props.teamsTabContext} />
+                    <QuestionsList userRole={stateVal.userRole} activeSessionData={stateVal.activeSessionData} httpService={this.props.httpService} teamsTabContext={this.props.teamsTabContext} />
                 ) : (
-                    this.noQuestionDesign(EmptySessionImage, 'Q & A session is live...Ask away!')
+                    <EmptyTile image={collaborationImage} line1="Q & A session is live..." line2="Ask away!" />
                 )}
                 <NewQuestion
                     activeSessionData={stateVal.activeSessionData}
