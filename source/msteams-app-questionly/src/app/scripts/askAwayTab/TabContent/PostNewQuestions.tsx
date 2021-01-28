@@ -1,10 +1,15 @@
 import './../index.scss';
 import * as React from 'react';
-import { Flex, Text, Button, Image, FlexItem, Card, Divider, Avatar, TextArea } from '@fluentui/react-northstar';
-import Badge from '../TabContent/Badge';
+import { Flex, Text, Button, Image, FlexItem, Card, Divider, Avatar, TextArea, ThemePrepared } from '@fluentui/react-northstar';
+import Badge from '../shared/Badge';
 import { useState } from 'react';
 import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
+import { withTheme } from '../shared/WithTheme';
 
+let moment = require('moment');
+interface ThemeProps {
+    theme: ThemePrepared;
+}
 /**
  * Properties for the PostNewQuestions React component
  */
@@ -13,17 +18,10 @@ export interface PostNewQuestionsProps {
     onPostNewQuestion: Function;
 }
 
-const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps> = (props) => {
-    const [question, setQuestion] = useState('');
+const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps & ThemeProps> = (props) => {
+    const colorScheme = props.theme.siteVariables.colorScheme;
 
-    const formatDate = (dateTimeCreated) => {
-        if (dateTimeCreated) {
-            const date = new Date(dateTimeCreated);
-            return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
-        } else {
-            return ' ';
-        }
-    };
+    const [question, setQuestion] = useState('');
 
     const submitQuestion = () => {
         if (question) {
@@ -34,14 +32,21 @@ const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps> = (props)
 
     return (
         <div className="post-new-question">
-            <Card aria-roledescription="card" className="card-layout">
+            <Card aria-roledescription="card" style={{ backgroundColor: colorScheme.default.background }} className="card-layout">
                 <Card.Header fitted>
                     <Flex gap="gap.small">
                         <Flex column>
-                            <Badge className={props.activeSessionData.isActive ? 'badge--success' : 'badge--disabled'} text={props.activeSessionData.isActive ? 'Live' : 'Closed'} />
+                            <Badge
+                                styles={
+                                    props.activeSessionData.isActive
+                                        ? { backgroundColor: colorScheme.green.background, color: colorScheme.green.foreground1 }
+                                        : { backgroundColor: colorScheme.default.background5, color: colorScheme.green.foreground4 }
+                                }
+                                text={props.activeSessionData.isActive ? 'Live' : 'Closed'}
+                            />
                             <Text
                                 className="date-content-format"
-                                content={`Created on ${formatDate(props.activeSessionData.dateTimeCreated)} by ${props.activeSessionData.hostUser.name}`}
+                                content={`Created on ${moment(props.activeSessionData.dateTimeCreated).format('L')} by ${props.activeSessionData.hostUser.name}`}
                                 size="small"
                             />
                         </Flex>
@@ -78,4 +83,4 @@ const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps> = (props)
         </div>
     );
 };
-export default PostNewQuestions;
+export default withTheme(PostNewQuestions);

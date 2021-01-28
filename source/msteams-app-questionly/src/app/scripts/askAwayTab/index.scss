@@ -15,6 +15,7 @@
     .text-configtab-caption {
         font-size: 18px;
         line-height: 24px;
+        color: #252423;
         font-weight: bold;
         top: 55%;
         position: absolute;
@@ -22,6 +23,7 @@
     .text-caption {
         font-size: 18px;
         line-height: 24px;
+        color: #252423;
         font-weight: bold;
         top: 52%;
         position: absolute;
@@ -29,6 +31,7 @@
     .text-subcaption {
         font-size: 14px;
         line-height: 20px;
+        color: #000000;
         top: 58%;
         position: absolute;
     }
@@ -172,10 +175,6 @@
         }
     }
 }
-/*
- * Common Class
-*/
-
 .badge {
     width: 3.75rem;
     font-family: Segoe UI;
@@ -189,25 +188,71 @@
     margin-bottom: 0.25rem;
 }
 
-#post-new-question {
-    margin: 2rem auto 0 auto;
-    width: 80%;
-    padding: 0.1rem;
-
-    .card-layout {
-        width: 100%;
-        .date-content-format {
-            font-size: 12px;
-            line-height: 16px;
-            padding-top: 0.15rem;
+.tab-content {
+    position: absolute;
+    height: 100%;
+    overflow-x: hidden;
+    width: 100%;
+    .tab-container {
+        margin: 0 auto;
+        width: 86.5%;
+        .post-new-question {
+            margin-top: 2rem;
+            padding: 0.1rem;
+            .card-layout {
+                width: 100%;
+                .date-content-format {
+                    font-size: 12px;
+                    line-height: 16px;
+                    padding-top: 0.15rem;
+                }
+                .session-title {
+                    padding-top: 0.5rem;
+                    font-size: 18px;
+                    line-height: 24px;
+                }
+            }
         }
-        .session-title {
-            padding-top: 0.3rem;
-            font-size: 18px;
-            line-height: 24px;
+        .question-container {
+            .svg-position {
+                position: relative;
+                top: 2px;
+                left: -5px;
+            }
+            .question-layout {
+                box-shadow: 0px 0.15px 0.45px rgba(0, 0, 0, 0.11), 0px 0.8px 1.8px rgba(0, 0, 0, 0.13);
+                border-radius: 4px;
+                margin-top: 0.5rem;
+                margin-bottom: 0.5rem;
+                .ui-reaction {
+                    position: relative;
+                    right: 1rem;
+                }
+                .badge {
+                    position: relative;
+                    top: 0.2rem;
+                }
+                .text-format {
+                    position: relative;
+                    top: -0.5rem;
+                }
+            }
+            .padding-none {
+                padding: 0;
+                span {
+                    font-size: 12px;
+                    line-height: 16px;
+                }
+            }
+            .btn-text-font-bold {
+                span {
+                    font-weight: 700;
+                }
+            }
         }
     }
 }
+
 .no-question-layout {
     margin: 0 auto;
     width: 25%;

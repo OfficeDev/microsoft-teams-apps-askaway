@@ -30,6 +30,8 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (p
         return votes.includes(props.teamsTabContext.userObjectId);
     };
 
+    const colorScheme = props.theme.siteVariables.colorScheme;
+
     /**
      * Display question list when session is active
      * @param questions - question data
@@ -37,8 +39,6 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (p
      * @param tabValue - true/false
      */
     const showQuestions = (questions, questionType, tabValue) => {
-        const colorScheme = props.theme.siteVariables.colorScheme;
-
         if (questions.length > 0) {
             return (
                 <React.Fragment>
@@ -46,7 +46,7 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (p
                     {((questionType === CONST.TAB_QUESTIONS.UNANSWERED_Q && tabValue) || (questionType === CONST.TAB_QUESTIONS.ANSWERED_Q && tabValue)) &&
                         questions.map((q) => {
                             return (
-                                <div key={q.id} className="question-layout">
+                                <div key={q.id} style={{ backgroundColor: colorScheme.default.background }} className="question-layout">
                                     <Flex gap="gap.small">
                                         <Flex.Item size="size.large">
                                             <div>
@@ -56,8 +56,8 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (p
                                                     <Badge
                                                         styles={
                                                             CONST.TAB_QUESTIONS.UNANSWERED_Q === questionType
-                                                                ? { backgroundColor: colorScheme.brand.background, color: colorScheme.brand.foreground4 }
-                                                                : { backgroundColor: colorScheme.green.background, color: colorScheme.green.foreground1 }
+                                                                ? { backgroundColor: colorScheme.brand.background, color: colorScheme.brand.foreground4, fontSize: '10px', lineHeight: '12px' }
+                                                                : { backgroundColor: colorScheme.green.background, color: colorScheme.green.foreground1, fontSize: '10px', lineHeight: '12px' }
                                                         }
                                                         text={CONST.TAB_QUESTIONS.UNANSWERED_Q === questionType ? 'PENDING' : 'ANSWERED'}
                                                     />
@@ -101,10 +101,18 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (p
      */
     const setIcons = (questionType) => {
         if (questionType === CONST.TAB_QUESTIONS.UNANSWERED_Q) {
-            return isPendingTabOpen ? <ChevronDownMediumIcon size="small" className="svg-position" outline /> : <ChevronEndMediumIcon size="small" className="svg-position" outline />;
+            return isPendingTabOpen ? (
+                <ChevronDownMediumIcon size="small" className="svg-position" outline />
+            ) : (
+                <ChevronEndMediumIcon styles={{ stroke: colorScheme.default.foreground1 }} size="small" className="svg-position" />
+            );
         }
         if (questionType === CONST.TAB_QUESTIONS.ANSWERED_Q) {
-            return isAnsweredTabOpen ? <ChevronDownMediumIcon size="small" className="svg-position" outline /> : <ChevronEndMediumIcon size="small" className="svg-position" outline />;
+            return isAnsweredTabOpen ? (
+                <ChevronDownMediumIcon size="small" className="svg-position" outline />
+            ) : (
+                <ChevronEndMediumIcon styles={{ stroke: colorScheme.default.foreground1 }} size="small" className="svg-position" />
+            );
         }
     };
 
@@ -121,11 +129,20 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (p
         }
     };
 
+    const toggleClass = (questionType) => {
+        if (questionType === CONST.TAB_QUESTIONS.UNANSWERED_Q && !isPendingTabOpen) {
+            return 'btn-text-font-bold';
+        }
+        if (questionType === CONST.TAB_QUESTIONS.ANSWERED_Q && !isAnsweredTabOpen) {
+            return 'btn-text-font-bold';
+        }
+    };
+
     const showTitle = (questionType) => {
         return (
             <Flex className="padding-none" gap="gap.small" padding="padding.medium" vAlign="center">
                 <Button
-                    className="padding-none"
+                    className={`padding-none ${toggleClass(questionType)}`}
                     icon={setIcons(questionType)}
                     text
                     iconPosition="after"
