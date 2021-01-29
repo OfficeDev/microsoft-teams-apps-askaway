@@ -1,0 +1,43 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "keyvaultName": {
+      "type": "string",
+      "metadata": {
+        "description": "key vault name."
+      }
+    },
+    "functionAppName": {
+      "type": "string",
+      "metadata": {
+        "description": "Function app name."
+      }
+    },
+    "backgroundFunctionName": {
+      "type": "string",
+      "metadata": {
+        "description": "Background function name."
+      }
+    },
+    "location": {
+      "type": "string",
+      "metadata": {
+        "description": "Location."
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "name": "[concat(parameters('keyVaultName'),'/BackgroundFunctionKey')]",
+      "apiVersion": "2015-06-01",
+      "location": "[parameters('location')]",
+      "dependsOn": [],
+      "properties": {
+        "contentType": "text/plain",
+        "value": "[listsecrets(resourceId('Microsoft.Web/sites/functions', parameters('functionAppName'), parameters('backgroundFunctionName')),'2015-08-01').key]"
+      }
+    }
+  ]
+}
