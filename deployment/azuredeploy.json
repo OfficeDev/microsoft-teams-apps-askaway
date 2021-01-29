@@ -463,6 +463,15 @@
               "secrets": ["get"],
               "certificates": []
             }
+          },
+          {
+            "tenantId": "[parameters('tenantId')]",
+            "objectId": "[reference(resourceId('Microsoft.Web/sites', variables('functionAppName')), '2016-08-01', 'Full').identity.principalId]",
+            "permissions": {
+              "keys": [],
+              "secrets": ["get"],
+              "certificates": []
+            }
           }
         ],
         "enabledForDeployment": false,
@@ -471,7 +480,8 @@
         "enableSoftDelete": true
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Web/sites', variables('botAppName'))]"
+        "[resourceId('Microsoft.Web/sites', variables('botAppName'))]",
+        "[resourceId('Microsoft.Web/sites', variables('functionAppName'))]"
       ]
     },
     {
@@ -531,6 +541,38 @@
       ],
       "properties": {
         "value": "[parameters('botClientSecret')]",
+        "attributes": {
+          "enabled": true
+        }
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2016-10-01",
+      "name": "[concat(variables('keyvaultName'), '/AzureSignalRConnectionString')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyvaultName'))]",
+        "[resourceId('Microsoft.SignalRService/signalR', variables('signalRName'))]"
+      ],
+      "properties": {
+        "value": "[listKeys(resourceId('Microsoft.SignalRService/SignalR', variables('signalRName')), providers('Microsoft.SignalRService','SignalR').apiVersions[0]).primaryConnectionString]",
+        "attributes": {
+          "enabled": true
+        }
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2016-10-01",
+      "name": "[concat(variables('keyvaultName'), '/AzureWebJobsStorage')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyvaultName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+      ],
+      "properties": {
+        "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listkeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2015-05-01-preview').key1,';')]",
         "attributes": {
           "enabled": true
         }
@@ -718,6 +760,9 @@
       "name": "[variables('functionAppName')]",
       "location": "[parameters('location')]",
       "kind": "functionapp",
+      "identity": {
+        "type": "SystemAssigned"
+      },
       "dependsOn": [
         "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
         "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
@@ -751,7 +796,7 @@
             },
             {
               "name": "AzureWebJobsStorage",
-              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listkeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2015-05-01-preview').key1,';')]"
+              "value": "[concat('@Microsoft.KeyVault(SecretUri=https://', variables('keyvaultName'), '.vault.azure.net/secrets/AzureWebJobsStorage/)')]"
             },
             {
               "name": "WEBSITE_NODE_DEFAULT_VERSION",
@@ -759,7 +804,7 @@
             },
             {
               "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-              "value": "[reference(resourceId('Microsoft.Insights/components/', variables('botAppInsightsName')), '2015-05-01').InstrumentationKey]"
+              "value": "[concat('@Microsoft.KeyVault(SecretUri=https://', variables('keyvaultName'), '.vault.azure.net/secrets/ApplicationInsightsInstrumentationKey/)')]"
             },
             {
               "name": "FUNCTIONS_WORKER_RUNTIME",
@@ -779,11 +824,11 @@
             },
             {
               "name": "MongoDbUri",
-              "value": "[listConnectionStrings(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('cosmosDbName')), '2019-12-12').connectionStrings[0].connectionString]"
+              "value": "[concat('@Microsoft.KeyVault(SecretUri=https://', variables('keyvaultName'), '.vault.azure.net/secrets/MongoDbUri/)')]"
             },
             {
               "name": "AzureSignalRConnectionString",
-              "value": "[listKeys(resourceId('Microsoft.SignalRService/SignalR', variables('signalRName')), providers('Microsoft.SignalRService','SignalR').apiVersions[0]).primaryConnectionString]"
+              "value": "[concat('@Microsoft.KeyVault(SecretUri=https://', variables('keyvaultName'), '.vault.azure.net/secrets/AzureSignalRConnectionString/)')]"
             },
             {
               "name": "MicrosoftAppId",
@@ -827,7 +872,11 @@
             },
             {
               "name": "MicrosoftAppPassword",
-              "value": "[parameters('botClientSecret')]"
+              "value": "[concat('@Microsoft.KeyVault(SecretUri=https://', variables('keyvaultName'), '.vault.azure.net/secrets/MicrosoftAppPassword/)')]"
+            },
+            {
+              "name": "AvatarKey",
+              "value": "[concat('@Microsoft.KeyVault(SecretUri=https://', variables('keyvaultName'), '.vault.azure.net/secrets/AvatarKey/)')]"
             },
             {
               "name": "FUNCTIONS_EXTENSION_VERSION",
