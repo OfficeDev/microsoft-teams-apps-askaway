@@ -29,10 +29,14 @@ import {
   title,
 } from "../src/constants/notificationBubbleConstants";
 import { exceptionLogger } from "../src/utils/exceptionTracking";
+import {
+  getAvatarKey,
+  getMicrosoftAppPassword,
+} from "../src/utils/keyvaultUtility";
 
 let adapter = new BotFrameworkAdapter({
   appId: process.env.MicrosoftAppId.toString(),
-  appPassword: process.env.MicrosoftAppPassword.toString(),
+  appPassword: getMicrosoftAppPassword(),
 });
 
 const activityFunction: AzureFunction = async function (
@@ -54,7 +58,7 @@ const activityFunction: AzureFunction = async function (
     questionDataService,
     qnaSessionId,
     isSessionEnded,
-    process.env.AvatarKey
+    getAvatarKey()
   );
   const card: IAdaptiveCard = result.card;
 
