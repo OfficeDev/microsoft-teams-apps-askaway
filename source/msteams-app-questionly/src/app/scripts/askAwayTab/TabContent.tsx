@@ -13,6 +13,14 @@ import NoQuestionDesign from './TabContent/NoQuestionDesign';
 import TabQuestions from './TabContent/TabQuestions';
 import TabCreateSession from './TabContent/TabCreateSession';
 import { ClientDataContract } from '../../../../src/contracts/clientDataContract';
+import {
+    handleTaskModuleErrorForCreateQnASessionFlow,
+    handleTaskModuleErrorForEndQnASessionFlow,
+    handleTaskModuleResponseForSuccessfulCreateQnASessionFlow,
+    handleTaskModuleResponseForEndQnASessionFlow,
+    openStartQnASessionTaskModule,
+    handleEndQnASessionFlow,
+} from './task-modules-utility/taskModuleHelper';
 
 export interface TabContentProps {
     teamsTabContext: microsoftTeams.Context;

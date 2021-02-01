@@ -26,8 +26,10 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (p
 
     const [isAnsweredTabOpen, setAnsweredTabOpen] = useState(true);
 
-    const isUserLikedQuestion = (votes: Array<any>) => {
-        return votes.includes(props.teamsTabContext.userObjectId);
+    const isUserLikedQuestion = (votes: Array<string>) => {
+        if (props.teamsTabContext.userObjectId) {
+            return votes.includes(props.teamsTabContext.userObjectId);
+        }
     };
 
     const colorScheme = props.theme.siteVariables.colorScheme;
@@ -37,7 +39,7 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (p
      * @param isActiveSession - 'true' or 'false' identifies session is active
      * @param authorId - user id as 'string'
      */
-    const isUserOwnQuestion = (isActiveSession, authorId) => {
+    const isUserOwnQuestion = (isActiveSession: boolean, authorId: string) => {
         return isActiveSession && props.teamsTabContext.userObjectId === authorId ? false : true;
     };
 
@@ -45,14 +47,14 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (p
      * Display question list when session is active
      * @param questions - question data
      * @param questionType - 'answered' or 'unanswered' will be the value
-     * @param tabValue - 'true' or 'false' will be the value
+     * @param isQuestionsTabexpanded - 'true' or 'false' will be the value
      */
-    const showQuestions = (questions, questionType, tabValue) => {
+    const showQuestions = (questions, questionType, isQuestionsTabexpanded) => {
         if (questions.length > 0) {
             return (
                 <React.Fragment>
                     {showTitle(questionType)}
-                    {((questionType === CONST.TAB_QUESTIONS.UNANSWERED_Q && tabValue) || (questionType === CONST.TAB_QUESTIONS.ANSWERED_Q && tabValue)) &&
+                    {((questionType === CONST.TAB_QUESTIONS.UNANSWERED_Q && isQuestionsTabexpanded) || (questionType === CONST.TAB_QUESTIONS.ANSWERED_Q && isQuestionsTabexpanded)) &&
                         questions.map((question) => {
                             return (
                                 <div key={question.id} style={{ backgroundColor: colorScheme.default.background, border: `1px solid ${colorScheme.onyx.border1}` }} className="question-layout">
@@ -76,7 +78,7 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (p
                                         <Flex.Item push>
                                             <Flex gap="gap.small" vAlign="center" styles={{ position: 'relative', right: '1.5rem' }}>
                                                 <Button
-                                                    // disabled={isUserOwnQuestion(questions.isActive, question.author.id)}
+                                                    disabled={isUserOwnQuestion(questions.isActive, question.author.id)}
                                                     onClick={() =>
                                                         props.onClickAction({
                                                             question,
