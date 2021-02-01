@@ -150,7 +150,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId api', () => {
 
         expect(result).toBeDefined();
         expect(result.status).toEqual(StatusCodes.INTERNAL_SERVER_ERROR);
-        expect(result.text).toEqual(testError.message);
+        expect(result.body.message).toEqual(testError.message);
     });
 
     it('validates get ama session api - user is not part of conversation', async () => {
@@ -351,7 +351,7 @@ describe('test conversations/:conversationId/sessions api', () => {
 
         const result = await request(app).get(`/api/conversations/${sampleConversationId}/sessions`);
 
-        expect(result.text).toEqual(errorMessages.UserIsNotPartOfConversationErrorMessage);
+        expect(result.body.message).toEqual(errorMessages.UserIsNotPartOfConversationErrorMessage);
         expect(result.status).toBe(StatusCodes.FORBIDDEN);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(sampleConversationId);
@@ -590,7 +590,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
         const result = await request(app).post(`/api/conversations/${sampleConversationId}/sessions/${testSessionId}/questions`);
 
         expect(result.status).toBe(StatusCodes.BAD_REQUEST);
-        expect(result.text).toEqual("Parameter 'questionContent' is missing in the request");
+        expect(result.body.message).toEqual("Parameter 'questionContent' is missing in the request");
     });
 
     it('questionContent as null in request', async () => {
@@ -599,7 +599,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
         const result = await request(app).post(`/api/conversations/${sampleConversationId}/sessions/${testSessionId}/questions`).send({ questionContent: null });
 
         expect(result.status).toBe(StatusCodes.BAD_REQUEST);
-        expect(result.text).toEqual("Parameter 'questionContent' is missing in the request");
+        expect(result.body.message).toEqual("Parameter 'questionContent' is missing in the request");
     });
 
     it('questionContent as empty string in request', async () => {
@@ -608,7 +608,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
         const result = await request(app).post(`/api/conversations/${sampleConversationId}/sessions/${testSessionId}/questions`).send({ questionContent: '' });
 
         expect(result.status).toBe(StatusCodes.BAD_REQUEST);
-        expect(result.text).toEqual("Parameter 'questionContent' is missing in the request");
+        expect(result.body.message).toEqual("Parameter 'questionContent' is missing in the request");
     });
 
     it('getConversationData throws error', async () => {
@@ -623,7 +623,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
         const result = await request(app).post(`/api/conversations/${sampleConversationId}/sessions/${testSessionId}/questions`).send({ questionContent: testQuestionContent });
 
         expect(result.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
-        expect(result.text).toEqual(testError.message);
+        expect(result.body.message).toEqual(testError.message);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(sampleConversationId);
     });
@@ -649,7 +649,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
         const result = await request(app).post(`/api/conversations/${sampleConversationId}/sessions/${testSessionId}/questions`).send({ questionContent: testQuestionContent });
 
         expect(result.status).toBe(StatusCodes.FORBIDDEN);
-        expect(result.text).toEqual(errorMessages.UserIsNotPartOfConversationErrorMessage);
+        expect(result.body.message).toEqual(errorMessages.UserIsNotPartOfConversationErrorMessage);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(sampleConversationId);
         expect(verifyUserFromConversationId).toBeCalledTimes(1);
@@ -681,7 +681,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
         const result = await request(app).post(`/api/conversations/${sampleConversationId}/sessions/${testSessionId}/questions`).send({ questionContent: testQuestionContent });
 
         expect(result.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
-        expect(result.text).toEqual(testError.message);
+        expect(result.body.message).toEqual(testError.message);
         expect(submitNewQuestion).toBeCalledTimes(1);
         expect(verifyUserFromConversationId).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
@@ -803,7 +803,7 @@ describe('test /conversations/:conversationId/me api', () => {
         const result = await request(app).get(`/api/conversations/${testConversation._id}/me`);
 
         expect(result).toBeDefined();
-        expect(result.text).toEqual(testError.message);
+        expect(result.body.message).toEqual(testError.message);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(testConversation._id);
         expect(getParticipantRole).toBeCalledTimes(1);
@@ -824,7 +824,7 @@ describe('test /conversations/:conversationId/me api', () => {
         const result = await request(app).get(`/api/conversations/${testConversation._id}/me`);
 
         expect(result).toBeDefined();
-        expect(result.text).toEqual(errorMessages.ConversationDoesNotBelongToMeetingChatErrorMessage);
+        expect(result.body.message).toEqual(errorMessages.ConversationDoesNotBelongToMeetingChatErrorMessage);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(testConversation._id);
     });
@@ -846,7 +846,7 @@ describe('test /conversations/:conversationId/me api', () => {
         const result = await request(app).get(`/api/conversations/${testConversation._id}/me`);
 
         expect(result).toBeDefined();
-        expect(result.text).toEqual(testError.message);
+        expect(result.body.message).toEqual(testError.message);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(testConversation._id);
     });
@@ -902,7 +902,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
         const result = await request(app).patch(`/api/conversations/${sampleConversationId}/sessions/${testSessionId}/questions/${testQuestionId}`);
 
         expect(result.status).toBe(StatusCodes.BAD_REQUEST);
-        expect(result.text).toEqual("Parameter 'action' is missing in the request");
+        expect(result.body.message).toEqual("Parameter 'action' is missing in the request");
     });
 
     it('patch action as null in request', async () => {
@@ -912,7 +912,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
         const result = await request(app).patch(`/api/conversations/${sampleConversationId}/sessions/${testSessionId}/questions/${testQuestionId}`).send({ action: null });
 
         expect(result.status).toBe(StatusCodes.BAD_REQUEST);
-        expect(result.text).toEqual("Parameter 'action' is missing in the request");
+        expect(result.body.message).toEqual("Parameter 'action' is missing in the request");
     });
 
     it('patch action as empty string in request', async () => {
@@ -922,7 +922,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
         const result = await request(app).patch(`/api/conversations/${sampleConversationId}/sessions/${testSessionId}/questions/${testQuestionId}`).send({ action: '' });
 
         expect(result.status).toBe(StatusCodes.BAD_REQUEST);
-        expect(result.text).toEqual("Parameter 'action' is missing in the request");
+        expect(result.body.message).toEqual("Parameter 'action' is missing in the request");
     });
 
     it('invalid patch action in request', async () => {
@@ -933,7 +933,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
         const result = await request(app).patch(`/api/conversations/${sampleConversationId}/sessions/${testSessionId}/questions/${testQuestionId}`).send({ action: randomAction });
 
         expect(result.status).toBe(StatusCodes.BAD_REQUEST);
-        expect(result.text).toEqual(`action ${randomAction} is not supported`);
+        expect(result.body.message).toEqual(`action ${randomAction} is not supported`);
     });
 
     it('upVoteQuestion api throws error for upvote action', async () => {
@@ -961,7 +961,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
         const result = await request(app).patch(`/api/conversations/${sampleConversationId}/sessions/${testSessionId}/questions/${testQuestionId}`).send({ action: 'upvote' });
 
         expect(result.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
-        expect(result.text).toEqual(testError.message);
+        expect(result.body.message).toEqual(testError.message);
         expect(upvoteQuestion).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(sampleConversationId);
@@ -1027,7 +1027,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
         const result = await request(app).patch(`/api/conversations/${sampleConversationId}/sessions/${testSessionId}/questions/${testQuestionId}`).send({ action: 'upvote' });
 
         expect(result.status).toBe(StatusCodes.FORBIDDEN);
-        expect(result.text).toEqual(errorMessages.UserIsNotPartOfConversationErrorMessage);
+        expect(result.body.message).toEqual(errorMessages.UserIsNotPartOfConversationErrorMessage);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(sampleConversationId);
         expect(verifyUserFromConversationId).toBeCalledTimes(1);
@@ -1092,7 +1092,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
         const result = await request(app).patch(`/api/conversations/${sampleConversationId}/sessions/${testSessionId}/questions/${testQuestionId}`).send({ action: 'downvote' });
 
         expect(result.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
-        expect(result.text).toEqual(testError.message);
+        expect(result.body.message).toEqual(testError.message);
         expect(downvoteQuestion).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(sampleConversationId);
@@ -1119,7 +1119,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
         const result = await request(app).patch(`/api/conversations/${sampleConversationId}/sessions/${testSessionId}/questions/${testQuestionId}`).send({ action: 'downvote' });
 
         expect(result.status).toBe(StatusCodes.FORBIDDEN);
-        expect(result.text).toEqual(errorMessages.UserIsNotPartOfConversationErrorMessage);
+        expect(result.body.message).toEqual(errorMessages.UserIsNotPartOfConversationErrorMessage);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(sampleConversationId);
         expect(verifyUserFromConversationId).toBeCalledTimes(1);
@@ -1147,7 +1147,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
         const result = await request(app).patch(`/api/conversations/${sampleConversationId}/sessions/${testSessionId}/questions/${testQuestionId}`).send({ action: 'markAnswered' });
 
         expect(result.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
-        expect(result.text).toEqual(testError.message);
+        expect(result.body.message).toEqual(testError.message);
         expect(markQuestionAsAnswered).toBeCalledTimes(1);
         expect(<any>conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(<any>conversationDataService.getConversationData).toBeCalledWith(sampleConversationId);
@@ -1205,7 +1205,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
         const result = await request(app).patch(`/api/conversations/${sampleConversationId}/sessions/${testSessionId}/questions/${testQuestionId}`).send({ action: 'markAnswered' });
 
         expect(result.status).toBe(StatusCodes.FORBIDDEN);
-        expect(result.text).toEqual('Only a Presenter or an Organizer can mark question as answered.');
+        expect(result.body.message).toEqual('Only a Presenter or an Organizer can mark question as answered.');
         expect(<any>conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(<any>conversationDataService.getConversationData).toBeCalledWith(sampleConversationId);
     });
@@ -1255,7 +1255,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
         const result = await request(app).patch(`/api/conversations/${sampleConversationId}/sessions/${testSessionId}`);
 
         expect(result.status).toBe(StatusCodes.BAD_REQUEST);
-        expect(result.text).toEqual("Parameter 'action' is missing in the request");
+        expect(result.body.message).toEqual("Parameter 'action' is missing in the request");
     });
 
     it('patch action as null in request', async () => {
@@ -1264,7 +1264,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
         const result = await request(app).patch(`/api/conversations/${sampleConversationId}/sessions/${testSessionId}`).send({ action: null });
 
         expect(result.status).toBe(StatusCodes.BAD_REQUEST);
-        expect(result.text).toEqual("Parameter 'action' is missing in the request");
+        expect(result.body.message).toEqual("Parameter 'action' is missing in the request");
     });
 
     it('patch action as empty string in request', async () => {
@@ -1273,7 +1273,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
         const result = await request(app).patch(`/api/conversations/${sampleConversationId}/sessions/${testSessionId}`).send({ action: '' });
 
         expect(result.status).toBe(StatusCodes.BAD_REQUEST);
-        expect(result.text).toEqual("Parameter 'action' is missing in the request");
+        expect(result.body.message).toEqual("Parameter 'action' is missing in the request");
     });
 
     it('invalid patch action in request', async () => {
@@ -1283,7 +1283,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
         const result = await request(app).patch(`/api/conversations/${sampleConversationId}/sessions/${testSessionId}`).send({ action: randomAction });
 
         expect(result.status).toBe(StatusCodes.BAD_REQUEST);
-        expect(result.text).toEqual(`action ${randomAction} is not supported`);
+        expect(result.body.message).toEqual(`action ${randomAction} is not supported`);
     });
 
     it('endQnASession api throws error', async () => {
@@ -1308,7 +1308,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
         const result = await request(app).patch(`/api/conversations/${sampleConversationId}/sessions/${testSessionId}`).send({ action: 'end' });
 
         expect(result.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
-        expect(result.text).toEqual(testError.message);
+        expect(result.body.message).toEqual(testError.message);
         expect(endQnASession).toBeCalledTimes(1);
         expect(<any>conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(<any>conversationDataService.getConversationData).toBeCalledWith(sampleConversationId);
@@ -1325,7 +1325,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
         const result = await request(app).patch(`/api/conversations/${sampleConversationId}/sessions/${testSessionId}`).send({ action: 'end' });
 
         expect(result.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
-        expect(result.text).toEqual(testError.message);
+        expect(result.body.message).toEqual(testError.message);
         expect(<any>conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(<any>conversationDataService.getConversationData).toBeCalledWith(sampleConversationId);
     });
@@ -1556,7 +1556,7 @@ describe('test get /:conversationId/activesessions api', () => {
 
         const result = await request(app).get(`/api/conversations/${sampleConversationId}/activesessions`);
         expect(result.status).toBe(StatusCodes.FORBIDDEN);
-        expect(result.text).toEqual(errorMessages.UserIsNotPartOfConversationErrorMessage);
+        expect(result.body.message).toEqual(errorMessages.UserIsNotPartOfConversationErrorMessage);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(sampleConversationId);
         expect(verifyUserFromConversationId).toBeCalledTimes(1);

@@ -92,9 +92,13 @@
             top: 55%;
             position: absolute;
             text-align: center;
-            width: 70%;
-            left: 25%;
-            max-inline-size: 9rem;
+            left: 50%;
+            width: 200px;
+            transform: translate(-50%, -50%);
+
+            .text-section {
+                display: block;
+            }
         }
         .create-session {
             top: 35%;
@@ -102,6 +106,8 @@
             transform: translate(-50%, -50%);
             position: absolute;
             width: 17rem;
+            width: 200px;
+            height: 200px;
         }
     }
     .session-title {
