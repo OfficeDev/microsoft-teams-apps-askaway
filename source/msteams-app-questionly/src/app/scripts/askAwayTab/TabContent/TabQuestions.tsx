@@ -47,14 +47,14 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (p
      * Display question list when session is active
      * @param questions - question data
      * @param questionType - 'answered' or 'unanswered' will be the value
-     * @param isQuestionsTabexpanded - 'true' or 'false' will be the value
+     * @param isQuestionsTabExpanded - 'true' or 'false' will be the value
      */
-    const showQuestions = (questions, questionType, isQuestionsTabexpanded) => {
+    const showQuestions = (questions, questionType, isQuestionsTabExpanded) => {
         if (questions.length > 0) {
             return (
                 <React.Fragment>
                     {showTitle(questionType)}
-                    {((questionType === CONST.TAB_QUESTIONS.UNANSWERED_Q && isQuestionsTabexpanded) || (questionType === CONST.TAB_QUESTIONS.ANSWERED_Q && isQuestionsTabexpanded)) &&
+                    {((questionType === CONST.TAB_QUESTIONS.UNANSWERED_Q && isQuestionsTabExpanded) || (questionType === CONST.TAB_QUESTIONS.ANSWERED_Q && isQuestionsTabExpanded)) &&
                         questions.map((question) => {
                             return (
                                 <div key={question.id} style={{ backgroundColor: colorScheme.default.background, border: `1px solid ${colorScheme.onyx.border1}` }} className="question-layout">
@@ -86,7 +86,7 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (p
                                                             actionValue: isUserLikedQuestion(question.voterAadObjectIds) ? CONST.TAB_QUESTIONS.DOWN_VOTE : CONST.TAB_QUESTIONS.UP_VOTE,
                                                         })
                                                     }
-                                                    icon={isUserLikedQuestion(question.voterAadObjectIds) ? <LikeIconFilled /> : <LikeIcon outline />}
+                                                    icon={isUserLikedQuestion(question.voterAadObjectIds) ? <LikeIconFilled style={{ fill: colorScheme.brand.background }} /> : <LikeIcon outline />}
                                                     styles={{ marginRight: '0 !important' }}
                                                     iconOnly
                                                     text
