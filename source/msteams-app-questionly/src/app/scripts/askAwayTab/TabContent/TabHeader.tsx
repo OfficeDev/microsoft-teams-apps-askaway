@@ -1,6 +1,6 @@
 import './../index.scss';
 import * as React from 'react';
-import { Flex, Button, FlexItem } from '@fluentui/react-northstar';
+import { Flex, Button, FlexItem, Divider } from '@fluentui/react-northstar';
 import { SwitchIcon } from '../shared/Icons/SwitchIcon';
 import { AddIcon, RetryIcon } from '@fluentui/react-icons-northstar';
 import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
@@ -17,7 +17,7 @@ export interface TabHeaderProps {
 const TabHeader: React.FunctionComponent<TabHeaderProps> = (props) => {
     return (
         <React.Fragment>
-            <Flex gap="gap.small">
+            <Flex gap="gap.small" className="tab-nav-header">
                 <Button
                     text
                     onClick={() => {
@@ -29,7 +29,7 @@ const TabHeader: React.FunctionComponent<TabHeaderProps> = (props) => {
                 </Button>
                 <Button
                     text
-                    disabled={props.activeSessionData && props.activeSessionData.isActive ? true : false}
+                    disabled={props.activeSessionData && props.activeSessionData.isActive}
                     onClick={() => {
                         props.showTaskModule();
                     }}
@@ -44,17 +44,18 @@ const TabHeader: React.FunctionComponent<TabHeaderProps> = (props) => {
                 {props.activeSessionData && props.activeSessionData.sessionId && (
                     <FlexItem push>
                         <Button
-                            disabled={props.activeSessionData && props.activeSessionData.isActive ? false : true}
+                            disabled={props.activeSessionData && !props.activeSessionData.isActive}
                             primary
                             onClick={(e) => {
                                 props.endSession(e);
                             }}
-                            size="small"
+                            size="medium"
                             content="End session"
                         />
                     </FlexItem>
                 )}
             </Flex>
+            <Divider />
         </React.Fragment>
     );
 };

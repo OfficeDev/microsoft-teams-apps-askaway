@@ -361,8 +361,12 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
      */
     public render() {
         const stateVal = this.state;
-        if (stateVal.showLoader) return <Loader label="Loading Meeting Information" />;
-
+        if (stateVal.showLoader)
+            return (
+                <div className="loader">
+                    <Loader label="Loading Meeting Information" />
+                </div>
+            );
         return (
             <React.Fragment>
                 <SignalRLifecycle

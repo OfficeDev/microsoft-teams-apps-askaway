@@ -205,7 +205,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
 
     private handleClickAction = (event) => {
         this.props.httpService
-            .patch(`/conversations/${this.props.teamsTabContext.chatId}/sessions/${this.state.activeSessionData.sessionId}/questions/${event.q['id']}`, { action: event.actionValue })
+            .patch(`/conversations/${this.props.teamsTabContext.chatId}/sessions/${this.state.activeSessionData.sessionId}/questions/${event.question['id']}`, { action: event.actionValue })
             .then((response: any) => {
                 if (response.data && response.data.id) {
                     let questions = this.state.activeSessionData[event.key];

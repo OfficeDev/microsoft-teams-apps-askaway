@@ -45,7 +45,7 @@ const Question: React.FunctionComponent<QuestionCompProps> = (props) => {
                             <Flex vAlign="center" className="like-icon">
                                 {isMouseHovered && renderHoverElement}
                                 <Button
-                                    disabled={userId === question.author.id}
+                                    // disabled={userId === question.author.id}
                                     onClick={() =>
                                         onClickAction({
                                             question,

@@ -32,7 +32,7 @@ const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps & ThemePro
 
     return (
         <div className="post-new-question">
-            <Card aria-roledescription="card" style={{ backgroundColor: colorScheme.default.background }} className="card-layout">
+            <Card aria-roledescription="card" style={{ backgroundColor: colorScheme.default.background, borderColor: colorScheme.onyx.border1 }} className="card-layout">
                 <Card.Header fitted>
                     <Flex gap="gap.small">
                         <Flex column>
@@ -60,11 +60,12 @@ const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps & ThemePro
                 {props.activeSessionData.isActive && (
                     <Card.Footer>
                         <Divider />
-                        <Flex styles={{ paddingTop: '0.3rem', marginBottom: '-1rem' }} gap="gap.small" vAlign="center">
+                        <Flex className="question-input-flex" gap="gap.small" vAlign="center">
                             <Avatar size="medium" name={props.activeSessionData.hostUser.name} />
                             <TextArea
-                                styles={{ paddingBottom: '0rem', height: '2.3rem' }}
+                                className="question-input"
                                 fluid
+                                inverted
                                 maxLength={250}
                                 placeholder="Type a question here"
                                 onChange={(e) => {

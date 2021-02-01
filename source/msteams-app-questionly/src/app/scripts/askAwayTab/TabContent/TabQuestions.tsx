@@ -26,17 +26,26 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (p
 
     const [isAnsweredTabOpen, setAnsweredTabOpen] = useState(true);
 
-    const isUserLikedQuestion = (votes) => {
+    const isUserLikedQuestion = (votes: Array<any>) => {
         return votes.includes(props.teamsTabContext.userObjectId);
     };
 
     const colorScheme = props.theme.siteVariables.colorScheme;
 
     /**
+     * Identifies user own questions
+     * @param isActiveSession - 'true' or 'false' identifies session is active
+     * @param authorId - user id as 'string'
+     */
+    const isUserOwnQuestion = (isActiveSession, authorId) => {
+        return isActiveSession && props.teamsTabContext.userObjectId === authorId ? false : true;
+    };
+
+    /**
      * Display question list when session is active
      * @param questions - question data
-     * @param questionType - answered/unanswered
-     * @param tabValue - true/false
+     * @param questionType - 'answered' or 'unanswered' will be the value
+     * @param tabValue - 'true' or 'false' will be the value
      */
     const showQuestions = (questions, questionType, tabValue) => {
         if (questions.length > 0) {
@@ -44,22 +53,22 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (p
                 <React.Fragment>
                     {showTitle(questionType)}
                     {((questionType === CONST.TAB_QUESTIONS.UNANSWERED_Q && tabValue) || (questionType === CONST.TAB_QUESTIONS.ANSWERED_Q && tabValue)) &&
-                        questions.map((q) => {
+                        questions.map((question) => {
                             return (
-                                <div key={q.id} style={{ backgroundColor: colorScheme.default.background }} className="question-layout">
+                                <div key={question.id} style={{ backgroundColor: colorScheme.default.background, border: `1px solid ${colorScheme.onyx.border1}` }} className="question-layout">
                                     <Flex gap="gap.small">
                                         <Flex.Item size="size.large">
                                             <div>
                                                 <Flex vAlign="center" gap="gap.small" padding="padding.medium">
-                                                    <Avatar name={q.author.name} />
-                                                    <Text content={q.author.name} />
+                                                    <Avatar size="small" name={question.author.name} />
+                                                    <Text className="author-name" content={question.author.name} />
                                                     <Badge
                                                         styles={
                                                             CONST.TAB_QUESTIONS.UNANSWERED_Q === questionType
-                                                                ? { backgroundColor: colorScheme.brand.background, color: colorScheme.brand.foreground4, fontSize: '10px', lineHeight: '12px' }
-                                                                : { backgroundColor: colorScheme.green.background, color: colorScheme.green.foreground1, fontSize: '10px', lineHeight: '12px' }
+                                                                ? { backgroundColor: colorScheme.brand.background, color: colorScheme.brand.foreground4 }
+                                                                : { backgroundColor: colorScheme.green.background, color: colorScheme.green.foreground1 }
                                                         }
-                                                        text={CONST.TAB_QUESTIONS.UNANSWERED_Q === questionType ? 'PENDING' : 'ANSWERED'}
+                                                        text={CONST.TAB_QUESTIONS.UNANSWERED_Q === questionType ? 'Pending' : 'Answered'}
                                                     />
                                                 </Flex>
                                             </div>
@@ -67,25 +76,25 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (p
                                         <Flex.Item push>
                                             <Flex gap="gap.small" vAlign="center" styles={{ position: 'relative', right: '1.5rem' }}>
                                                 <Button
-                                                    disabled={questions.isActive && props.teamsTabContext.userObjectId === q.author.id ? false : true}
+                                                    // disabled={isUserOwnQuestion(questions.isActive, question.author.id)}
                                                     onClick={() =>
                                                         props.onClickAction({
-                                                            q,
+                                                            question,
                                                             key: questionType,
-                                                            actionValue: isUserLikedQuestion(q.voterAadObjectIds) ? CONST.TAB_QUESTIONS.DOWN_VOTE : CONST.TAB_QUESTIONS.UP_VOTE,
+                                                            actionValue: isUserLikedQuestion(question.voterAadObjectIds) ? CONST.TAB_QUESTIONS.DOWN_VOTE : CONST.TAB_QUESTIONS.UP_VOTE,
                                                         })
                                                     }
-                                                    icon={isUserLikedQuestion(q.voterAadObjectIds) ? <LikeIconFilled /> : <LikeIcon outline />}
+                                                    icon={isUserLikedQuestion(question.voterAadObjectIds) ? <LikeIconFilled /> : <LikeIcon outline />}
                                                     styles={{ marginRight: '0 !important' }}
                                                     iconOnly
                                                     text
                                                 />
-                                                <Text content={q.votesCount} />
+                                                <Text content={question.votesCount} />
                                             </Flex>
                                         </Flex.Item>
                                     </Flex>
                                     <Flex gap="gap.small" padding="padding.medium">
-                                        <Text className="text-format" content={q.content} />
+                                        <Text className="text-format" content={question.content} />
                                     </Flex>
                                 </div>
                             );
@@ -100,25 +109,17 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (p
      * @param questionType - answered/unanswered
      */
     const setIcons = (questionType) => {
-        if (questionType === CONST.TAB_QUESTIONS.UNANSWERED_Q) {
-            return isPendingTabOpen ? (
-                <ChevronDownMediumIcon size="small" className="svg-position" outline />
-            ) : (
-                <ChevronEndMediumIcon styles={{ stroke: colorScheme.default.foreground1 }} size="small" className="svg-position" />
-            );
+        const downMediumIcon = <ChevronDownMediumIcon size="small" className="svg-position" outline />;
+        let response = <ChevronEndMediumIcon styles={{ stroke: colorScheme.default.foreground1 }} size="small" className="svg-position" />;
+        if ((questionType === CONST.TAB_QUESTIONS.UNANSWERED_Q && isPendingTabOpen) || (questionType === CONST.TAB_QUESTIONS.ANSWERED_Q && isAnsweredTabOpen)) {
+            response = downMediumIcon;
         }
-        if (questionType === CONST.TAB_QUESTIONS.ANSWERED_Q) {
-            return isAnsweredTabOpen ? (
-                <ChevronDownMediumIcon size="small" className="svg-position" outline />
-            ) : (
-                <ChevronEndMediumIcon styles={{ stroke: colorScheme.default.foreground1 }} size="small" className="svg-position" />
-            );
-        }
+        return response;
     };
 
     /**
      * show / hide question list
-     * @param questionType - answered/unanswered
+     * @param questionType - 'answered' or 'unanswered'
      */
     const toggleQuestions = (questionType) => {
         if (questionType === CONST.TAB_QUESTIONS.UNANSWERED_Q) {
@@ -130,10 +131,7 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (p
     };
 
     const toggleClass = (questionType) => {
-        if (questionType === CONST.TAB_QUESTIONS.UNANSWERED_Q && !isPendingTabOpen) {
-            return 'btn-text-font-bold';
-        }
-        if (questionType === CONST.TAB_QUESTIONS.ANSWERED_Q && !isAnsweredTabOpen) {
+        if ((questionType === CONST.TAB_QUESTIONS.UNANSWERED_Q && !isPendingTabOpen) || (questionType === CONST.TAB_QUESTIONS.ANSWERED_Q && !isAnsweredTabOpen)) {
             return 'btn-text-font-bold';
         }
     };

@@ -161,23 +161,31 @@
         bottom: 0.75rem;
         width: 94%;
         .text-question {
-            height: 2.5rem;
+            height: 2.2rem;
             margin-right: -0.5rem;
             word-break: break-word;
         }
         .send-button {
             position: relative;
-            top: 0.25rem;
             left: 1rem;
         }
     }
 }
+
+.loader {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    margin-top: -50px;
+    margin-left: -100px;
+}
+
 .badge {
     width: 3.75rem;
-    font-family: Segoe UI;
-    font-size: 12px;
-    padding: 0.55em 0.5em;
-    line-height: 0.35rem;
+    font-family: Segoe UI semibold;
+    font-size: 10px;
+    padding: 0.43em 0.5em;
+    line-height: 12px;
     white-space: nowrap;
     vertical-align: baseline;
     border-radius: 0.75rem;
@@ -190,14 +198,29 @@
     height: 100%;
     overflow-x: hidden;
     width: 100%;
+    .tab-nav-header {
+        span {
+            font-weight: 500;
+        }
+    }
     .tab-container {
         margin: 0 auto;
         width: 86.5%;
         .post-new-question {
             margin-top: 2rem;
             padding: 0.1rem;
+            .question-input-flex {
+                padding-top: 0.3rem;
+                margin-bottom: -1rem;
+            }
+            .question-input {
+                padding-bottom: 0rem;
+                height: 2.3rem;
+            }
             .card-layout {
                 width: 100%;
+                box-shadow: 0px 0.15px 0.45px rgba(0, 0, 0, 0.11), 0px 0.8px 1.8px rgba(0, 0, 0, 0.13);
+                border-radius: 4px;
                 .date-content-format {
                     font-size: 12px;
                     line-height: 16px;
@@ -232,6 +255,12 @@
                 .text-format {
                     position: relative;
                     top: -0.5rem;
+                    font-size: 14px;
+                    line-height: 20px;
+                }
+                .author-name {
+                    font-size: 12px;
+                    line-height: 20px;
                 }
             }
             .padding-none {
