@@ -47,110 +47,44 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
     /**
      * To Identify Active Session
      */
-    getActiveSession = () => {
-        this.props.httpService
-            .get(`/conversations/${this.props.teamsTabContext.chatId}/activesessions`)
-            .then((response) => {
-                if (response?.data?.length > 0) {
-                    this.setState({
-                        activeSessionData: response.data[0],
-                    });
-                }
-            })
-            .catch((error) => {});
+    getActiveSession = async (): Promise<ClientDataContract.QnaSession> => {
+        const response = await this.props.httpService.get(`/conversations/${this.props.teamsTabContext.chatId}/activesessions`);
+
+        if (response?.data?.length > 0) {
+            this.setState({
+                activeSessionData: response.data[0],
+            });
+
+            return response.data[0];
+        } else {
+            throw new Error('No active session to end.');
+        }
     };
 
-    private successModal() {
-        return {
-            $schema: 'https://adaptivecards.io/schemas/adaptive-card.json',
-            type: 'AdaptiveCard',
-            version: '1.2',
-            body: [
-                {
-                    type: 'Container',
-                    minHeight: '150px',
-                    verticalContentAlignment: 'center',
-                    items: [
-                        {
-                            type: 'Image',
-                            url: `https://${process.env.HostName}/images/success_image.png`,
-                            width: '75px',
-                            horizontalAlignment: 'center',
-                        },
-                        {
-                            type: 'TextBlock',
-                            text: 'New session successfully created',
-                            horizontalAlignment: 'center',
-                            weight: 'bolder',
-                            size: 'large',
-                        },
-                    ],
-                },
-            ],
-        };
-    }
-
-    private failureModal() {
-        return {
-            $schema: 'https://adaptivecards.io/schemas/adaptive-card.json',
-            type: 'AdaptiveCard',
-            version: '1.2',
-            body: [
-                {
-                    type: 'Container',
-                    minHeight: '150px',
-                    verticalContentAlignment: 'center',
-                    items: [
-                        {
-                            type: 'Image',
-                            url: `https://${process.env.HostName}/images/failure_image.png`,
-                            width: '160px',
-                            horizontalAlignment: 'center',
-                        },
-                        {
-                            type: 'TextBlock',
-                            text: 'something went wrong. You should try again later.',
-                            horizontalAlignment: 'center',
-                            weight: 'bolder',
-                            size: 'large',
-                        },
-                    ],
-                },
-            ],
-            actions: [
-                {
-                    id: 'submit',
-                    type: 'Action.Submit',
-                    title: ' Ok ',
-                },
-            ],
-        };
-    }
+    /**
+     * Takes user through end session journey, prompts end qna session message and calls end session callback if necessary.
+     */
+    private handleEndQnaSessionFlow = () => {
+        handleEndQnASessionFlow(this.endActiveSession);
+    };
 
     /**
-     * To End the active session
-     * @param e - event
+     * Ends active ama session.
      */
-    private endActiveSession = (e) => {
-        if (this.state?.activeSessionData?.sessionId) {
-            this.props.httpService
-                .patch(`/conversations/${this.props.teamsTabContext.chatId}/sessions/${this.state.activeSessionData.sessionId}`, { action: 'end' })
-                .then((response) => {
-                    this.setState({
-                        activeSessionData: this.props.helper.createEmptyActiveSessionData(),
-                    });
-                })
-                .catch((error) => {});
+    private endActiveSession = async (e?: any) => {
+        try {
+            const activeSessionData = await this.getActiveSession();
+            await this.props.httpService.patch(`/conversations/${this.props.teamsTabContext.chatId}/sessions/${activeSessionData.sessionId}`, { action: 'end' });
+            this.setState({
+                activeSessionData: this.props.helper.createEmptyActiveSessionData(),
+            });
+            handleTaskModuleResponseForEndQnASessionFlow();
+        } catch (error) {
+            handleTaskModuleErrorForEndQnASessionFlow(error);
         }
     };
 
     private onShowTaskModule = () => {
-        let taskInfo: any = {
-            fallbackUrl: '',
-            appId: process.env.MicrosoftAppId,
-            url: `https://${process.env.HostName}/askAwayTab/createsession.html?theme=${this.props.teamsTabContext.theme}&locale=${this.props.teamsTabContext.locale}`,
-        };
-
         let submitHandler = (err: any, result: any) => {
             if (result && result['title'] && result['description']) {
                 const createSessionData = {
@@ -159,41 +93,27 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                     scopeId: this.props.teamsTabContext.chatId,
                     isChannel: false,
                 };
+
                 this.props.httpService
                     .post(`/conversations/${this.props.teamsTabContext.chatId}/sessions`, createSessionData)
                     .then((response: any) => {
                         if (response && response['data'] && response['data']['sessionId']) {
-                            this.showAlertModal(true);
+                            handleTaskModuleResponseForSuccessfulCreateQnASessionFlow();
                             this.setState({
                                 activeSessionData: response.data,
                             });
                         } else {
-                            this.showAlertModal(false);
+                            handleTaskModuleErrorForCreateQnASessionFlow(new Error('Invalid response'), this.endActiveSession);
                         }
                     })
                     .catch((error) => {
-                        this.showAlertModal(false);
+                        handleTaskModuleErrorForCreateQnASessionFlow(error, this.endActiveSession);
                     });
             }
         };
 
-        microsoftTeams.tasks.startTask(taskInfo, submitHandler);
+        openStartQnASessionTaskModule(submitHandler, this.props.teamsTabContext.locale, this.props.teamsTabContext.theme);
     };
-
-    /**
-     * Show success popup
-     */
-    private showAlertModal(isSuccess = false) {
-        let taskInfo: any = {
-            fallbackUrl: '',
-            appID: process.env.MicrosoftAppId,
-            card: isSuccess ? this.successModal() : this.failureModal(),
-        };
-
-        let submitHandler = (err: any, result: any) => {};
-
-        microsoftTeams.tasks.startTask(taskInfo, submitHandler);
-    }
 
     private handlePostNewQuestions = (event) => {
         this.props.httpService
@@ -237,7 +157,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
         const { activeSessionData } = this.state;
         return (
             <div className="tab-content">
-                <TabHeader activeSessionData={activeSessionData} refreshSession={this.getActiveSession} endSession={this.endActiveSession} showTaskModule={this.onShowTaskModule} />
+                <TabHeader activeSessionData={activeSessionData} refreshSession={this.getActiveSession} endSession={this.handleEndQnaSessionFlow} showTaskModule={this.onShowTaskModule} />
                 {activeSessionData.sessionId ? (
                     <Flex column>
                         <div className="tab-container">
