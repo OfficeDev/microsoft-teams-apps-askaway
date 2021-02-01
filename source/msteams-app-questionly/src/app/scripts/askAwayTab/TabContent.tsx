@@ -131,7 +131,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
             .catch((error) => {});
     };
 
-    private handleClickAction = (event) => {
+    private validateClickAction = (event) => {
         this.props.httpService
             .patch(`/conversations/${this.props.teamsTabContext.chatId}/sessions/${this.state.activeSessionData.sessionId}/questions/${event.question['id']}`, { action: event.actionValue })
             .then((response: any) => {
@@ -163,7 +163,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                         <div className="tab-container">
                             <PostNewQuestions activeSessionData={activeSessionData} onPostNewQuestion={this.handlePostNewQuestions} />
                             {activeSessionData.unansweredQuestions.length > 0 || activeSessionData.answeredQuestions.length > 0 ? (
-                                <TabQuestions onClickAction={this.handleClickAction} activeSessionData={activeSessionData} teamsTabContext={this.props.teamsTabContext} />
+                                <TabQuestions onClickAction={this.validateClickAction} activeSessionData={activeSessionData} teamsTabContext={this.props.teamsTabContext} />
                             ) : (
                                 <NoQuestionDesign />
                             )}
