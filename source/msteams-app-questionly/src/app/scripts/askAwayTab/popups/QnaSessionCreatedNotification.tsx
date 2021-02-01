@@ -38,18 +38,17 @@ export class QnaSessionCreatedNotification extends msteamsReactBaseComponent<Qna
         const sessionTitle = searchParams.get('title');
         const userName = searchParams.get('username');
 
-        // TODO: Localize these.
-        const notificationBubbleTitle = `${userName} started a Q&A session`;
-        const notificationBubbleText = `Select the Ask Away icon at the top of the meeting view to participate`;
         return (
             <Provider style={{ background: 'unset' }} theme={this.state.theme}>
                 <Flex column>
-                    <Text content={notificationBubbleTitle} />
+                    <Text content={`${userName} started a Q&A session`} />
                     <div className="notification-title">
                         <Text content={sessionTitle} weight="bold" />
                     </div>
                     <Flex gap="gap.large" vAlign="center">
-                        <Text content={notificationBubbleText} />
+                        <Text content={`Select the Ask Away icon at the top of the meeting view to participate`} />
+                    </Flex>
+                    <Flex style={{ marginTop: '0.5rem' }} hAlign="end" vAlign="end">
                         <Button primary type="submit" size="small" onClick={this.onSubmit}>
                             <Button.Content>Ok</Button.Content>
                         </Button>
