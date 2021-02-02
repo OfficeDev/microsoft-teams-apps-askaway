@@ -26,10 +26,7 @@
     },
     "customDomainOption": {
       "type": "string",
-      "allowedValues": [
-        "Custom domain name (recommended)",
-      "Azure Front Door"
-      ],
+      "allowedValues": ["Custom domain name (recommended)", "Azure Front Door"],
       "defaultValue": "Azure Front Door",
       "metadata": {
         "description": "How the app will be hosted on a domain that is not *.azurewebsites.net. Azure Front Door is an easy option that the template can set up automatically, but it comes with ongoing monthly costs. "
@@ -104,13 +101,6 @@
       "defaultValue": "master",
       "metadata": {
         "description": "The branch of the GitHub repository to deploy."
-      }
-    },
-    "updateKeyvaultTemplateUrl": {
-      "type": "string",
-      "defaultValue": "https://raw.githubusercontent.com/shsarda/ask-away/master/deployment/update-keyvault.json",
-      "metadata": {
-        "description": "The url of update-keyvault.json template."
       }
     }
   },
@@ -679,37 +669,6 @@
         ],
         "enabledState": "Enabled",
         "friendlyName": "[variables('frontDoorName')]"
-      }
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "name": "updateKeyvault",
-      "apiVersion": "2015-01-01",
-      "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', variables('keyvaultName'))]",
-        "[resourceId('Microsoft.Web/sites', variables('functionAppName'))]",
-        "[resourceId('Microsoft.Web/sites/sourcecontrols', variables('functionAppName'), 'web')]"
-      ],
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[parameters('updateKeyvaultTemplateUrl')]",
-          "contentVersion": "1.0.0.0"
-        },
-        "parameters": {
-          "keyvaultName": {
-            "value": "[variables('keyvaultName')]"
-          },
-          "functionAppName": {
-            "value": "[variables('functionAppName')]"
-          },
-          "backgroundFunctionName": {
-            "value": "background-jobs-starter"
-          },
-          "location": {
-            "value": "[parameters('location')]"
-          }
-        }
       }
     },
     {
