@@ -15,10 +15,10 @@ const TabCreateSession: React.FunctionComponent<TabCreateSessionProps> = (props)
         <Flex hAlign="center" vAlign="center" className="screen">
             <Image className="create-session" alt="image" src={createSessionImage} />
             <Flex.Item align="center">
-                <Text className="text-caption" content="Welcome to Ask Away! We’re glad you’re here." />
+                <Text className="text-caption" content="Welcome to Ask Away!" />
             </Flex.Item>
             <Flex.Item align="center">
-                <Text className="text-subcaption" content="Ask away is your tool to create and manage Q&A sessions." />
+                <Text className="text-subcaption" content="Create, manage, and participate in Q&A sessions." />
             </Flex.Item>
             <Flex.Item align="center">
                 <Button
@@ -28,7 +28,7 @@ const TabCreateSession: React.FunctionComponent<TabCreateSessionProps> = (props)
                         props.showTaskModule();
                     }}
                 >
-                    <Button.Content>Create an ask away</Button.Content>
+                    <Button.Content>Start a Q&A session</Button.Content>
                 </Button>
             </Flex.Item>
         </Flex>
