@@ -26,10 +26,7 @@
     },
     "customDomainOption": {
       "type": "string",
-      "allowedValues": [
-        "Custom domain name (recommended)",
-      "Azure Front Door"
-      ],
+      "allowedValues": ["Custom domain name (recommended)", "Azure Front Door"],
       "defaultValue": "Azure Front Door",
       "metadata": {
         "description": "How the app will be hosted on a domain that is not *.azurewebsites.net. Azure Front Door is an easy option that the template can set up automatically, but it comes with ongoing monthly costs. "
@@ -885,6 +882,10 @@
             {
               "name": "AzureWebJobsSecretStorageType",
               "value": "Files"
+            },
+            {
+              "name": "ExpireInMemorySecretsAfterMs",
+              "value": "86400000"
             }
           ],
           "cors": {
