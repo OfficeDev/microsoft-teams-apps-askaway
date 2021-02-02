@@ -167,23 +167,31 @@
         bottom: 0.75rem;
         width: 94%;
         .text-question {
-            height: 2.5rem;
+            height: 2.2rem;
             margin-right: -0.5rem;
             word-break: break-word;
         }
         .send-button {
             position: relative;
-            top: 0.25rem;
             left: 1rem;
         }
     }
 }
+
+.loader {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    margin-top: -50px;
+    margin-left: -100px;
+}
+
 .badge {
     width: 3.75rem;
-    font-family: Segoe UI;
-    font-size: 12px;
-    padding: 0.55em 0.5em;
-    line-height: 0.35rem;
+    font-family: Segoe UI semibold;
+    font-size: 10px;
+    padding: 0.43em 0.5em;
+    line-height: 12px;
     white-space: nowrap;
     vertical-align: baseline;
     border-radius: 0.75rem;
@@ -191,25 +199,92 @@
     margin-bottom: 0.25rem;
 }
 
-#post-new-question {
-    margin: 2rem auto 0 auto;
-    width: 80%;
-    padding: 0.1rem;
-
-    .card-layout {
-        width: 100%;
-        .date-content-format {
-            font-size: 12px;
-            line-height: 16px;
-            padding-top: 0.15rem;
+.tab-content {
+    position: absolute;
+    height: 100%;
+    overflow-x: hidden;
+    width: 100%;
+    .tab-nav-header {
+        span {
+            font-weight: 500;
         }
-        .session-title {
-            padding-top: 0.3rem;
-            font-size: 18px;
-            line-height: 24px;
+    }
+    .tab-container {
+        margin: 0 auto;
+        width: 86.5%;
+        .post-new-question {
+            margin-top: 2rem;
+            padding: 0.1rem;
+            .question-input-flex {
+                padding-top: 0.3rem;
+                margin-bottom: -1rem;
+            }
+            .question-input {
+                padding-bottom: 0rem;
+                height: 2.3rem;
+            }
+            .card-layout {
+                width: 100%;
+                box-shadow: 0px 0.15px 0.45px rgba(0, 0, 0, 0.11), 0px 0.8px 1.8px rgba(0, 0, 0, 0.13);
+                border-radius: 4px;
+                .date-content-format {
+                    font-size: 12px;
+                    line-height: 16px;
+                    padding-top: 0.15rem;
+                }
+                .session-title {
+                    padding-top: 0.5rem;
+                    font-size: 18px;
+                    line-height: 24px;
+                }
+            }
+        }
+        .question-container {
+            .svg-position {
+                position: relative;
+                top: 2px;
+                left: -5px;
+            }
+            .question-layout {
+                box-shadow: 0px 0.15px 0.45px rgba(0, 0, 0, 0.11), 0px 0.8px 1.8px rgba(0, 0, 0, 0.13);
+                border-radius: 4px;
+                margin-top: 0.5rem;
+                margin-bottom: 0.5rem;
+                .ui-reaction {
+                    position: relative;
+                    right: 1rem;
+                }
+                .badge {
+                    position: relative;
+                    top: 0.2rem;
+                }
+                .text-format {
+                    position: relative;
+                    top: -0.5rem;
+                    font-size: 14px;
+                    line-height: 20px;
+                }
+                .author-name {
+                    font-size: 12px;
+                    line-height: 20px;
+                }
+            }
+            .padding-none {
+                padding: 0;
+                span {
+                    font-size: 12px;
+                    line-height: 16px;
+                }
+            }
+            .btn-text-font-bold {
+                span {
+                    font-weight: 700;
+                }
+            }
         }
     }
 }
+
 .no-question-layout {
     margin: 0 auto;
     width: 25%;
