@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Flex, Text, Button, FlexItem, Card, Divider, Avatar, TextArea, ThemePrepared } from '@fluentui/react-northstar';
 import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
-import Helper from '../shared/Helper';
+import { qnaSessionStrings } from '../shared/i18next';
 import Badge from '../shared/Badge';
 import { withTheme } from '../shared/WithTheme';
 import './../index.scss';
@@ -38,7 +38,10 @@ const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps & ThemePro
                             />
                             <Text
                                 className="date-content-format"
-                                content={`${props.t('tab.createdOn')} ${moment(props.activeSessionData.dateTimeCreated).format('L')} ${props.t('tab.by')} ${props.activeSessionData.hostUser.name}`}
+                                content={qnaSessionStrings('tab.createdBy', {
+                                    date: moment(props.activeSessionData.dateTimeCreated).format('L'),
+                                    name: props.activeSessionData.hostUser.name,
+                                })}
                                 size="small"
                             />
                         </Flex>

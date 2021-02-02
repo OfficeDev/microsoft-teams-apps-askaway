@@ -4,7 +4,7 @@ import * as React from 'react';
 import './../index.scss';
 import { Provider } from '@fluentui/react-northstar';
 import Helper from '../shared/Helper';
-import i18next from '../shared/i18next';
+import { i18next } from '../shared/i18next';
 import QnaSessionNotificationInternal from './QnaSessionNotificationInternal';
 
 export interface QnaSessionCreatedNotificationProps {}

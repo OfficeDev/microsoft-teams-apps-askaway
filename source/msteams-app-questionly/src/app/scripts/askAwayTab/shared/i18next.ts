@@ -21,4 +21,15 @@ i18next
             formatSeparator: ',',
         },
     });
-export default i18next;
+// export default i18next;
+
+const qnaSessionStrings = (
+    string: string,
+    options?: {
+        [key: string]: any;
+    }
+) => {
+    return i18next.t(`${string}`, options);
+};
+
+export { i18next, qnaSessionStrings };

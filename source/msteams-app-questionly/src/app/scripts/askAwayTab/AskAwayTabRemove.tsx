@@ -3,7 +3,7 @@ import { Provider } from '@fluentui/react-northstar';
 import msteamsReactBaseComponent, { ITeamsBaseComponentState } from 'msteams-react-base-component';
 import * as microsoftTeams from '@microsoft/teams-js';
 import AskAwayTabRemoveInternal from './AskAwayTabRemoveInternal';
-import i18next from './../askAwayTab/shared/i18next';
+import { i18next } from './../askAwayTab/shared/i18next';
 import Helper from './shared/Helper';
 
 export interface IAskAwayTabRemoveState extends ITeamsBaseComponentState {

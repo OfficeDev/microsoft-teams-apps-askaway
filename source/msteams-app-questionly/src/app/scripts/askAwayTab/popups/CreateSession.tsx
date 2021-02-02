@@ -6,7 +6,7 @@ import { Provider, Flex, Text, Button, Form, Input, TextArea, FlexItem } from '@
 import * as microsoftTeams from '@microsoft/teams-js';
 import msteamsReactBaseComponent, { ITeamsBaseComponentState } from 'msteams-react-base-component';
 import Helper from '../shared/Helper';
-import i18next from '../shared/i18next';
+import { i18next } from '../shared/i18next';
 import CreateSessionInternal from './CreateSessionInternal';
 
 export interface CreateSessionProps {}
