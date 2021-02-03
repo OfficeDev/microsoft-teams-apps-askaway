@@ -20,6 +20,7 @@ configure({ adapter: new Adapter() });
 describe('SignalRLifecycle Component', () => {
     const testConversationId = '1234';
     const updateEventCallback = jest.fn();
+    const t = jest.fn();
     let hubConnection: HubConnection;
     let sampleHttpService: HttpService;
     let sampleAppInsights: ApplicationInsights;
@@ -53,7 +54,7 @@ describe('SignalRLifecycle Component', () => {
 
     it('should render fine with no alert', async () => {
         const wrapper = shallow(
-            <SignalRLifecycle conversationId={testConversationId} onEvent={updateEventCallback} appInsights={sampleAppInsights} httpService={sampleHttpService} connection={hubConnection} />
+            <SignalRLifecycle t={t} conversationId={testConversationId} onEvent={updateEventCallback} appInsights={sampleAppInsights} httpService={sampleHttpService} connection={hubConnection} />
         );
         await waitForAsync();
         wrapper.update();
@@ -69,7 +70,7 @@ describe('SignalRLifecycle Component', () => {
         });
 
         const wrapper = shallow(
-            <SignalRLifecycle conversationId={testConversationId} onEvent={updateEventCallback} appInsights={sampleAppInsights} httpService={sampleHttpService} connection={hubConnection} />
+            <SignalRLifecycle t={t} conversationId={testConversationId} onEvent={updateEventCallback} appInsights={sampleAppInsights} httpService={sampleHttpService} connection={hubConnection} />
         );
         await waitForAsync();
         wrapper.update();
@@ -95,7 +96,7 @@ describe('SignalRLifecycle Component', () => {
         } as unknown) as HubConnection;
 
         const wrapper = shallow(
-            <SignalRLifecycle conversationId={testConversationId} onEvent={updateEventCallback} appInsights={sampleAppInsights} httpService={sampleHttpService} connection={hubConnection} />
+            <SignalRLifecycle t={t} conversationId={testConversationId} onEvent={updateEventCallback} appInsights={sampleAppInsights} httpService={sampleHttpService} connection={hubConnection} />
         );
         await waitForAsync();
         wrapper.update();
@@ -113,7 +114,7 @@ describe('SignalRLifecycle Component', () => {
         axios.post = mockPostFunction;
 
         const wrapper = shallow(
-            <SignalRLifecycle conversationId={testConversationId} onEvent={updateEventCallback} appInsights={sampleAppInsights} httpService={sampleHttpService} connection={hubConnection} />
+            <SignalRLifecycle t={t} conversationId={testConversationId} onEvent={updateEventCallback} appInsights={sampleAppInsights} httpService={sampleHttpService} connection={hubConnection} />
         );
         await waitForAsync();
         wrapper.update();
@@ -132,7 +133,7 @@ describe('SignalRLifecycle Component', () => {
         });
 
         const wrapper = shallow(
-            <SignalRLifecycle conversationId={testConversationId} onEvent={updateEventCallback} appInsights={sampleAppInsights} httpService={sampleHttpService} connection={hubConnection} />
+            <SignalRLifecycle t={t} conversationId={testConversationId} onEvent={updateEventCallback} appInsights={sampleAppInsights} httpService={sampleHttpService} connection={hubConnection} />
         );
         await waitForAsync();
         wrapper.update();
@@ -153,6 +154,7 @@ describe('SignalRLifecycle Component', () => {
 
         const wrapper = mount(
             <SignalRLifecycle
+                t={t}
                 ref={(instance) => {
                     signalRComponent = instance;
                 }}
@@ -193,7 +195,7 @@ describe('SignalRLifecycle Component', () => {
         });
 
         const wrapper = shallow(
-            <SignalRLifecycle conversationId={testConversationId} onEvent={updateEventCallback} appInsights={sampleAppInsights} httpService={sampleHttpService} connection={hubConnection} />
+            <SignalRLifecycle t={t} conversationId={testConversationId} onEvent={updateEventCallback} appInsights={sampleAppInsights} httpService={sampleHttpService} connection={hubConnection} />
         );
         await waitForAsync();
         wrapper.update();
@@ -231,7 +233,7 @@ describe('SignalRLifecycle Component', () => {
         });
 
         const wrapper = shallow(
-            <SignalRLifecycle conversationId={testConversationId} onEvent={updateEventCallback} appInsights={sampleAppInsights} httpService={sampleHttpService} connection={hubConnection} />
+            <SignalRLifecycle t={t} conversationId={testConversationId} onEvent={updateEventCallback} appInsights={sampleAppInsights} httpService={sampleHttpService} connection={hubConnection} />
         );
         await waitForAsync();
         wrapper.update();
@@ -261,7 +263,7 @@ describe('SignalRLifecycle Component', () => {
         });
 
         const wrapper = shallow(
-            <SignalRLifecycle conversationId={testConversationId} onEvent={updateEventCallback} appInsights={sampleAppInsights} httpService={sampleHttpService} connection={hubConnection} />
+            <SignalRLifecycle t={t} conversationId={testConversationId} onEvent={updateEventCallback} appInsights={sampleAppInsights} httpService={sampleHttpService} connection={hubConnection} />
         );
         await waitForAsync();
         wrapper.update();

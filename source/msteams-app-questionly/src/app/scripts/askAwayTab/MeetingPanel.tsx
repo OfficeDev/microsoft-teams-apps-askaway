@@ -275,7 +275,7 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
                     showToolBar={false}
                 />
                 <Flex hAlign="center" vAlign="center">
-                    <EmptyTile t={this.localize} image={image} line1={text1} line2={text2} />
+                    <EmptyTile image={image} line1={text1} line2={text2} />
                     {isUserPresenterOrOrganizer && (
                         <Flex.Item align="center">
                             <Button className="button" onClick={this.onShowTaskModule}>
@@ -341,7 +341,7 @@ class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState>
                         teamsTabContext={this.props.teamsTabContext}
                     />
                 ) : (
-                    <EmptyTile t={this.localize} image={collaborationImage} line1="Q & A session is live..." line2="Ask away!" />
+                    <EmptyTile image={collaborationImage} line1="Q & A session is live..." line2="Ask away!" />
                 )}
                 <NewQuestion
                     t={this.localize}

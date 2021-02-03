@@ -8,10 +8,6 @@ import { Flex, Text, Image } from '@fluentui/react-northstar';
  */
 export interface EmptyTileProps {
     /**
-     * localize string.
-     */
-    t: Function;
-    /**
      * Image src.
      */
     image: string;
