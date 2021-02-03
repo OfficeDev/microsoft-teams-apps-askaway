@@ -33,7 +33,7 @@ export interface TabContentState {
     activeSessionData: ClientDataContract.QnaSession;
 }
 
-class TabContent extends React.Component<TabContentProps, TabContentState> {
+export class TabContent extends React.Component<TabContentProps, TabContentState> {
     public localize: TFunction;
     constructor(props) {
         super(props);
@@ -58,7 +58,6 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
             this.setState({
                 activeSessionData: response.data[0],
             });
-
             return response.data[0];
         } else {
             throw new Error('No active session to end.');
@@ -79,9 +78,12 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
         try {
             const activeSessionData = await this.getActiveSession();
             await this.props.httpService.patch(`/conversations/${this.props.teamsTabContext.chatId}/sessions/${activeSessionData.sessionId}`, { action: 'end' });
-            this.setState({
-                activeSessionData: this.props.helper.createEmptyActiveSessionData(),
-            });
+            this.setState((prevState) => ({
+                activeSessionData: {
+                    ...prevState.activeSessionData,
+                    isActive: false,
+                },
+            }));
             handleTaskModuleResponseForEndQnASessionFlow();
         } catch (error) {
             handleTaskModuleErrorForEndQnASessionFlow(error);

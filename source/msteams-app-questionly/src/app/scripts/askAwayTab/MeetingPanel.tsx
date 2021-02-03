@@ -62,7 +62,7 @@ export interface MeetingPanelState {
      */
     isActiveSessionEnded: boolean;
 }
-class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState> {
+export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState> {
     public localize: TFunction;
     /**
      * signalR component instance which is used later to refresh the connection.
