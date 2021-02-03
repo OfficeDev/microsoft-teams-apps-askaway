@@ -10,6 +10,7 @@ import MeetingPanel from '../MeetingPanel';
 import { HttpService } from '../shared/HttpService';
 import { telemetryService } from '../../telemetryService';
 import Helper from '../shared/Helper';
+import { ParticipantRoles } from '../../../../enums/ParticipantRoles';
 
 configure({ adapter: new Adapter() });
 
@@ -41,12 +42,22 @@ describe('Meeting Panel Component', () => {
         expect(divEle).toHaveLength(1);
     });
 
-    it('should render createSessionLayout when activeSessionData is not present', () => {
+    it('should render presenter/organizer createSessionLayout view when activeSessionData is not present', () => {
         const component = shallow(<MeetingPanel teamsTabContext={{ entityId: '', locale: '' }} httpService={httpServiceIns} appInsights={telemetryService.appInsights} helper={Helper} />);
-        const stateVal = { showLoader: false };
+        const stateVal = { showLoader: false, userRole: ParticipantRoles.Presenter };
         component.setState(stateVal);
         const buttonEle = component.containsMatchingElement(<Button.Content>Start a Q&A session</Button.Content>);
 
         expect(buttonEle).toBeTruthy();
+    });
+
+    it('should render attendee createSessionLayout view when activeSessionData is not present', () => {
+        const component = shallow(<MeetingPanel teamsTabContext={{ entityId: '', locale: '' }} httpService={httpServiceIns} appInsights={telemetryService.appInsights} helper={Helper} />);
+        const stateVal = { showLoader: false, userRole: ParticipantRoles.Attendee };
+        component.setState(stateVal);
+        const buttonEle = component.containsMatchingElement(<Button.Content>Start a Q&A session</Button.Content>);
+
+        // Create session button should not be visible to the attendee.
+        expect(buttonEle).not.toBeTruthy();
     });
 });

@@ -7,6 +7,8 @@ import { LikeIconFilled } from '../shared/Icons/LikeIconFilled';
 import { CONST } from '../shared/Constants';
 import { useState } from 'react';
 import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
+import { ParticipantRoles } from '../../../../enums/ParticipantRoles';
+import { isPresenterOrOrganizer } from '../shared/meetingUtility';
 
 type QuestionCompProps = {
     question: ClientDataContract.Question;
@@ -16,6 +18,7 @@ type QuestionCompProps = {
     questionTab: string;
     onClickAction: any;
     userId: string;
+    userRole: ParticipantRoles;
 };
 /**
  * Properties for the UnansweredQuestions React component
@@ -43,7 +46,7 @@ const Question: React.FunctionComponent<QuestionCompProps> = (props) => {
                         <Flex>
                             <Text className="author-name" content={question.author.name} weight="regular" />
                             <Flex vAlign="center" className="like-icon">
-                                {isMouseHovered && renderHoverElement}
+                                {isPresenterOrOrganizer(props.userRole) && isMouseHovered && renderHoverElement}
                                 <Button
                                     disabled={userId === question.author.id}
                                     onClick={() =>

@@ -7,6 +7,7 @@ import { exceptionLogger } from 'src/util/exceptionTracking';
 import { createResponseForBadRequest, createResponseForForbiddenAccess, createResponseForInternalServerError } from 'src/routes/responseUtility';
 import { IUser } from 'msteams-app-questionly.data';
 import { TelemetryExceptions } from 'src/constants/telemetryConstants';
+import { ClientDataContract } from 'src/contracts/clientDataContract';
 
 /**
  * Error handling middleware for rest APIs
@@ -30,12 +31,25 @@ export const restApiErrorMiddleware = (error: Error, request: Request, response:
     });
 
     if (error instanceof UnauthorizedAccessError || error instanceof ConversationDoesNotBelongToMeetingChatError || error instanceof UserIsNotPartOfConversationError) {
-        createResponseForForbiddenAccess(response, error.message);
+        createResponseForForbiddenAccess(response, createErrorResponse(error));
     } else if (error instanceof ParameterMissingInRequestError) {
-        createResponseForBadRequest(response, error.message);
+        createResponseForBadRequest(response, createErrorResponse(error));
     } else {
-        createResponseForInternalServerError(response, error.message);
+        createResponseForInternalServerError(response, createErrorResponse(error));
     }
 
     next(error);
+};
+
+/**
+ * Creates error response object from error,
+ * JavaScript Error object cannot be stringified and we don't want to expose stack trace to the client,
+ * hence passing only relevant information.
+ * @param error - error object.
+ */
+const createErrorResponse = (error: Error): ClientDataContract.errorResponse => {
+    return {
+        message: error.message,
+        code: error['code'],
+    };
 };

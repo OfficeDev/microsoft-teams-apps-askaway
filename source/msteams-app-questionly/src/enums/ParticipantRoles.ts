@@ -4,4 +4,5 @@
 export enum ParticipantRoles {
     Presenter = 'Presenter',
     Organizer = 'Organizer',
+    Attendee = 'Attendee',
 }

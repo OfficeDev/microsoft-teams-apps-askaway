@@ -1,4 +1,4 @@
-import { errorMessages } from 'src/errors/errorMessages';
+import { errorMessages } from './errorMessages';
 
 export enum UnauthorizedAccessErrorCode {
     InsufficientPermissionsToCreateOrEndQnASession = 'InsufficientPermissionsToCreateOrEndQnASession',

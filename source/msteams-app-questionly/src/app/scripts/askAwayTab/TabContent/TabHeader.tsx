@@ -1,8 +1,9 @@
 import './../index.scss';
 import * as React from 'react';
-import { Flex, Button, FlexItem } from '@fluentui/react-northstar';
+import { Flex, Button, FlexItem, Divider } from '@fluentui/react-northstar';
 import { SwitchIcon } from '../shared/Icons/SwitchIcon';
 import { AddIcon, RetryIcon } from '@fluentui/react-icons-northstar';
+import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
 
 /**
  * Properties for the TabHeader React component
@@ -11,11 +12,13 @@ export interface TabHeaderProps {
     refreshSession: Function;
     endSession: Function;
     t: Function;
+    activeSessionData: ClientDataContract.QnaSession;
+    showTaskModule: Function;
 }
 const TabHeader: React.FunctionComponent<TabHeaderProps> = (props) => {
     return (
         <React.Fragment>
-            <Flex gap="gap.small">
+            <Flex gap="gap.small" className="tab-nav-header">
                 <Button
                     text
                     onClick={() => {
@@ -25,7 +28,13 @@ const TabHeader: React.FunctionComponent<TabHeaderProps> = (props) => {
                     <RetryIcon xSpacing="after" />
                     <Button.Content>{props.t('tab.refreshButton')}</Button.Content>
                 </Button>
-                <Button text>
+                <Button
+                    text
+                    disabled={props.activeSessionData && props.activeSessionData.isActive}
+                    onClick={() => {
+                        props.showTaskModule();
+                    }}
+                >
                     <AddIcon outline xSpacing="after" />
                     <Button.Content>{props.t('tab.startNewSession')}</Button.Content>
                 </Button>
@@ -33,17 +42,21 @@ const TabHeader: React.FunctionComponent<TabHeaderProps> = (props) => {
                     <SwitchIcon outline xSpacing="after" />
                     <Button.Content>{props.t('tab.switchSession')}</Button.Content>
                 </Button>
-                <FlexItem push>
-                    <Button
-                        primary
-                        onClick={(e) => {
-                            props.endSession(e);
-                        }}
-                        size="small"
-                        content={props.t('tab.endSessionButton')}
-                    />
-                </FlexItem>
+                {props.activeSessionData && props.activeSessionData.sessionId && (
+                    <FlexItem push>
+                        <Button
+                            disabled={props.activeSessionData && !props.activeSessionData.isActive}
+                            primary
+                            onClick={(e) => {
+                                props.endSession(e);
+                            }}
+                            size="medium"
+                            content={props.t('tab.endSessionButton')}
+                        />
+                    </FlexItem>
+                )}
             </Flex>
+            <Divider />
         </React.Fragment>
     );
 };

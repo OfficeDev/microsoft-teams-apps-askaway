@@ -127,7 +127,7 @@ router.patch('/:conversationId/sessions/:sessionId', async (req: Express.Request
         const allowedPatchActions = Object.values(QnaSessionPatchAction).map((value) => value.toString());
 
         if (!allowedPatchActions.includes(action)) {
-            createResponseForBadRequest(res, `action ${action} is not supported`);
+            createResponseForBadRequest(res, { message: `action ${action} is not supported` });
             return;
         }
 
@@ -222,7 +222,7 @@ router.patch('/:conversationId/sessions/:sessionId/questions/:questionId', async
         const allowedPatchActions = Object.values(QuestionPatchAction).map((value) => value.toString());
 
         if (!allowedPatchActions.includes(action)) {
-            createResponseForBadRequest(res, `action ${action} is not supported`);
+            createResponseForBadRequest(res, { message: `action ${action} is not supported` });
             return;
         }
 

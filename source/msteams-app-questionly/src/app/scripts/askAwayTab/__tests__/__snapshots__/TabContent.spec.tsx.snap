@@ -66,7 +66,7 @@ exports[`TabContent Component should match the snapshot 1`] = `
       alt="image"
       as="img"
       className="create-session"
-      src="create_session.png"
+      src="collaboration.png"
     />
     <FlexItem
       align="center"

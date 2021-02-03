@@ -2,7 +2,7 @@ import './../index.scss';
 import * as React from 'react';
 import { Flex, Text, Button, Image } from '@fluentui/react-northstar';
 
-const createSessionImage = require('./../../../web/assets/create_session.png');
+const createSessionImage = require('./../../../web/assets/collaboration.png');
 
 /**
  * Properties for the TabCreateSession React component
