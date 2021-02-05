@@ -14,15 +14,14 @@ configure({ adapter: new Adapter() });
 describe('QnaSessionNotificationInternal Component', () => {
     const onSubmitSession = jest.fn();
     const searchParams = {} as URLSearchParams;
-    const t = jest.fn();
 
     it('should match the snapshot', () => {
-        const wrapper = shallow(<QnaSessionNotificationInternal t={t} onSubmitSession={onSubmitSession} searchParams={searchParams} />);
+        const wrapper = shallow(<QnaSessionNotificationInternal onSubmitSession={onSubmitSession} searchParams={searchParams} />);
         expect(enzymeToJson(wrapper)).toMatchSnapshot();
     });
 
     it('should render the tab', () => {
-        const component = shallow(<QnaSessionNotificationInternal t={t} onSubmitSession={onSubmitSession} searchParams={searchParams} />);
+        const component = shallow(<QnaSessionNotificationInternal onSubmitSession={onSubmitSession} searchParams={searchParams} />);
 
         expect(component.find(Flex)).toHaveLength(2);
         expect(component.find(Text)).toHaveLength(3);
