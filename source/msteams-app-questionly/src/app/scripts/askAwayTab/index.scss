@@ -206,6 +206,11 @@
     overflow-x: hidden;
     width: 100%;
     .tab-nav-header {
+        .btn-end-session {
+            margin-top: 0.3rem;
+            margin-right: 1rem;
+        }
+
         span {
             font-weight: 500;
         }

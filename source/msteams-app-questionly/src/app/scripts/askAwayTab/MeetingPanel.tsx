@@ -190,7 +190,7 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                     });
                 })
                 .catch((error) => {
-                    handleTaskModuleErrorForEndQnASessionFlow(error);
+                    handleTaskModuleErrorForEndQnASessionFlow(this.localize, error);
                     this.setState({ showLoader: false });
                 });
         }
@@ -200,7 +200,7 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
      * Takes user through end session journey, prompts end qna session message and calls end session callback if necessary.
      */
     private handleEndQnaSessionFlow = () => {
-        handleEndQnASessionFlow(this.endActiveSession);
+        handleEndQnASessionFlow(this.localize, this.endActiveSession);
     };
 
     /**
@@ -224,16 +224,16 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                     .post(`/conversations/${this.props.teamsTabContext.chatId}/sessions`, { ...this.state.input, ...createSessionData })
                     .then((response: any) => {
                         if (response && response['data'] && response['data']['sessionId']) {
-                            handleTaskModuleResponseForSuccessfulCreateQnASessionFlow();
+                            handleTaskModuleResponseForSuccessfulCreateQnASessionFlow(this.localize);
                             this.setState({
                                 activeSessionData: response.data,
                             });
                         } else {
-                            handleTaskModuleErrorForCreateQnASessionFlow(new Error('Invalid response'), this.endActiveSession);
+                            handleTaskModuleErrorForCreateQnASessionFlow(this.localize, new Error('Invalid response'), this.endActiveSession);
                         }
                     })
                     .catch((error) => {
-                        handleTaskModuleErrorForCreateQnASessionFlow(error, this.endActiveSession);
+                        handleTaskModuleErrorForCreateQnASessionFlow(this.localize, error, this.endActiveSession);
                     });
             }
         };
@@ -252,15 +252,15 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
 
         if (isUserPresenterOrOrganizer) {
             image = collaborationImage;
-            text1 = 'Ready to field questions?';
+            text1 = this.localize('meetingPanel.welcomeText');
         } else {
             image = noSessionImageForAttendees;
 
             if (this.state.isActiveSessionEnded) {
-                text1 = 'Q&A session ended';
-                text2 = 'Thanks to everyone who participated';
+                text1 = this.localize('meetingPanel.endSessionText');
+                text2 = this.localize('meetingPanel.userThankyoutext');
             } else {
-                text1 = "Once the Q&A starts, you'll be able to ask and upvote questions here";
+                text1 = this.localize('meetingPanel.attendeViewText');
             }
         }
 
@@ -269,7 +269,7 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                 <QnASessionHeader
                     t={this.localize}
                     userRole={this.state.userRole}
-                    title={'Start a Q&A session'}
+                    title={this.localize('meetingPanel.panelTitle')}
                     onClickRefreshSession={this.updateContent}
                     onClickEndSession={this.handleEndQnaSessionFlow}
                     showToolBar={false}
@@ -279,7 +279,7 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                     {isUserPresenterOrOrganizer && (
                         <Flex.Item align="center">
                             <Button className="button" onClick={this.onShowTaskModule}>
-                                <Button.Content>Start a Q&A session</Button.Content>
+                                <Button.Content>{this.localize('meetingPanel.createQnaSessionButton')}</Button.Content>
                             </Button>
                         </Flex.Item>
                     )}
@@ -341,7 +341,7 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                         teamsTabContext={this.props.teamsTabContext}
                     />
                 ) : (
-                    <EmptyTile image={collaborationImage} line1="Q & A session is live..." line2="Ask away!" />
+                    <EmptyTile image={collaborationImage} line1={this.localize('meetingPanel.noQuestionsPosted')} line2={this.localize('meetingPanel.askAway')} />
                 )}
                 <NewQuestion
                     t={this.localize}

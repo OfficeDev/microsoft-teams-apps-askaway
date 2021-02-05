@@ -45,12 +45,13 @@ const TabHeader: React.FunctionComponent<TabHeaderProps> = (props) => {
                 {props.activeSessionData && props.activeSessionData.sessionId && (
                     <FlexItem push>
                         <Button
+                            className="btn-end-session"
                             disabled={props.activeSessionData && !props.activeSessionData.isActive}
                             primary
                             onClick={(e) => {
                                 props.endSession(e);
                             }}
-                            size="medium"
+                            size="small"
                             content={props.t('tab.endSessionButton')}
                         />
                     </FlexItem>

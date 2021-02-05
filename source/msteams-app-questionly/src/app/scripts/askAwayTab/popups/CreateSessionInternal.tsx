@@ -77,7 +77,6 @@ const CreateSessionInternal: React.FunctionComponent<CreateSessionInternalProps>
                             as="div"
                             fluid
                             placeholder={t('popups.sessionTitlePlaceholder')}
-                            styles={{ color: '#c8c6c4' }}
                             onKeyUp={(e) => validateCreateSessionField(input.title, 'isTitle')}
                             onChange={(e) => appendInput(e, 'title')}
                         />

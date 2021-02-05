@@ -4,7 +4,6 @@ import { Flex, Text, Button, FlexItem, Card, Divider, Avatar, TextArea, ThemePre
 import Badge from '../shared/Badge';
 import { useState } from 'react';
 import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
-import { qnaSessionStrings } from '../shared/i18next';
 import { withTheme } from '../shared/WithTheme';
 
 let moment = require('moment');
@@ -48,7 +47,7 @@ const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps & ThemePro
                             />
                             <Text
                                 className="date-content-format"
-                                content={qnaSessionStrings('tab.createdBy', {
+                                content={props.t('tab.createdBy', {
                                     date: moment(props.activeSessionData.dateTimeCreated).format('L'),
                                     name: props.activeSessionData.hostUser.name,
                                 })}
