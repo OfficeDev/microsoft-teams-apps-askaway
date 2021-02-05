@@ -1,0 +1,70 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AskAwayTabRemove Component should match the snapshot 1`] = `
+<div
+  className="card-divider"
+  key=""
+  onMouseEnter={[Function]}
+  onMouseLeave={[Function]}
+>
+  <Card
+    accessibility={[Function]}
+    aria-roledescription="card avatar"
+    className="card-layout"
+    size="medium"
+  >
+    <CardHeader
+      fitted={true}
+    >
+      <Flex
+        gap="gap.small"
+      >
+        <Avatar
+          getInitials={[Function]}
+          name=""
+          size="smaller"
+        />
+        <Flex>
+          <Text
+            as="span"
+            className="author-name"
+            content=""
+            weight="regular"
+          />
+          <Flex
+            className="like-icon"
+            vAlign="center"
+          >
+            <Button
+              accessibility={[Function]}
+              as="button"
+              className="like-icon-size"
+              disabled={true}
+              icon={
+                <LikeIcon
+                  outline={true}
+                />
+              }
+              iconOnly={true}
+              onClick={[Function]}
+              size="medium"
+              text={true}
+            />
+            <Text
+              as="span"
+              content={0}
+            />
+          </Flex>
+        </Flex>
+      </Flex>
+    </CardHeader>
+    <CardBody>
+      <Text
+        as="span"
+        className="card-body-question"
+        content=""
+      />
+    </CardBody>
+  </Card>
+</div>
+`;

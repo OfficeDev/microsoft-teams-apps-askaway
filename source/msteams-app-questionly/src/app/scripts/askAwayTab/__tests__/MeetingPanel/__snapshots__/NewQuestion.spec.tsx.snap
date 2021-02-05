@@ -1,0 +1,40 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AskAwayTabRemove Component should match the snapshot 1`] = `
+<div
+  className="input-text-field"
+>
+  <Flex
+    gap="gap.small"
+  >
+    <TextArea
+      accessibility={[Function]}
+      as="textarea"
+      className="text-question"
+      fluid={true}
+      inverted={true}
+      maxLength={250}
+      onChange={[Function]}
+      value=""
+    />
+    <FlexItem
+      push={true}
+    >
+      <Button
+        accessibility={[Function]}
+        as="button"
+        className="send-button"
+        icon={
+          <SendIcon
+            onClick={[Function]}
+            size="large"
+          />
+        }
+        iconOnly={true}
+        size="medium"
+        text={true}
+      />
+    </FlexItem>
+  </Flex>
+</div>
+`;

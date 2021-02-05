@@ -16,7 +16,7 @@ type QuestionCompProps = {
     renderHoverElement?: any;
     questionId: string;
     questionTab: string;
-    onClickAction: any;
+    onClickAction: Function;
     userId: string;
     userRole: ParticipantRoles;
 };

@@ -20,8 +20,8 @@ export interface PostNewQuestionsProps {
     onPostNewQuestion: Function;
 }
 
-const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps & ThemeProps> = (props) => {
-    const colorScheme = props.theme.siteVariables.colorScheme;
+export const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps & ThemeProps> = (props) => {
+    const colorScheme = props.theme?.siteVariables?.colorScheme;
 
     const [question, setQuestion] = useState('');
 
@@ -34,15 +34,15 @@ const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps & ThemePro
 
     return (
         <div className="post-new-question">
-            <Card aria-roledescription="card" style={{ backgroundColor: colorScheme.default.background, borderColor: colorScheme.onyx.border1 }} className="card-layout">
+            <Card aria-roledescription="card" style={{ backgroundColor: colorScheme?.default?.background, borderColor: colorScheme?.onyx?.border1 }} className="card-layout">
                 <Card.Header fitted>
                     <Flex gap="gap.small">
                         <Flex column>
                             <Badge
                                 styles={
                                     props.activeSessionData.isActive
-                                        ? { backgroundColor: colorScheme.green.background, color: colorScheme.green.foreground1 }
-                                        : { backgroundColor: colorScheme.default.background5, color: colorScheme.green.foreground4 }
+                                        ? { backgroundColor: colorScheme?.green?.background, color: colorScheme?.green?.foreground1 }
+                                        : { backgroundColor: colorScheme?.default?.background5, color: colorScheme?.green?.foreground4 }
                                 }
                                 text={props.activeSessionData.isActive ? props.t('tab.liveStatus') : props.t('tab.closedStatus')}
                             />

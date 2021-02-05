@@ -1,0 +1,18 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`QnaSessionCreatedNotification should match the snapshot 1`] = `
+<Provider
+  style={
+    Object {
+      "background": "unset",
+    }
+  }
+  theme={Object {}}
+>
+  <QnaSessionNotificationInternal
+    onSubmitSession={[Function]}
+    searchParams={Object {}}
+    t={[MockFunction]}
+  />
+</Provider>
+`;

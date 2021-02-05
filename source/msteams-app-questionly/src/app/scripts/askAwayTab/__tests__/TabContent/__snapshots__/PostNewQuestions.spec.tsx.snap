@@ -1,0 +1,60 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PostNewQuestions Component should match the snapshot 1`] = `
+<div
+  className="post-new-question"
+>
+  <Card
+    accessibility={[Function]}
+    aria-roledescription="card"
+    className="card-layout"
+    size="medium"
+    style={
+      Object {
+        "backgroundColor": undefined,
+        "borderColor": undefined,
+      }
+    }
+  >
+    <CardHeader
+      fitted={true}
+    >
+      <Flex
+        gap="gap.small"
+      >
+        <Flex
+          column={true}
+        >
+          <Badge
+            styles={
+              Object {
+                "backgroundColor": undefined,
+                "color": undefined,
+              }
+            }
+          />
+          <Text
+            as="span"
+            className="date-content-format"
+            content="tab.createdBy"
+            size="small"
+          />
+        </Flex>
+      </Flex>
+    </CardHeader>
+    <CardBody>
+      <Flex
+        column={true}
+        gap="gap.small"
+      >
+        <Text
+          as="span"
+          className="session-title"
+          content=""
+          weight="bold"
+        />
+      </Flex>
+    </CardBody>
+  </Card>
+</div>
+`;

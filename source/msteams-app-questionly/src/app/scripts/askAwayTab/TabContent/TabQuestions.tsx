@@ -21,7 +21,7 @@ export interface TabQuestionsProps {
     teamsTabContext: microsoftTeams.Context;
     onClickAction: Function;
 }
-const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (props) => {
+export const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (props) => {
     const [isPendingTabOpen, setPendingTabOpen] = useState(true);
 
     const [isAnsweredTabOpen, setAnsweredTabOpen] = useState(true);
@@ -32,7 +32,7 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (p
         }
     };
 
-    const colorScheme = props.theme.siteVariables.colorScheme;
+    const colorScheme = props.theme?.siteVariables?.colorScheme;
 
     /**
      * Identifies user own questions
@@ -57,7 +57,7 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (p
                     {((questionType === CONST.TAB_QUESTIONS.UNANSWERED_Q && isQuestionsTabExpanded) || (questionType === CONST.TAB_QUESTIONS.ANSWERED_Q && isQuestionsTabExpanded)) &&
                         questions.map((question) => {
                             return (
-                                <div key={question.id} style={{ backgroundColor: colorScheme.default.background, border: `1px solid ${colorScheme.onyx.border1}` }} className="question-layout">
+                                <div key={question.id} style={{ backgroundColor: colorScheme?.default?.background, border: `1px solid ${colorScheme?.onyx?.border1}` }} className="question-layout">
                                     <Flex gap="gap.small">
                                         <Flex.Item size="size.large">
                                             <div>
@@ -67,8 +67,8 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (p
                                                     <Badge
                                                         styles={
                                                             CONST.TAB_QUESTIONS.UNANSWERED_Q === questionType
-                                                                ? { backgroundColor: colorScheme.brand.background, color: colorScheme.brand.foreground4 }
-                                                                : { backgroundColor: colorScheme.green.background, color: colorScheme.green.foreground1 }
+                                                                ? { backgroundColor: colorScheme?.brand?.background, color: colorScheme?.brand?.foreground4 }
+                                                                : { backgroundColor: colorScheme?.green?.background, color: colorScheme?.green?.foreground1 }
                                                         }
                                                         text={CONST.TAB_QUESTIONS.UNANSWERED_Q === questionType ? 'Pending' : 'Answered'}
                                                     />
@@ -86,7 +86,7 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (p
                                                             actionValue: isUserLikedQuestion(question.voterAadObjectIds) ? CONST.TAB_QUESTIONS.DOWN_VOTE : CONST.TAB_QUESTIONS.UP_VOTE,
                                                         })
                                                     }
-                                                    icon={isUserLikedQuestion(question.voterAadObjectIds) ? <LikeIconFilled style={{ fill: colorScheme.brand.background }} /> : <LikeIcon outline />}
+                                                    icon={isUserLikedQuestion(question.voterAadObjectIds) ? <LikeIconFilled style={{ fill: colorScheme?.brand?.background }} /> : <LikeIcon outline />}
                                                     styles={{ marginRight: '0 !important' }}
                                                     iconOnly
                                                     text
@@ -112,7 +112,7 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (p
      */
     const setIcons = (questionType) => {
         const downMediumIcon = <ChevronDownMediumIcon size="small" className="svg-position" outline />;
-        let response = <ChevronEndMediumIcon styles={{ stroke: colorScheme.default.foreground1 }} size="small" className="svg-position" />;
+        let response = <ChevronEndMediumIcon styles={{ stroke: colorScheme?.default?.foreground1 }} size="small" className="svg-position" />;
         if ((questionType === CONST.TAB_QUESTIONS.UNANSWERED_Q && isPendingTabOpen) || (questionType === CONST.TAB_QUESTIONS.ANSWERED_Q && isAnsweredTabOpen)) {
             response = downMediumIcon;
         }

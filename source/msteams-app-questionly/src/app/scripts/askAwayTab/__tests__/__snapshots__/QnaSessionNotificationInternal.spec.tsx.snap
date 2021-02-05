@@ -1,0 +1,41 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`QnaSessionNotificationInternal Component should match the snapshot 1`] = `
+<Flex
+  column={true}
+>
+  <Text
+    as="span"
+    content=" undefined"
+  />
+  <div
+    className="notification-title"
+  >
+    <Text
+      as="span"
+      content=""
+      weight="bold"
+    />
+  </div>
+  <Flex
+    gap="gap.large"
+    vAlign="center"
+  >
+    <Text
+      as="span"
+    />
+    <Button
+      accessibility={[Function]}
+      as="button"
+      onClick={[Function]}
+      primary={true}
+      size="small"
+      type="submit"
+    >
+      <ButtonContent
+        as="span"
+      />
+    </Button>
+  </Flex>
+</Flex>
+`;

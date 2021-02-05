@@ -1,0 +1,58 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TabHeader Component should match the snapshot 1`] = `
+<Fragment>
+  <Flex
+    className="tab-nav-header"
+    gap="gap.small"
+  >
+    <Button
+      accessibility={[Function]}
+      as="button"
+      onClick={[Function]}
+      size="medium"
+      text={true}
+    >
+      <RetryIcon
+        xSpacing="after"
+      />
+      <ButtonContent
+        as="span"
+      />
+    </Button>
+    <Button
+      accessibility={[Function]}
+      as="button"
+      disabled={false}
+      onClick={[Function]}
+      size="medium"
+      text={true}
+    >
+      <AddIcon
+        outline={true}
+        xSpacing="after"
+      />
+      <ButtonContent
+        as="span"
+      />
+    </Button>
+    <Button
+      accessibility={[Function]}
+      as="button"
+      size="medium"
+      text={true}
+    >
+      <SwitchIcon
+        outline={true}
+        xSpacing="after"
+      />
+      <ButtonContent
+        as="span"
+      />
+    </Button>
+  </Flex>
+  <Divider
+    size={0}
+  />
+</Fragment>
+`;
