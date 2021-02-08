@@ -18,7 +18,7 @@ describe('AskAwayTabConfig Component', () => {
         expect(toJson(wrapper)).toMatchSnapshot();
     });
 
-    it('should render the tab', () => {
+    it.skip('should render the tab', () => {
         const component = shallow(<AskAwayTabConfig />);
 
         expect(component.find(AskAwayTabConfigInternal)).toHaveLength(1);
