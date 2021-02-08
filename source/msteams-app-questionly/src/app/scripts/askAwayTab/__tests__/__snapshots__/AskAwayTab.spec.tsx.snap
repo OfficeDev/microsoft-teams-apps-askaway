@@ -2,6 +2,11 @@
 
 exports[`AskAwayTab Component should match the snapshot 1`] = `
 <Provider
+  style={
+    Object {
+      "background": "unset",
+    }
+  }
   theme={
     Object {
       "animations": Object {
@@ -2898,5 +2903,7 @@ exports[`AskAwayTab Component should match the snapshot 1`] = `
       ],
     }
   }
-/>
+>
+  <div />
+</Provider>
 `;

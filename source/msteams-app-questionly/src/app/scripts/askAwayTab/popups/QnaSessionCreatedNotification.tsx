@@ -2,7 +2,10 @@ import msteamsReactBaseComponent, { ITeamsBaseComponentState } from 'msteams-rea
 import * as microsoftTeams from '@microsoft/teams-js';
 import * as React from 'react';
 import './../index.scss';
-import { Button, Provider, Flex, Text } from '@fluentui/react-northstar';
+import { Provider } from '@fluentui/react-northstar';
+import Helper from '../shared/Helper';
+import { i18next } from '../shared/i18next';
+import QnaSessionNotificationInternal from './QnaSessionNotificationInternal';
 
 export interface QnaSessionCreatedNotificationProps {}
 
@@ -23,37 +26,25 @@ export class QnaSessionCreatedNotification extends msteamsReactBaseComponent<Qna
         microsoftTeams.initialize();
         const theme = this.getQueryVariable('theme') ? this.getQueryVariable('theme') : 'dark';
         this.updateTheme(theme);
+        microsoftTeams.getContext((context: microsoftTeams.Context) => {
+            // Set Language for Localization
+            Helper.setI18nextLocale(i18next, context.locale);
+        });
     }
 
     /**
      * event handler for `ok` button click.
      */
-    private onSubmit() {
+    handleOnSubmit = () => {
         microsoftTeams.tasks.submitTask();
-    }
+    };
 
     public render() {
         const searchParams = new URL(decodeURIComponent(window.location.href)).searchParams;
 
-        const sessionTitle = searchParams.get('title');
-        const userName = searchParams.get('username');
-
         return (
             <Provider style={{ background: 'unset' }} theme={this.state.theme}>
-                <Flex column>
-                    <Text content={`${userName} started a Q&A session`} />
-                    <div className="notification-title">
-                        <Text content={sessionTitle} weight="bold" />
-                    </div>
-                    <Flex gap="gap.large" vAlign="center">
-                        <Text content={`Select the Ask Away icon at the top of the meeting view to participate`} />
-                    </Flex>
-                    <Flex style={{ marginTop: '0.5rem' }} hAlign="end" vAlign="end">
-                        <Button primary type="submit" size="small" onClick={this.onSubmit}>
-                            <Button.Content>Ok</Button.Content>
-                        </Button>
-                    </Flex>
-                </Flex>
+                <QnaSessionNotificationInternal onSubmitSession={this.handleOnSubmit} searchParams={searchParams} />
             </Provider>
         );
     }

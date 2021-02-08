@@ -9,16 +9,17 @@ const createSessionImage = require('./../../../web/assets/collaboration.png');
  */
 export interface TabCreateSessionProps {
     showTaskModule: Function;
+    t: Function;
 }
 const TabCreateSession: React.FunctionComponent<TabCreateSessionProps> = (props) => {
     return (
         <Flex hAlign="center" vAlign="center" className="screen">
             <Image className="create-session" alt="image" src={createSessionImage} />
             <Flex.Item align="center">
-                <Text className="text-caption" content="Welcome to Ask Away!" />
+                <Text className="text-caption" content={props.t('tab.welcomeText')} />
             </Flex.Item>
             <Flex.Item align="center">
-                <Text className="text-subcaption" content="Create, manage, and participate in Q&A sessions." />
+                <Text className="text-subcaption" content={props.t('tab.welcomeSubText')} />
             </Flex.Item>
             <Flex.Item align="center">
                 <Button
@@ -28,7 +29,7 @@ const TabCreateSession: React.FunctionComponent<TabCreateSessionProps> = (props)
                         props.showTaskModule();
                     }}
                 >
-                    <Button.Content>Start a Q&A session</Button.Content>
+                    <Button.Content>{props.t('tab.createButton')}</Button.Content>
                 </Button>
             </Flex.Item>
         </Flex>

@@ -50,6 +50,10 @@ enum ConnectionLimit {
 
 export interface SignalRLifecycleProps {
     /**
+     * localize string.
+     */
+    t: Function;
+    /**
      * conversation id of the group chat.
      */
     conversationId?: string;
@@ -251,7 +255,7 @@ export class SignalRLifecycle extends React.Component<SignalRLifecycleProps, Sig
         return (
             <div id="alertHolder">
                 {(this.state.connectionStatus === ConnectionStatus.NotConnected || this.state.connectionStatus === ConnectionStatus.Reconnecting) && (
-                    <Alert id="alert" content="Connection lost. Refresh to view content. if that doesn't do the trick, try again later." dismissible />
+                    <Alert id="alert" content={this.props.t('meetingPanel.bannerText')} dismissible />
                 )}
             </div>
         );

@@ -1,12 +1,13 @@
 // tslint:disable:no-relative-imports
 import './index.scss';
 import * as React from 'react';
-import { withTranslation } from 'react-i18next';
+import { withTranslation, WithTranslation } from 'react-i18next';
 import * as microsoftTeams from '@microsoft/teams-js';
 import { ApplicationInsights } from '@microsoft/applicationinsights-web';
 import { Flex } from '@fluentui/react-northstar';
 import { HttpService } from './shared/HttpService';
 import { Helper } from './shared/Helper';
+import { TFunction } from 'i18next';
 import TabHeader from './TabContent/TabHeader';
 import PostNewQuestions from './TabContent/PostNewQuestions';
 import NoQuestionDesign from './TabContent/NoQuestionDesign';
@@ -22,7 +23,7 @@ import {
     handleEndQnASessionFlow,
 } from './task-modules-utility/taskModuleHelper';
 
-export interface TabContentProps {
+export interface TabContentProps extends WithTranslation {
     teamsTabContext: microsoftTeams.Context;
     httpService: HttpService;
     appInsights: ApplicationInsights;
@@ -32,9 +33,12 @@ export interface TabContentState {
     activeSessionData: ClientDataContract.QnaSession;
 }
 
-class TabContent extends React.Component<TabContentProps, TabContentState> {
+export class TabContent extends React.Component<TabContentProps, TabContentState> {
+    public localize: TFunction;
     constructor(props) {
         super(props);
+        this.onShowTaskModule = this.onShowTaskModule.bind(this);
+        this.localize = this.props.t;
         this.state = {
             activeSessionData: this.props.helper.createEmptyActiveSessionData(),
         };
@@ -54,7 +58,6 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
             this.setState({
                 activeSessionData: response.data[0],
             });
-
             return response.data[0];
         } else {
             throw new Error('No active session to end.');
@@ -65,7 +68,7 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
      * Takes user through end session journey, prompts end qna session message and calls end session callback if necessary.
      */
     private handleEndQnaSessionFlow = () => {
-        handleEndQnASessionFlow(this.endActiveSession);
+        handleEndQnASessionFlow(this.localize, this.endActiveSession);
     };
 
     /**
@@ -75,12 +78,15 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
         try {
             const activeSessionData = await this.getActiveSession();
             await this.props.httpService.patch(`/conversations/${this.props.teamsTabContext.chatId}/sessions/${activeSessionData.sessionId}`, { action: 'end' });
-            this.setState({
-                activeSessionData: this.props.helper.createEmptyActiveSessionData(),
-            });
-            handleTaskModuleResponseForEndQnASessionFlow();
+            this.setState((prevState) => ({
+                activeSessionData: {
+                    ...prevState.activeSessionData,
+                    isActive: false,
+                },
+            }));
+            handleTaskModuleResponseForEndQnASessionFlow(this.localize);
         } catch (error) {
-            handleTaskModuleErrorForEndQnASessionFlow(error);
+            handleTaskModuleErrorForEndQnASessionFlow(this.localize, error);
         }
     };
 
@@ -98,16 +104,16 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
                     .post(`/conversations/${this.props.teamsTabContext.chatId}/sessions`, createSessionData)
                     .then((response: any) => {
                         if (response && response['data'] && response['data']['sessionId']) {
-                            handleTaskModuleResponseForSuccessfulCreateQnASessionFlow();
+                            handleTaskModuleResponseForSuccessfulCreateQnASessionFlow(this.localize);
                             this.setState({
                                 activeSessionData: response.data,
                             });
                         } else {
-                            handleTaskModuleErrorForCreateQnASessionFlow(new Error('Invalid response'), this.endActiveSession);
+                            handleTaskModuleErrorForCreateQnASessionFlow(this.localize, new Error('Invalid response'), this.endActiveSession);
                         }
                     })
                     .catch((error) => {
-                        handleTaskModuleErrorForCreateQnASessionFlow(error, this.endActiveSession);
+                        handleTaskModuleErrorForCreateQnASessionFlow(this.localize, error, this.endActiveSession);
                     });
             }
         };
@@ -157,20 +163,26 @@ class TabContent extends React.Component<TabContentProps, TabContentState> {
         const { activeSessionData } = this.state;
         return (
             <div className="tab-content">
-                <TabHeader activeSessionData={activeSessionData} refreshSession={this.getActiveSession} endSession={this.handleEndQnaSessionFlow} showTaskModule={this.onShowTaskModule} />
+                <TabHeader
+                    t={this.localize}
+                    activeSessionData={activeSessionData}
+                    refreshSession={this.getActiveSession}
+                    endSession={this.handleEndQnaSessionFlow}
+                    showTaskModule={this.onShowTaskModule}
+                />
                 {activeSessionData.sessionId ? (
                     <Flex column>
                         <div className="tab-container">
-                            <PostNewQuestions activeSessionData={activeSessionData} onPostNewQuestion={this.handlePostNewQuestions} />
+                            <PostNewQuestions t={this.localize} activeSessionData={activeSessionData} onPostNewQuestion={this.handlePostNewQuestions} />
                             {activeSessionData.unansweredQuestions.length > 0 || activeSessionData.answeredQuestions.length > 0 ? (
-                                <TabQuestions onClickAction={this.validateClickAction} activeSessionData={activeSessionData} teamsTabContext={this.props.teamsTabContext} />
+                                <TabQuestions t={this.localize} onClickAction={this.validateClickAction} activeSessionData={activeSessionData} teamsTabContext={this.props.teamsTabContext} />
                             ) : (
-                                <NoQuestionDesign />
+                                <NoQuestionDesign t={this.localize} />
                             )}
                         </div>
                     </Flex>
                 ) : (
-                    <TabCreateSession showTaskModule={this.onShowTaskModule} />
+                    <TabCreateSession t={this.localize} showTaskModule={this.onShowTaskModule} />
                 )}
             </div>
         );

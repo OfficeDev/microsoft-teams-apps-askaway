@@ -11,7 +11,8 @@ import { Provider } from '@fluentui/react-northstar';
 import msteamsReactBaseComponent, { ITeamsBaseComponentState } from 'msteams-react-base-component';
 import * as microsoftTeams from '@microsoft/teams-js';
 // tslint:disable-next-line:no-relative-imports
-import i18next from './../askAwayTab/shared/i18next';
+import { i18next } from './../askAwayTab/shared/i18next';
+import { TFunction } from 'i18next';
 import { withAITracking } from '@microsoft/applicationinsights-react-js';
 import { SeverityLevel } from '@microsoft/applicationinsights-web';
 import { HttpService } from './shared/HttpService';
@@ -46,6 +47,7 @@ export interface IAskAwayTabProps {}
  * Implementation of the askAway Tab content page
  */
 export class AskAwayTab extends msteamsReactBaseComponent<IAskAwayTabProps, IAskAwayTabState> {
+    public localize: TFunction;
     private httpService: HttpService;
 
     constructor(props) {

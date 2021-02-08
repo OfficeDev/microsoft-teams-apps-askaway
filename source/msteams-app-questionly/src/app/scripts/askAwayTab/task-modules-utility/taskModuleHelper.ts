@@ -20,7 +20,7 @@ import { TaskModuleMessages } from './taskModuleMessages';
  * @param error - error occured while creating a QnA session.
  * @param endQnASessionHandler - handler to call when the task module is completed for `end session` flow.
  */
-export const handleTaskModuleErrorForCreateQnASessionFlow = (error: any, endQnASessionHandler: () => void) => {
+export const handleTaskModuleErrorForCreateQnASessionFlow = (t, error: any, endQnASessionHandler: () => void) => {
     let card: AdaptiveCard;
 
     if (error?.response?.data?.code === 'QnASessionLimitExhaustedError') {
@@ -28,12 +28,12 @@ export const handleTaskModuleErrorForCreateQnASessionFlow = (error: any, endQnAS
             // If `end session` button is pressed, invoke end session callback.
             // Else, just close the task module.
             if (result?.id === SubmitButtonId.SubmitEndQnA) {
-                handleEndQnASessionFlow(endQnASessionHandler);
+                handleEndQnASessionFlow(t, endQnASessionHandler);
             }
         };
 
         card = createCardForQnASessionLimitExhaustedError();
-        invokeAdaptiveCardBasedTaskModule(TaskModuleMessages.StartQnATitle, card, submitHandler);
+        invokeAdaptiveCardBasedTaskModule(t('TaskModuleMessages.StartQnATitle'), card, submitHandler);
 
         return;
     } else if (error?.response?.data?.code === UnauthorizedAccessErrorCode.InsufficientPermissionsToCreateOrEndQnASession) {
@@ -44,14 +44,14 @@ export const handleTaskModuleErrorForCreateQnASessionFlow = (error: any, endQnAS
         card = createGenericErrorCard();
     }
 
-    invokeAdaptiveCardBasedTaskModule(TaskModuleMessages.StartQnATitle, card);
+    invokeAdaptiveCardBasedTaskModule(t('TaskModuleMessages.StartQnATitle'), card);
 };
 
 /**
  * handles a case where ending a QnA session fails.
  * @param error - error occured while ending a QnA session.
  */
-export const handleTaskModuleErrorForEndQnASessionFlow = (error: any) => {
+export const handleTaskModuleErrorForEndQnASessionFlow = (t, error: any) => {
     let card: AdaptiveCard;
 
     if (error?.response?.data?.code === UnauthorizedAccessErrorCode.InsufficientPermissionsToCreateOrEndQnASession) {
@@ -62,30 +62,30 @@ export const handleTaskModuleErrorForEndQnASessionFlow = (error: any) => {
         card = createGenericErrorCard();
     }
 
-    invokeAdaptiveCardBasedTaskModule(TaskModuleMessages.EndQnATitle, card);
+    invokeAdaptiveCardBasedTaskModule(t('TaskModuleMessages.EndQnATitle'), card);
 };
 
 /**
  * handles a case where new session creation is successful.
  */
-export const handleTaskModuleResponseForSuccessfulCreateQnASessionFlow = () => {
-    const card = createSuccessAdaptiveCard(TaskModuleMessages.NewSessionCreated);
-    invokeAdaptiveCardBasedTaskModule(TaskModuleMessages.StartQnATitle, card);
+export const handleTaskModuleResponseForSuccessfulCreateQnASessionFlow = (t) => {
+    const card = createSuccessAdaptiveCard(t('TaskModuleMessages.NewSessionCreated'));
+    invokeAdaptiveCardBasedTaskModule(t('TaskModuleMessages.StartQnATitle'), card);
 };
 
 /**
  * handles a case where a session is successfully ended.
  */
-export const handleTaskModuleResponseForEndQnASessionFlow = () => {
-    const card = createSuccessAdaptiveCard(TaskModuleMessages.UnblockedToCreateNewSession);
-    invokeAdaptiveCardBasedTaskModule(TaskModuleMessages.EndQnATitle, card);
+export const handleTaskModuleResponseForEndQnASessionFlow = (t) => {
+    const card = createSuccessAdaptiveCard(t('TaskModuleMessages.UnblockedToCreateNewSession'));
+    invokeAdaptiveCardBasedTaskModule(t('TaskModuleMessages.EndQnATitle'), card);
 };
 
 /**
  * Takes user through end session journey, prompts end qna session message and calls end session callback if necessary.
  * @param endSessionHandler - callback function in case user chooses to end the session.
  */
-export const handleEndQnASessionFlow = (endSessionHandler: () => void) => {
+export const handleEndQnASessionFlow = (t, endSessionHandler: () => void) => {
     const submitHandler = (err: any, result: any) => {
         // If `end session` button is pressed, invoke end session callback.
         // Else, just close the task module.
@@ -95,7 +95,7 @@ export const handleEndQnASessionFlow = (endSessionHandler: () => void) => {
     };
 
     const card = createEndQnAConfirmationAdaptiveCard();
-    invokeAdaptiveCardBasedTaskModule(TaskModuleMessages.EndQnATitle, card, submitHandler);
+    invokeAdaptiveCardBasedTaskModule(t('TaskModuleMessages.EndQnATitle'), card, submitHandler);
 };
 
 /**

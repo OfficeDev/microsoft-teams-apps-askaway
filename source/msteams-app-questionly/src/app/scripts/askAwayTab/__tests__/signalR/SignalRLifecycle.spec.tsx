@@ -20,6 +20,7 @@ configure({ adapter: new Adapter() });
 describe('SignalRLifecycle Component', () => {
     const testConversationId = '1234';
     const updateEventCallback = jest.fn();
+    const t = jest.fn();
     let hubConnection: HubConnection;
     let sampleHttpService: HttpService;
     let sampleAppInsights: ApplicationInsights;
@@ -27,9 +28,7 @@ describe('SignalRLifecycle Component', () => {
     beforeEach(() => {
         jest.clearAllMocks();
         const mockPostFunction = jest.fn();
-        mockPostFunction.mockReturnValue(
-            Promise.resolve({ status: StatusCodes.OK })
-        );
+        mockPostFunction.mockReturnValue(Promise.resolve({ status: StatusCodes.OK }));
         axios.post = mockPostFunction;
         sampleAppInsights = new ApplicationInsights({ config: {} });
         sampleAppInsights.trackException = jest.fn();
@@ -55,19 +54,11 @@ describe('SignalRLifecycle Component', () => {
 
     it('should render fine with no alert', async () => {
         const wrapper = shallow(
-            <SignalRLifecycle
-                conversationId={testConversationId}
-                onEvent={updateEventCallback}
-                appInsights={sampleAppInsights}
-                httpService={sampleHttpService}
-                connection={hubConnection}
-            />
+            <SignalRLifecycle t={t} conversationId={testConversationId} onEvent={updateEventCallback} appInsights={sampleAppInsights} httpService={sampleHttpService} connection={hubConnection} />
         );
         await waitForAsync();
         wrapper.update();
-        expect(
-            wrapper.containsMatchingElement(<div id="alertHolder" />)
-        ).toBeTruthy();
+        expect(wrapper.containsMatchingElement(<div id="alertHolder" />)).toBeTruthy();
 
         // No alert should be shown.
         expect(wrapper.find('#alertHolder').children().length).toEqual(0);
@@ -79,13 +70,7 @@ describe('SignalRLifecycle Component', () => {
         });
 
         const wrapper = shallow(
-            <SignalRLifecycle
-                conversationId={testConversationId}
-                onEvent={updateEventCallback}
-                appInsights={sampleAppInsights}
-                httpService={sampleHttpService}
-                connection={hubConnection}
-            />
+            <SignalRLifecycle t={t} conversationId={testConversationId} onEvent={updateEventCallback} appInsights={sampleAppInsights} httpService={sampleHttpService} connection={hubConnection} />
         );
         await waitForAsync();
         wrapper.update();
@@ -111,13 +96,7 @@ describe('SignalRLifecycle Component', () => {
         } as unknown) as HubConnection;
 
         const wrapper = shallow(
-            <SignalRLifecycle
-                conversationId={testConversationId}
-                onEvent={updateEventCallback}
-                appInsights={sampleAppInsights}
-                httpService={sampleHttpService}
-                connection={hubConnection}
-            />
+            <SignalRLifecycle t={t} conversationId={testConversationId} onEvent={updateEventCallback} appInsights={sampleAppInsights} httpService={sampleHttpService} connection={hubConnection} />
         );
         await waitForAsync();
         wrapper.update();
@@ -131,19 +110,11 @@ describe('SignalRLifecycle Component', () => {
 
     it("should render alert when connection can't be added to the meeting group", async () => {
         const mockPostFunction = jest.fn();
-        mockPostFunction.mockReturnValue(
-            Promise.resolve({ status: StatusCodes.INTERNAL_SERVER_ERROR })
-        );
+        mockPostFunction.mockReturnValue(Promise.resolve({ status: StatusCodes.INTERNAL_SERVER_ERROR }));
         axios.post = mockPostFunction;
 
         const wrapper = shallow(
-            <SignalRLifecycle
-                conversationId={testConversationId}
-                onEvent={updateEventCallback}
-                appInsights={sampleAppInsights}
-                httpService={sampleHttpService}
-                connection={hubConnection}
-            />
+            <SignalRLifecycle t={t} conversationId={testConversationId} onEvent={updateEventCallback} appInsights={sampleAppInsights} httpService={sampleHttpService} connection={hubConnection} />
         );
         await waitForAsync();
         wrapper.update();
@@ -162,13 +133,7 @@ describe('SignalRLifecycle Component', () => {
         });
 
         const wrapper = shallow(
-            <SignalRLifecycle
-                conversationId={testConversationId}
-                onEvent={updateEventCallback}
-                appInsights={sampleAppInsights}
-                httpService={sampleHttpService}
-                connection={hubConnection}
-            />
+            <SignalRLifecycle t={t} conversationId={testConversationId} onEvent={updateEventCallback} appInsights={sampleAppInsights} httpService={sampleHttpService} connection={hubConnection} />
         );
         await waitForAsync();
         wrapper.update();
@@ -189,6 +154,7 @@ describe('SignalRLifecycle Component', () => {
 
         const wrapper = mount(
             <SignalRLifecycle
+                t={t}
                 ref={(instance) => {
                     signalRComponent = instance;
                 }}
@@ -224,27 +190,17 @@ describe('SignalRLifecycle Component', () => {
     it('should fire updateEvent callback on events.', async () => {
         let updateFuncFromComponent = (data: any) => {};
 
-        hubConnection.on = jest.fn(
-            (methodName: string, newMethod: (data: any) => void) => {
-                updateFuncFromComponent = newMethod;
-            }
-        );
+        hubConnection.on = jest.fn((methodName: string, newMethod: (data: any) => void) => {
+            updateFuncFromComponent = newMethod;
+        });
 
         const wrapper = shallow(
-            <SignalRLifecycle
-                conversationId={testConversationId}
-                onEvent={updateEventCallback}
-                appInsights={sampleAppInsights}
-                httpService={sampleHttpService}
-                connection={hubConnection}
-            />
+            <SignalRLifecycle t={t} conversationId={testConversationId} onEvent={updateEventCallback} appInsights={sampleAppInsights} httpService={sampleHttpService} connection={hubConnection} />
         );
         await waitForAsync();
         wrapper.update();
 
-        expect(
-            wrapper.containsMatchingElement(<div id="alertHolder" />)
-        ).toBeTruthy();
+        expect(wrapper.containsMatchingElement(<div id="alertHolder" />)).toBeTruthy();
 
         // No alert should be shown.
         expect(wrapper.find('#alertHolder').children().length).toEqual(0);
@@ -263,9 +219,7 @@ describe('SignalRLifecycle Component', () => {
 
         // Make sure ux rendering is not affected.
         wrapper.update();
-        expect(
-            wrapper.containsMatchingElement(<div id="alertHolder" />)
-        ).toBeTruthy();
+        expect(wrapper.containsMatchingElement(<div id="alertHolder" />)).toBeTruthy();
 
         // No alert should be shown.
         expect(wrapper.find('#alertHolder').children().length).toEqual(0);
@@ -279,20 +233,12 @@ describe('SignalRLifecycle Component', () => {
         });
 
         const wrapper = shallow(
-            <SignalRLifecycle
-                conversationId={testConversationId}
-                onEvent={updateEventCallback}
-                appInsights={sampleAppInsights}
-                httpService={sampleHttpService}
-                connection={hubConnection}
-            />
+            <SignalRLifecycle t={t} conversationId={testConversationId} onEvent={updateEventCallback} appInsights={sampleAppInsights} httpService={sampleHttpService} connection={hubConnection} />
         );
         await waitForAsync();
         wrapper.update();
 
-        expect(
-            wrapper.containsMatchingElement(<div id="alertHolder" />)
-        ).toBeTruthy();
+        expect(wrapper.containsMatchingElement(<div id="alertHolder" />)).toBeTruthy();
 
         // No alert should be shown.
         expect(wrapper.find('#alertHolder').children().length).toEqual(0);
@@ -317,20 +263,12 @@ describe('SignalRLifecycle Component', () => {
         });
 
         const wrapper = shallow(
-            <SignalRLifecycle
-                conversationId={testConversationId}
-                onEvent={updateEventCallback}
-                appInsights={sampleAppInsights}
-                httpService={sampleHttpService}
-                connection={hubConnection}
-            />
+            <SignalRLifecycle t={t} conversationId={testConversationId} onEvent={updateEventCallback} appInsights={sampleAppInsights} httpService={sampleHttpService} connection={hubConnection} />
         );
         await waitForAsync();
         wrapper.update();
 
-        expect(
-            wrapper.containsMatchingElement(<div id="alertHolder" />)
-        ).toBeTruthy();
+        expect(wrapper.containsMatchingElement(<div id="alertHolder" />)).toBeTruthy();
 
         // No alert should be shown.
         expect(wrapper.find('#alertHolder').children().length).toEqual(0);

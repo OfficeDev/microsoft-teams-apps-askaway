@@ -1,5 +1,4 @@
 .screen {
-    background-color: #f3f2f1;
     .askaway-tab-added {
         top: 30%;
         left: 50%;
@@ -23,17 +22,19 @@
         font-size: 18px;
         line-height: 24px;
         font-weight: bold;
-        top: 52%;
+        top: 56%;
         position: absolute;
+        text-align: center;
     }
     .text-subcaption {
         font-size: 14px;
         line-height: 20px;
-        top: 58%;
+        top: 63%;
         position: absolute;
+        text-align: center;
     }
     .button {
-        top: 67%;
+        top: 70%;
         position: absolute;
     }
 }
@@ -205,6 +206,11 @@
     overflow-x: hidden;
     width: 100%;
     .tab-nav-header {
+        .btn-end-session {
+            margin-top: 0.3rem;
+            margin-right: 1rem;
+        }
+
         span {
             font-weight: 500;
         }

@@ -11,6 +11,7 @@ import { ClientDataContract } from '../../../../../src/contracts/clientDataContr
 export interface TabHeaderProps {
     refreshSession: Function;
     endSession: Function;
+    t: Function;
     activeSessionData: ClientDataContract.QnaSession;
     showTaskModule: Function;
 }
@@ -25,7 +26,7 @@ const TabHeader: React.FunctionComponent<TabHeaderProps> = (props) => {
                     }}
                 >
                     <RetryIcon xSpacing="after" />
-                    <Button.Content>Refresh</Button.Content>
+                    <Button.Content>{props.t('tab.refreshButton')}</Button.Content>
                 </Button>
                 <Button
                     text
@@ -35,22 +36,23 @@ const TabHeader: React.FunctionComponent<TabHeaderProps> = (props) => {
                     }}
                 >
                     <AddIcon outline xSpacing="after" />
-                    <Button.Content>Start a Q&A session</Button.Content>
+                    <Button.Content>{props.t('tab.startNewSession')}</Button.Content>
                 </Button>
                 <Button text>
                     <SwitchIcon outline xSpacing="after" />
-                    <Button.Content>Switch to another session</Button.Content>
+                    <Button.Content>{props.t('tab.switchSession')}</Button.Content>
                 </Button>
                 {props.activeSessionData && props.activeSessionData.sessionId && (
                     <FlexItem push>
                         <Button
+                            className="btn-end-session"
                             disabled={props.activeSessionData && !props.activeSessionData.isActive}
                             primary
                             onClick={(e) => {
                                 props.endSession(e);
                             }}
-                            size="medium"
-                            content="End session"
+                            size="small"
+                            content={props.t('tab.endSessionButton')}
                         />
                     </FlexItem>
                 )}
