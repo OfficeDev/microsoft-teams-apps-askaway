@@ -177,7 +177,7 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
                             {activeSessionData.unansweredQuestions.length > 0 || activeSessionData.answeredQuestions.length > 0 ? (
                                 <TabQuestions t={this.localize} onClickAction={this.validateClickAction} activeSessionData={activeSessionData} teamsTabContext={this.props.teamsTabContext} />
                             ) : (
-                                <NoQuestionDesign t={this.localize} />
+                                <NoQuestionDesign isSessionActive={activeSessionData.isActive} t={this.localize} />
                             )}
                         </div>
                     </Flex>

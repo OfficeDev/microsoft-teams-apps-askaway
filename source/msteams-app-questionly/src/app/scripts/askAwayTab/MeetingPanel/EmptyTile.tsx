@@ -26,15 +26,17 @@ export interface EmptyTileProps {
  */
 const EmptyTile: React.FunctionComponent<EmptyTileProps> = (props) => {
     return (
-        <div className="no-question">
-            <Image className="create-session" alt="image" src={props.image} />
-            <Flex.Item align="center">
-                <div className="text-caption-panel">
-                    <Text className="text-section" content={props.line1} />
-                    {props.line2 && <Text className="text-section" content={props.line2} />}
-                </div>
-            </Flex.Item>
-        </div>
+        <Flex>
+            <div className="no-question">
+                <Image className="create-session" alt="image" src={props.image} />
+                <Flex.Item align="center">
+                    <div className="text-caption-panel">
+                        <Text className="text-section" content={props.line1} />
+                        {props.line2 && <Text className="text-section" content={props.line2} />}
+                    </div>
+                </Flex.Item>
+            </div>
+        </Flex>
     );
 };
 export default EmptyTile;

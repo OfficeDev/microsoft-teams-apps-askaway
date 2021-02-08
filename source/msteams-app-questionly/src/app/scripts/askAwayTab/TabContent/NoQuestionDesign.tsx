@@ -8,16 +8,26 @@ const NoQuestionImage = require('./../../../web/assets/no-question.png');
  */
 export interface NoQuestionDesignProps {
     t: Function;
+    isSessionActive: boolean;
 }
 const NoQuestionDesign: React.FunctionComponent<NoQuestionDesignProps> = (props) => {
+    const showSubText = (subText, className) => {
+        return (
+            <div className={className}>
+                <Text weight="bold" content={subText} />
+            </div>
+        );
+    };
+
     return (
-        <div className="no-question-layout">
-            <Flex column>
-                <Image src={NoQuestionImage} />
-                <div className="sub-text">
-                    <Text weight="bold" content={props.t('tab.noQuestionsPosted')} />
-                </div>
-            </Flex>
+        <div>
+            <div className="no-question-layout">
+                <Flex column>
+                    <Image src={NoQuestionImage} />
+                    {props.isSessionActive && showSubText(props.t('tab.noQuestionsPosted'), 'sub-text')}
+                </Flex>
+            </div>
+            {!props.isSessionActive && showSubText(props.t('tab.whenSessionClosed'), 'text-center')}
         </div>
     );
 };

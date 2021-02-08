@@ -87,28 +87,35 @@
         font-weight: normal;
     }
     .no-question {
+        margin: 0 auto;
+        width: 100%;
         .text-caption-panel {
             font-size: 12px;
             line-height: 16px;
-            top: 55%;
-            position: absolute;
+            // top: 55%;
+            // position: absolute;
             text-align: center;
-            left: 50%;
-            width: 200px;
-            transform: translate(-50%, -50%);
+            // left: 50%;
+            // width: 200px;
+            // transform: translate(-50%, -50%);
+            margin-top: 10%;
 
             .text-section {
                 display: block;
             }
         }
         .create-session {
-            top: 35%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            position: absolute;
-            width: 17rem;
-            width: 200px;
-            height: 200px;
+            // top: 35%;
+            // left: 50%;
+            // transform: translate(-50%, -50%);
+            // position: absolute;
+            // width: 17rem;
+            // width: 200px;
+            // height: 200px;
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+            margin-top: 4%;
         }
     }
     .session-title {
@@ -207,12 +214,16 @@
     width: 100%;
     .tab-nav-header {
         .btn-end-session {
-            margin-top: 0.3rem;
             margin-right: 1rem;
+            height: 2rem;
+            width: 7rem;
+            margin-top: 0rem;
         }
 
         span {
             font-weight: 500;
+            font-size: 14px;
+            line-height: 20px;
         }
     }
     .tab-container {
@@ -305,4 +316,7 @@
     margin-bottom: 1rem;
     font-size: 14px;
     line-height: 20px;
+}
+.text-center {
+    text-align: center;
 }

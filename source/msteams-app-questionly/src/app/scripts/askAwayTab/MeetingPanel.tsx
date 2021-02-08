@@ -360,7 +360,7 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
     public render() {
         const stateVal = this.state;
         if (stateVal.showLoader) return <Loader label={this.localize('meetingPanel.loaderText')} />;
-
+        console.log('signal', this.signalRComponent);
         return (
             <React.Fragment>
                 <SignalRLifecycle

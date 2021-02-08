@@ -23,7 +23,8 @@
         "showPendingQuestions": "Pending questions",
         "showAnsweredQuestions": "Answered questions",
         "pendingStatus": "Pending",
-        "answeredStatus": "Answered"
+        "answeredStatus": "Answered",
+        "whenSessionClosed": "Surprising, but true. No questions were posted."
     },
     "meetingPanel": {
         "successText": "Q&A session started",
