@@ -2,6 +2,7 @@ import './../index.scss';
 import * as React from 'react';
 import { Flex, Text, Button } from '@fluentui/react-northstar';
 import { useTranslation } from 'react-i18next';
+
 /**
  * Properties for the CreateSessionInternal React component
  */
@@ -18,7 +19,7 @@ const QnaSessionNotificationInternal: React.FunctionComponent<QnaSessionNotifica
 
     return (
         <Flex column>
-            <Text content={`${userName} ${t('popups.notificationTitle')}`} />
+            <Text content={t('popups.notificationTitle', { userName: userName })} />
             <div className="notification-title">
                 <Text content={sessionTitle} weight="bold" />
             </div>

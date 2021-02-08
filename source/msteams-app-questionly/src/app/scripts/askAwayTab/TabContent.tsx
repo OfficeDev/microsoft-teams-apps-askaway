@@ -68,7 +68,7 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
      * Takes user through end session journey, prompts end qna session message and calls end session callback if necessary.
      */
     private handleEndQnaSessionFlow = () => {
-        handleEndQnASessionFlow(this.endActiveSession);
+        handleEndQnASessionFlow(this.localize, this.endActiveSession);
     };
 
     /**
@@ -84,9 +84,9 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
                     isActive: false,
                 },
             }));
-            handleTaskModuleResponseForEndQnASessionFlow();
+            handleTaskModuleResponseForEndQnASessionFlow(this.localize);
         } catch (error) {
-            handleTaskModuleErrorForEndQnASessionFlow(error);
+            handleTaskModuleErrorForEndQnASessionFlow(this.localize, error);
         }
     };
 
@@ -104,16 +104,16 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
                     .post(`/conversations/${this.props.teamsTabContext.chatId}/sessions`, createSessionData)
                     .then((response: any) => {
                         if (response && response['data'] && response['data']['sessionId']) {
-                            handleTaskModuleResponseForSuccessfulCreateQnASessionFlow();
+                            handleTaskModuleResponseForSuccessfulCreateQnASessionFlow(this.localize);
                             this.setState({
                                 activeSessionData: response.data,
                             });
                         } else {
-                            handleTaskModuleErrorForCreateQnASessionFlow(new Error('Invalid response'), this.endActiveSession);
+                            handleTaskModuleErrorForCreateQnASessionFlow(this.localize, new Error('Invalid response'), this.endActiveSession);
                         }
                     })
                     .catch((error) => {
-                        handleTaskModuleErrorForCreateQnASessionFlow(error, this.endActiveSession);
+                        handleTaskModuleErrorForCreateQnASessionFlow(this.localize, error, this.endActiveSession);
                     });
             }
         };
@@ -175,7 +175,7 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
                         <div className="tab-container">
                             <PostNewQuestions t={this.localize} activeSessionData={activeSessionData} onPostNewQuestion={this.handlePostNewQuestions} />
                             {activeSessionData.unansweredQuestions.length > 0 || activeSessionData.answeredQuestions.length > 0 ? (
-                                <TabQuestions onClickAction={this.validateClickAction} activeSessionData={activeSessionData} teamsTabContext={this.props.teamsTabContext} />
+                                <TabQuestions t={this.localize} onClickAction={this.validateClickAction} activeSessionData={activeSessionData} teamsTabContext={this.props.teamsTabContext} />
                             ) : (
                                 <NoQuestionDesign t={this.localize} />
                             )}
