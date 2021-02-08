@@ -27,6 +27,7 @@ exports[`CreateSessionInternal Component should match the snapshot 1`] = `
       >
         <Text
           as="span"
+          content="popups.sessionTitle"
           size="small"
         />
         <Input
@@ -38,11 +39,7 @@ exports[`CreateSessionInternal Component should match the snapshot 1`] = `
           label=""
           onChange={[Function]}
           onKeyUp={[Function]}
-          styles={
-            Object {
-              "color": "#c8c6c4",
-            }
-          }
+          placeholder="popups.sessionTitlePlaceholder"
           successIndicator={<PresenceAvailableIcon />}
           type="text"
           wrapper={Object {}}
@@ -53,6 +50,7 @@ exports[`CreateSessionInternal Component should match the snapshot 1`] = `
       >
         <Text
           as="span"
+          content="popups.sessionDescription"
           size="small"
         />
         <TextArea
@@ -61,6 +59,7 @@ exports[`CreateSessionInternal Component should match the snapshot 1`] = `
           fluid={true}
           onChange={[Function]}
           onKeyUp={[Function]}
+          placeholder="popups.sessionDescriptionPlaceholder"
           styles={
             Object {
               "marginTop": "0.25rem",
@@ -85,7 +84,9 @@ exports[`CreateSessionInternal Component should match the snapshot 1`] = `
             >
               <ButtonContent
                 as="span"
-              />
+              >
+                popups.createQnaSessionButton
+              </ButtonContent>
             </Button>
           </FlexItem>
         </Flex>

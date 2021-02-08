@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AskAwayTabRemoveInternal Component should match the snapshot 1`] = `
+<Flex
+  fill={true}
+>
+  <FlexItem>
+    <div>
+      <Header
+        as="h1"
+        content="tab.removeHeaderText"
+      />
+      <Text
+        as="span"
+        content="tab.removeTextNotification"
+      />
+    </div>
+  </FlexItem>
+</Flex>
+`;

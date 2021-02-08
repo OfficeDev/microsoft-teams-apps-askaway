@@ -6,14 +6,14 @@ exports[`QnaSessionNotificationInternal Component should match the snapshot 1`] 
 >
   <Text
     as="span"
-    content=" undefined"
+    content="popups.notificationTitle"
   />
   <div
     className="notification-title"
   >
     <Text
       as="span"
-      content=""
+      content="some-value"
       weight="bold"
     />
   </div>
@@ -23,6 +23,7 @@ exports[`QnaSessionNotificationInternal Component should match the snapshot 1`] 
   >
     <Text
       as="span"
+      content="popups.notificationMessage"
     />
     <Button
       accessibility={[Function]}
@@ -34,7 +35,9 @@ exports[`QnaSessionNotificationInternal Component should match the snapshot 1`] 
     >
       <ButtonContent
         as="span"
-      />
+      >
+        popups.notificationButton
+      </ButtonContent>
     </Button>
   </Flex>
 </Flex>
