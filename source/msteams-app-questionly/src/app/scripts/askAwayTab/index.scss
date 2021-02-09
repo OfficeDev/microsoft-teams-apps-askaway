@@ -10,6 +10,8 @@
         left: 50%;
         transform: translate(-50%, -50%);
         position: absolute;
+        width: 190px;
+        height: 190px;
     }
     .text-configtab-caption {
         font-size: 18px;
@@ -106,7 +108,6 @@
             left: 50%;
             transform: translate(-50%, -50%);
             position: absolute;
-            width: 17rem;
             width: 200px;
             height: 200px;
         }
@@ -305,4 +306,11 @@
     margin-bottom: 1rem;
     font-size: 14px;
     line-height: 20px;
+}
+
+.centerContent {
+    top: 50%;
+    left: 50%;
+    position: absolute;
+    transform: translate(-50%, -50%);
 }
