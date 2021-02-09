@@ -24,7 +24,6 @@ describe('validates NewQuestionAddedEventHandler', () => {
             qnaSessionId: testsessionId,
             type: 'newQuestionAddedEvent',
             data: {},
-            version: 0,
         };
 
         activeSessionData = {

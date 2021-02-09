@@ -7,7 +7,11 @@ import seedrandom from "seedrandom";
 import * as jwt from "jsonwebtoken";
 import { clone } from "lodash";
 
-import { IQuestionPopulatedUser } from "msteams-app-questionly.data";
+import {
+  IQuestionPopulatedUser,
+  IQuestionDataService,
+  IQnASessionDataService,
+} from "msteams-app-questionly.data";
 import { mainCard, viewLeaderboardButton } from "./maincard";
 import { initLocalization, mainCardStrings } from "../localization/locale";
 import { CardConstants } from "./cardConstants";
@@ -180,12 +184,12 @@ const getAtMentionInBoldMarkDown = (userName: string): string => {
 };
 
 export const getUpdatedMainCard = async (
-  qnaSessionDataService: any,
-  questionDataService: any,
+  qnaSessionDataService: IQnASessionDataService,
+  questionDataService: IQuestionDataService,
   qnaSessionId: string,
   ended = false,
   avatarKey?: string
-): Promise<{ card: IAdaptiveCard; activityId: string }> => {
+): Promise<{ card: IAdaptiveCard; activityId?: string }> => {
   const qnaSessionData = await qnaSessionDataService.getQnASessionData(
     qnaSessionId
   );
@@ -195,7 +199,10 @@ export const getUpdatedMainCard = async (
     topQuestions,
     recentQuestions,
     numQuestions,
-  } = await questionDataService.getQuestions(qnaSessionId, 3);
+  } = await questionDataService.getQuestionsCountWithRecentAndTopNQuestions(
+    qnaSessionId,
+    3
+  );
 
   // generate and return maincard
   return {

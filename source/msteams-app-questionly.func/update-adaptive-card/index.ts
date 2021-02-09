@@ -20,14 +20,14 @@ import {
   IDataEvent,
 } from "msteams-app-questionly.common";
 import {
-  qnaSessionDataService,
-  questionDataService,
-} from "msteams-app-questionly.data";
-import {
   height,
   width,
   title,
 } from "../src/constants/notificationBubbleConstants";
+import {
+  questionDataService,
+  qnaSessionDataService,
+} from "../src/utils/dbUtility";
 import { exceptionLogger } from "../src/utils/exceptionTracking";
 
 let adapter = new BotFrameworkAdapter({

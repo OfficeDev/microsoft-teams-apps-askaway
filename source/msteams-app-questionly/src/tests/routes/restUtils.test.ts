@@ -1,6 +1,6 @@
 import { generateUniqueId } from 'adaptivecards';
 import { BotFrameworkAdapter } from 'botbuilder';
-import { questionDataService, userDataService, IConversation } from 'msteams-app-questionly.data';
+import { IQuestionDataService, QuestionDataService, UserDataService, IUserDataService, IConversation, IQnASessionDataService } from 'msteams-app-questionly.data';
 import { getTeamsUserId, getMemberInfo, getAndEnsureRequestBodyContainsParameter, ensureUserIsPartOfMeetingConversation } from 'src/routes/restUtils';
 import { getMicrosoftAppPassword } from 'src/util/keyvault';
 import { Request } from 'express';
@@ -9,7 +9,7 @@ import { errorMessages } from 'src/errors/errorMessages';
 import { ConversationDoesNotBelongToMeetingChatError } from 'src/errors/conversationDoesNotBelongToMeetingChatError';
 import { verifyUserFromConversationId } from 'msteams-app-questionly.common';
 import { UserIsNotPartOfConversationError } from 'src/errors/userIsNotPartOfConversationError';
-import { formatQnaSessionDataArrayAsPerClientDataContract } from 'src/util/clientDataContractFormatter';
+import { ClientDataContractFormatter, IClientDataContractFormatter } from 'src/util/clientDataContractFormatter';
 
 const sampleUserId = 'sampleUserId';
 const sampleServiceUrl = 'sampleServiceUrl';
@@ -23,9 +23,17 @@ let user2: any;
 
 // Test cases will be improved as part of rest api TASK 1211744, this is a boilerplate code.
 describe('test process QnA sesssions for meeting tab', () => {
+    let mockUserDataService: IUserDataService;
+    let mockQuestionDataService: IQuestionDataService;
+    let mockQnASessionDataService: IQnASessionDataService;
+    let mockClientDataContractFormatter: IClientDataContractFormatter;
+
     beforeAll(() => {
-        (<any>questionDataService.getQuestionData) = jest.fn();
-        (<any>userDataService.getUser) = jest.fn();
+        mockUserDataService = new UserDataService();
+        mockQuestionDataService = new QuestionDataService(mockUserDataService, mockQnASessionDataService);
+        mockClientDataContractFormatter = new ClientDataContractFormatter(mockUserDataService, mockQuestionDataService);
+        (<any>mockQuestionDataService.getAllQuestions) = jest.fn();
+        (<any>mockUserDataService.getUser) = jest.fn();
 
         testQnAData1 = {
             _id: generateUniqueId(),
@@ -82,21 +90,21 @@ describe('test process QnA sesssions for meeting tab', () => {
 
     it('validates process QnA sesssions for meeting tab', async () => {
         const qnaSessionsData = [testQnAData1, testQnAData2];
-        (<any>questionDataService.getQuestionData).mockImplementation((qnaid) => {
+        (<any>mockQuestionDataService.getAllQuestions).mockImplementation((qnaid) => {
             if (qnaid === testQnAData1._id) {
                 return [question1, question2];
             } else if (qnaid === testQnAData2._id) {
                 return [];
             }
         });
-        (<any>userDataService.getUser).mockImplementation((id) => {
+        (<any>mockUserDataService.getUser).mockImplementation((id) => {
             if (id == testQnAData1.hostId) {
                 return user1;
             } else if (id == testQnAData2.hostId) {
                 return user2;
             }
         });
-        const result = await formatQnaSessionDataArrayAsPerClientDataContract(qnaSessionsData);
+        const result = await mockClientDataContractFormatter.formatQnaSessionDataArrayAsPerClientDataContract(qnaSessionsData);
         expect(result.length).toEqual(2);
         expect(result[0].title).toEqual(testQnAData1.title);
         expect(result[0].isActive).toEqual(testQnAData1.isActive);
@@ -108,48 +116,48 @@ describe('test process QnA sesssions for meeting tab', () => {
         expect(result[1].isActive).toEqual(testQnAData2.isActive);
         expect(result[1].hostUser.id).toEqual(user2._id);
         expect(result[1].hostUser.name).toEqual(user2.userName);
-        expect(questionDataService.getQuestionData).toBeCalledTimes(2);
-        expect(userDataService.getUser).toBeCalledTimes(2);
+        expect(mockQuestionDataService.getAllQuestions).toBeCalledTimes(2);
+        expect(mockUserDataService.getUser).toBeCalledTimes(2);
     });
 
     it('validates process QnA sesssions for meeting tab - no qna session data', async () => {
         const qnaSessionsData = [];
-        const result = await formatQnaSessionDataArrayAsPerClientDataContract(qnaSessionsData);
+        const result = await mockClientDataContractFormatter.formatQnaSessionDataArrayAsPerClientDataContract(qnaSessionsData);
 
         expect(result.length).toEqual(0);
     });
 
     it('validates process QnA sesssions for meeting tab - error while getting user data', async () => {
         const sampleError: Error = new Error();
-        (<any>questionDataService.getQuestionData).mockImplementation((qnaid) => {
+        (<any>mockQuestionDataService.getAllQuestions).mockImplementation((qnaid) => {
             if (qnaid === testQnAData1._id) {
                 return [question1, question2];
             } else if (qnaid === testQnAData2._id) {
                 return [];
             }
         });
-        (<any>userDataService.getUser).mockImplementationOnce(() => {
+        (<any>mockUserDataService.getUser).mockImplementationOnce(() => {
             throw sampleError;
         });
 
         const qnaSessionsData = [testQnAData1, testQnAData2];
-        await formatQnaSessionDataArrayAsPerClientDataContract(qnaSessionsData).catch((err) => {
+        await mockClientDataContractFormatter.formatQnaSessionDataArrayAsPerClientDataContract(qnaSessionsData).catch((err) => {
             expect(err).toEqual(sampleError);
         });
-        expect(questionDataService.getQuestionData).toBeCalled();
-        expect(userDataService.getUser).toBeCalled();
+        expect(mockQuestionDataService.getAllQuestions).toBeCalled();
+        expect(mockUserDataService.getUser).toBeCalled();
     });
 
     it('validates process QnA sesssions for meeting tab - error while getting question data', async () => {
         const sampleError: Error = new Error();
-        (<any>questionDataService.getQuestionData).mockImplementationOnce(() => {
+        (<any>mockQuestionDataService.getAllQuestions).mockImplementationOnce(() => {
             throw sampleError;
         });
         const qnaSessionsData = [testQnAData1, testQnAData2];
-        await formatQnaSessionDataArrayAsPerClientDataContract(qnaSessionsData).catch((err) => {
+        await mockClientDataContractFormatter.formatQnaSessionDataArrayAsPerClientDataContract(qnaSessionsData).catch((err) => {
             expect(err).toEqual(sampleError);
         });
-        expect(questionDataService.getQuestionData).toBeCalled();
+        expect(mockQuestionDataService.getAllQuestions).toBeCalled();
     });
 });
 

@@ -9,13 +9,65 @@ import {
   QnASession,
 } from "./../schemas/qnaSession";
 import { IUser, User } from "./../schemas/user";
-import { userDataService } from "./userDataService";
+import { IUserDataService } from "./userDataService";
 import { QnASessionLimitExhaustedError } from "src/errors/qnaSessionLimitExhaustedError";
 
-class QnASessionDataService {
-  private userDataService;
+export interface IQnASessionDataService {
+  createQnASession: (sessionParameters: {
+    title: string;
+    description: string;
+    userName: string;
+    userAadObjectId: string;
+    activityId: string;
+    conversationId: string;
+    tenantId: string;
+    scopeId: string;
+    hostUserId: string;
+    isChannel: boolean;
+    isMeetingGroupChat: boolean;
+  }) => Promise<IQnASession_populated>;
+  updateActivityId: (qnaSessionId: string, activityId: string) => Promise<void>;
+  getQnASessionData: (qnaSessionId: string) => Promise<IQnASession_populated>;
+  endQnASession: (
+    qnaSessionId: string,
+    conversationId: string,
+    endedById: string,
+    endedByName: string,
+    endedByUserId: string
+  ) => Promise<void>;
+  isExistingQnASession: (
+    qnaTeamsSessionId: string,
+    conversationId: string
+  ) => Promise<boolean>;
+  isExistingActiveQnASession: (
+    qnaTeamsSessionId: string,
+    conversationId: string
+  ) => Promise<boolean>;
+  isHost: (qnaSessionId: string, userAadjObjId: string) => Promise<boolean>;
+  isActiveQnA: (qnaTeamsSessionId: string) => Promise<boolean>;
+  getQnASession: (qnaSessionId: string) => Promise<IQnASession | null>;
+  getAllQnASessionData: (
+    conversationId: string
+  ) => Promise<IQnASession_populated[]>;
+  getNumberOfActiveSessions: (conversationId: string) => Promise<Number>;
+  getAllActiveQnASessionData: (
+    conversationId: string
+  ) => Promise<IQnASession_populated[]>;
+  incrementAndGetDataEventVersion: (qnaSessionId: string) => Promise<Number>;
+  updateDateTimeCardLastUpdated: (
+    qnaSessionId: string,
+    dateTimeCardLastUpdated: Date
+  ) => Promise<void>;
+  updateDateTimeNextCardUpdateScheduled: (
+    qnaSessionId: string,
+    dateTimeNextCardUpdateScheduled: Date
+  ) => Promise<void>;
+}
 
-  constructor(userDataService) {
+export class QnASessionDataService implements IQnASessionDataService {
+  private userDataService: IUserDataService;
+
+  constructor(userDataService: IUserDataService) {
     this.userDataService = userDataService;
   }
 
@@ -106,7 +158,9 @@ class QnASessionDataService {
     );
   }
 
-  public async getQnASessionData(qnaSessionId: string) {
+  public async getQnASessionData(
+    qnaSessionId: string
+  ): Promise<IQnASession_populated> {
     const qnaSessionData = await retryWrapper(() =>
       QnASession.findById(qnaSessionId)
         .populate({
@@ -379,5 +433,3 @@ class QnASessionDataService {
     );
   }
 }
-
-export const qnaSessionDataService = new QnASessionDataService(userDataService);
