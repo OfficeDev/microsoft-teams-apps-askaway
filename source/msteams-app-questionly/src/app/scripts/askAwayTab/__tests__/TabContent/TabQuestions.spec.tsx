@@ -5,7 +5,7 @@
 import * as React from 'react';
 import { shallow, configure } from 'enzyme';
 import enzymeToJson from 'enzyme-to-json';
-import { Flex, Text, Button, Image, ThemePrepared } from '@fluentui/react-northstar';
+import { ThemePrepared } from '@fluentui/react-northstar';
 import Adapter from 'enzyme-adapter-react-16';
 import { TabQuestions } from '../../TabContent/TabQuestions';
 import { Helper } from '../../shared/Helper';

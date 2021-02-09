@@ -5,7 +5,7 @@
 import * as React from 'react';
 import { shallow, configure } from 'enzyme';
 import enzymeToJson from 'enzyme-to-json';
-import { Flex, Text, Button, FlexItem, Card, Divider, Avatar, TextArea, ThemePrepared, SiteVariablesPrepared } from '@fluentui/react-northstar';
+import { Flex, Text, Card, ThemePrepared } from '@fluentui/react-northstar';
 import Adapter from 'enzyme-adapter-react-16';
 import { PostNewQuestions } from '../../TabContent/PostNewQuestions';
 import { Helper } from '../../shared/Helper';

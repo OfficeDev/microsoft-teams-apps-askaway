@@ -5,7 +5,7 @@
 import * as React from 'react';
 import { shallow, configure } from 'enzyme';
 import enzymeToJson from 'enzyme-to-json';
-import { Flex, Text, FlexItem, Menu, menuAsToolbarBehavior, ShorthandCollection, MenuItemProps } from '@fluentui/react-northstar';
+import { Flex, Text, FlexItem, Menu } from '@fluentui/react-northstar';
 import Adapter from 'enzyme-adapter-react-16';
 import QnASessionHeader from '../../MeetingPanel/QnASessionHeader';
 import { ParticipantRoles } from '../../../../../enums/ParticipantRoles';
