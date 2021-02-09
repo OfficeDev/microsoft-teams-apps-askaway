@@ -41,7 +41,7 @@ const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps & ThemePro
                                 styles={
                                     props.activeSessionData.isActive
                                         ? { backgroundColor: colorScheme.green.background, color: colorScheme.green.foreground1 }
-                                        : { backgroundColor: colorScheme.default.background5, color: colorScheme.default.foreground3 }
+                                        : { backgroundColor: colorScheme.default.background5, color: colorScheme.yellow.foreground2 }
                                 }
                                 text={props.activeSessionData.isActive ? props.t('tab.liveStatus') : props.t('tab.closedStatus')}
                             />

@@ -70,8 +70,10 @@
 }
 .meeting-panel {
     .button {
-        top: 67%;
-        position: absolute;
+        margin-left: auto;
+        margin-right: auto;
+        display: block;
+        margin-top: 17%;
     }
     .newUpdatesButton {
         top: 12%;
@@ -92,30 +94,17 @@
         .text-caption-panel {
             font-size: 12px;
             line-height: 16px;
-            // top: 55%;
-            // position: absolute;
             text-align: center;
-            // left: 50%;
-            // width: 200px;
-            // transform: translate(-50%, -50%);
-            margin-top: 10%;
-
+            margin-top: 14%;
             .text-section {
                 display: block;
             }
         }
         .create-session {
-            // top: 35%;
-            // left: 50%;
-            // transform: translate(-50%, -50%);
-            // position: absolute;
-            // width: 17rem;
-            // width: 200px;
-            // height: 200px;
             margin-left: auto;
             margin-right: auto;
             display: block;
-            margin-top: 4%;
+            margin-top: 9%;
         }
     }
     .session-title {
@@ -136,7 +125,7 @@
         overflow-x: hidden;
         .card-divider {
             border-bottom: 1px solid #3b3a39;
-            height: 4.5rem;
+            min-height: 4.5rem;
             .card-layout {
                 width: 100%;
                 padding: 0.5rem;

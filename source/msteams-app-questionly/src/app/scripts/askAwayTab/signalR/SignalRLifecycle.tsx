@@ -89,6 +89,9 @@ export interface SignalRLifecycleState {
      * State variable denoting whether signalR max connection limit is reached.
      */
     connectionLimit: ConnectionLimit;
+    /**
+     *
+     */
     isAlertVisible: boolean;
 }
 
@@ -103,7 +106,7 @@ export class SignalRLifecycle extends React.Component<SignalRLifecycleProps, Sig
         this.state = {
             connectionStatus: ConnectionStatus.Connecting,
             connectionLimit: ConnectionLimit.NotExhausted,
-            isAlertVisible: false,
+            isAlertVisible: true,
         };
     }
 
@@ -253,30 +256,24 @@ export class SignalRLifecycle extends React.Component<SignalRLifecycleProps, Sig
         }
     }
 
-    setVisible(e, isVisible) {
-        console.log('e', e);
-        qna;
-    }
+    private setVisible = (visible) => {
+        this.setState({
+            isAlertVisible: visible,
+        });
+    };
 
     public render() {
-        const isVisible = this.state.connectionStatus === ConnectionStatus.NotConnected || this.state.connectionStatus === ConnectionStatus.Reconnecting ? true : false;
-        // return (
-        //     <div id="alertHolder">
-        //         {(this.state.connectionStatus === ConnectionStatus.NotConnected || this.state.connectionStatus === ConnectionStatus.Reconnecting) && (
-        //             <Alert id="alert" content={this.props.t('meetingPanel.bannerText')} dismissible />
-        //         )}
-        //     </div>
-        // );
         return (
             <div id="alertHolder">
-                <Alert
-                    id="alert"
-                    content={this.props.t('meetingPanel.bannerText')}
-                    dismissible
-                    onVisibleChange={(e) => {
-                        this.setVisible(e, false);
-                    }}
-                />
+                {(this.state.connectionStatus === ConnectionStatus.NotConnected || this.state.connectionStatus === ConnectionStatus.Reconnecting) && (
+                    <Alert
+                        id="alert"
+                        styles={this.state.isAlertVisible ? { display: 'inline-flex' } : { display: 'none' }}
+                        content={this.props.t('meetingPanel.bannerText')}
+                        dismissible
+                        onVisibleChange={() => this.setVisible(false)}
+                    />
+                )}
             </div>
         );
     }
