@@ -130,12 +130,3 @@ export const getAvatarKey = async (): Promise<string | undefined> => {
         return undefined;
     }
 };
-
-/**
- * Reads and returns background function key from key vault.
- * @returns - Background function key.
- * @throws - Error if error occurs while fetching secret from key vault.
- */
-export const getBackgroundFunctionKey = async (): Promise<string> => {
-    return await getSecretFromVault(backgroundFunctionKeySecretName);
-};

@@ -38,3 +38,25 @@ export const isCardRefreshNeededForQuestionEvent = (
       dataEvent.type === DataEventType.newQuestionAddedEvent)
   );
 };
+
+/**
+ * Checks if the token is valid, and oid received in token payload is equal to object id for managed identity in app service.
+ * @param token - Bearer token in received in request.
+ */
+export const isValidToken = (token: string): Boolean => {
+  if (process.env.debugMode === "true") {
+    return true;
+  }
+
+  if (!isValidParam(token) || !token.startsWith("Bearer")) {
+    return false;
+  }
+  token = token.replace("Bearer", "").trim();
+  const base64Payload = token.split(".")[1];
+  const payload = JSON.parse(Buffer.from(base64Payload, "base64").toString());
+
+  if (payload.oid !== process.env.IdentityObjectId_AppService) {
+    return false;
+  }
+  return true;
+};

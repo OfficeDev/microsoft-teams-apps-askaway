@@ -1,7 +1,6 @@
 import { IBackgroundJobPayload, IDataEvent } from 'msteams-app-questionly.common';
 import axios, { AxiosRequestConfig } from 'axios';
 import { exceptionLogger, getOperationIdForCurrentRequest } from 'src/util/exceptionTracking';
-import { getBackgroundFunctionKey } from 'src/util/keyvault';
 import { IQnASession_populated, IQuestion } from 'msteams-app-questionly.data';
 import {
     createQnaSessionCreatedEvent,
@@ -13,6 +12,7 @@ import {
 } from 'src/background-job/events/dataEventUtility';
 import { StatusCodes } from 'http-status-codes';
 import { TelemetryExceptions } from 'src/constants/telemetryConstants';
+import { DefaultAzureCredential } from '@azure/identity';
 
 const axiosConfig: AxiosRequestConfig = axios.defaults;
 let backgroundJobUri: string;
@@ -20,8 +20,6 @@ let backgroundJobUri: string;
 // Load background job uri and function key in memory.
 // throws exception if these values failed to load.
 export const initBackgroundJobSetup = async () => {
-    axiosConfig.headers['x-functions-key'] = await getBackgroundFunctionKey();
-
     if (process.env.BackgroundJobUri === undefined) {
         exceptionLogger('backgroundJobUri is missing in app settings.');
         throw new Error('backgroundJobUri is missing in app settings.');
@@ -163,6 +161,9 @@ const triggerBackgroundJob = async (conversationId: string, qnaSessionId: string
     };
 
     try {
+        const token = await getToken();
+        axiosConfig.headers['Authorization'] = `Bearer ${token}`;
+
         const res = await axios.post(backgroundJobUri, backgroundJobPayload, axiosConfig);
 
         if (res.status != StatusCodes.ACCEPTED) {
@@ -180,4 +181,18 @@ const triggerBackgroundJob = async (conversationId: string, qnaSessionId: string
 
         return false;
     }
+};
+
+/**
+ * Gets JWT access token using DefaultAzureCredential.
+ * @returns access token.
+ * @throws error if access token could not be fetched.
+ */
+const getToken = async (): Promise<string> => {
+    const defaultAzureCredential = new DefaultAzureCredential();
+    const accessToken = await defaultAzureCredential.getToken('https://management.azure.com/.default');
+    if (!accessToken) {
+        throw new Error('Error while fetching access token for background job.');
+    }
+    return accessToken.token;
 };
