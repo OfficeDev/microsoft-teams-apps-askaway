@@ -61,6 +61,10 @@ export interface MeetingPanelState {
      * boolean representing if any active session is ended.
      */
     isActiveSessionEnded: boolean;
+    /**
+     * boolean representing if alert is visbile or not
+     */
+    isNetworkAlertVisible: boolean;
 }
 export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState> {
     public localize: TFunction;
@@ -85,6 +89,7 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
             showNewUpdatesButton: false,
             userRole: ParticipantRoles.Attendee,
             isActiveSessionEnded: false,
+            isNetworkAlertVisible: false,
         };
     }
 
@@ -341,6 +346,7 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                         activeSessionData={stateVal.activeSessionData}
                         httpService={this.props.httpService}
                         teamsTabContext={this.props.teamsTabContext}
+                        isNetworkAlertVisible={stateVal.isNetworkAlertVisible}
                     />
                 ) : (
                     <div className="no-question">
@@ -356,6 +362,13 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                 />
             </React.Fragment>
         );
+    };
+
+    private setAlertVisible = (value) => {
+        console.log('setAlertVisible', value);
+        this.setState({
+            isNetworkAlertVisible: value,
+        });
     };
 
     /**
@@ -376,6 +389,7 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                         ref={(instance) => {
                             this.signalRComponent = instance;
                         }}
+                        setAlertVisible={this.setAlertVisible}
                     />
                     {this.state.showNewUpdatesButton && (
                         <Button onClick={this.updateQnASessionContent} className="newUpdatesButton">

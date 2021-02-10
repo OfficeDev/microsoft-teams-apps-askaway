@@ -77,6 +77,10 @@ export interface SignalRLifecycleProps {
      * signalR HubConnection for UTs only.
      */
     connection?: signalR.HubConnection;
+    /**
+     * Function to update parent whether alert component is rendered or not.
+     */
+    setAlertVisible: Function;
 }
 
 export interface SignalRLifecycleState {
@@ -90,7 +94,7 @@ export interface SignalRLifecycleState {
      */
     connectionLimit: ConnectionLimit;
     /**
-     *
+     *State variable to set whether network alert is visable or not.
      */
     isAlertVisible: boolean;
 }
@@ -108,6 +112,14 @@ export class SignalRLifecycle extends React.Component<SignalRLifecycleProps, Sig
             connectionLimit: ConnectionLimit.NotExhausted,
             isAlertVisible: true,
         };
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        if (prevState.connectionStatus != this.state.connectionStatus) {
+            if ((this.state.connectionStatus === ConnectionStatus.NotConnected || this.state.connectionStatus === ConnectionStatus.Reconnecting) && this.state.isAlertVisible == true) {
+                this.props.setAlertVisible(true);
+            }
+        }
     }
 
     componentDidMount() {
@@ -255,11 +267,16 @@ export class SignalRLifecycle extends React.Component<SignalRLifecycleProps, Sig
             this.initiateConnectionSetup();
         }
     }
-
+    /**
+     * Handler to change the alert visibility
+     * @param visible - boolen
+     */
     private setVisible = (visible) => {
         this.setState({
             isAlertVisible: visible,
         });
+        console.log('setVisible setting to false');
+        this.props.setAlertVisible(false);
     };
 
     public render() {

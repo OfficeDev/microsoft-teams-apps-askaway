@@ -121,8 +121,11 @@
     }
     .question-card {
         margin-top: 1rem;
-        height: 20rem;
+        height: 21rem;
         overflow-x: hidden;
+        &.network-alert {
+            height: 17.3rem;
+        }
         .card-divider {
             border-bottom: 1px solid #3b3a39;
             min-height: 4.5rem;

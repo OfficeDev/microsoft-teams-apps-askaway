@@ -21,6 +21,7 @@ export interface QuestionsListProps {
     teamsTabContext: microsoftTeams.Context;
     t: Function;
     userRole: ParticipantRoles;
+    isNetworkAlertVisible: boolean;
 }
 export interface QuestionTab {
     selectedTab: string;
@@ -97,7 +98,7 @@ const QuestionsList: React.FunctionComponent<QuestionsListProps> = (props) => {
     return (
         <React.Fragment>
             <TabHeader t={props.t} onSelectActiveTab={setActiveLiveTab} tabActiveIndex={liveTab.defaultActiveIndex} />
-            <div className="question-card">
+            <div className={!props.isNetworkAlertVisible ? 'question-card' : 'question-card network-alert'}>
                 {liveTab.selectedTab === CONST.TAB_QUESTIONS.ANSWERED_Q &&
                     activeSessionData.answeredQuestions.map((question: ClientDataContract.Question) => {
                         const isUserLikedQuestion = checkIsUserLikedQuestion({ idsArray: question.voterAadObjectIds });
