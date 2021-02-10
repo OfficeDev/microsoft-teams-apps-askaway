@@ -88,20 +88,6 @@
       "metadata": {
         "description": "Location for all resources."
       }
-    },
-    "gitRepoUrl": {
-      "type": "string",
-      "defaultValue": "https://github.com/OfficeDev/microsoft-teams-apps-askaway",
-      "metadata": {
-        "description": "The URL to the GitHub repository to deploy."
-      }
-    },
-    "gitBranch": {
-      "type": "string",
-      "defaultValue": "master",
-      "metadata": {
-        "description": "The branch of the GitHub repository to deploy."
-      }
     }
   },
   "variables": {
