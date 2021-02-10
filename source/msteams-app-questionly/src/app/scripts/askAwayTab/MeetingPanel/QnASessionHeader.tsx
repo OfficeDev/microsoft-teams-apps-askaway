@@ -14,13 +14,14 @@ export interface QnASessionHeaderProps {
     onClickRefreshSession: Function;
     onClickEndSession: Function;
     showToolBar: boolean;
+    t: Function;
     userRole: ParticipantRoles;
 }
 const QnASessionHeader: React.FunctionComponent<QnASessionHeaderProps> = (props) => {
     const items = [
         {
             key: 'Refresh session',
-            content: 'Refresh session',
+            content: props.t('meetingPanel.refreshSessionButton'),
             onClick: () => {
                 props.onClickRefreshSession();
             },
@@ -32,7 +33,7 @@ const QnASessionHeader: React.FunctionComponent<QnASessionHeaderProps> = (props)
     if (isPresenterOrOrganizer(props.userRole)) {
         items.push({
             key: 'End session',
-            content: 'End session',
+            content: props.t('meetingPanel.endSessionButton'),
             onClick: () => {
                 props.onClickEndSession();
             },

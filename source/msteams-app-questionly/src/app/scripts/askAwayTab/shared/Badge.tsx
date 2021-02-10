@@ -8,10 +8,11 @@ import * as React from 'react';
 export interface BadgeProps {
     text: string;
     styles: CSSProperties;
+    className?: string;
 }
 const Badge: React.FunctionComponent<BadgeProps> = (props) => {
     return (
-        <span style={props.styles} className={`badge`}>
+        <span style={props.styles} className={props.className ?? `badge`}>
             {props.text}
         </span>
     );

@@ -16,6 +16,7 @@ export interface NewQuestionProps {
     httpService: HttpService;
     teamsTabContext: microsoftTeams.Context;
     onAddNewQuestion: Function;
+    t: Function;
 }
 const NewQuestion: React.FunctionComponent<NewQuestionProps> = (props) => {
     const [question, setQuestion] = useState('');
@@ -45,7 +46,7 @@ const NewQuestion: React.FunctionComponent<NewQuestionProps> = (props) => {
                     inverted
                     fluid
                     maxLength={250}
-                    placeholder="Type a question here"
+                    placeholder={props.t('meetingPanel.inputPlaceholder')}
                     onChange={(e) => {
                         setQuestion(e.target['value']);
                     }}

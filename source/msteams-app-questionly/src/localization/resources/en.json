@@ -34,7 +34,9 @@
         "conversationInvalid": "Requests pertaining to a Q & A must be made in the same conversation the QnA is in.",
         "qnasessionlimitexhaustedError": "Could not create a new Q & A session. Number of active sessions cannot exceed 1. Please end existing session(s) and try again.",
         "qnasessionCreationError": "Could not create a new QnA session. Please try again later.",
-        "insufficientPermissionsToCreateOrEndQnASessionError": "Only a Presenter or an Organizer can create/end a Q & A Session."
+        "insufficientPermissionsToCreateOrEndQnASessionError": "Only a Presenter or an Organizer can create/end a Q & A Session.",
+        "unableToPostCardForSessionStartedEvent": "Something went wrong, we were not able to successfully create a new Ask Away session. Please try again later.",
+        "unableToPerformActivityOnEndedSession": "Sorry, we cannot perform the action because the session has ended."
     },
     "generic": {
         "submit": "Submit",

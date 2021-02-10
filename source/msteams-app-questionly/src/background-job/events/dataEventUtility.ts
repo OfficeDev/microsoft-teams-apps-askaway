@@ -1,4 +1,4 @@
-import { IQnASession_populated, IQuestion, qnaSessionDataService } from 'msteams-app-questionly.data';
+import { IQnASession_populated, IQuestion } from 'msteams-app-questionly.data';
 import { DataEventType, IDataEvent } from 'msteams-app-questionly.common';
 import { ClientDataContract } from 'src/contracts/clientDataContract';
 
@@ -26,7 +26,7 @@ export const createQnaSessionCreatedEvent = (qnaSession: IQnASession_populated):
         qnaSessionId: qnaSession._id,
         type: DataEventType.qnaSessionCreatedEvent,
         data: qnaSessionData,
-        version: 0,
+        //version: 0,
     };
 };
 
@@ -34,20 +34,18 @@ export const createQnaSessionCreatedEvent = (qnaSession: IQnASession_populated):
  * Creates event data payload corresponding to qnaSession ended operation.
  * Updates event version in db and adds new version to the payload.
  * @param qnaSessionId - qnaSession id.
- * @param endedByUserAadObjectId - aadObject id of user who ended the qna session.
  * @returns - data event corresponding to qnaSession ended operation.
  */
-export const createQnaSessionEndedEvent = async (qnaSessionId: string, endedByUserAadObjectId: string): Promise<IDataEvent> => {
+export const createQnaSessionEndedEvent = (qnaSessionId: string): IDataEvent => {
     const data = {
         qnaSessionId: qnaSessionId,
-        endedByUserAadObjectId: endedByUserAadObjectId,
     };
 
     return {
         qnaSessionId: qnaSessionId,
         type: DataEventType.qnaSessionEndedEvent,
         data: data,
-        version: await qnaSessionDataService.incrementAndGetDataEventVersion(qnaSessionId),
+        //version: await qnaSessionDataService.incrementAndGetDataEventVersion(qnaSessionId),
     };
 };
 
@@ -59,7 +57,7 @@ export const createQnaSessionEndedEvent = async (qnaSessionId: string, endedByUs
  * @param postedByUserAadObjectId - aadObject id of user who posted the question.
  * @returns - data event corresponding to qnaSession ended operation.
  */
-export const createQuestionAddedEvent = async (qnaSessionId: string, question: IQuestion, postedByUserAadObjectId: string): Promise<IDataEvent> => {
+export const createQuestionAddedEvent = (qnaSessionId: string, question: IQuestion, postedByUserAadObjectId: string): IDataEvent => {
     const data = {
         questionId: question._id,
         postedByUserAadObjectId: postedByUserAadObjectId,
@@ -69,7 +67,7 @@ export const createQuestionAddedEvent = async (qnaSessionId: string, question: I
         qnaSessionId: qnaSessionId,
         type: DataEventType.newQuestionAddedEvent,
         data: data,
-        version: await qnaSessionDataService.incrementAndGetDataEventVersion(qnaSessionId),
+        //version: await qnaSessionDataService.incrementAndGetDataEventVersion(qnaSessionId),
     };
 };
 
@@ -81,7 +79,7 @@ export const createQuestionAddedEvent = async (qnaSessionId: string, question: I
  * @param upvotedByUserAadObjectId - aadObject id of user who upvoted the question.
  * @returns - data event corresponding to qnaSession ended operation.
  */
-export const createQuestionUpvotedEvent = async (qnaSessionId: string, questionId: string, upvotedByUserAadObjectId: string): Promise<IDataEvent> => {
+export const createQuestionUpvotedEvent = (qnaSessionId: string, questionId: string, upvotedByUserAadObjectId: string): IDataEvent => {
     const data = {
         questionId: questionId,
         upvotedByUserAadObjectId: upvotedByUserAadObjectId,
@@ -91,7 +89,7 @@ export const createQuestionUpvotedEvent = async (qnaSessionId: string, questionI
         qnaSessionId: qnaSessionId,
         type: DataEventType.questionUpvotedEvent,
         data: data,
-        version: await qnaSessionDataService.incrementAndGetDataEventVersion(qnaSessionId),
+        //version: await qnaSessionDataService.incrementAndGetDataEventVersion(qnaSessionId),
     };
 };
 
@@ -103,7 +101,7 @@ export const createQuestionUpvotedEvent = async (qnaSessionId: string, questionI
  * @param downvotedByUserAadObjectId - aadObject id of user who downvoted the question.
  * @returns - data event corresponding to qnaSession ended operation.
  */
-export const createQuestionDownvotedEvent = async (qnaSessionId: string, questionId: string, downvotedByUserAadObjectId: string): Promise<IDataEvent> => {
+export const createQuestionDownvotedEvent = (qnaSessionId: string, questionId: string, downvotedByUserAadObjectId: string): IDataEvent => {
     const data = {
         questionId: questionId,
         downvotedByUserAadObjectId: downvotedByUserAadObjectId,
@@ -113,7 +111,7 @@ export const createQuestionDownvotedEvent = async (qnaSessionId: string, questio
         qnaSessionId: qnaSessionId,
         type: DataEventType.questionDownvotedEvent,
         data: data,
-        version: await qnaSessionDataService.incrementAndGetDataEventVersion(qnaSessionId),
+        //version: await qnaSessionDataService.incrementAndGetDataEventVersion(qnaSessionId),
     };
 };
 
@@ -125,7 +123,7 @@ export const createQuestionDownvotedEvent = async (qnaSessionId: string, questio
  * @param markedAnsweredByUserAadObjectId - aadObject id of user who marked the question as answered.
  * @returns - data event corresponding to qnaSession ended operation.
  */
-export const createQuestionMarkedAsAnsweredEvent = async (qnaSessionId: string, questionId: string, markedAnsweredByUserAadObjectId: string): Promise<IDataEvent> => {
+export const createQuestionMarkedAsAnsweredEvent = (qnaSessionId: string, questionId: string, markedAnsweredByUserAadObjectId: string): IDataEvent => {
     const data = {
         questionId: questionId,
         markedAnsweredByUserAadObjectId: markedAnsweredByUserAadObjectId,
@@ -135,6 +133,6 @@ export const createQuestionMarkedAsAnsweredEvent = async (qnaSessionId: string, 
         qnaSessionId: qnaSessionId,
         type: DataEventType.questionMarkedAsAnsweredEvent,
         data: data,
-        version: await qnaSessionDataService.incrementAndGetDataEventVersion(qnaSessionId),
+        //version: await qnaSessionDataService.incrementAndGetDataEventVersion(qnaSessionId),
     };
 };

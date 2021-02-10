@@ -66,6 +66,10 @@ var config = [
                         from: path.join(__dirname, 'src/public'),
                         to: path.join(__dirname, 'dist/public'),
                     },
+                    {
+                        from: path.join(__dirname, 'src/app/localization/locales/en'),
+                        to: path.join(__dirname, 'dist/web/locales/en'),
+                    },
                 ],
             }),
         ],

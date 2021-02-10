@@ -5,8 +5,8 @@ import Badge from '../shared/Badge';
 import { useState } from 'react';
 import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
 import { withTheme } from '../shared/WithTheme';
+import Helper from '../shared/Helper';
 
-let moment = require('moment');
 interface ThemeProps {
     theme: ThemePrepared;
 }
@@ -15,6 +15,7 @@ interface ThemeProps {
  */
 export interface PostNewQuestionsProps {
     activeSessionData: ClientDataContract.QnaSession;
+    t: Function;
     onPostNewQuestion: Function;
 }
 
@@ -42,11 +43,14 @@ const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps & ThemePro
                                         ? { backgroundColor: colorScheme.green.background, color: colorScheme.green.foreground1 }
                                         : { backgroundColor: colorScheme.default.background5, color: colorScheme.green.foreground4 }
                                 }
-                                text={props.activeSessionData.isActive ? 'Live' : 'Closed'}
+                                text={props.activeSessionData.isActive ? props.t('tab.liveStatus') : props.t('tab.closedStatus')}
                             />
                             <Text
                                 className="date-content-format"
-                                content={`Created on ${moment(props.activeSessionData.dateTimeCreated).format('L')} by ${props.activeSessionData.hostUser.name}`}
+                                content={props.t('tab.createdBy', {
+                                    date: Helper.createDateString(props.activeSessionData.dateTimeCreated),
+                                    name: props.activeSessionData.hostUser.name,
+                                })}
                                 size="small"
                             />
                         </Flex>
@@ -67,7 +71,7 @@ const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps & ThemePro
                                 fluid
                                 inverted
                                 maxLength={250}
-                                placeholder="Type a question here"
+                                placeholder={props.t('tab.questionPlaceholder')}
                                 onChange={(e) => {
                                     setQuestion(e.target['value']);
                                 }}
@@ -75,7 +79,7 @@ const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps & ThemePro
                             />
                             <FlexItem push>
                                 <Button onClick={() => submitQuestion()} size="medium">
-                                    <Button.Content>Post</Button.Content>
+                                    <Button.Content>{props.t('tab.postQuestionButton')}</Button.Content>
                                 </Button>
                             </FlexItem>
                         </Flex>

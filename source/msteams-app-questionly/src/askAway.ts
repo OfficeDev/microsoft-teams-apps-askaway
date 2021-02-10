@@ -13,26 +13,35 @@ import {
     ChannelAccount,
     BotMessagePreviewActionType,
 } from 'botbuilder';
-import * as controller from 'src/controller';
+import { IController } from 'src/controller';
 import { AdaptiveCard } from 'adaptivecards';
 import { endQnAStrings, askQuestionStrings, errorStrings, startQnAStrings, leaderboardStrings } from 'src/localization/locale';
 import { exceptionLogger } from 'src/util/exceptionTracking';
-import { IConversationDataService } from 'msteams-app-questionly.data';
+import { IConversationDataService, SessionIsNoLongerActiveError } from 'msteams-app-questionly.data';
 import { extractMainCardData, MainCardData } from 'msteams-app-questionly.common';
 import { getMeetingIdFromContext, isConverationTypeChannel } from 'src/util/meetingsUtility';
 import { TelemetryExceptions } from 'src/constants/telemetryConstants';
+import * as maincardBuilder from 'msteams-app-questionly.common';
+import * as adaptiveCardBuilder from 'src/adaptive-cards/adaptiveCardBuilder';
+
+const getMainCard = maincardBuilder.getMainCard;
+const getStartQnACard = adaptiveCardBuilder.getStartQnACard;
+const getErrorCard = adaptiveCardBuilder.getErrorCard;
 
 const NULL_RESPONSE: any = null;
 /**
  * Main bot activity handler class
  */
 export class AskAway extends TeamsActivityHandler {
+    private controller: IController;
+
     /**
      * The constructor
      * @param conversationDataService - conversation data service
      */
-    public constructor(conversationDataService: IConversationDataService) {
+    public constructor(conversationDataService: IConversationDataService, controller: IController) {
         super();
+        this.controller = controller;
         this.onMembersAdded(async (context, next) => {
             const activity = context.activity;
             const membersAdded = activity.membersAdded;
@@ -106,9 +115,9 @@ export class AskAway extends TeamsActivityHandler {
         // following if statement.
         try {
             if (process.env.debugMode !== 'true') {
-                const conversationIdValid = await controller.validateConversationId(taskModuleRequest.data.qnaSessionId, context.activity.conversation.id);
+                const conversationIdValid = await this.controller.validateConversationId(taskModuleRequest.data.qnaSessionId, context.activity.conversation.id);
                 if (!conversationIdValid) {
-                    return this._buildTaskModuleContinueResponse(controller.getErrorCard(errorStrings('conversationInvalid')));
+                    return this._buildTaskModuleContinueResponse(getErrorCard(errorStrings('conversationInvalid')));
                 }
             }
         } catch (error) {
@@ -139,9 +148,9 @@ export class AskAway extends TeamsActivityHandler {
         // following if statement.
         try {
             if (process.env.debugMode !== 'true') {
-                const conversationIdValid = await controller.validateConversationId(taskModuleRequest.data.qnaSessionId, context.activity.conversation.id);
+                const conversationIdValid = await this.controller.validateConversationId(taskModuleRequest.data.qnaSessionId, context.activity.conversation.id);
                 if (!conversationIdValid) {
-                    return this._buildTaskModuleContinueResponse(controller.getErrorCard(errorStrings('conversationInvalid')));
+                    return this._buildTaskModuleContinueResponse(getErrorCard(errorStrings('conversationInvalid')));
                 }
             }
         } catch (error) {
@@ -189,7 +198,7 @@ export class AskAway extends TeamsActivityHandler {
         ================================================================================================================================*/
 
         try {
-            const leaderboard = await controller.generateLeaderboard(
+            const leaderboard = await this.controller.generateLeaderboard(
                 taskModuleRequest.data.qnaSessionId,
                 <string>context.activity.from.aadObjectId,
                 taskModuleRequest.context ? <string>taskModuleRequest.context.theme : 'default'
@@ -205,16 +214,16 @@ export class AskAway extends TeamsActivityHandler {
                 filename: module.id,
                 exceptionName: TelemetryExceptions.ViewLeaderboardFailed,
             });
-            return this._buildTaskModuleContinueResponse(controller.getErrorCard(errorStrings('leaderboard')));
+            return this._buildTaskModuleContinueResponse(getErrorCard(errorStrings('leaderboard')));
         }
     };
 
     private async handleTeamsTaskModuleFetchAskQuestion(context: TurnContext, taskModuleRequest: TaskModuleRequest): Promise<TaskModuleResponse> {
-        return this._buildTaskModuleContinueResponse(controller.getNewQuestionCard(taskModuleRequest.data.qnaSessionId), askQuestionStrings('taskModuleTitle'));
+        return this._buildTaskModuleContinueResponse(this.controller.getNewQuestionCard(taskModuleRequest.data.qnaSessionId), askQuestionStrings('taskModuleTitle'));
     }
 
     private handleTeamsTaskModuleFetchError(): TaskModuleResponse {
-        return this._buildTaskModuleContinueResponse(controller.getErrorCard(errorStrings('taskFetch')));
+        return this._buildTaskModuleContinueResponse(getErrorCard(errorStrings('taskFetch')));
     }
 
     // -------------------------------------------------------------------------- //
@@ -222,8 +231,8 @@ export class AskAway extends TeamsActivityHandler {
     // -------------------------------------------------------------------------- //
 
     private async handleTeamsTaskModuleSubmitQuestion(context: TurnContext, user: ChannelAccount, taskModuleRequest: TaskModuleRequest): Promise<TaskModuleResponse> {
-        if (!(await controller.validateConversationId(taskModuleRequest.data.qnaSessionId, context.activity.conversation.id)))
-            return this._buildTaskModuleContinueResponse(controller.getErrorCard(errorStrings('conversationInvalid')));
+        if (!(await this.controller.validateConversationId(taskModuleRequest.data.qnaSessionId, context.activity.conversation.id)))
+            return this._buildTaskModuleContinueResponse(getErrorCard(errorStrings('conversationInvalid')));
 
         const qnaSessionId = taskModuleRequest.data.qnaSessionId;
         const userAadObjectId = <string>user.aadObjectId;
@@ -236,7 +245,7 @@ export class AskAway extends TeamsActivityHandler {
         }
 
         try {
-            await controller.submitNewQuestion(qnaSessionId, userAadObjectId, userName, questionContent, conversationId, context.activity.serviceUrl, getMeetingIdFromContext(context));
+            await this.controller.submitNewQuestion(qnaSessionId, userAadObjectId, userName, questionContent, conversationId, context.activity.serviceUrl, getMeetingIdFromContext(context));
         } catch (error) {
             exceptionLogger(error, {
                 conversationId: conversationId,
@@ -248,14 +257,19 @@ export class AskAway extends TeamsActivityHandler {
                 filename: module.id,
                 exceptionName: TelemetryExceptions.CreateQuestionFailed,
             });
-            return this.handleTeamsTaskModuleResubmitQuestion(qnaSessionId, questionContent);
+
+            if (error instanceof SessionIsNoLongerActiveError) {
+                return this.handleTeamsTaskModuleSessionIsNoMoreActiveError();
+            } else {
+                return this.handleTeamsTaskModuleResubmitQuestion(qnaSessionId, questionContent);
+            }
         }
         return NULL_RESPONSE;
     }
 
     private handleTeamsTaskModuleSubmitUpvote = async (context: TurnContext, taskModuleRequest: TaskModuleRequest): Promise<TaskModuleResponse> => {
         try {
-            const updatedLeaderboard = await controller.updateUpvote(
+            const updatedLeaderboard = await this.controller.updateUpvote(
                 taskModuleRequest.data.qnaSessionId,
                 taskModuleRequest.data.questionId,
                 <string>context.activity.from.aadObjectId,
@@ -278,20 +292,25 @@ export class AskAway extends TeamsActivityHandler {
                 filename: module.id,
                 exceptionName: TelemetryExceptions.VoteQuestionFailed,
             });
-            return this._buildTaskModuleContinueResponse(controller.getErrorCard(errorStrings('upvoting')));
+
+            if (error instanceof SessionIsNoLongerActiveError) {
+                return this.handleTeamsTaskModuleSessionIsNoMoreActiveError();
+            } else {
+                return this._buildTaskModuleContinueResponse(getErrorCard(errorStrings('upvoting')));
+            }
         }
     };
 
     private async handleTeamsTaskModuleSubmitConfirmEndQnA(context: TurnContext, taskModuleRequest: TaskModuleRequest): Promise<TaskModuleResponse> {
-        if (!(await controller.validateConversationId(taskModuleRequest.data.qnaSessionId, context.activity.conversation.id)))
-            return this._buildTaskModuleContinueResponse(controller.getErrorCard(errorStrings('conversationInvalid')));
+        if (!(await this.controller.validateConversationId(taskModuleRequest.data.qnaSessionId, context.activity.conversation.id)))
+            return this._buildTaskModuleContinueResponse(getErrorCard(errorStrings('conversationInvalid')));
 
-        return this._buildTaskModuleContinueResponse(controller.getEndQnAConfirmationCard(taskModuleRequest.data.qnaSessionId), endQnAStrings('taskModuleTitle'));
+        return this._buildTaskModuleContinueResponse(this.controller.getEndQnAConfirmationCard(taskModuleRequest.data.qnaSessionId), endQnAStrings('taskModuleTitle'));
     }
 
     private async handleTeamsTaskModuleSubmitEndQnA(taskModuleRequest: TaskModuleRequest, context: TurnContext): Promise<TaskModuleResponse> {
-        if (!(await controller.validateConversationId(taskModuleRequest.data.qnaSessionId, context.activity.conversation.id)))
-            return this._buildTaskModuleContinueResponse(controller.getErrorCard(errorStrings('conversationInvalid')));
+        if (!(await this.controller.validateConversationId(taskModuleRequest.data.qnaSessionId, context.activity.conversation.id)))
+            return this._buildTaskModuleContinueResponse(getErrorCard(errorStrings('conversationInvalid')));
 
         const conversation = context.activity.conversation;
         const qnaSessionId = taskModuleRequest.data.qnaSessionId,
@@ -299,7 +318,7 @@ export class AskAway extends TeamsActivityHandler {
 
         if (taskModuleRequest.data.id == 'submitEndQnA') {
             try {
-                await controller.endQnASession({
+                await this.controller.endQnASession({
                     qnaSessionId: qnaSessionId,
                     aadObjectId: <string>context.activity.from.aadObjectId,
                     conversationId: context.activity.conversation.id,
@@ -314,25 +333,34 @@ export class AskAway extends TeamsActivityHandler {
                     conversationId: context.activity.conversation.id,
                     qnaSessionId: qnaSessionId,
                     tenantId: conversation.tenantId,
-                    userAadObjectId: <string>context.activity.from.aadObjectId,
+                    userAadObjectId: context.activity.from.aadObjectId,
                     isChannel: isConverationTypeChannel(context),
                     meetingId: meetingId,
                     filename: module.id,
                     exceptionName: TelemetryExceptions.EndQnASessionFailed,
                 });
-                return this.handleTeamsTaskModuleSubmitError();
+
+                if (error instanceof SessionIsNoLongerActiveError) {
+                    return this.handleTeamsTaskModuleSessionIsNoMoreActiveError();
+                } else {
+                    return this.handleTeamsTaskModuleSubmitError();
+                }
             }
         }
 
         return NULL_RESPONSE;
     }
 
+    private handleTeamsTaskModuleSessionIsNoMoreActiveError(): TaskModuleResponse {
+        return this._buildTaskModuleContinueResponse(getErrorCard(errorStrings('unableToPerformActivityOnEndedSession')));
+    }
+
     private handleTeamsTaskModuleSubmitError(): TaskModuleResponse {
-        return this._buildTaskModuleContinueResponse(controller.getErrorCard(errorStrings('taskSubmit')));
+        return this._buildTaskModuleContinueResponse(getErrorCard(errorStrings('taskSubmit')));
     }
 
     private handleTeamsTaskModuleResubmitQuestion(qnaSessionId: string, questionContent: string): TaskModuleResponse {
-        return this._buildTaskModuleContinueResponse(controller.getResubmitQuestionCard(qnaSessionId, questionContent), askQuestionStrings('resubmitTaskModuleTitle'));
+        return this._buildTaskModuleContinueResponse(this.controller.getResubmitQuestionCard(qnaSessionId, questionContent), askQuestionStrings('resubmitTaskModuleTitle'));
     }
 
     private async handleTeamsTaskModuleSubmitRefreshLeaderboard(context: TurnContext, taskModuleRequest: TaskModuleRequest): Promise<TaskModuleResponse> {
@@ -345,7 +373,7 @@ export class AskAway extends TeamsActivityHandler {
 
     async handleTeamsMessagingExtensionFetchTask(): Promise<MessagingExtensionActionResponse> {
         // commandId: 'startQnA'
-        return this._buildTaskModuleContinueResponse(controller.getStartQnACard(), startQnAStrings('taskModuleTitle'));
+        return this._buildTaskModuleContinueResponse(getStartQnACard(), startQnAStrings('taskModuleTitle'));
     }
 
     async handleTeamsMessagingExtensionBotMessagePreviewEdit(context: TurnContext, action: MessagingExtensionAction): Promise<MessagingExtensionActionResponse> {
@@ -358,7 +386,7 @@ export class AskAway extends TeamsActivityHandler {
             cardData = { title: '', description: '' };
         }
 
-        return this._buildTaskModuleContinueResponse(controller.getStartQnACard(cardData.title, cardData.description), startQnAStrings('taskModuleTitleEdit'));
+        return this._buildTaskModuleContinueResponse(getStartQnACard(cardData.title, cardData.description), startQnAStrings('taskModuleTitleEdit'));
     }
 
     async handleTeamsMessagingExtensionBotMessagePreviewSend(context: TurnContext, action: MessagingExtensionAction): Promise<MessagingExtensionActionResponse> {
@@ -402,7 +430,7 @@ export class AskAway extends TeamsActivityHandler {
             meetingId = getMeetingIdFromContext(context);
 
         try {
-            await controller.startQnASession({
+            await this.controller.startQnASession({
                 title: title,
                 description: description,
                 userName: userName,
@@ -428,16 +456,39 @@ export class AskAway extends TeamsActivityHandler {
                 filename: module.id,
                 exceptionName: TelemetryExceptions.CreateQnASessionFailed,
             });
-            if (error.code === 'QnASessionLimitExhaustedError') {
-                await context.sendActivity(MessageFactory.text(errorStrings('qnasessionlimitexhaustedError')));
-            } else if (error['code'] === 'InsufficientPermissionsToCreateOrEndQnASessionError') {
-                await context.sendActivity(MessageFactory.text(errorStrings('insufficientPermissionsToCreateOrEndQnASessionError')));
-            } else {
-                await context.sendActivity(MessageFactory.text(errorStrings('qnasessionCreationError')));
-            }
+
+            await this.handleCreateQnaSessionFailure(context, error);
         }
 
         return NULL_RESPONSE;
+    }
+
+    /**
+     * handles error occurred in create qna session flow, sends appropriate response.
+     * @param context - turnContext.
+     * @param error - error occured while creating a session.
+     */
+    async handleCreateQnaSessionFailure(context: TurnContext, error: Error) {
+        let errorMessage: string;
+        switch (error['code']) {
+            case 'QnASessionLimitExhaustedError': {
+                errorMessage = errorStrings('qnasessionlimitexhaustedError');
+                break;
+            }
+            case 'InsufficientPermissionsToCreateOrEndQnASession': {
+                errorMessage = errorStrings('insufficientPermissionsToCreateOrEndQnASessionError');
+                break;
+            }
+            case 'RevertOperationFailedAfterBackgroundJobFailureError': {
+                errorMessage = errorStrings('unableToPostCardForSessionStartedEvent');
+                break;
+            }
+            default: {
+                errorMessage = errorStrings('qnasessionCreationError');
+            }
+        }
+
+        context.sendActivity(errorMessage);
     }
 
     async handleTeamsMessagingExtensionSubmitAction(context: TurnContext, action: MessagingExtensionAction): Promise<MessagingExtensionActionResponse> {
@@ -460,9 +511,9 @@ export class AskAway extends TeamsActivityHandler {
             userId = <string>context.activity.from.aadObjectId,
             hostUserId = context.activity.from.id;
 
-        if (!(title && description)) return this._buildTaskModuleContinueResponse(controller.getStartQnACard(title, description, errorStrings('missingFields')));
+        if (!(title && description)) return this._buildTaskModuleContinueResponse(getStartQnACard(title, description, errorStrings('missingFields')));
 
-        const card = CardFactory.adaptiveCard(await controller.getMainCard(title, description, username, qnaSessionId, userId, hostUserId));
+        const card = CardFactory.adaptiveCard(await getMainCard(title, description, username, qnaSessionId, userId, hostUserId));
 
         return {
             composeExtension: {

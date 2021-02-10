@@ -34,6 +34,8 @@ export interface Errors {
     qnasessionlimitexhaustedError: string;
     qnasessionCreationError: string;
     insufficientPermissionsToCreateOrEndQnASessionError: string;
+    unableToPostCardForSessionStartedEvent: string;
+    unableToPerformActivityOnEndedSession: string;
 }
 
 export interface Generic {

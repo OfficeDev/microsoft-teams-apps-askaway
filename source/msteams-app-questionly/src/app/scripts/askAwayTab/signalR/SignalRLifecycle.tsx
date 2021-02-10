@@ -1,14 +1,16 @@
 import * as React from 'react';
+import { useEffect, useState } from 'react';
 import * as signalR from '@microsoft/signalr';
 import axios from 'axios';
 import { StatusCodes } from 'http-status-codes';
 import { ApplicationInsights, SeverityLevel } from '@microsoft/applicationinsights-web';
-import { HttpService } from './../shared/HttpService';
-import { Alert } from '@fluentui/react-northstar';
+import { HttpService } from '../shared/HttpService';
 import { IDataEvent } from 'msteams-app-questionly.common';
+import ConnectionStatusAlert from './ConnectionStatusAlert';
+import { TFunction } from 'i18next';
 
 /**
- * signalR connection status
+ * SignalR connection status
  */
 enum ConnectionStatus {
     /**
@@ -35,7 +37,7 @@ enum ConnectionStatus {
 }
 
 /**
- * signalR service connection limit options.
+ * SignalR service connection limit options.
  */
 enum ConnectionLimit {
     /**
@@ -49,6 +51,16 @@ enum ConnectionLimit {
 }
 
 export interface SignalRLifecycleProps {
+    /**
+     * TFunction to localize strings.
+     */
+    t: TFunction;
+
+    /**
+     * If real time updates are enabled.
+     */
+    enableLiveUpdates: boolean;
+
     /**
      * conversation id of the group chat.
      */
@@ -75,61 +87,125 @@ export interface SignalRLifecycleProps {
     connection?: signalR.HubConnection;
 }
 
-export interface SignalRLifecycleState {
-    /**
-     * State variable to track signalR connection status
-     */
-    connectionStatus: ConnectionStatus;
+/**
+ * SignalR hub connection.
+ */
+let connection: signalR.HubConnection;
+
+const SignalRLifecycle: React.FunctionComponent<SignalRLifecycleProps> = (props) => {
+    const [connectionStatus, setConnectionStatus] = useState(ConnectionStatus.Connecting);
+    const [connectionLimit, setConnectionLimit] = useState(ConnectionLimit.NotExhausted);
 
     /**
-     * State variable denoting whether signalR max connection limit is reached.
+     * This function is triggered on events from signalR connection.
+     * @param dataEvent - event received.
      */
-    connectionLimit: ConnectionLimit;
-}
+    const onEvent = (dataEvent: any) => {
+        props.onEvent(dataEvent);
+    };
 
-export class SignalRLifecycle extends React.Component<SignalRLifecycleProps, SignalRLifecycleState> {
     /**
-     * signalR hub connection.
+     * When signalR connection is closed and the client retries the connection,
+     * this handler updates state accordingly.
+     * @param error - error which closed the connection. signalR client passes error to `onreconnecting` callback.
      */
-    private connection: signalR.HubConnection;
+    const showAutoRefreshEstablishingMessage = (error?: Error) => {
+        setConnectionStatus(ConnectionStatus.Reconnecting);
+        props.appInsights.trackException({
+            exception: error,
+            severityLevel: SeverityLevel.Warning,
+        });
+    };
 
-    constructor(props: Readonly<SignalRLifecycleProps>) {
-        super(props);
-        this.state = {
-            connectionStatus: ConnectionStatus.Connecting,
-            connectionLimit: ConnectionLimit.NotExhausted,
-        };
-    }
+    /**
+     * When signalR connection can not be established by the client,
+     * this handler updates state accordingly.
+     * @param error - error that occured while establishing connection. signalR client passes error to `onclose` callback.
+     */
+    const handleConnectionError = (error?: Error) => {
+        setConnectionStatus(ConnectionStatus.NotConnected);
 
-    componentDidMount() {
-        this.initiateConnectionSetup();
-    }
+        if (error) {
+            props.appInsights.trackException({
+                exception: error,
+                severityLevel: SeverityLevel.Error,
+            });
+        }
+    };
+
+    /**
+     * Retries the connection if it's not alive already.
+     */
+    const refreshConnection = () => {
+        if (connectionStatus !== ConnectionStatus.Connected) {
+            initiateConnectionSetup();
+        }
+    };
 
     /**
      * Register callbacks for signalR connection life cycle events.
      */
-    private registerCallbacksOnConnection() {
-        this.connection.on('updateEvent', this.onEvent.bind(this));
-        this.connection.onclose(this.handleConnectionError.bind(this));
+    const registerCallbacksOnConnection = () => {
+        connection.on('updateEvent', onEvent);
+        connection.onclose(handleConnectionError);
         // `onreconnected` callback is called with new connection id.
-        this.connection.onreconnected(this.addConnectionToGroup.bind(this));
-        this.connection.onreconnecting(this.showAutoRefreshEstablishingMessage.bind(this));
-    }
+        connection.onreconnected(addConnectionToGroup);
+        connection.onreconnecting(showAutoRefreshEstablishingMessage);
+    };
+
+    /**
+     * When `enableLiveUpdates` prop is changed, establish/ close connection.
+     */
+    useEffect(() => {
+        if (props.enableLiveUpdates) {
+            initiateConnectionSetup();
+        } else {
+            // `onclose` callback is called on `connection.stop`, hence no need to update state.
+            connection?.stop();
+        }
+    }, [props.enableLiveUpdates]);
+
+    /**
+     * Adds connection to the meeting group.
+     * @param connectionId - connection id.
+     */
+    const addConnectionToGroup = async (connectionId: string) => {
+        const token = await props.httpService.getAuthToken();
+
+        const addToGroupInputDate = {
+            connectionId: connectionId,
+            conversationId: props.conversationId,
+        };
+
+        const response = await axios.post(`${process.env.SignalRFunctionBaseUrl}/api/add-to-group?authorization=${token}`, addToGroupInputDate);
+
+        if (response.status !== StatusCodes.OK) {
+            props.appInsights.trackException({
+                exception: new Error(`Error in adding connection to the group, conversationId: ${props.conversationId}, reason: ${response.statusText}`),
+                severityLevel: SeverityLevel.Error,
+            });
+
+            handleConnectionError();
+            return;
+        }
+
+        if (connectionStatus !== ConnectionStatus.Connected) {
+            setConnectionStatus(ConnectionStatus.Connected);
+        }
+    };
 
     /**
      * Establishes connection with signalR service and adds client to meeting group.
      */
-    private async initiateConnectionSetup() {
+    const initiateConnectionSetup = async () => {
         try {
-            this.setState({
-                connectionLimit: ConnectionLimit.NotExhausted,
-                connectionStatus: ConnectionStatus.Connecting,
-            });
+            setConnectionStatus(ConnectionStatus.Connecting);
+            setConnectionLimit(ConnectionLimit.NotExhausted);
 
-            const token = await this.props.httpService.getAuthToken();
+            const token = await props.httpService.getAuthToken();
 
-            this.connection =
-                this.props.connection ??
+            connection =
+                props.connection ??
                 new signalR.HubConnectionBuilder()
                     .withUrl(`${process.env.SignalRFunctionBaseUrl}/api?authorization=${token}`)
                     // Configures the signalr.HubConnection to automatically attempt to reconnect if the connection is lost.
@@ -138,122 +214,44 @@ export class SignalRLifecycle extends React.Component<SignalRLifecycleProps, Sig
                     .build();
 
             // Establish connection with signalR service.
-            await this.connection.start();
+            await connection.start();
 
-            if (this.connection.connectionId !== null) {
+            if (connection.connectionId !== null) {
                 // Add client to the meeting group.
-                await this.addConnectionToGroup(this.connection.connectionId);
+                await addConnectionToGroup(connection.connectionId);
             } else {
-                throw new Error(`SignalR connection id is not resolved for conersationId: ${this.props.conversationId}`);
+                throw new Error(`SignalR connection id is not resolved for conersationId: ${props.conversationId}`);
             }
 
-            this.registerCallbacksOnConnection();
+            registerCallbacksOnConnection();
         } catch (error) {
             // SignalR connection limit is reached.
             if (error.statusCode === StatusCodes.TOO_MANY_REQUESTS) {
-                this.setState({ connectionLimit: ConnectionLimit.Exhausted });
+                setConnectionLimit(ConnectionLimit.Exhausted);
 
                 // Too many connection can be logged as warning than error.
-                this.props.appInsights.trackException({
+                props.appInsights.trackException({
                     exception: error,
                     severityLevel: SeverityLevel.Warning,
                 });
             } else {
-                this.props.appInsights.trackException({
+                props.appInsights.trackException({
                     exception: error,
                     severityLevel: SeverityLevel.Error,
                 });
             }
 
-            this.handleConnectionError();
+            handleConnectionError();
         }
-    }
-
-    /**
-     * This function is triggered on events from signalR connection.
-     * @param dataEvent - event received.
-     */
-    private onEvent = (dataEvent: any) => {
-        this.props.onEvent(dataEvent);
     };
 
-    /**
-     * When signalR connection is closed and the client retries the connection,
-     * this handler updates state accordingly.
-     * @param error - error which closed the connection. signalR client passes error to `onreconnecting` callback.
-     */
-    private showAutoRefreshEstablishingMessage(error?: Error) {
-        this.setState({
-            connectionStatus: ConnectionStatus.Reconnecting,
-        });
+    return (
+        <div id="alertHolder">
+            {props.enableLiveUpdates && (connectionStatus === ConnectionStatus.NotConnected || connectionStatus === ConnectionStatus.Reconnecting) && (
+                <ConnectionStatusAlert t={props.t} onRefreshConnection={refreshConnection}></ConnectionStatusAlert>
+            )}
+        </div>
+    );
+};
 
-        this.props.appInsights.trackException({
-            exception: error,
-            severityLevel: SeverityLevel.Warning,
-        });
-    }
-
-    /**
-     * Adds connection to the meeting group.
-     * @param connectionId - connection id.
-     */
-    private async addConnectionToGroup(connectionId: string) {
-        const token = await this.props.httpService.getAuthToken();
-
-        const addToGroupInputDate = {
-            connectionId: connectionId,
-            conversationId: this.props.conversationId,
-        };
-
-        const response = await axios.post(`${process.env.SignalRFunctionBaseUrl}/api/add-to-group?authorization=${token}`, addToGroupInputDate);
-
-        if (response.status !== StatusCodes.OK) {
-            this.props.appInsights.trackException({
-                exception: new Error(`Error in adding connection to the group, conversationId: ${this.props.conversationId}, reason: ${response.statusText}`),
-                severityLevel: SeverityLevel.Error,
-            });
-
-            this.handleConnectionError();
-            return;
-        }
-
-        if (this.state.connectionStatus !== ConnectionStatus.Connected) {
-            this.setState({ connectionStatus: ConnectionStatus.Connected });
-        }
-    }
-
-    /**
-     * When signalR connection can not be established by the client,
-     * this handler updates state accordingly.
-     * @param error - error that occured while establishing connection. signalR client passes error to `onclose` callback.
-     */
-    private handleConnectionError(error?: Error) {
-        this.setState({ connectionStatus: ConnectionStatus.NotConnected });
-
-        if (error) {
-            this.props.appInsights.trackException({
-                exception: error,
-                severityLevel: SeverityLevel.Error,
-            });
-        }
-    }
-
-    /**
-     * Retries the connection if it's not alive already.
-     */
-    public refreshConnection() {
-        if (this.state.connectionStatus !== ConnectionStatus.Connected) {
-            this.initiateConnectionSetup();
-        }
-    }
-
-    public render() {
-        return (
-            <div id="alertHolder">
-                {(this.state.connectionStatus === ConnectionStatus.NotConnected || this.state.connectionStatus === ConnectionStatus.Reconnecting) && (
-                    <Alert id="alert" content="Connection lost. Refresh to view content. if that doesn't do the trick, try again later." dismissible />
-                )}
-            </div>
-        );
-    }
-}
+export default SignalRLifecycle;

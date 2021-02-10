@@ -2,10 +2,10 @@ import Express from 'express';
 import request from 'supertest';
 import { Express as ExpressType } from 'express-serve-static-core';
 import { router, initializeRouter } from 'src/routes/rest';
-import { ConversationDataService, qnaSessionDataService } from 'msteams-app-questionly.data';
+import { ConversationDataService, IQnASessionDataService, QnASessionDataService, UserDataService, IUserDataService, IQuestionDataService, QuestionDataService } from 'msteams-app-questionly.data';
 import { getTeamsUserId } from 'src/routes/restUtils';
 import { generateUniqueId } from 'adaptivecards';
-import { downvoteQuestion, endQnASession, markQuestionAsAnswered, submitNewQuestion, upvoteQuestion } from 'src/controller';
+import { Controller, IController } from 'src/controller';
 import { StatusCodes } from 'http-status-codes';
 import { getParticipantRole, isPresenterOrOrganizer } from 'src/util/meetingsUtility';
 import { verifyUserFromConversationId } from 'msteams-app-questionly.common';
@@ -13,7 +13,8 @@ import { getMicrosoftAppPassword } from 'src/util/keyvault';
 import { restApiErrorMiddleware } from 'src/routes/restApiErrorMiddleware';
 import { errorMessages } from 'src/errors/errorMessages';
 import { UnauthorizedAccessError, UnauthorizedAccessErrorCode } from 'src/errors/unauthorizedAccessError';
-import { formatQnaSessionDataArrayAsPerClientDataContract, formatQnaSessionDataAsPerClientDataContract } from 'src/util/clientDataContractFormatter';
+import { triggerBackgroundJobForQnaSessionCreatedEvent } from 'src/background-job/backgroundJobTrigger';
+import { ClientDataContractFormatter, IClientDataContractFormatter } from 'src/util/clientDataContractFormatter';
 
 let app: ExpressType;
 
@@ -33,14 +34,23 @@ const sampleQnASessionId = 'sampleQnASessionId';
 const sampleServiceUrl = 'sampleServiceUrl';
 const sampleTenantId = 'sampleTenantId';
 let testQnAData1, testQnAData2;
+let mockUserDataService: IUserDataService;
+let mockQuestionDataService: IQuestionDataService;
+let mockClientDataContractFormatter: IClientDataContractFormatter;
+let mockController: IController;
+let mockQnASessionDataService: IQnASessionDataService;
 
 describe('test /conversations/:conversationId/sessions/:sessionId api', () => {
     const testError = new Error('test error');
 
     beforeAll(() => {
         app = Express();
-
-        initializeRouter(conversationDataService);
+        mockUserDataService = new UserDataService();
+        mockQnASessionDataService = new QnASessionDataService(mockUserDataService);
+        mockQuestionDataService = new QuestionDataService(mockUserDataService, mockQnASessionDataService);
+        mockClientDataContractFormatter = new ClientDataContractFormatter(mockUserDataService, mockQuestionDataService);
+        mockController = new Controller(mockQuestionDataService, mockQnASessionDataService);
+        initializeRouter(conversationDataService, mockQnASessionDataService, mockClientDataContractFormatter, mockController);
 
         const mockEnsureAuthenticated = (req, res, next) => {
             req.user = {
@@ -57,8 +67,8 @@ describe('test /conversations/:conversationId/sessions/:sessionId api', () => {
         process.env.MicrosoftAppId = 'random';
         (<any>getMicrosoftAppPassword) = jest.fn();
         (<any>conversationDataService.getConversationData) = jest.fn();
-        (<any>formatQnaSessionDataAsPerClientDataContract) = jest.fn();
-        (<any>qnaSessionDataService.getQnASessionData) = jest.fn();
+        (<any>mockClientDataContractFormatter.formatQnaSessionDataAsPerClientDataContract) = jest.fn();
+        (<any>mockQnASessionDataService.getQnASessionData) = jest.fn();
     });
 
     beforeEach(() => {
@@ -93,8 +103,8 @@ describe('test /conversations/:conversationId/sessions/:sessionId api', () => {
             return true;
         });
 
-        (<any>qnaSessionDataService.getQnASessionData) = jest.fn();
-        (<any>qnaSessionDataService.getQnASessionData).mockImplementationOnce(() => {
+        (<any>mockQnASessionDataService.getQnASessionData) = jest.fn();
+        (<any>mockQnASessionDataService.getQnASessionData).mockImplementationOnce(() => {
             return testQnASession;
         });
 
@@ -108,7 +118,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId api', () => {
             numberOfQuestions: 0,
         };
 
-        (<any>formatQnaSessionDataAsPerClientDataContract).mockImplementationOnce(() => {
+        (<any>mockClientDataContractFormatter.formatQnaSessionDataAsPerClientDataContract).mockImplementationOnce(() => {
             return processedData;
         });
 
@@ -117,8 +127,8 @@ describe('test /conversations/:conversationId/sessions/:sessionId api', () => {
         expect(result).toBeDefined();
         expect(result.body).toBeDefined();
         expect(result.body).toEqual(processedData);
-        expect(qnaSessionDataService.getQnASessionData).toBeCalledTimes(1);
-        expect(qnaSessionDataService.getQnASessionData).toBeCalledWith(testSessionId);
+        expect(mockQnASessionDataService.getQnASessionData).toBeCalledTimes(1);
+        expect(mockQnASessionDataService.getQnASessionData).toBeCalledWith(testSessionId);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(sampleConversationId);
         expect(verifyUserFromConversationId).toBeCalledTimes(1);
@@ -142,7 +152,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId api', () => {
             return true;
         });
 
-        (<any>qnaSessionDataService.getQnASessionData).mockImplementationOnce(() => {
+        (<any>mockQnASessionDataService.getQnASessionData).mockImplementationOnce(() => {
             throw testError;
         });
 
@@ -186,7 +196,12 @@ describe('test conversations/:conversationId/sessions api', () => {
     beforeAll(async () => {
         app = Express();
 
-        initializeRouter(conversationDataService);
+        mockUserDataService = new UserDataService();
+        mockQnASessionDataService = new QnASessionDataService(mockUserDataService);
+        mockQuestionDataService = new QuestionDataService(mockUserDataService, mockQnASessionDataService);
+        mockClientDataContractFormatter = new ClientDataContractFormatter(mockUserDataService, mockQuestionDataService);
+        mockController = new Controller(mockQuestionDataService, mockQnASessionDataService);
+        initializeRouter(conversationDataService, mockQnASessionDataService, mockClientDataContractFormatter, mockController);
 
         const mockEnsureAuthenticated = (req, res, next) => {
             req.user = {
@@ -198,8 +213,8 @@ describe('test conversations/:conversationId/sessions api', () => {
         // Rest endpoints
         app.use('/api/conversations', mockEnsureAuthenticated, router);
         app.use(restApiErrorMiddleware);
-        (<any>qnaSessionDataService.getAllQnASessionData) = jest.fn();
-        (<any>formatQnaSessionDataArrayAsPerClientDataContract) = jest.fn();
+        (<any>mockQnASessionDataService.getAllQnASessionData) = jest.fn();
+        (<any>mockClientDataContractFormatter.formatQnaSessionDataArrayAsPerClientDataContract) = jest.fn();
 
         (<any>verifyUserFromConversationId) = jest.fn();
         process.env.MicrosoftAppId = 'random';
@@ -235,7 +250,7 @@ describe('test conversations/:conversationId/sessions api', () => {
 
     it('get all QnA sessions data', async () => {
         const testQnAData = [testQnAData1, testQnAData2];
-        (<any>qnaSessionDataService.getAllQnASessionData).mockImplementationOnce(() => {
+        (<any>mockQnASessionDataService.getAllQnASessionData).mockImplementationOnce(() => {
             return testQnAData;
         });
         const qnaSessionDataObject1 = {
@@ -266,7 +281,7 @@ describe('test conversations/:conversationId/sessions api', () => {
             ],
         };
 
-        (<any>formatQnaSessionDataArrayAsPerClientDataContract).mockImplementationOnce(() => {
+        (<any>mockClientDataContractFormatter.formatQnaSessionDataArrayAsPerClientDataContract).mockImplementationOnce(() => {
             return [qnaSessionDataObject1, qnaSessionDataObject2];
         });
 
@@ -293,8 +308,8 @@ describe('test conversations/:conversationId/sessions api', () => {
         expect(res.length).toEqual(2);
         expect(res[0]).toEqual(qnaSessionDataObject1);
         expect(res[1]).toEqual(qnaSessionDataObject2);
-        expect(formatQnaSessionDataArrayAsPerClientDataContract).toBeCalledTimes(1);
-        expect(formatQnaSessionDataArrayAsPerClientDataContract).toBeCalledWith(testQnAData);
+        expect(mockClientDataContractFormatter.formatQnaSessionDataArrayAsPerClientDataContract).toBeCalledTimes(1);
+        expect(mockClientDataContractFormatter.formatQnaSessionDataArrayAsPerClientDataContract).toBeCalledWith(testQnAData);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(sampleConversationId);
         expect(verifyUserFromConversationId).toBeCalledTimes(1);
@@ -302,10 +317,10 @@ describe('test conversations/:conversationId/sessions api', () => {
 
     it('get all QnA sessions data for internal server error', async () => {
         const testQnAData = [testQnAData1, testQnAData2];
-        (<any>qnaSessionDataService.getAllQnASessionData).mockImplementationOnce(() => {
+        (<any>mockQnASessionDataService.getAllQnASessionData).mockImplementationOnce(() => {
             return testQnAData;
         });
-        (<any>formatQnaSessionDataArrayAsPerClientDataContract).mockImplementationOnce(() => {
+        (<any>mockClientDataContractFormatter.formatQnaSessionDataArrayAsPerClientDataContract).mockImplementationOnce(() => {
             throw new Error();
         });
 
@@ -326,8 +341,8 @@ describe('test conversations/:conversationId/sessions api', () => {
 
         const result = await request(app).get(`/api/conversations/${sampleConversationId}/sessions`);
         expect(result.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
-        expect(formatQnaSessionDataArrayAsPerClientDataContract).toBeCalledTimes(1);
-        expect(formatQnaSessionDataArrayAsPerClientDataContract).toBeCalledWith(testQnAData);
+        expect(mockClientDataContractFormatter.formatQnaSessionDataArrayAsPerClientDataContract).toBeCalledTimes(1);
+        expect(mockClientDataContractFormatter.formatQnaSessionDataArrayAsPerClientDataContract).toBeCalledWith(testQnAData);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(sampleConversationId);
         expect(verifyUserFromConversationId).toBeCalledTimes(1);
@@ -361,7 +376,7 @@ describe('test conversations/:conversationId/sessions api', () => {
     it('get all QnA sessions data for invalid conversation id ', async () => {
         const sampleInvalidConversationId = '1';
         const testQnAData = [];
-        (<any>qnaSessionDataService.getAllQnASessionData).mockImplementationOnce(() => {
+        (<any>mockQnASessionDataService.getAllQnASessionData).mockImplementationOnce(() => {
             return testQnAData;
         });
 
@@ -383,7 +398,7 @@ describe('test conversations/:conversationId/sessions api', () => {
         const result = await request(app).get(`/api/conversations/${sampleInvalidConversationId}/sessions`);
         expect(result.status).toBe(StatusCodes.OK);
         expect(JSON.parse(result.text)).toEqual([]);
-        expect(formatQnaSessionDataArrayAsPerClientDataContract).toBeCalledTimes(0);
+        expect(mockClientDataContractFormatter.formatQnaSessionDataArrayAsPerClientDataContract).toBeCalledTimes(0);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(sampleInvalidConversationId);
         expect(verifyUserFromConversationId).toBeCalledTimes(1);
@@ -402,7 +417,12 @@ describe('test post conversations/:conversationId/sessions api', () => {
         );
         app.use(Express.urlencoded({ extended: true }));
 
-        initializeRouter(conversationDataService);
+        mockUserDataService = new UserDataService();
+        mockQnASessionDataService = new QnASessionDataService(mockUserDataService);
+        mockQuestionDataService = new QuestionDataService(mockUserDataService, mockQnASessionDataService);
+        mockClientDataContractFormatter = new ClientDataContractFormatter(mockUserDataService, mockQuestionDataService);
+        mockController = new Controller(mockQuestionDataService, mockQnASessionDataService);
+        initializeRouter(conversationDataService, mockQnASessionDataService, mockClientDataContractFormatter, mockController);
 
         const mockEnsureAuthenticated = (req, res, next) => {
             req.user = {
@@ -415,12 +435,13 @@ describe('test post conversations/:conversationId/sessions api', () => {
         app.use('/api/conversations', mockEnsureAuthenticated, router);
         app.use(restApiErrorMiddleware);
 
-        initializeRouter(conversationDataService);
-
         (<any>isPresenterOrOrganizer) = jest.fn();
         (<any>getTeamsUserId) = jest.fn();
-        (<any>qnaSessionDataService.createQnASession) = jest.fn();
+        (<any>mockQnASessionDataService.createQnASession) = jest.fn();
         (<any>conversationDataService.getConversationData) = jest.fn();
+        (<any>triggerBackgroundJobForQnaSessionCreatedEvent) = jest.fn(() => {
+            return Promise.resolve(true);
+        });
     });
 
     beforeEach(() => {
@@ -441,7 +462,7 @@ describe('test post conversations/:conversationId/sessions api', () => {
         (<any>getTeamsUserId).mockImplementationOnce(() => {
             return sampleHostUserId;
         });
-        (<any>qnaSessionDataService.createQnASession).mockImplementationOnce(() => {
+        (<any>mockQnASessionDataService.createQnASession).mockImplementationOnce(() => {
             return {
                 qnaSessionId: sampleQnASessionId,
                 hostId: sampleHostId,
@@ -460,7 +481,7 @@ describe('test post conversations/:conversationId/sessions api', () => {
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(isPresenterOrOrganizer).toBeCalledTimes(1);
         expect(getTeamsUserId).toBeCalledTimes(1);
-        expect(qnaSessionDataService.createQnASession).toBeCalledTimes(1);
+        expect(mockQnASessionDataService.createQnASession).toBeCalledTimes(1);
     });
 
     it('test post a qna session - createQnASession fails', async () => {
@@ -478,7 +499,7 @@ describe('test post conversations/:conversationId/sessions api', () => {
         (<any>getTeamsUserId).mockImplementationOnce(() => {
             return sampleHostUserId;
         });
-        (<any>qnaSessionDataService.createQnASession).mockImplementationOnce(() => {
+        (<any>mockQnASessionDataService.createQnASession).mockImplementationOnce(() => {
             throw testError;
         });
 
@@ -491,7 +512,7 @@ describe('test post conversations/:conversationId/sessions api', () => {
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(isPresenterOrOrganizer).toBeCalledTimes(1);
         expect(getTeamsUserId).toBeCalledTimes(1);
-        expect(qnaSessionDataService.createQnASession).toBeCalledTimes(1);
+        expect(mockQnASessionDataService.createQnASession).toBeCalledTimes(1);
     });
 
     it('test post a qna session - getHostUserId fails', async () => {
@@ -517,7 +538,7 @@ describe('test post conversations/:conversationId/sessions api', () => {
         expect(result.status).toBe(500);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(getTeamsUserId).toBeCalledTimes(1);
-        expect(qnaSessionDataService.createQnASession).toBeCalledTimes(0);
+        expect(mockQnASessionDataService.createQnASession).toBeCalledTimes(0);
     });
 
     it('test post a qna session - getConversationData fails', async () => {
@@ -537,7 +558,7 @@ describe('test post conversations/:conversationId/sessions api', () => {
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(isPresenterOrOrganizer).toBeCalledTimes(0);
         expect(getTeamsUserId).toBeCalledTimes(0);
-        expect(qnaSessionDataService.createQnASession).toBeCalledTimes(0);
+        expect(mockQnASessionDataService.createQnASession).toBeCalledTimes(0);
     });
 
     it('test post a qna session - parameters missing in request payload', async () => {
@@ -559,7 +580,13 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
         );
 
         app.use(Express.urlencoded({ extended: true }));
-        initializeRouter(conversationDataService);
+
+        mockUserDataService = new UserDataService();
+        mockQnASessionDataService = new QnASessionDataService(mockUserDataService);
+        mockQuestionDataService = new QuestionDataService(mockUserDataService, mockQnASessionDataService);
+        mockClientDataContractFormatter = new ClientDataContractFormatter(mockUserDataService, mockQuestionDataService);
+        mockController = new Controller(mockQuestionDataService, mockQnASessionDataService);
+        initializeRouter(conversationDataService, mockQnASessionDataService, mockClientDataContractFormatter, mockController);
 
         const mockEnsureAuthenticated = (req, res, next) => {
             req.user = {
@@ -572,7 +599,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
         process.env.MicrosoftAppId = 'random';
         (<any>getMicrosoftAppPassword) = jest.fn();
         (<any>verifyUserFromConversationId) = jest.fn();
-        (<any>submitNewQuestion) = jest.fn();
+        (<any>mockController.submitNewQuestion) = jest.fn();
         (<any>conversationDataService.getConversationData) = jest.fn();
 
         // Rest endpoints
@@ -674,7 +701,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
             return true;
         });
 
-        (<any>submitNewQuestion).mockImplementationOnce(() => {
+        (<any>mockController.submitNewQuestion).mockImplementationOnce(() => {
             throw testError;
         });
 
@@ -682,7 +709,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
 
         expect(result.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
         expect(result.body.message).toEqual(testError.message);
-        expect(submitNewQuestion).toBeCalledTimes(1);
+        expect(mockController.submitNewQuestion).toBeCalledTimes(1);
         expect(verifyUserFromConversationId).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(sampleConversationId);
@@ -710,7 +737,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
         (<any>verifyUserFromConversationId).mockImplementationOnce(() => {
             return true;
         });
-        (<any>submitNewQuestion).mockImplementationOnce(() => {
+        (<any>mockController.submitNewQuestion).mockImplementationOnce(() => {
             return questionRes;
         });
 
@@ -721,7 +748,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
 
         expect(result.status).toBe(StatusCodes.CREATED);
         expect(result.body.id).toEqual('testQuestionId');
-        expect(submitNewQuestion).toBeCalledTimes(1);
+        expect(mockController.submitNewQuestion).toBeCalledTimes(1);
         expect(verifyUserFromConversationId).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
@@ -740,7 +767,12 @@ describe('test /conversations/:conversationId/me api', () => {
             next();
         };
 
-        initializeRouter(conversationDataService);
+        mockUserDataService = new UserDataService();
+        mockQnASessionDataService = new QnASessionDataService(mockUserDataService);
+        mockQuestionDataService = new QuestionDataService(mockUserDataService, mockQnASessionDataService);
+        mockClientDataContractFormatter = new ClientDataContractFormatter(mockUserDataService, mockQuestionDataService);
+        mockController = new Controller(mockQuestionDataService, mockQnASessionDataService);
+        initializeRouter(conversationDataService, mockQnASessionDataService, mockClientDataContractFormatter, mockController);
 
         (<any>getParticipantRole) = jest.fn();
         (<any>conversationDataService.getConversationData) = jest.fn();
@@ -866,7 +898,12 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
 
         app.use(Express.urlencoded({ extended: true }));
 
-        initializeRouter(conversationDataService);
+        mockUserDataService = new UserDataService();
+        mockQnASessionDataService = new QnASessionDataService(mockUserDataService);
+        mockQuestionDataService = new QuestionDataService(mockUserDataService, mockQnASessionDataService);
+        mockClientDataContractFormatter = new ClientDataContractFormatter(mockUserDataService, mockQuestionDataService);
+        mockController = new Controller(mockQuestionDataService, mockQnASessionDataService);
+        initializeRouter(conversationDataService, mockQnASessionDataService, mockClientDataContractFormatter, mockController);
 
         const mockEnsureAuthenticated = (req, res, next) => {
             req.user = {
@@ -880,9 +917,9 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
         app.use('/api/conversations', mockEnsureAuthenticated, router);
         app.use(restApiErrorMiddleware);
 
-        (<any>upvoteQuestion) = jest.fn();
-        (<any>downvoteQuestion) = jest.fn();
-        (<any>markQuestionAsAnswered) = jest.fn();
+        (<any>mockController.upvoteQuestion) = jest.fn();
+        (<any>mockController.downvoteQuestion) = jest.fn();
+        (<any>mockController.markQuestionAsAnswered) = jest.fn();
         (<any>isPresenterOrOrganizer) = jest.fn();
         (<any>conversationDataService.getConversationData) = jest.fn();
         process.env.MicrosoftAppId = 'random';
@@ -954,7 +991,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
             return true;
         });
 
-        (<any>upvoteQuestion).mockImplementationOnce(() => {
+        (<any>mockController.upvoteQuestion).mockImplementationOnce(() => {
             throw testError;
         });
 
@@ -962,7 +999,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
 
         expect(result.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
         expect(result.body.message).toEqual(testError.message);
-        expect(upvoteQuestion).toBeCalledTimes(1);
+        expect(mockController.upvoteQuestion).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(sampleConversationId);
         expect(verifyUserFromConversationId).toBeCalledTimes(1);
@@ -985,7 +1022,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
             return true;
         });
 
-        (<any>upvoteQuestion).mockImplementationOnce(() => {
+        (<any>mockController.upvoteQuestion).mockImplementationOnce(() => {
             return {
                 _id: testQuestionId,
                 userId: { _id: testUserId, userName: testUserName },
@@ -998,7 +1035,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
 
         expect(result.status).toBe(StatusCodes.OK);
         expect(result.body.id).toEqual(testQuestionId);
-        expect(upvoteQuestion).toBeCalledTimes(1);
+        expect(mockController.upvoteQuestion).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(sampleConversationId);
         expect(verifyUserFromConversationId).toBeCalledTimes(1);
@@ -1020,7 +1057,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
         (<any>verifyUserFromConversationId).mockImplementationOnce(() => {
             return false;
         });
-        (<any>downvoteQuestion).mockImplementationOnce(() => {
+        (<any>mockController.downvoteQuestion).mockImplementationOnce(() => {
             return;
         });
 
@@ -1049,7 +1086,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
         (<any>verifyUserFromConversationId).mockImplementationOnce(() => {
             return true;
         });
-        (<any>downvoteQuestion).mockImplementationOnce(() => {
+        (<any>mockController.downvoteQuestion).mockImplementationOnce(() => {
             return {
                 _id: testQuestionId,
                 userId: { _id: testUserId, userName: testUserName },
@@ -1062,7 +1099,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
 
         expect(result.status).toBe(StatusCodes.OK);
         expect(result.body.id).toEqual(testQuestionId);
-        expect(downvoteQuestion).toBeCalledTimes(1);
+        expect(mockController.downvoteQuestion).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(sampleConversationId);
         expect(verifyUserFromConversationId).toBeCalledTimes(1);
@@ -1085,7 +1122,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
         (<any>verifyUserFromConversationId).mockImplementationOnce(() => {
             return true;
         });
-        (<any>downvoteQuestion).mockImplementationOnce(() => {
+        (<any>mockController.downvoteQuestion).mockImplementationOnce(() => {
             throw testError;
         });
 
@@ -1093,7 +1130,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
 
         expect(result.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
         expect(result.body.message).toEqual(testError.message);
-        expect(downvoteQuestion).toBeCalledTimes(1);
+        expect(mockController.downvoteQuestion).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(sampleConversationId);
         expect(verifyUserFromConversationId).toBeCalledTimes(1);
@@ -1136,7 +1173,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
             meetingId: sampleMeetingId,
         };
 
-        (<any>markQuestionAsAnswered).mockImplementationOnce(() => {
+        (<any>mockController.markQuestionAsAnswered).mockImplementationOnce(() => {
             throw testError;
         });
 
@@ -1148,7 +1185,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
 
         expect(result.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
         expect(result.body.message).toEqual(testError.message);
-        expect(markQuestionAsAnswered).toBeCalledTimes(1);
+        expect(mockController.markQuestionAsAnswered).toBeCalledTimes(1);
         expect(<any>conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(<any>conversationDataService.getConversationData).toBeCalledWith(sampleConversationId);
     });
@@ -1167,7 +1204,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
             return testConversationData;
         });
 
-        (<any>markQuestionAsAnswered).mockImplementationOnce(() => {
+        (<any>mockController.markQuestionAsAnswered).mockImplementationOnce(() => {
             return {
                 _id: testQuestionId,
                 userId: { _id: testUserId, userName: testUserName },
@@ -1180,7 +1217,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
 
         expect(result.status).toBe(StatusCodes.OK);
         expect(result.body.id).toEqual(testQuestionId);
-        expect(markQuestionAsAnswered).toBeCalledTimes(1);
+        expect(mockController.markQuestionAsAnswered).toBeCalledTimes(1);
         expect(<any>conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(<any>conversationDataService.getConversationData).toBeCalledWith(sampleConversationId);
     });
@@ -1198,7 +1235,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
             };
         });
 
-        (<any>markQuestionAsAnswered).mockImplementationOnce(() => {
+        (<any>mockController.markQuestionAsAnswered).mockImplementationOnce(() => {
             throw new UnauthorizedAccessError(UnauthorizedAccessErrorCode.InsufficientPermissionsToMarkQuestionAsAnswered);
         });
 
@@ -1223,7 +1260,12 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
             })
         );
 
-        initializeRouter(conversationDataService);
+        mockUserDataService = new UserDataService();
+        mockQnASessionDataService = new QnASessionDataService(mockUserDataService);
+        mockQuestionDataService = new QuestionDataService(mockUserDataService, mockQnASessionDataService);
+        mockClientDataContractFormatter = new ClientDataContractFormatter(mockUserDataService, mockQuestionDataService);
+        mockController = new Controller(mockQuestionDataService, mockQnASessionDataService);
+        initializeRouter(conversationDataService, mockQnASessionDataService, mockClientDataContractFormatter, mockController);
 
         app.use(Express.urlencoded({ extended: true }));
 
@@ -1235,7 +1277,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
             next();
         };
 
-        (<any>endQnASession) = jest.fn();
+        (<any>mockController.endQnASession) = jest.fn();
         (<any>isPresenterOrOrganizer) = jest.fn();
         (<any>getTeamsUserId) = jest.fn();
         (<any>conversationDataService.getConversationData) = jest.fn();
@@ -1301,7 +1343,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
         (<any>getTeamsUserId).mockImplementationOnce(() => {
             return sampleHostUserId;
         });
-        (<any>endQnASession).mockImplementationOnce(() => {
+        (<any>mockController.endQnASession).mockImplementationOnce(() => {
             throw testError;
         });
 
@@ -1309,7 +1351,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
 
         expect(result.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
         expect(result.body.message).toEqual(testError.message);
-        expect(endQnASession).toBeCalledTimes(1);
+        expect(mockController.endQnASession).toBeCalledTimes(1);
         expect(<any>conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(<any>conversationDataService.getConversationData).toBeCalledWith(sampleConversationId);
     });
@@ -1349,7 +1391,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
 
         expect(result.status).toBe(StatusCodes.NO_CONTENT);
         expect(result.noContent).toBeTruthy();
-        expect(endQnASession).toBeCalledTimes(1);
+        expect(mockController.endQnASession).toBeCalledTimes(1);
         expect(<any>conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(<any>conversationDataService.getConversationData).toBeCalledWith(sampleConversationId);
     });
@@ -1359,7 +1401,12 @@ describe('test get /:conversationId/activesessions api', () => {
     beforeAll(async () => {
         app = Express();
 
-        initializeRouter(conversationDataService);
+        mockUserDataService = new UserDataService();
+        mockQnASessionDataService = new QnASessionDataService(mockUserDataService);
+        mockQuestionDataService = new QuestionDataService(mockUserDataService, mockQnASessionDataService);
+        mockClientDataContractFormatter = new ClientDataContractFormatter(mockUserDataService, mockQuestionDataService);
+        mockController = new Controller(mockQuestionDataService, mockQnASessionDataService);
+        initializeRouter(conversationDataService, mockQnASessionDataService, mockClientDataContractFormatter, mockController);
 
         (<any>conversationDataService.getConversationData) = jest.fn();
         process.env.MicrosoftAppId = 'random';
@@ -1377,8 +1424,8 @@ describe('test get /:conversationId/activesessions api', () => {
         app.use('/api/conversations', mockEnsureAuthenticated, router);
         app.use(restApiErrorMiddleware);
 
-        (<any>qnaSessionDataService.getAllActiveQnASessionData) = jest.fn();
-        (<any>formatQnaSessionDataArrayAsPerClientDataContract) = jest.fn();
+        (<any>mockQnASessionDataService.getAllActiveQnASessionData) = jest.fn();
+        (<any>mockClientDataContractFormatter.formatQnaSessionDataArrayAsPerClientDataContract) = jest.fn();
 
         testQnAData1 = {
             id: generateUniqueId(),
@@ -1409,7 +1456,7 @@ describe('test get /:conversationId/activesessions api', () => {
 
     it('get all QnA sessions data', async () => {
         const testQnAData = [testQnAData1, testQnAData2];
-        (<any>qnaSessionDataService.getAllActiveQnASessionData).mockImplementationOnce(() => {
+        (<any>mockQnASessionDataService.getAllActiveQnASessionData).mockImplementationOnce(() => {
             return testQnAData;
         });
 
@@ -1456,7 +1503,7 @@ describe('test get /:conversationId/activesessions api', () => {
             ],
         };
 
-        (<any>formatQnaSessionDataArrayAsPerClientDataContract).mockImplementationOnce(() => {
+        (<any>mockClientDataContractFormatter.formatQnaSessionDataArrayAsPerClientDataContract).mockImplementationOnce(() => {
             return [qnaSessionDataObject1, qnaSessionDataObject2];
         });
 
@@ -1468,8 +1515,8 @@ describe('test get /:conversationId/activesessions api', () => {
         expect(res.length).toEqual(2);
         expect(res[0]).toEqual(qnaSessionDataObject1);
         expect(res[1]).toEqual(qnaSessionDataObject2);
-        expect(formatQnaSessionDataArrayAsPerClientDataContract).toBeCalledTimes(1);
-        expect(formatQnaSessionDataArrayAsPerClientDataContract).toBeCalledWith(testQnAData);
+        expect(mockClientDataContractFormatter.formatQnaSessionDataArrayAsPerClientDataContract).toBeCalledTimes(1);
+        expect(mockClientDataContractFormatter.formatQnaSessionDataArrayAsPerClientDataContract).toBeCalledWith(testQnAData);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(sampleConversationId);
         expect(verifyUserFromConversationId).toBeCalledTimes(1);
@@ -1477,10 +1524,10 @@ describe('test get /:conversationId/activesessions api', () => {
 
     it('get all QnA sessions data for internal server error', async () => {
         const testQnAData = [testQnAData1, testQnAData2];
-        (<any>qnaSessionDataService.getAllActiveQnASessionData).mockImplementationOnce(() => {
+        (<any>mockQnASessionDataService.getAllActiveQnASessionData).mockImplementationOnce(() => {
             return testQnAData;
         });
-        (<any>formatQnaSessionDataArrayAsPerClientDataContract).mockImplementationOnce(() => {
+        (<any>mockClientDataContractFormatter.formatQnaSessionDataArrayAsPerClientDataContract).mockImplementationOnce(() => {
             throw new Error();
         });
         const testConversation = {
@@ -1500,8 +1547,8 @@ describe('test get /:conversationId/activesessions api', () => {
 
         const result = await request(app).get(`/api/conversations/${sampleConversationId}/activesessions`);
         expect(result.status).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
-        expect(formatQnaSessionDataArrayAsPerClientDataContract).toBeCalledTimes(1);
-        expect(formatQnaSessionDataArrayAsPerClientDataContract).toBeCalledWith(testQnAData);
+        expect(mockClientDataContractFormatter.formatQnaSessionDataArrayAsPerClientDataContract).toBeCalledTimes(1);
+        expect(mockClientDataContractFormatter.formatQnaSessionDataArrayAsPerClientDataContract).toBeCalledWith(testQnAData);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(sampleConversationId);
         expect(verifyUserFromConversationId).toBeCalledTimes(1);
@@ -1510,7 +1557,7 @@ describe('test get /:conversationId/activesessions api', () => {
     it('get all QnA sessions data for invalid conversation id ', async () => {
         const sampleInvalidConversationId = '1';
         const testQnAData = [];
-        (<any>qnaSessionDataService.getAllActiveQnASessionData).mockImplementationOnce(() => {
+        (<any>mockQnASessionDataService.getAllActiveQnASessionData).mockImplementationOnce(() => {
             return testQnAData;
         });
 
@@ -1532,7 +1579,7 @@ describe('test get /:conversationId/activesessions api', () => {
         const result = await request(app).get(`/api/conversations/${sampleInvalidConversationId}/activesessions`);
         expect(result.status).toBe(StatusCodes.OK);
         expect(JSON.parse(result.text)).toEqual([]);
-        expect(formatQnaSessionDataArrayAsPerClientDataContract).toBeCalledTimes(0);
+        expect(mockClientDataContractFormatter.formatQnaSessionDataArrayAsPerClientDataContract).toBeCalledTimes(0);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(sampleInvalidConversationId);
         expect(verifyUserFromConversationId).toBeCalledTimes(1);

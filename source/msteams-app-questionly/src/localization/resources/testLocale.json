@@ -34,7 +34,9 @@
         "conversationInvalid": "conversationInvalid",
         "qnasessionlimitexhaustedError": "qnasessionlimitexhaustedError",
         "qnasessionCreationError": "qnasessionCreationError",
-        "insufficientPermissionsToCreateOrEndQnASessionError": "insufficientPermissionsToCreateOrEndQnASessionError"
+        "insufficientPermissionsToCreateOrEndQnASessionError": "insufficientPermissionsToCreateOrEndQnASessionError",
+        "unableToPostCardForSessionStartedEvent": "unableToPostCardForSessionStartedEvent",
+        "unableToPerformActivityOnEndedSession": "unableToPerformActivityOnEndedSession"
     },
     "generic": {
         "submit": "submit",
