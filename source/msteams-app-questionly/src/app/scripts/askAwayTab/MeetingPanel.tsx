@@ -238,7 +238,7 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
             }
         };
 
-        openStartQnASessionTaskModule(submitHandler, this.props.teamsTabContext.locale, this.props.teamsTabContext.theme);
+        openStartQnASessionTaskModule(this.props.t, submitHandler, this.props.teamsTabContext.locale, this.props.teamsTabContext.theme);
     };
 
     /**

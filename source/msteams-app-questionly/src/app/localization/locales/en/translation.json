@@ -24,7 +24,8 @@
         "showPendingQuestions": "Pending questions",
         "showAnsweredQuestions": "Answered questions",
         "pendingStatus": "Pending",
-        "answeredStatus": "Answered"
+        "answeredStatus": "Answered",
+        "loaderText": "Loading information"
     },
     "meetingPanel": {
         "successText": "Q&A session started",
@@ -57,7 +58,14 @@
         "createQnaSessionButton": "Create",
         "notificationTitle": "{{userName}} started a Q&A session",
         "notificationMessage": "Select the Ask Away icon at the top of the meeting view to participate",
-        "notificationButton": "Ok"
+        "notificationButton": "Ok",
+        "switchNow": "Switch now",
+        "cancel": "Cancel",
+        "noSessionsToSelect": "There are no sessions to select.",
+        "live": "Live",
+        "sessionCreatedDate": "Date created: {{date}}",
+        "loaderText": "Loading information",
+        "selectSession": "Select a session:"
     },
     "TaskModuleMessages": {
         "EndSession": "End session",
@@ -75,6 +83,7 @@
         "QnASessionEndPrompt": "Are you sure you want to stop gathering questions?",
         "Cancel": "Cancel",
         "StartQnATitle": "Start a Q&A session",
-        "EndQnATitle": "End a Q&A session"
+        "EndQnATitle": "End a Q&A session",
+        "SwitchSessionTitle": "Switch to another session"
     }
 }

@@ -313,4 +313,63 @@
     left: 50%;
     position: absolute;
     transform: translate(-50%, -50%);
+    font-family: Segoe UI;
+}
+.switchSessionListHolder {
+    padding-left: 30px;
+    padding-right: 30px;
+    margin-bottom: 12px;
+    overflow: scroll;
+    max-height: 450px;
+    padding-top: 2%;
+    font-family: Segoe UI;
+
+    .title {
+        margin-bottom: 12px;
+    }
+
+    .switchSessionList {
+        li {
+            margin-bottom: 12px;
+            padding-left: 0px;
+            padding-right: 0px;
+        }
+
+        .fn {
+            margin-right: 0rem;
+        }
+    }
+}
+.switchButton {
+    position: absolute;
+    right: 5%;
+    bottom: 5%;
+}
+.switchSessionListCard {
+    padding-right: 12px;
+    padding-left: 12px;
+    padding-top: 11px;
+    padding-bottom: 11px;
+    border: solid;
+    border-radius: 3px;
+    font-family: Segoe UI;
+
+    .sessionName {
+        font-size: 14px;
+        line-height: 20px;
+    }
+    .sessionMetadata {
+        font-size: 12px;
+        line-height: 20px;
+    }
+    .liveTag {
+        font-weight: bold;
+        padding-left: 1rem;
+        border-radius: 0.75rem;
+        padding-right: 1rem;
+        line-height: 14px;
+        font-size: 12px;
+        padding-bottom: 3px;
+        padding-top: 3px;
+    }
 }

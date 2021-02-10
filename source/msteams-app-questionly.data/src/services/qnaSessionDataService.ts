@@ -340,6 +340,7 @@ export class QnASessionDataService implements IQnASessionDataService {
       QnASession.find({
         conversationId: conversationId,
       })
+        .sort([["dateTimeCreated", -1]])
         .populate({ path: "userId", model: User })
         .exec()
     );

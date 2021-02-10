@@ -5,6 +5,7 @@ import Badge from '../shared/Badge';
 import { useState } from 'react';
 import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
 import { withTheme } from '../shared/WithTheme';
+import Helper from '../shared/Helper';
 
 let moment = require('moment');
 interface ThemeProps {
@@ -48,7 +49,7 @@ const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps & ThemePro
                             <Text
                                 className="date-content-format"
                                 content={props.t('tab.createdBy', {
-                                    date: moment(props.activeSessionData.dateTimeCreated).format('L'),
+                                    date: Helper.createDateString(props.activeSessionData.dateTimeCreated),
                                     name: props.activeSessionData.hostUser.name,
                                 })}
                                 size="small"
