@@ -85,6 +85,11 @@ const QnASessionSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
+    // Time stamp when `end` operation is locked. If this field is not set, it means document is not locked.
+    dateTimeEndOperationLockAcquired: {
+      type: Date,
+      required: false,
+    },
   },
   { optimisticConcurrency: true }
 );
@@ -107,6 +112,7 @@ interface IQnASessionBase extends mongoose.Document {
   dateTimeCardLastUpdated?: Date;
   dateTimeNextCardUpdateScheduled?: Date;
   endedByUserId?: string;
+  dateTimeEndOperationLockAcquired?: Date;
 }
 
 /**

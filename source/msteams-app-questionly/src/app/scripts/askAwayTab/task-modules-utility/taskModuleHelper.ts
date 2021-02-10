@@ -13,14 +13,15 @@ import {
 } from './errorCardBuilder';
 import { SubmitButtonId } from './ISubmitButtonData';
 import { createSuccessAdaptiveCard } from './successCardBuilder';
-import { TaskModuleMessages } from './taskModuleMessages';
+import { TFunction } from 'i18next';
 
 /**
  * Handles a case where creating a QnA session fails from task module.
+ * @param t - TFunction for localization.
  * @param error - error occured while creating a QnA session.
  * @param endQnASessionHandler - handler to call when the task module is completed for `end session` flow.
  */
-export const handleTaskModuleErrorForCreateQnASessionFlow = (error: any, endQnASessionHandler: () => void) => {
+export const handleTaskModuleErrorForCreateQnASessionFlow = (t: TFunction, error: any, endQnASessionHandler: () => void) => {
     let card: AdaptiveCard;
 
     if (error?.response?.data?.code === 'QnASessionLimitExhaustedError') {
@@ -28,64 +29,68 @@ export const handleTaskModuleErrorForCreateQnASessionFlow = (error: any, endQnAS
             // If `end session` button is pressed, invoke end session callback.
             // Else, just close the task module.
             if (result?.id === SubmitButtonId.SubmitEndQnA) {
-                handleEndQnASessionFlow(endQnASessionHandler);
+                handleEndQnASessionFlow(t, endQnASessionHandler);
             }
         };
 
-        card = createCardForQnASessionLimitExhaustedError();
-        invokeAdaptiveCardBasedTaskModule(TaskModuleMessages.StartQnATitle, card, submitHandler);
+        card = createCardForQnASessionLimitExhaustedError(t);
+        invokeAdaptiveCardBasedTaskModule(t('TaskModuleMessages.StartQnATitle'), card, submitHandler);
 
         return;
     } else if (error?.response?.data?.code === UnauthorizedAccessErrorCode.InsufficientPermissionsToCreateOrEndQnASession) {
-        card = createCardForInsufficientPermissionsToCreateQnASessionError();
+        card = createCardForInsufficientPermissionsToCreateQnASessionError(t);
     } else if (error?.response?.status === StatusCodes.FORBIDDEN) {
-        card = createCardForUnauthorizedAccessError();
+        card = createCardForUnauthorizedAccessError(t);
     } else {
-        card = createGenericErrorCard();
+        card = createGenericErrorCard(t);
     }
 
-    invokeAdaptiveCardBasedTaskModule(TaskModuleMessages.StartQnATitle, card);
+    invokeAdaptiveCardBasedTaskModule(t('TaskModuleMessages.StartQnATitle'), card);
 };
 
 /**
  * handles a case where ending a QnA session fails.
+ * @param t - TFunction for localization.
  * @param error - error occured while ending a QnA session.
  */
-export const handleTaskModuleErrorForEndQnASessionFlow = (error: any) => {
+export const handleTaskModuleErrorForEndQnASessionFlow = (t: TFunction, error: any) => {
     let card: AdaptiveCard;
 
     if (error?.response?.data?.code === UnauthorizedAccessErrorCode.InsufficientPermissionsToCreateOrEndQnASession) {
-        card = createCardForInsufficientPermissionsToEndQnASessionError();
+        card = createCardForInsufficientPermissionsToEndQnASessionError(t);
     } else if (error?.response?.status === StatusCodes.FORBIDDEN) {
-        card = createCardForUnauthorizedAccessError();
+        card = createCardForUnauthorizedAccessError(t);
     } else {
-        card = createGenericErrorCard();
+        card = createGenericErrorCard(t);
     }
 
-    invokeAdaptiveCardBasedTaskModule(TaskModuleMessages.EndQnATitle, card);
+    invokeAdaptiveCardBasedTaskModule(t('TaskModuleMessages.EndQnATitle'), card);
 };
 
 /**
+ * @param t - TFunction for localization.
  * handles a case where new session creation is successful.
  */
-export const handleTaskModuleResponseForSuccessfulCreateQnASessionFlow = () => {
-    const card = createSuccessAdaptiveCard(TaskModuleMessages.NewSessionCreated);
-    invokeAdaptiveCardBasedTaskModule(TaskModuleMessages.StartQnATitle, card);
+export const handleTaskModuleResponseForSuccessfulCreateQnASessionFlow = (t: TFunction) => {
+    const card = createSuccessAdaptiveCard(t('TaskModuleMessages.NewSessionCreated'));
+    invokeAdaptiveCardBasedTaskModule(t('TaskModuleMessages.StartQnATitle'), card);
 };
 
 /**
+ * @param t - TFunction for localization.
  * handles a case where a session is successfully ended.
  */
-export const handleTaskModuleResponseForEndQnASessionFlow = () => {
-    const card = createSuccessAdaptiveCard(TaskModuleMessages.UnblockedToCreateNewSession);
-    invokeAdaptiveCardBasedTaskModule(TaskModuleMessages.EndQnATitle, card);
+export const handleTaskModuleResponseForEndQnASessionFlow = (t: TFunction) => {
+    const card = createSuccessAdaptiveCard(t('TaskModuleMessages.UnblockedToCreateNewSession'));
+    invokeAdaptiveCardBasedTaskModule(t('TaskModuleMessages.EndQnATitle'), card);
 };
 
 /**
  * Takes user through end session journey, prompts end qna session message and calls end session callback if necessary.
+ * @param t - TFunction for localization.
  * @param endSessionHandler - callback function in case user chooses to end the session.
  */
-export const handleEndQnASessionFlow = (endSessionHandler: () => void) => {
+export const handleEndQnASessionFlow = (t: TFunction, endSessionHandler: () => void) => {
     const submitHandler = (err: any, result: any) => {
         // If `end session` button is pressed, invoke end session callback.
         // Else, just close the task module.
@@ -94,18 +99,32 @@ export const handleEndQnASessionFlow = (endSessionHandler: () => void) => {
         }
     };
 
-    const card = createEndQnAConfirmationAdaptiveCard();
-    invokeAdaptiveCardBasedTaskModule(TaskModuleMessages.EndQnATitle, card, submitHandler);
+    const card = createEndQnAConfirmationAdaptiveCard(t);
+    invokeAdaptiveCardBasedTaskModule(t('TaskModuleMessages.EndQnATitle'), card, submitHandler);
 };
 
 /**
  * opens task module to create a new session.
+ * @param t - TFunction to localize strings.
  * @param submitHandler - Handler to call when the task module is completed.
  * @param locale - User's locale.
  * @param theme - Teams's theme.
  */
-export const openStartQnASessionTaskModule = (submitHandler: (err: string, result: string) => void, locale: string, theme?: string) => {
-    invokeIframeBasedTaskModule(TaskModuleMessages.StartQnATitle, `https://${process.env.HostName}/askAwayTab/createsession.html?theme=${theme}&locale=${locale}`, submitHandler);
+export const openStartQnASessionTaskModule = (t: TFunction, submitHandler: (err: string, result: string) => void, locale: string, theme?: string) => {
+    invokeIframeBasedTaskModule(t('TaskModuleMessages.StartQnATitle'), `https://${process.env.HostName}/askAwayTab/createsession.html?theme=${theme}&locale=${locale}`, submitHandler);
+};
+
+/**
+ * Opens task module to switch sessions.
+ * @param t - TFunction to localize strings.
+ * @param submitHandler - Handler to call when the task module is completed.
+ * @param conversationId - conversation id.
+ * @param preSelectedSessionId - session id which should be preselected in switch tab.
+ * @param theme - Teams's theme.
+ */
+export const openSwitchSessionsTaskModule = (t: TFunction, submitHandler: (err: string, result: string) => void, conversationId?: string, preSelectedSessionId?: string, theme?: string) => {
+    const swicthSessionTaskModuleUrl = `https://${process.env.HostName}/askAwayTab/switchSession.html?conversationId=${conversationId}&selectedSessionId=${preSelectedSessionId}&theme=${theme}`;
+    invokeIframeBasedTaskModule(t('TaskModuleMessages.SwitchSessionTitle'), swicthSessionTaskModuleUrl, submitHandler, 600, 600);
 };
 
 /**
@@ -113,11 +132,15 @@ export const openStartQnASessionTaskModule = (submitHandler: (err: string, resul
  * @param title - task module title.
  * @param url - The url to be rendered in the webview/iframe.
  * @param submitHandler - Handler to call when the task module is completed.
+ * @param height - The requested height of the iframe.
+ * @param width - The requested width of the iframe.
  */
-export const invokeIframeBasedTaskModule = (title: string, url: string, submitHandler?: (err: string, result: string) => void) => {
+export const invokeIframeBasedTaskModule = (title: string, url: string, submitHandler?: (err: string, result: string) => void, height?: number, width?: number) => {
     const taskInfo: TaskInfo = {
         url: url,
         title: title,
+        height: height,
+        width: width,
     };
 
     tasks.startTask(taskInfo, submitHandler);

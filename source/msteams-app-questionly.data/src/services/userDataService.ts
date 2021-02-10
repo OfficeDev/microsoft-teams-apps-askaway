@@ -1,7 +1,15 @@
 import { retryWrapper } from "./../utils/retryPolicies";
 import { IUser, User } from "./../schemas/user";
 
-class UserDataService {
+export interface IUserDataService {
+  getUserOrCreate: (
+    userAadObjId: string,
+    userTeamsName: string
+  ) => Promise<IUser>;
+  getUser: (userAadObjId: IUser) => Promise<IUser>;
+}
+
+export class UserDataService implements IUserDataService {
   /**
    * If user exists, finds the specified user and updates information.
    * Otherwise, if user doesn't exist, will create new user with provided parameters.
@@ -35,5 +43,3 @@ class UserDataService {
     return user;
   }
 }
-
-export const userDataService = new UserDataService();

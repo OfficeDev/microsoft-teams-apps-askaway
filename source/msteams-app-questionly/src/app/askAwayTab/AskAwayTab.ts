@@ -8,4 +8,5 @@ import { PreventIframe } from 'express-msteams-host';
 @PreventIframe('/askAwayTab/remove.html')
 @PreventIframe('/askAwayTab/popups/createsession.html')
 @PreventIframe('/askAwayTab/popups/qnaSessioncreatednotification.html')
+@PreventIframe('/askAwayTab/popups/switchSession.html')
 export class AskAwayTab {}

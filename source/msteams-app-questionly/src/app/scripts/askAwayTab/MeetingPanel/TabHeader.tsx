@@ -10,19 +10,20 @@ import { CONST } from './../shared/Constants';
 export interface TabHeaderProps {
     onSelectActiveTab: Function;
     tabActiveIndex: number;
+    t: Function;
 }
 const TabHeader: React.FunctionComponent<TabHeaderProps> = (props) => {
     const items = [
         {
             key: CONST.TAB_QUESTIONS.UNANSWERED_Q,
-            content: 'Pending questions',
+            content: props.t('meetingPanel.showPendingQuestions'),
             onClick: () => {
                 props.onSelectActiveTab(CONST.TAB_QUESTIONS.UNANSWERED_Q);
             },
         },
         {
             key: CONST.TAB_QUESTIONS.ANSWERED_Q,
-            content: 'Answered questions',
+            content: props.t('meetingPanel.showAnsweredQuestions'),
             onClick: () => {
                 props.onSelectActiveTab(CONST.TAB_QUESTIONS.ANSWERED_Q);
             },

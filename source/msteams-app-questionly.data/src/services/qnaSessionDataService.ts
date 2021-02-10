@@ -1,5 +1,6 @@
 import {
   ExponentialBackOff,
+  ifNumber,
   retryWrapper,
   retryWrapperForConcurrency,
 } from "./../utils/retryPolicies";
@@ -9,13 +10,65 @@ import {
   QnASession,
 } from "./../schemas/qnaSession";
 import { IUser, User } from "./../schemas/user";
-import { userDataService } from "./userDataService";
-import { QnASessionLimitExhaustedError } from "src/errors/qnaSessionLimitExhaustedError";
+import { QnASessionLimitExhaustedError } from "../errors/qnaSessionLimitExhaustedError";
+import { DocumentNotAvailableForOperationError } from "../errors/documentNotAvailableForOperationError";
+import { SessionIsNoLongerActiveError } from "../errors/sessionIsNoLongerActiveError";
+import { IUserDataService } from "./userDataService";
 
-class QnASessionDataService {
-  private userDataService;
+export interface IQnASessionDataService {
+  createQnASession: (sessionParameters: {
+    title: string;
+    description: string;
+    userName: string;
+    userAadObjectId: string;
+    activityId: string;
+    conversationId: string;
+    tenantId: string;
+    scopeId: string;
+    hostUserId: string;
+    isChannel: boolean;
+    isMeetingGroupChat: boolean;
+  }) => Promise<IQnASession_populated>;
+  updateActivityId: (qnaSessionId: string, activityId: string) => Promise<void>;
+  getQnASessionData: (qnaSessionId: string) => Promise<IQnASession_populated>;
+  endQnASession: (
+    qnaSessionId: string,
+    conversationId: string,
+    endedById: string,
+    endedByName: string,
+    endedByUserId: string
+  ) => Promise<void>;
+  isHost: (qnaSessionId: string, userAadjObjId: string) => Promise<boolean>;
+  isActiveQnA: (qnaTeamsSessionId: string) => Promise<boolean>;
+  getQnASession: (qnaSessionId: string) => Promise<IQnASession | null>;
+  getAllQnASessionData: (
+    conversationId: string
+  ) => Promise<IQnASession_populated[]>;
+  getNumberOfActiveSessions: (conversationId: string) => Promise<Number>;
+  getAllActiveQnASessionData: (
+    conversationId: string
+  ) => Promise<IQnASession_populated[]>;
+  incrementAndGetDataEventVersion: (qnaSessionId: string) => Promise<Number>;
+  updateDateTimeCardLastUpdated: (
+    qnaSessionId: string,
+    dateTimeCardLastUpdated: Date
+  ) => Promise<void>;
+  updateDateTimeNextCardUpdateScheduled: (
+    qnaSessionId: string,
+    dateTimeNextCardUpdateScheduled: Date
+  ) => Promise<void>;
+  activateQnASession: (qnaSessionId: string) => Promise<void>;
+  deleteQnASession: (qnaSessionId: string) => Promise<void>;
+  getAndCheckIfQnASessionCanBeUpdated: (
+    qnaTeamsSessionId: string,
+    conversationId: string
+  ) => Promise<IQnASession>;
+}
 
-  constructor(userDataService) {
+export class QnASessionDataService implements IQnASessionDataService {
+  private userDataService: IUserDataService;
+
+  constructor(userDataService: IUserDataService) {
     this.userDataService = userDataService;
   }
 
@@ -106,7 +159,9 @@ class QnASessionDataService {
     );
   }
 
-  public async getQnASessionData(qnaSessionId: string) {
+  public async getQnASessionData(
+    qnaSessionId: string
+  ): Promise<IQnASession_populated> {
     const qnaSessionData = await retryWrapper(() =>
       QnASession.findById(qnaSessionId)
         .populate({
@@ -146,69 +201,62 @@ class QnASessionDataService {
     endedByName: string,
     endedByUserId: string
   ) {
-    await this.isExistingQnASession(qnaSessionId, conversationId);
     await this.userDataService.getUserOrCreate(endedById, endedByName);
-    const result = await retryWrapperForConcurrency(
-      () =>
-        QnASession.findByIdAndUpdate(qnaSessionId, {
-          $set: {
-            isActive: false,
-            dateTimeEnded: new Date(),
-            endedById: endedById,
-            endedByName: endedByName,
-            endedByUserId: endedByUserId,
-          },
-        }).exec(),
-      new ExponentialBackOff()
-    );
+
+    const result = await retryWrapperForConcurrency(async () => {
+      const session = await this.getAndCheckIfQnASessionCanBeUpdated(
+        qnaSessionId,
+        conversationId
+      );
+
+      session.isActive = false;
+      session.dateTimeEnded = new Date();
+      session.endedById = endedById;
+      session.endedByUserId = endedByUserId;
+      session.dateTimeEndOperationLockAcquired = new Date();
+      return await session.save();
+    }, new ExponentialBackOff());
 
     if (!result) throw new Error("QnA Session not found");
   }
 
   /**
-   * If QnA session exists and belongs to given conversation id, will return true
-   * Otherwise, if QnA session doesn't exist, will throw an error.
-   * @param qnaTeamsSessionId - id of the current QnA session
-   * @param conversationId - conversation id
-   * @returns true if qnaTeamsSessionId is in the database
-   * @throws Error thrown when database fails to find the qnaTeamsSessionId or qnaTeamsSessionId
-   * does not belong to conversationId.
-   */
-  public async isExistingQnASession(
-    qnaTeamsSessionId: string,
-    conversationId: string
-  ): Promise<boolean> {
-    const result: IQnASession = await retryWrapper(() =>
-      QnASession.findById(qnaTeamsSessionId)
+   * Activates the QnA by changing fields: isActive to true and dateTimeEnded, endedById and endedByUserId to null.
+   * (This is used for revert operation, hence does not perform validations.)
+   * @param qnaSessionId - id of the current QnA session
+   * @throws Error thrown when database fails to execute changes
+   * */
+  public async activateQnASession(qnaSessionId: string) {
+    await retryWrapperForConcurrency(
+      () =>
+        QnASession.findByIdAndUpdate(qnaSessionId, {
+          $set: {
+            isActive: true,
+            dateTimeEnded: null,
+            endedById: null,
+            endedByUserId: null,
+            dateTimeEndOperationLockAcquired: null,
+          },
+        }).exec(),
+      new ExponentialBackOff()
     );
-
-    if (!result) throw new Error("QnA Session record not found");
-
-    if (result.conversationId.split(";")[0] !== conversationId.split(";")[0]) {
-      throw new Error(
-        `session ${qnaTeamsSessionId} does not belong to conversation ${conversationId}`
-      );
-    }
-
-    return true;
   }
 
   /**
-   * If active QnA session exists and belongs to given conversation id, will return true
-   * Otherwise, if active QnA session doesn't exist, will throw an error.
+   * Checks if QnA session can be updated. Validates following:
+   * 1] session exists, 2] session belongs to provided conversation
+   * 3] session is not being ended (locked), 4] session is not ended
+   * Otherwise, throws appropriate error.
    * @param qnaTeamsSessionId - id of the current QnA session
    * @param conversationId - conversation id
-   * @returns true if qnaTeamsSessionId is in the database
-   * @throws Error thrown when database fails to find the active qnaTeamsSession or qnaTeamsSessionId
-   * does not belong to conversationId.
+   * @returns session document.
+   * @throws appropriate error id end operation can't be performed..
    */
-  public async isExistingActiveQnASession(
+  public async getAndCheckIfQnASessionCanBeUpdated(
     qnaTeamsSessionId: string,
     conversationId: string
-  ): Promise<boolean> {
-    const result: IQnASession = await retryWrapper(() =>
-      QnASession.findById(qnaTeamsSessionId)
-    );
+  ): Promise<IQnASession> {
+    const result: IQnASession = await QnASession.findById(qnaTeamsSessionId);
 
     if (!result) throw new Error("QnA Session record not found");
 
@@ -218,9 +266,27 @@ class QnASessionDataService {
       );
     }
 
-    if (!result.isActive) throw new Error("QnA Session is not active");
+    const endSessionOperationLockValidityInMS = ifNumber(
+      process.env.EndSessionOperationLockValidityInMS,
+      5000
+    );
+    const currentTime = new Date().getTime();
 
-    return true;
+    // Check if session document is beging marked as ended by some other process.
+    if (
+      result.dateTimeEndOperationLockAcquired &&
+      currentTime - result.dateTimeEndOperationLockAcquired.getTime() <
+        endSessionOperationLockValidityInMS
+    ) {
+      throw new DocumentNotAvailableForOperationError();
+    }
+
+    // If session document is not being marked as ended, and is not active, throw session not active error.
+    if (!result.isActive) {
+      throw new SessionIsNoLongerActiveError();
+    }
+
+    return result;
   }
 
   /**
@@ -275,6 +341,14 @@ class QnASessionDataService {
   }
 
   /**
+   * Deletes QnASession document by id. (This is used for revert operation, hence does not perform validations.)
+   * @param qnaSessionId - document database id of the QnA session
+   */
+  public async deleteQnASession(qnaSessionId: string): Promise<void> {
+    await retryWrapper(() => QnASession.findByIdAndDelete(qnaSessionId).exec());
+  }
+
+  /**
    * Retrives all QnA sessions for a given conversation Id.
    * @param conversationId - the conversation id for which QnA session data has to be retrived.
    * @return - Array of QnA session data.
@@ -286,6 +360,7 @@ class QnASessionDataService {
       QnASession.find({
         conversationId: conversationId,
       })
+        .sort([["dateTimeCreated", -1]])
         .populate({ path: "userId", model: User })
         .exec()
     );
@@ -379,5 +454,3 @@ class QnASessionDataService {
     );
   }
 }
-
-export const qnaSessionDataService = new QnASessionDataService(userDataService);

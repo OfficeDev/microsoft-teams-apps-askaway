@@ -1,16 +1,35 @@
 import { IQuestion, Question } from "src/schemas/question";
 import mongoose from "mongoose";
 import { IQnASession, QnASession } from "src/schemas/qnaSession";
-import { questionDataService } from "src/services/questionDataService";
-import { User } from "src/schemas/user";
-import { userDataService } from "src/services/userDataService";
+import { DocumentNotAvailableForOperationError } from "src/errors/documentNotAvailableForOperationError";
+import {
+  QuestionDataService,
+  IQuestionDataService,
+} from "src/services/questionDataService";
+import {
+  IUserDataService,
+  UserDataService,
+} from "src/services/userDataService";
+import {
+  IQnASessionDataService,
+  QnASessionDataService,
+} from "src/services/qnaSessionDataService";
+import { IUser, User } from "src/schemas/user";
 
 const testConversationId = "testConversationId";
 const testQuestionId = "5faccb06e62b5d7ea8e9c49e";
 const testUserId = "testUserId";
 const testUserName = "testUserName";
+const testUserId1 = "testUserId1";
+const testUserName1 = "testUserName1";
+const testQuestionContent = "Sample Question?";
+const randomSessionId = "5f160b862655575054393a0e";
 let testSession: IQnASession;
 let testQuestion: IQuestion;
+let userDataService: IUserDataService;
+let questionDataService: IQuestionDataService;
+let testUserUpvoting: IUser;
+let qnaSessionDataService: IQnASessionDataService;
 
 const createDummyQnASession = async (isactive?: Boolean) => {
   return await new QnASession({
@@ -50,14 +69,23 @@ beforeAll(async () => {
     useUnifiedTopology: true,
     useFindAndModify: false,
   });
+
+  userDataService = new UserDataService();
+  qnaSessionDataService = new QnASessionDataService(userDataService);
+  questionDataService = new QuestionDataService(
+    userDataService,
+    qnaSessionDataService
+  );
+
+  testUserUpvoting = await new User({
+    _id: "sampleUserAADObjId3",
+    userName: "sampleUserName3",
+  }).save();
 });
 
 afterEach(async () => {
-  QnASession.deleteOne({ _id: testSession.id });
-
-  if (testQuestion) {
-    Question.deleteOne({ _id: testQuestion.id });
-  }
+  await QnASession.deleteOne({ _id: testSession.id });
+  await Question.deleteMany({ qnaSessionId: testSession._id });
 });
 
 afterAll(async () => {
@@ -76,7 +104,7 @@ test("upvote question - invalid session id", async () => {
       testUserId,
       testUserName
     )
-  ).rejects.toThrow(`Invalid session id ${randomSessionId}`);
+  ).rejects.toThrow("QnA Session record not found");
 });
 
 test("upvote question - invalid conversation id", async () => {
@@ -107,7 +135,7 @@ test("upvote question - session is not active", async () => {
       testUserId,
       testUserName
     )
-  ).rejects.toThrow(`session ${testSession.id} is not active`);
+  ).rejects.toThrow("QnA session is no longer active.");
 });
 
 test("upvote question - invalid question id", async () => {
@@ -221,7 +249,7 @@ test("downvote question - invalid session id", async () => {
       testQuestionId,
       testUserId
     )
-  ).rejects.toThrow(`Invalid session id ${randomSessionId}`);
+  ).rejects.toThrow("QnA Session record not found");
 });
 
 test("downvote question - invalid conversation id", async () => {
@@ -250,7 +278,7 @@ test("downvote question - session is not active", async () => {
       testQuestionId,
       testUserId
     )
-  ).rejects.toThrow(`session ${testSession.id} is not active`);
+  ).rejects.toThrow("QnA session is no longer active.");
 });
 
 test("downvote question - invalid question id", async () => {
@@ -352,7 +380,7 @@ test("mark question as answered - invalid session id", async () => {
       randomSessionId,
       testQuestionId
     )
-  ).rejects.toThrow(`Invalid session id ${randomSessionId}`);
+  ).rejects.toThrow("QnA Session record not found");
 });
 
 test("mark question as answered - invalid conversation id", async () => {
@@ -379,7 +407,7 @@ test("mark question as answered - session is not active", async () => {
       testSession.id,
       testQuestionId
     )
-  ).rejects.toThrow(`session ${testSession.id} is not active`);
+  ).rejects.toThrow("QnA session is no longer active.");
 });
 
 test("mark question as answered - invalid question id", async () => {
@@ -425,6 +453,20 @@ test("mark question as answered", async () => {
   const question = <IQuestion>await Question.findById(testQuestion.id);
   expect(question.id).toEqual(testQuestion.id);
   expect(question.isAnswered).toBeTruthy();
+  expect(question.dateTimeMarkAsAnsweredOperationLockAcquired).toBeDefined();
+});
+
+test("mark question as unanswered", async () => {
+  testSession = await createDummyQnASession();
+  testQuestion = await createDummyQuestion(testSession.id, true);
+
+  expect(testQuestion.isAnswered).toBeTruthy();
+
+  await questionDataService.markQuestionAsUnanswered(testQuestion.id);
+
+  const question = <IQuestion>await Question.findById(testQuestion.id);
+  expect(question.id).toEqual(testQuestion.id);
+  expect(question.isAnswered).not.toBeTruthy();
 });
 
 test("mark question as answered - already answered question", async () => {
@@ -453,5 +495,423 @@ test("create question for not active session", async () => {
       "dummy",
       testConversationId
     )
-  ).rejects.toThrow(`QnA Session is not active`);
+  ).rejects.toThrow("QnA session is no longer active.");
+});
+
+test("delete question", async () => {
+  testSession = await createDummyQnASession();
+  testQuestion = await createDummyQuestion(testSession.id);
+
+  questionDataService.deleteQuestion(testQuestion.id);
+
+  const question = <IQuestion>await Question.findById(testQuestion.id);
+  expect(question).toBeNull();
+});
+
+test("2nd immediate mark as answered operation should fail due to loack acquired by the first process", async () => {
+  testSession = await createDummyQnASession();
+  testQuestion = await createDummyQuestion(testSession.id, false);
+
+  process.env.MarkQuestionAsAnsweredOperationLockValidityInMS = "500000";
+
+  await questionDataService.markQuestionAsAnswered(
+    testConversationId,
+    testSession.id,
+    testQuestion.id
+  );
+
+  try {
+    await questionDataService.markQuestionAsAnswered(
+      testConversationId,
+      testSession.id,
+      testQuestion.id
+    );
+  } catch (error) {
+    expect(error instanceof DocumentNotAvailableForOperationError).toBeTruthy();
+  }
+});
+
+test("retrieve most recent/top questions with three questions", async () => {
+  testSession = await createDummyQnASession();
+  const doc: any = await QnASession.findById(testSession._id);
+  expect(doc).not.toBeNull();
+
+  // create a new questions
+  const questions: any = [
+    {
+      qnaSessionId: testSession._id,
+      userId: testSession._id,
+      content: "This is test question 1",
+      isAnswered: false,
+      voters: [
+        {
+          _id: "456",
+          userName: "Khayan Shalili",
+        },
+        {
+          _id: "456",
+          userName: "Khayan Shalili",
+        },
+      ],
+    },
+    {
+      qnaSessionId: testSession._id,
+      userId: testSession._id,
+      content: "This is test question 2",
+      isAnswered: false,
+      voters: [],
+    },
+    {
+      qnaSessionId: testSession._id,
+      userId: testUserId,
+      content: "This is test question 3",
+      isAnswered: false,
+      voters: [
+        {
+          _id: "456",
+          userName: "Khayan Shalili",
+        },
+      ],
+    },
+  ];
+
+  const _sleep = (ms) =>
+    new Promise<void>((resolve) => setTimeout(() => resolve(), ms));
+  questions[1] = await new Question(questions[1]).save();
+  await _sleep(50);
+  questions[0] = await new Question(questions[0]).save();
+  await _sleep(1000);
+  questions[2] = await new Question(questions[2]).save();
+
+  const results = await questionDataService.getQuestionsCountWithRecentAndTopNQuestions(
+    testSession._id,
+    3
+  );
+  const topQuestions: any = results.topQuestions;
+  const recentQuestions: any = results.recentQuestions;
+  const numQuestions = results.numQuestions;
+
+  expect(topQuestions).not.toBe(null);
+  expect(recentQuestions).not.toBe(null);
+  expect(numQuestions).toEqual(3);
+
+  expect(topQuestions[0]._id).toEqual(questions[0]._id);
+  expect(topQuestions[1]._id).toEqual(questions[2]._id);
+  expect(topQuestions[2]._id).toEqual(questions[1]._id);
+
+  expect(recentQuestions[0]._id).toEqual(questions[2]._id);
+  expect(recentQuestions[1]._id).toEqual(questions[0]._id);
+  expect(recentQuestions[2]._id).toEqual(questions[1]._id);
+});
+
+test("retrieve most top questions with no votes should be most recent questions", async () => {
+  testSession = await createDummyQnASession();
+
+  // create a new questions
+  const questions: any = [
+    {
+      qnaSessionId: testSession._id,
+      userId: testUserId,
+      content: "This is test question 1",
+      isAnswered: false,
+      voters: [],
+    },
+    {
+      qnaSessionId: testSession._id,
+      userId: testUserId,
+      content: "This is test question 2",
+      isAnswered: false,
+      voters: [],
+    },
+    {
+      qnaSessionId: testSession._id,
+      userId: testUserId,
+      content: "This is test question 3",
+      isAnswered: false,
+      voters: [],
+    },
+  ];
+
+  const _sleep = (ms) =>
+    new Promise<void>((resolve) => setTimeout(() => resolve(), ms));
+  questions[1] = await new Question(questions[1]).save();
+  await _sleep(50);
+  questions[0] = await new Question(questions[0]).save();
+  await _sleep(1000);
+  questions[2] = await new Question(questions[2]).save();
+
+  const results = await questionDataService.getQuestionsCountWithRecentAndTopNQuestions(
+    testSession._id,
+    3
+  );
+  const topQuestions: any = results.topQuestions;
+  const numQuestions = results.numQuestions;
+
+  expect(topQuestions).not.toBe(null);
+  expect(numQuestions).toEqual(3);
+
+  expect(topQuestions[0]._id).toEqual(questions[2]._id);
+  expect(topQuestions[1]._id).toEqual(questions[0]._id);
+  expect(topQuestions[2]._id).toEqual(questions[1]._id);
+});
+
+test("retrieve most top questions with some votes should be most recent questions", async () => {
+  testSession = await createDummyQnASession();
+
+  // create a new questions
+  const questions: any = [
+    {
+      qnaSessionId: testSession._id,
+      userId: testUserId,
+      content: "This is test question 1",
+      isAnswered: false,
+      voters: [
+        {
+          _id: "456",
+          userName: "Khayan Shalili",
+        },
+      ],
+    },
+    {
+      qnaSessionId: testSession._id,
+      userId: testUserId,
+      content: "This is test question 2",
+      isAnswered: false,
+      voters: [],
+    },
+    {
+      qnaSessionId: testSession._id,
+      userId: testUserId,
+      content: "This is test question 3",
+      isAnswered: false,
+      voters: [],
+    },
+  ];
+
+  const _sleep = (ms) =>
+    new Promise<void>((resolve) => setTimeout(() => resolve(), ms));
+  questions[1] = await new Question(questions[1]).save();
+  await _sleep(50);
+  questions[0] = await new Question(questions[0]).save();
+  await _sleep(1000);
+  questions[2] = await new Question(questions[2]).save();
+
+  const results = await questionDataService.getQuestionsCountWithRecentAndTopNQuestions(
+    testSession._id,
+    3
+  );
+  const topQuestions: any = results.topQuestions;
+  const numQuestions = results.numQuestions;
+
+  expect(topQuestions).not.toBe(null);
+  expect(numQuestions).toEqual(3);
+
+  expect(topQuestions[0]._id).toEqual(questions[0]._id);
+  expect(topQuestions[1]._id).toEqual(questions[2]._id);
+  expect(topQuestions[2]._id).toEqual(questions[1]._id);
+});
+
+test("retrieve most recent/top questions with no questions", async () => {
+  testSession = await createDummyQnASession();
+
+  const results = await questionDataService.getQuestionsCountWithRecentAndTopNQuestions(
+    testSession._id,
+    3
+  );
+  const topQuestions: any = results.topQuestions;
+  const recentQuestions: any = results.recentQuestions;
+  const numQuestions: any = results.numQuestions;
+
+  expect(topQuestions).toEqual([]);
+  expect(recentQuestions).toEqual([]);
+  expect(numQuestions).toEqual(0);
+});
+
+test("retrieve question data in empty QnA", async () => {
+  testSession = await createDummyQnASession();
+  const questionData = await questionDataService.getAllQuestions(
+    testSession._id
+  );
+
+  expect(questionData).toEqual([]);
+});
+
+test("retrieve question data in non-empty QnA", async () => {
+  testSession = await createDummyQnASession();
+
+  const questions: IQuestion[] = [
+    new Question({
+      qnaSessionId: testSession._id,
+      userId: testUserId,
+      content: "This is test question 1",
+      isAnswered: false,
+      voters: [],
+    }),
+    new Question({
+      qnaSessionId: testSession._id,
+      userId: testUserId,
+      content: "This is test question 2",
+      isAnswered: false,
+      voters: [],
+    }),
+  ];
+
+  await questions[0].save();
+  await questions[1].save();
+
+  const questionData = await questionDataService.getAllQuestions(
+    testSession._id
+  );
+
+  expect(questionData[0]._id).toEqual(questions[0]._id);
+  expect(questionData[1]._id).toEqual(questions[1]._id);
+
+  await Question.deleteOne({ _id: questionData[0]._id });
+  await Question.deleteOne({ _id: questionData[1]._id });
+});
+
+test("new question with existing user in existing QnA session", async () => {
+  testSession = await createDummyQnASession();
+
+  const question = await questionDataService.createQuestion(
+    testSession._id,
+    testUserId,
+    testUserName,
+    testQuestionContent,
+    testConversationId
+  );
+
+  expect(question).toBeDefined();
+  const doc: any = await Question.findById(question.id);
+  expect(doc).not.toBeNull();
+  expect(doc.id).toEqual(question.id);
+  expect(doc.toObject().content).toEqual(testQuestionContent);
+});
+
+test("new question with new user in existing QnA session", async () => {
+  testSession = await createDummyQnASession();
+
+  const question = await questionDataService.createQuestion(
+    testSession._id,
+    testUserId1,
+    testUserName1,
+    testQuestionContent,
+    testConversationId
+  );
+  expect(question.id).toBeDefined();
+
+  const doc: any = await Question.findById(question.id);
+  expect(doc).not.toBeNull();
+  expect(doc.id).toEqual(question.id);
+  expect(doc.toObject().content).toEqual(testQuestionContent);
+});
+
+test("new question with existing user in non-existing QnA session", async () => {
+  await questionDataService
+    .createQuestion(
+      randomSessionId,
+      testUserId1,
+      testUserName,
+      testQuestionContent,
+      testConversationId
+    )
+    .catch((error) => {
+      expect(error).toEqual(new Error("QnA Session record not found"));
+    });
+});
+
+test("upvote question that has not been upvoted yet with existing user", async () => {
+  testSession = await createDummyQnASession();
+
+  const newQuestion = new Question({
+    qnaSessionId: testSession._id,
+    userId: testUserId,
+    content: "This is a question to test upvotes?",
+    isAnswered: false,
+    voters: [],
+  });
+
+  await newQuestion.save();
+
+  const response = await questionDataService.updateUpvote(
+    testConversationId,
+    testSession.id,
+    newQuestion._id,
+    testUserUpvoting._id,
+    testUserUpvoting.userName
+  );
+
+  expect(response.question.voters).toContain(testUserUpvoting._id);
+
+  await Question.deleteOne(response.question);
+  await User.deleteOne(testUserUpvoting);
+});
+
+test("upvote question that has already been upvoted with existing user", async () => {
+  testSession = await createDummyQnASession();
+
+  const newQuestion = new Question({
+    qnaSessionId: testSession.id,
+    userId: testUserId,
+    content: "This is a question to test upvotes?",
+    isAnswered: false,
+    voters: [],
+  });
+
+  await newQuestion.save();
+
+  let response = await questionDataService.updateUpvote(
+    testConversationId,
+    testSession.id,
+    newQuestion._id,
+    testUserUpvoting._id,
+    testUserUpvoting.userName
+  );
+
+  expect(response.question.voters).toContain(testUserUpvoting._id);
+
+  response = await questionDataService.updateUpvote(
+    testConversationId,
+    testSession.id,
+    newQuestion._id,
+    testUserUpvoting._id,
+    testUserUpvoting.userName
+  );
+
+  expect(response.question.voters).not.toContain(testUserUpvoting._id);
+
+  expect(
+    response.question.voters.filter((userId) => userId === testUserUpvoting._id)
+      .length
+  ).toEqual(0);
+
+  await Question.deleteOne(response.question);
+  await User.deleteOne(testUserUpvoting);
+});
+
+test("upvote question with new user not in database", async () => {
+  testSession = await createDummyQnASession();
+
+  const newQuestion = new Question({
+    qnaSessionId: testSession._id,
+    userId: testUserId,
+    content: "This is a question to test upvotes?",
+    isAnswered: false,
+    voters: [],
+  });
+
+  await newQuestion.save();
+
+  const response = await questionDataService.updateUpvote(
+    testConversationId,
+    testSession.id,
+    newQuestion._id,
+    "134679",
+    "New User Junior"
+  );
+
+  expect(response.question.voters).toContain("134679");
+
+  await Question.deleteOne(response.question);
+  await User.deleteOne(testUserUpvoting);
 });

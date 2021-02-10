@@ -4,11 +4,9 @@
 
 import { AzureFunction, Context } from "@azure/functions";
 import moment from "moment";
-import {
-  qnaSessionDataService,
-  IQnASession,
-} from "msteams-app-questionly.data";
+import { IQnASession } from "msteams-app-questionly.data";
 import { ifNumber } from "../src/utils/typeUtility";
+import { qnaSessionDataService } from "../src/utils/dbUtility";
 
 const maxWaitTimeForAdaptiveCardRefreshInMs = ifNumber(
   process.env.MaxWaitTimeForAdaptiveCardRefreshInMs,

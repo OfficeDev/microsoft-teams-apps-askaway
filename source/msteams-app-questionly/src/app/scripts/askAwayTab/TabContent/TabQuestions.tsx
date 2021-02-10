@@ -20,6 +20,7 @@ export interface TabQuestionsProps {
     activeSessionData: ClientDataContract.QnaSession;
     teamsTabContext: microsoftTeams.Context;
     onClickAction: Function;
+    t: Function;
 }
 const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (props) => {
     const [isPendingTabOpen, setPendingTabOpen] = useState(true);
@@ -70,7 +71,7 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (p
                                                                 ? { backgroundColor: colorScheme.brand.background, color: colorScheme.brand.foreground4 }
                                                                 : { backgroundColor: colorScheme.green.background, color: colorScheme.green.foreground1 }
                                                         }
-                                                        text={CONST.TAB_QUESTIONS.UNANSWERED_Q === questionType ? 'Pending' : 'Answered'}
+                                                        text={CONST.TAB_QUESTIONS.UNANSWERED_Q === questionType ? props.t('tab.pendingStatus') : props.t('tab.answeredStatus')}
                                                     />
                                                 </Flex>
                                             </div>
@@ -146,7 +147,7 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (p
                     icon={setIcons(questionType)}
                     text
                     iconPosition="after"
-                    content={questionType === CONST.TAB_QUESTIONS.UNANSWERED_Q ? 'Pending Questions' : 'Answered Questions'}
+                    content={questionType === CONST.TAB_QUESTIONS.UNANSWERED_Q ? props.t('tab.showPendingQuestions') : props.t('tab.showAnsweredQuestions')}
                     onClick={() => {
                         toggleQuestions(questionType);
                     }}

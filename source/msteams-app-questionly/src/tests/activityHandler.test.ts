@@ -1,15 +1,31 @@
 /* eslint-disable @typescript-eslint/tslint/config */
 import { AskAway } from 'src/askAway';
 import { TaskModuleRequest } from 'botframework-connector/lib/connectorApi/models';
-import { submitNewQuestion, updateUpvote, getErrorCard, endQnASession, startQnASession, getMainCard, getStartQnACard, validateConversationId } from 'src/Controller';
+import { IController, Controller } from 'src/Controller';
 import { errorStrings, initLocalization } from 'src/localization/locale';
-import { ConversationDataService } from 'msteams-app-questionly.data';
+import { ConversationDataService, IQuestionDataService, IUserDataService, UserDataService, QuestionDataService, IQnASessionDataService, QnASessionDataService } from 'msteams-app-questionly.data';
 import { getMeetingIdFromContext } from 'src/util/meetingsUtility';
+import * as maincardBuilder from 'msteams-app-questionly.common';
+import * as adaptiveCardBuilder from 'src/adaptive-cards/adaptiveCardBuilder';
 
-jest.mock('src/controller');
+jest.mock('msteams-app-questionly.common');
+jest.mock('src/adaptive-cards/adaptiveCardBuilder');
+let mockController: IController;
+let mockUserDataService: IUserDataService;
+let mockQuestionDataService: IQuestionDataService;
+let mockQnASessionDataService: IQnASessionDataService;
 
 beforeAll(async () => {
     await initLocalization();
+    mockUserDataService = new UserDataService();
+    mockQnASessionDataService = new QnASessionDataService(mockUserDataService);
+    mockQuestionDataService = new QuestionDataService(mockUserDataService, mockQuestionDataService);
+    mockController = new Controller(mockQuestionDataService, mockQnASessionDataService);
+    (<any>mockController.validateConversationId) = jest.fn();
+    (<any>mockController.startQnASession) = jest.fn();
+    (<any>mockController.endQnASession) = jest.fn();
+    (<any>mockController.submitNewQuestion) = jest.fn();
+    (<any>mockController.updateUpvote) = jest.fn();
 });
 
 describe('teams task module fetch', () => {
@@ -17,7 +33,7 @@ describe('teams task module fetch', () => {
     let context;
 
     beforeEach(() => {
-        handler = <any>new AskAway(new ConversationDataService());
+        handler = <any>new AskAway(new ConversationDataService(), mockController);
         handler.handleTeamsTaskModuleFetchViewLeaderboard = jest.fn();
         handler.handleTeamsTaskModuleFetchAskQuestion = jest.fn();
         handler.handleTeamsTaskModuleFetchError = jest.fn();
@@ -83,7 +99,7 @@ describe('teams task module submit', () => {
     let context;
 
     beforeEach(() => {
-        handler = <any>new AskAway(new ConversationDataService());
+        handler = <any>new AskAway(new ConversationDataService(), mockController);
         handler.handleTeamsTaskModuleSubmitQuestion = jest.fn();
         handler.handleTeamsTaskModuleSubmitUpvote = jest.fn();
         handler.handleTeamsTaskModuleSubmitConfirmEndQnA = jest.fn();
@@ -215,7 +231,7 @@ describe('handle submit question', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        handler = <any>new AskAway(new ConversationDataService());
+        handler = <any>new AskAway(new ConversationDataService(), mockController);
         handler.handleTeamsTaskModuleResubmitQuestion = jest.fn();
         handler._updateMainCard = jest.fn();
         context = {
@@ -226,7 +242,7 @@ describe('handle submit question', () => {
                 },
             },
         };
-        (<any>validateConversationId).mockImplementationOnce(() => {
+        (<any>mockController.validateConversationId).mockImplementationOnce(() => {
             return true;
         });
     });
@@ -244,13 +260,13 @@ describe('handle submit question', () => {
             aadObjectId: 'fancyId',
         };
 
-        (<any>submitNewQuestion).mockImplementationOnce(() => {
+        (<any>mockController.submitNewQuestion).mockImplementationOnce(() => {
             return true;
         });
 
         expect(await handler.handleTeamsTaskModuleSubmitQuestion(context, user, taskModuleRequest)).toBe(null);
 
-        expect(submitNewQuestion).toBeCalledTimes(1);
+        expect(mockController.submitNewQuestion).toBeCalledTimes(1);
     });
 
     it('empty question', async () => {
@@ -266,14 +282,14 @@ describe('handle submit question', () => {
             aadObjectId: 'fancyId',
         };
 
-        (<any>submitNewQuestion).mockImplementation(() => {
+        (<any>mockController.submitNewQuestion).mockImplementation(() => {
             return true;
         });
 
         expect(await handler.handleTeamsTaskModuleSubmitQuestion(context, user, taskModuleRequest)).not.toBe(null);
 
         expect(handler.handleTeamsTaskModuleResubmitQuestion).toBeCalledTimes(1);
-        expect(submitNewQuestion).toBeCalledTimes(0);
+        expect(mockController.submitNewQuestion).toBeCalledTimes(0);
         expect(handler._updateMainCard).toBeCalledTimes(0);
     });
 
@@ -290,20 +306,20 @@ describe('handle submit question', () => {
             aadObjectId: 'fancyId',
         };
 
-        (<any>submitNewQuestion).mockImplementation(() => {
+        (<any>mockController.submitNewQuestion).mockImplementation(() => {
             throw new Error();
         });
 
         expect(await handler.handleTeamsTaskModuleSubmitQuestion(context, user, taskModuleRequest)).not.toEqual(null);
 
         expect(handler.handleTeamsTaskModuleResubmitQuestion).toBeCalledTimes(1);
-        expect(submitNewQuestion).toBeCalledTimes(1);
+        expect(mockController.submitNewQuestion).toBeCalledTimes(1);
         expect(handler._updateMainCard).toBeCalledTimes(0);
     });
 });
 
 test('handle submit upvote', async () => {
-    const handler = <any>new AskAway(new ConversationDataService());
+    const handler = <any>new AskAway(new ConversationDataService(), mockController);
     handler.handleTeamsTaskModuleResubmitQuestion = jest.fn();
     handler._updateMainCard = jest.fn();
     handler._buildTaskModuleContinueResponse = jest.fn();
@@ -325,23 +341,23 @@ test('handle submit upvote', async () => {
         },
         context: null,
     };
-    (<any>updateUpvote).mockImplementation(() => {
+    (<any>mockController.updateUpvote).mockImplementation(() => {
         throw new Error();
     });
     await handler.handleTeamsTaskModuleSubmitUpvote(context, taskModuleRequest);
 
-    expect(updateUpvote).toBeCalledTimes(1);
+    expect(mockController.updateUpvote).toBeCalledTimes(1);
     expect(handler._buildTaskModuleContinueResponse).toBeCalledTimes(1);
-    expect(getErrorCard).toBeCalledTimes(1);
-    expect(getErrorCard).toBeCalledWith(errorStrings('upvoting'));
+    expect(adaptiveCardBuilder.getErrorCard).toBeCalledTimes(1);
+    expect(adaptiveCardBuilder.getErrorCard).toBeCalledWith(errorStrings('upvoting'));
 });
 
 test('handle submit end qna', async () => {
-    const handler = <any>new AskAway(new ConversationDataService());
+    const handler = <any>new AskAway(new ConversationDataService(), mockController);
     handler.handleTeamsTaskModuleResubmitQuestion = jest.fn();
     handler._updateMainCard = jest.fn();
     handler._buildTaskModuleContinueResponse = jest.fn();
-    (<any>validateConversationId).mockImplementationOnce(() => {
+    (<any>mockController.validateConversationId).mockImplementationOnce(() => {
         return true;
     });
     const sampleMeetingId = 'sampleMeetingId';
@@ -370,14 +386,14 @@ test('handle submit end qna', async () => {
             qnaSessionId: 'qnaSessionId',
         },
     };
-    (<any>endQnASession).mockImplementation(() => true);
+    (<any>mockController.endQnASession).mockImplementation(() => true);
     await handler.handleTeamsTaskModuleSubmitEndQnA(taskModuleRequest, context);
 
-    expect(endQnASession).toBeCalledTimes(1);
+    expect(mockController.endQnASession).toBeCalledTimes(1);
 });
 
 test('bot message preview send', async () => {
-    const handler = <any>new AskAway(new ConversationDataService());
+    const handler = <any>new AskAway(new ConversationDataService(), mockController);
     handler._extractMainCardFromActivityPreview = jest.fn(() => cardData);
     const sampleMeetingId = 'sampleMeetingId';
     (<any>getMeetingIdFromContext) = jest.fn();
@@ -411,12 +427,12 @@ test('bot message preview send', async () => {
         description: 'card description',
     };
 
-    (<any>startQnASession).mockImplementation(() => true);
+    (<any>mockController.startQnASession).mockImplementation(() => true);
 
     await handler.handleTeamsMessagingExtensionBotMessagePreviewSend(context, action);
 
-    expect(startQnASession).toBeCalledTimes(1);
-    expect(startQnASession).toBeCalledWith({
+    expect(mockController.startQnASession).toBeCalledTimes(1);
+    expect(mockController.startQnASession).toBeCalledWith({
         title: cardData.title,
         description: cardData.description,
         userName: context.activity.from.name,
@@ -436,7 +452,7 @@ describe('messaging extension submit', () => {
     let handler, context;
 
     beforeEach(() => {
-        handler = <any>new AskAway(new ConversationDataService());
+        handler = <any>new AskAway(new ConversationDataService(), mockController);
         context = {
             activity: {
                 from: {
@@ -459,8 +475,8 @@ describe('messaging extension submit', () => {
 
         const result = await handler.handleTeamsMessagingExtensionSubmitAction(context, action);
 
-        expect(getMainCard).toBeCalledTimes(1);
-        expect(getMainCard).toBeCalledWith(action.data.title, action.data.description, context.activity.from.name, '', context.activity.from.aadObjectId, context.activity.from.id);
+        expect(maincardBuilder.getMainCard).toBeCalledTimes(1);
+        expect(maincardBuilder.getMainCard).toBeCalledWith(action.data.title, action.data.description, context.activity.from.name, '', context.activity.from.aadObjectId, context.activity.from.id);
         expect(result.composeExtension.type).toBe('botMessagePreview');
     });
 
@@ -474,9 +490,9 @@ describe('messaging extension submit', () => {
 
         await handler.handleTeamsMessagingExtensionSubmitAction(context, action);
 
-        expect(getMainCard).toBeCalledTimes(0);
-        expect(getStartQnACard).toBeCalledTimes(1);
-        expect(getStartQnACard).toBeCalledWith(action.data.title, action.data.description, errorStrings('missingFields'));
+        expect(maincardBuilder.getMainCard).toBeCalledTimes(0);
+        expect(adaptiveCardBuilder.getStartQnACard).toBeCalledTimes(1);
+        expect(adaptiveCardBuilder.getStartQnACard).toBeCalledWith(action.data.title, action.data.description, errorStrings('missingFields'));
     });
 
     test('filled title and unfilled description', async () => {
@@ -489,8 +505,8 @@ describe('messaging extension submit', () => {
 
         await handler.handleTeamsMessagingExtensionSubmitAction(context, action);
 
-        expect(getMainCard).toBeCalledTimes(0);
-        expect(getStartQnACard).toBeCalledTimes(1);
-        expect(getStartQnACard).toBeCalledWith(action.data.title, action.data.description, errorStrings('missingFields'));
+        expect(maincardBuilder.getMainCard).toBeCalledTimes(0);
+        expect(adaptiveCardBuilder.getStartQnACard).toBeCalledTimes(1);
+        expect(adaptiveCardBuilder.getStartQnACard).toBeCalledWith(action.data.title, action.data.description, errorStrings('missingFields'));
     });
 });

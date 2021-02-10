@@ -1,23 +1,72 @@
 import {
   ExponentialBackOff,
+  ifNumber,
   retryWrapper,
   retryWrapperForConcurrency,
 } from "./../utils/retryPolicies";
-import { IQnASession, QnASession } from "./../schemas/qnaSession";
 import {
   IQuestion,
   IQuestionPopulatedUser,
   Question,
 } from "./../schemas/question";
 import { User } from "./../schemas/user";
-import { qnaSessionDataService } from "./qnaSessionDataService";
-import { userDataService } from "./userDataService";
+import { DocumentNotAvailableForOperationError } from "../errors/documentNotAvailableForOperationError";
+import { IQnASessionDataService } from "./qnaSessionDataService";
+import { IUserDataService } from "./userDataService";
 
-export class QuestionDataService {
-  private qnaSessionDataService;
-  private userDataService;
+export interface IQuestionDataService {
+  createQuestion: (
+    qnaTeamsSessionId: string,
+    userAadObjId: string,
+    userTeamsName: string,
+    questionContent: string,
+    conversationId: string
+  ) => Promise<IQuestion>;
+  updateUpvote: (
+    conversationId: string,
+    qnaSessionId: string,
+    questionId: string,
+    aadObjectId: string,
+    name: string
+  ) => Promise<{ question: IQuestion; upvoted: Boolean }>;
+  upVoteQuestion: (
+    conversationId: string,
+    sessionId: string,
+    questionId: string,
+    aadObjectId: string,
+    name: string
+  ) => Promise<IQuestionPopulatedUser>;
+  downVoteQuestion: (
+    conversationId: string,
+    sessionId: string,
+    questionId: string,
+    aadObjectId: string
+  ) => Promise<IQuestionPopulatedUser>;
+  markQuestionAsAnswered: (
+    conversationId: string,
+    sessionId: string,
+    questionId: string
+  ) => Promise<IQuestionPopulatedUser>;
+  getAllQuestions: (qnaSessionId: string) => Promise<IQuestionPopulatedUser[]>;
+  getQuestionsCountWithRecentAndTopNQuestions: (
+    qnaSessionId: string,
+    topN?: number
+  ) => Promise<{
+    topQuestions?: IQuestionPopulatedUser[];
+    recentQuestions?: IQuestionPopulatedUser[];
+    numQuestions: number;
+  }>;
+  markQuestionAsUnanswered: (
+    questionId: string
+  ) => Promise<IQuestionPopulatedUser>;
+  deleteQuestion: (questionId: string) => Promise<void>;
+}
 
-  constructor(userDataService, qnaSessionDataService) {
+export class QuestionDataService implements IQuestionDataService {
+  private qnaSessionDataService: IQnASessionDataService;
+  private userDataService: IUserDataService;
+
+  constructor(userDataService: IUserDataService, qnaSessionDataService) {
     this.userDataService = userDataService;
     this.qnaSessionDataService = qnaSessionDataService;
   }
@@ -39,11 +88,13 @@ export class QuestionDataService {
     questionContent: string,
     conversationId: string
   ): Promise<IQuestion> {
-    await this.userDataService.getUserOrCreate(userAadObjId, userTeamsName);
-    await this.qnaSessionDataService.isExistingActiveQnASession(
+    // Check if QnA session exists, is active etc.
+    await this.qnaSessionDataService.getAndCheckIfQnASessionCanBeUpdated(
       qnaTeamsSessionId,
       conversationId
     );
+
+    await this.userDataService.getUserOrCreate(userAadObjId, userTeamsName);
 
     const question = new Question({
       qnaSessionId: qnaTeamsSessionId,
@@ -66,7 +117,7 @@ export class QuestionDataService {
    * @returns - Array of Question documents under the QnA.
    * @throws - Error thrown when finding questions or populating userId field of question documents fails.
    */
-  public async getQuestionData(
+  public async getAllQuestions(
     qnaSessionId: string
   ): Promise<IQuestionPopulatedUser[]> {
     const questionData: IQuestion[] = await retryWrapper<IQuestion[]>(() =>
@@ -84,12 +135,20 @@ export class QuestionDataService {
   }
 
   /**
+   * Deletes question document by id. (This is used for revert operation, hence does not perform validations.)
+   * @param questionId - document database id of the question document.
+   */
+  public async deleteQuestion(questionId: string): Promise<void> {
+    await retryWrapper(() => Question.findByIdAndDelete(questionId).exec());
+  }
+
+  /**
    * Retrives top N questions with the highest number of votes.
    * @param qnaSessionId - the DBID of the QnA session from which to retrieve the questions.
    * @param topN - number of questions to retrieve. Must be positive.
    * @returns - Array of Question documents in the QnA and total questions in QnA.
    */
-  public async getQuestions(
+  public async getQuestionsCountWithRecentAndTopNQuestions(
     qnaSessionId: string,
     topN?: number
   ): Promise<{
@@ -97,7 +156,7 @@ export class QuestionDataService {
     recentQuestions?: IQuestionPopulatedUser[];
     numQuestions: number;
   }> {
-    const questionData = await this.getQuestionData(qnaSessionId);
+    const questionData = await this.getAllQuestions(qnaSessionId);
     let voteSorted;
 
     // most recent question comes first at index 0
@@ -140,36 +199,34 @@ export class QuestionDataService {
    * @returns - question document and boolean (true if question is upvoted).
    */
   public async updateUpvote(
+    conversationId: string,
+    qnaSessionId: string,
     questionId: string,
     aadObjectId: string,
     name: string
   ): Promise<{ question: IQuestion; upvoted: Boolean }> {
     await this.userDataService.getUserOrCreate(aadObjectId, name);
 
-    return await retryWrapperForConcurrency<{
+    return retryWrapperForConcurrency<{
       question: IQuestion;
       upvoted: Boolean;
     }>(async () => {
-      const question: IQuestion = <IQuestion>(
-        await Question.findById(questionId)
+      const question: IQuestionPopulatedUser = await this.getAndValidateQuestion(
+        conversationId,
+        qnaSessionId,
+        questionId
       );
+      let upvoted: boolean;
 
-      const qnaSession: IQnASession = <IQnASession>(
-        await QnASession.findById(question.qnaSessionId)
-      );
-
-      let upvoted = false;
-
-      if (qnaSession.isActive) {
-        if (question.voters.includes(aadObjectId))
-          question.voters.splice(question.voters.indexOf(aadObjectId), 1);
-        else {
-          question.voters.push(aadObjectId);
-          upvoted = true;
-        }
-
-        await question.save();
+      if (question.voters.includes(aadObjectId)) {
+        upvoted = false;
+        question.voters.splice(question.voters.indexOf(aadObjectId), 1);
+      } else {
+        question.voters.push(aadObjectId);
+        upvoted = true;
       }
+
+      await question.save();
 
       return { question: question, upvoted: upvoted };
     }, new ExponentialBackOff());
@@ -188,21 +245,16 @@ export class QuestionDataService {
     sessionId: string,
     questionId: string
   ): Promise<IQuestionPopulatedUser> {
-    const session = await qnaSessionDataService.getQnASession(sessionId);
-
-    if (!session) {
-      throw new Error(`Invalid session id ${sessionId}`);
-    } else if (session.conversationId !== conversationId) {
-      throw new Error(
-        `session ${sessionId} does not belong to conversation ${conversationId}`
-      );
-    } else if (!session.isActive) {
-      throw new Error(`session ${sessionId} is not active`);
-    }
-
-    const question = await retryWrapper<IQuestionPopulatedUser>(() =>
-      Question.findById(questionId).populate({ path: "userId", model: User })
+    // Check if QnA session exists, is active etc.
+    await this.qnaSessionDataService.getAndCheckIfQnASessionCanBeUpdated(
+      sessionId,
+      conversationId
     );
+
+    const question = await Question.findById(questionId).populate({
+      path: "userId",
+      model: User,
+    });
 
     if (!question) {
       throw new Error(`Invalid question id ${questionId}`);
@@ -306,22 +358,62 @@ export class QuestionDataService {
     sessionId: string,
     questionId: string
   ): Promise<IQuestionPopulatedUser> {
-    return await retryWrapperForConcurrency<IQuestionPopulatedUser>(
-      async () => {
-        const question = await this.getAndValidateQuestion(
-          conversationId,
-          sessionId,
-          questionId
-        );
+    return retryWrapperForConcurrency<IQuestionPopulatedUser>(async () => {
+      const question = await this.getAndValidateQuestion(
+        conversationId,
+        sessionId,
+        questionId
+      );
 
-        if (!question.isAnswered) {
-          question.isAnswered = true;
-          await question.save();
-        }
+      const markQuestionAsAnsweredOperationLockValidityInMS = ifNumber(
+        process.env.MarkQuestionAsAnsweredOperationLockValidityInMS,
+        5000
+      );
+      const currentTime = new Date().getTime();
 
-        return question;
+      // Check if question document is beging marked as answered by some other process.
+      if (
+        question.dateTimeMarkAsAnsweredOperationLockAcquired &&
+        currentTime -
+          question.dateTimeMarkAsAnsweredOperationLockAcquired.getTime() <
+          markQuestionAsAnsweredOperationLockValidityInMS
+      ) {
+        throw new DocumentNotAvailableForOperationError();
       }
-    );
+
+      if (!question.isAnswered) {
+        question.isAnswered = true;
+        question.dateTimeMarkAsAnsweredOperationLockAcquired = new Date();
+        await question.save();
+      }
+
+      return question;
+    });
+  }
+
+  /**
+   * Updates question as unanswered. (This is used for revert operation, hence does not perform validations.)
+   * @param questionId - The DBID of the question document for the question being upvoted.
+   * @returns - user document.
+   * @throws - exception if question update fails.
+   */
+  public async markQuestionAsUnanswered(
+    questionId: string
+  ): Promise<IQuestionPopulatedUser> {
+    return retryWrapperForConcurrency<IQuestionPopulatedUser>(async () => {
+      const question = await Question.findById(questionId).populate({
+        path: "userId",
+        model: User,
+      });
+
+      if (question.isAnswered) {
+        question.isAnswered = false;
+        delete question.dateTimeMarkAsAnsweredOperationLockAcquired;
+        await question.save();
+      }
+
+      return question;
+    });
   }
 
   /**
@@ -342,8 +434,3 @@ export class QuestionDataService {
     return true;
   }
 }
-
-export const questionDataService = new QuestionDataService(
-  userDataService,
-  qnaSessionDataService
-);

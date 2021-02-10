@@ -24,7 +24,6 @@ describe('validates QnaSessionCreatedEventHandler', () => {
             qnaSessionId: testsessionId,
             type: 'qnaSessionCreatedEvent',
             data: {},
-            version: 0,
         };
 
         activeSessionData = {

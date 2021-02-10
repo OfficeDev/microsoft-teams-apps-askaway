@@ -1,5 +1,4 @@
 .screen {
-    background-color: #f3f2f1;
     .askaway-tab-added {
         top: 30%;
         left: 50%;
@@ -11,6 +10,8 @@
         left: 50%;
         transform: translate(-50%, -50%);
         position: absolute;
+        width: 190px;
+        height: 190px;
     }
     .text-configtab-caption {
         font-size: 18px;
@@ -23,17 +24,19 @@
         font-size: 18px;
         line-height: 24px;
         font-weight: bold;
-        top: 52%;
+        top: 56%;
         position: absolute;
+        text-align: center;
     }
     .text-subcaption {
         font-size: 14px;
         line-height: 20px;
-        top: 58%;
+        top: 63%;
         position: absolute;
+        text-align: center;
     }
     .button {
-        top: 67%;
+        top: 70%;
         position: absolute;
     }
 }
@@ -76,7 +79,6 @@
         top: 12%;
         display: block;
         position: absolute;
-        background-color: #6366a5;
         text-align: center;
         z-index: 99;
         transform: translateX(40%);
@@ -105,7 +107,6 @@
             left: 50%;
             transform: translate(-50%, -50%);
             position: absolute;
-            width: 17rem;
             width: 200px;
             height: 200px;
         }
@@ -205,6 +206,11 @@
     overflow-x: hidden;
     width: 100%;
     .tab-nav-header {
+        .btn-end-session {
+            margin-top: 0.3rem;
+            margin-right: 1rem;
+        }
+
         span {
             font-weight: 500;
         }
@@ -299,4 +305,97 @@
     margin-bottom: 1rem;
     font-size: 14px;
     line-height: 20px;
+}
+
+.centerContent {
+    top: 50%;
+    left: 50%;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    font-family: Segoe UI;
+}
+.switchSessionListHolder {
+    padding-left: 30px;
+    padding-right: 30px;
+    margin-bottom: 12px;
+    overflow: scroll;
+    max-height: 450px;
+    padding-top: 2%;
+    font-family: Segoe UI;
+
+    .title {
+        margin-bottom: 12px;
+    }
+
+    .switchSessionList {
+        li {
+            margin-bottom: 12px;
+            padding-left: 0px;
+            padding-right: 0px;
+        }
+
+        .fn {
+            margin-right: 0rem;
+        }
+    }
+}
+.switchButton {
+    position: absolute;
+    right: 5%;
+    bottom: 5%;
+}
+.switchSessionListCard {
+    padding-right: 12px;
+    padding-left: 12px;
+    padding-top: 11px;
+    padding-bottom: 11px;
+    border: solid;
+    border-radius: 3px;
+    font-family: Segoe UI;
+
+    .sessionName {
+        font-size: 14px;
+        line-height: 20px;
+    }
+    .sessionMetadata {
+        font-size: 12px;
+        line-height: 20px;
+    }
+    .liveTag {
+        font-weight: bold;
+        padding-left: 1rem;
+        border-radius: 0.75rem;
+        padding-right: 1rem;
+        line-height: 14px;
+        font-size: 12px;
+        padding-bottom: 3px;
+        padding-top: 3px;
+    }
+}
+
+.tab-content {
+    .newUpdatesButton {
+        top: 45%;
+        display: block;
+        position: absolute;
+        text-align: center;
+        z-index: 99;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+}
+
+.connectionStatusAlert {
+    border: solid;
+    margin-bottom: 0.25rem;
+
+    .alertContent {
+        margin-left: 0.5rem;
+        margin-bottom: 0.25rem;
+        margin-top: 0.25rem;
+    }
+
+    .refreshNowLink {
+        color: inherit;
+    }
 }
