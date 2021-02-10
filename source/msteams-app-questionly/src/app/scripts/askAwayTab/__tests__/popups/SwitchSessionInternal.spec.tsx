@@ -11,7 +11,7 @@ jest.mock('history');
 
 configure({ adapter: new Adapter() });
 
-describe('Test SessionList Component', () => {
+describe('Test SwitchSessionInternal Component', () => {
     let testSessions: ClientDataContract.QnaSession[];
 
     beforeEach(() => {

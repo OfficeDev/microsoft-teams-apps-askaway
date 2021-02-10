@@ -46,7 +46,7 @@ router.get('/:conversationId/sessions/:sessionId', async (req: Express.Request, 
 
         const qnaSessionData = await qnaSessionDataService.getQnASessionData(req.params['sessionId']);
 
-        res.send(clientDataContractFormatter.formatQnaSessionDataAsPerClientDataContract(qnaSessionData));
+        res.send(await clientDataContractFormatter.formatQnaSessionDataAsPerClientDataContract(qnaSessionData));
     } catch (error) {
         next(error);
     }

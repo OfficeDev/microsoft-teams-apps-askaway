@@ -7,7 +7,6 @@ import { ClientDataContract } from '../../../../../src/contracts/clientDataContr
 import { withTheme } from '../shared/WithTheme';
 import Helper from '../shared/Helper';
 
-let moment = require('moment');
 interface ThemeProps {
     theme: ThemePrepared;
 }

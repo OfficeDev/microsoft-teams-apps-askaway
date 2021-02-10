@@ -6,8 +6,8 @@ interface ThemeProps {
 }
 
 /** Creates dummy color schemes for unit tests */
-const createThemeForUTs = () => {
-    return {
+const createThemeForUTs = (): ThemePrepared => {
+    return ({
         siteVariables: {
             colorScheme: {
                 default: {
@@ -20,7 +20,7 @@ const createThemeForUTs = () => {
                 },
             },
         },
-    };
+    } as unknown) as ThemePrepared;
 };
 
 /**
@@ -30,7 +30,7 @@ export function withTheme<TProps>(base: React.FunctionComponent<TProps & ThemePr
     return (props: TProps) => (
         <Provider.Consumer
             render={(theme: any) => {
-                if (!theme && process.env.debugMode === 'true') {
+                if (!theme?.siteVariables?.colorScheme && process.env.debugMode === 'true') {
                     theme = createThemeForUTs();
                 }
                 return base({ ...props, theme });

@@ -25,6 +25,10 @@ import {
 } from './task-modules-utility/taskModuleHelper';
 import { ParticipantRoles } from '../../../enums/ParticipantRoles';
 import { getCurrentParticipantRole } from './shared/meetingUtility';
+import SignalRLifecycle from './signalR/SignalRLifecycle';
+import { DataEventHandlerFactory } from './dataEventHandling/dataEventHandlerFactory';
+import { IDataEvent } from 'msteams-app-questionly.common';
+import { ArrowUpIcon, Button } from '@fluentui/react-northstar';
 
 export interface TabContentProps extends WithTranslation {
     teamsTabContext: microsoftTeams.Context;
@@ -33,6 +37,10 @@ export interface TabContentProps extends WithTranslation {
     helper: Helper;
 }
 export interface TabContentState {
+    /**
+     * State variable denoting if there are new updates on active qna session.
+     */
+    showNewUpdatesButton: boolean;
     /**
      * Q&A session selected in the tab view.
      */
@@ -49,14 +57,18 @@ export interface TabContentState {
 
 export class TabContent extends React.Component<TabContentProps, TabContentState> {
     public localize: TFunction;
+    private dataEventFactory: DataEventHandlerFactory;
+
     constructor(props) {
         super(props);
+        this.dataEventFactory = new DataEventHandlerFactory();
         this.onShowTaskModule = this.onShowTaskModule.bind(this);
         this.localize = this.props.t;
         this.state = {
             selectedAmaSessionData: this.props.helper.createEmptyActiveSessionData(),
             userRole: ParticipantRoles.Attendee,
             showLoader: false,
+            showNewUpdatesButton: false,
         };
     }
 
@@ -65,13 +77,58 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
     }
 
     /**
+     * Shows `new updates` button on the screen.
+     */
+    private showNewUpdatesButton = () => {
+        this.setState({ showNewUpdatesButton: true });
+    };
+
+    /**
+     * This function is triggered on events from signalR connection.
+     * @param dataEvent - event received.
+     */
+    private updateEvent = (dataEvent: IDataEvent) => {
+        const eventHandler = this.dataEventFactory.createHandler(dataEvent.type);
+        if (eventHandler) {
+            eventHandler.handleEvent(dataEvent, this.state.selectedAmaSessionData, this.refreshSession, this.showNewUpdatesButton, this.refreshSession);
+        } else {
+            this.props.appInsights.trackException({
+                exception: new Error(`Cant find event handler for ${dataEvent.type}`),
+                severityLevel: SeverityLevel.Error,
+            });
+        }
+    };
+
+    /**
      * Fetches data needed to update session and user information.
      */
     private updateContent = async () => {
         this.setState({ showLoader: true });
         await this.updateUserRole();
-        await this.getActiveSession();
+        await this.refreshSession();
         this.setState({ showLoader: false });
+    };
+
+    /**
+     * Refreshes currently selected session, else if no session is selected, fetches active session.
+     * TODO: handle api errors: Task1475400
+     */
+    refreshSession = async () => {
+        this.setState({ showNewUpdatesButton: false });
+
+        if (this.state.selectedAmaSessionData.sessionId) {
+            try {
+                const response = await this.props.httpService.get(`/conversations/${this.props.teamsTabContext.chatId}/sessions/${this.state.selectedAmaSessionData.sessionId}`);
+
+                if (response?.data) {
+                    this.setState({
+                        selectedAmaSessionData: response.data,
+                    });
+                }
+            } catch (error) {}
+        } else {
+            this.getActiveSession();
+        }
     };
 
     /**
@@ -258,9 +315,23 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
                     showTaskModule={this.onShowTaskModule}
                     onSwitchSessionClick={this.openSwitchSessionsTaskModule}
                 />
+                <SignalRLifecycle
+                    t={this.props.t}
+                    enableLiveUpdates={this.state.selectedAmaSessionData?.isActive === true}
+                    conversationId={this.props.teamsTabContext.chatId}
+                    onEvent={this.updateEvent}
+                    httpService={this.props.httpService}
+                    appInsights={this.props.appInsights}
+                />
                 {selectedAmaSessionData.sessionId ? (
                     <Flex column>
                         <div className="tab-container">
+                            {this.state.showNewUpdatesButton && (
+                                <Button primary onClick={this.refreshSession} className="newUpdatesButton">
+                                    <ArrowUpIcon xSpacing="after"></ArrowUpIcon>
+                                    <Button.Content className="newUpdatesButtonContent" content="New updates"></Button.Content>
+                                </Button>
+                            )}
                             <PostNewQuestions t={this.localize} activeSessionData={selectedAmaSessionData} onPostNewQuestion={this.handlePostNewQuestions} />
                             {selectedAmaSessionData.unansweredQuestions.length > 0 || selectedAmaSessionData.answeredQuestions.length > 0 ? (
                                 <TabQuestions t={this.localize} onClickAction={this.validateClickAction} activeSessionData={selectedAmaSessionData} teamsTabContext={this.props.teamsTabContext} />

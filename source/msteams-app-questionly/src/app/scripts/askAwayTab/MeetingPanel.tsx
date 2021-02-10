@@ -14,7 +14,7 @@ import { withTranslation, WithTranslation } from 'react-i18next';
 import { TFunction } from 'i18next';
 import { ApplicationInsights, SeverityLevel } from '@microsoft/applicationinsights-web';
 import { HttpService } from './shared/HttpService';
-import { SignalRLifecycle } from './signalR/SignalRLifecycle';
+import SignalRLifecycle from './signalR/SignalRLifecycle';
 import QuestionsList from './MeetingPanel/QuestionsList';
 import NewQuestion from './MeetingPanel/NewQuestion';
 import QnASessionHeader from './MeetingPanel/QnASessionHeader';
@@ -62,12 +62,9 @@ export interface MeetingPanelState {
      */
     isActiveSessionEnded: boolean;
 }
+
 export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPanelState> {
     public localize: TFunction;
-    /**
-     * signalR component instance which is used later to refresh the connection.
-     */
-    private signalRComponent: SignalRLifecycle | null;
     private dataEventFactory: DataEventHandlerFactory;
 
     constructor(props) {
@@ -118,7 +115,6 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
     private updateContent = async () => {
         this.setState({ showLoader: true });
         await this.updateUserRole();
-        this.signalRComponent?.refreshConnection();
         this.setState({ showLoader: true });
         this.setState({ showNewUpdatesButton: false });
         this.getActiveSession();
@@ -364,18 +360,16 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
         return (
             <React.Fragment>
                 <SignalRLifecycle
+                    enableLiveUpdates={true}
                     t={this.localize}
                     conversationId={this.props.teamsTabContext.chatId}
                     onEvent={this.updateEvent}
                     httpService={this.props.httpService}
                     appInsights={this.props.appInsights}
-                    ref={(instance) => {
-                        this.signalRComponent = instance;
-                    }}
                 />
                 <div className="meeting-panel">
                     {this.state.showNewUpdatesButton && (
-                        <Button onClick={this.updateQnASessionContent} className="newUpdatesButton">
+                        <Button primary onClick={this.updateQnASessionContent} className="newUpdatesButton">
                             <ArrowUpIcon xSpacing="after"></ArrowUpIcon>
                             <Button.Content className="newUpdatesButtonContent" content={this.localize('meetingPanel.updatemessage')}></Button.Content>
                         </Button>
