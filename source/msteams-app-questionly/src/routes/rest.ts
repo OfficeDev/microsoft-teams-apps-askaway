@@ -260,8 +260,7 @@ router.patch('/:conversationId/sessions/:sessionId/questions/:questionId', async
             res.status(StatusCodes.OK).send(clientDataContractFormatter.formatQuestionDataAsPerClientDataContract(question));
         } else if (action === QuestionPatchAction.Downvote) {
             await ensureUserIsPartOfMeetingConversation(conversationData, user._id);
-
-            question = await controller.downvoteQuestion(conversationId, sessionId, questionId, user._id, conversationData.serviceUrl, conversationData.meetingId);
+            question = await controller.downvoteQuestion(conversationId, sessionId, questionId, user._id, user.userName, conversationData.serviceUrl, conversationData.meetingId);
 
             res.status(StatusCodes.OK).send(clientDataContractFormatter.formatQuestionDataAsPerClientDataContract(question));
         } else if (action === QuestionPatchAction.MarkAnswered) {

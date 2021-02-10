@@ -22,4 +22,5 @@ export const TelemetryExceptions = {
     GetTeamsMemberIdFailed: 'GetTeamsMemberIdFailed',
     ApplicationStartUpFailed: 'ApplicationStartUpFailed',
     SetUpBotFailed: 'SetUpBotFailed',
+    RevertOperationFailedAfterBackgroundJobFailure: 'RevertOperationFailedAfterBackgroundJobFailure',
 };

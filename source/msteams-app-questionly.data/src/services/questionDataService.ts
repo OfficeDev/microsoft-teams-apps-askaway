@@ -1,15 +1,16 @@
 import {
   ExponentialBackOff,
+  ifNumber,
   retryWrapper,
   retryWrapperForConcurrency,
 } from "./../utils/retryPolicies";
-import { IQnASession, QnASession } from "./../schemas/qnaSession";
 import {
   IQuestion,
   IQuestionPopulatedUser,
   Question,
 } from "./../schemas/question";
 import { User } from "./../schemas/user";
+import { DocumentNotAvailableForOperationError } from "../errors/documentNotAvailableForOperationError";
 import { IQnASessionDataService } from "./qnaSessionDataService";
 import { IUserDataService } from "./userDataService";
 
@@ -22,6 +23,8 @@ export interface IQuestionDataService {
     conversationId: string
   ) => Promise<IQuestion>;
   updateUpvote: (
+    conversationId: string,
+    qnaSessionId: string,
     questionId: string,
     aadObjectId: string,
     name: string
@@ -53,6 +56,10 @@ export interface IQuestionDataService {
     recentQuestions?: IQuestionPopulatedUser[];
     numQuestions: number;
   }>;
+  markQuestionAsUnanswered: (
+    questionId: string
+  ) => Promise<IQuestionPopulatedUser>;
+  deleteQuestion: (questionId: string) => Promise<void>;
 }
 
 export class QuestionDataService implements IQuestionDataService {
@@ -81,11 +88,13 @@ export class QuestionDataService implements IQuestionDataService {
     questionContent: string,
     conversationId: string
   ): Promise<IQuestion> {
-    await this.userDataService.getUserOrCreate(userAadObjId, userTeamsName);
-    await this.qnaSessionDataService.isExistingActiveQnASession(
+    // Check if QnA session exists, is active etc.
+    await this.qnaSessionDataService.getAndCheckIfQnASessionCanBeUpdated(
       qnaTeamsSessionId,
       conversationId
     );
+
+    await this.userDataService.getUserOrCreate(userAadObjId, userTeamsName);
 
     const question = new Question({
       qnaSessionId: qnaTeamsSessionId,
@@ -123,6 +132,14 @@ export class QuestionDataService implements IQuestionDataService {
     else {
       throw new Error("Incorrect type received for questions array");
     }
+  }
+
+  /**
+   * Deletes question document by id. (This is used for revert operation, hence does not perform validations.)
+   * @param questionId - document database id of the question document.
+   */
+  public async deleteQuestion(questionId: string): Promise<void> {
+    await retryWrapper(() => Question.findByIdAndDelete(questionId).exec());
   }
 
   /**
@@ -182,36 +199,34 @@ export class QuestionDataService implements IQuestionDataService {
    * @returns - question document and boolean (true if question is upvoted).
    */
   public async updateUpvote(
+    conversationId: string,
+    qnaSessionId: string,
     questionId: string,
     aadObjectId: string,
     name: string
   ): Promise<{ question: IQuestion; upvoted: Boolean }> {
     await this.userDataService.getUserOrCreate(aadObjectId, name);
 
-    return await retryWrapperForConcurrency<{
+    return retryWrapperForConcurrency<{
       question: IQuestion;
       upvoted: Boolean;
     }>(async () => {
-      const question: IQuestion = <IQuestion>(
-        await Question.findById(questionId)
+      const question: IQuestionPopulatedUser = await this.getAndValidateQuestion(
+        conversationId,
+        qnaSessionId,
+        questionId
       );
+      let upvoted: boolean;
 
-      const qnaSession: IQnASession = <IQnASession>(
-        await QnASession.findById(question.qnaSessionId)
-      );
-
-      let upvoted = false;
-
-      if (qnaSession.isActive) {
-        if (question.voters.includes(aadObjectId))
-          question.voters.splice(question.voters.indexOf(aadObjectId), 1);
-        else {
-          question.voters.push(aadObjectId);
-          upvoted = true;
-        }
-
-        await question.save();
+      if (question.voters.includes(aadObjectId)) {
+        upvoted = false;
+        question.voters.splice(question.voters.indexOf(aadObjectId), 1);
+      } else {
+        question.voters.push(aadObjectId);
+        upvoted = true;
       }
+
+      await question.save();
 
       return { question: question, upvoted: upvoted };
     }, new ExponentialBackOff());
@@ -230,21 +245,16 @@ export class QuestionDataService implements IQuestionDataService {
     sessionId: string,
     questionId: string
   ): Promise<IQuestionPopulatedUser> {
-    const session = await this.qnaSessionDataService.getQnASession(sessionId);
-
-    if (!session) {
-      throw new Error(`Invalid session id ${sessionId}`);
-    } else if (session.conversationId !== conversationId) {
-      throw new Error(
-        `session ${sessionId} does not belong to conversation ${conversationId}`
-      );
-    } else if (!session.isActive) {
-      throw new Error(`session ${sessionId} is not active`);
-    }
-
-    const question = await retryWrapper<IQuestionPopulatedUser>(() =>
-      Question.findById(questionId).populate({ path: "userId", model: User })
+    // Check if QnA session exists, is active etc.
+    await this.qnaSessionDataService.getAndCheckIfQnASessionCanBeUpdated(
+      sessionId,
+      conversationId
     );
+
+    const question = await Question.findById(questionId).populate({
+      path: "userId",
+      model: User,
+    });
 
     if (!question) {
       throw new Error(`Invalid question id ${questionId}`);
@@ -348,22 +358,62 @@ export class QuestionDataService implements IQuestionDataService {
     sessionId: string,
     questionId: string
   ): Promise<IQuestionPopulatedUser> {
-    return await retryWrapperForConcurrency<IQuestionPopulatedUser>(
-      async () => {
-        const question = await this.getAndValidateQuestion(
-          conversationId,
-          sessionId,
-          questionId
-        );
+    return retryWrapperForConcurrency<IQuestionPopulatedUser>(async () => {
+      const question = await this.getAndValidateQuestion(
+        conversationId,
+        sessionId,
+        questionId
+      );
 
-        if (!question.isAnswered) {
-          question.isAnswered = true;
-          await question.save();
-        }
+      const markQuestionAsAnsweredOperationLockValidityInMS = ifNumber(
+        process.env.MarkQuestionAsAnsweredOperationLockValidityInMS,
+        5000
+      );
+      const currentTime = new Date().getTime();
 
-        return question;
+      // Check if question document is beging marked as answered by some other process.
+      if (
+        question.dateTimeMarkAsAnsweredOperationLockAcquired &&
+        currentTime -
+          question.dateTimeMarkAsAnsweredOperationLockAcquired.getTime() <
+          markQuestionAsAnsweredOperationLockValidityInMS
+      ) {
+        throw new DocumentNotAvailableForOperationError();
       }
-    );
+
+      if (!question.isAnswered) {
+        question.isAnswered = true;
+        question.dateTimeMarkAsAnsweredOperationLockAcquired = new Date();
+        await question.save();
+      }
+
+      return question;
+    });
+  }
+
+  /**
+   * Updates question as unanswered. (This is used for revert operation, hence does not perform validations.)
+   * @param questionId - The DBID of the question document for the question being upvoted.
+   * @returns - user document.
+   * @throws - exception if question update fails.
+   */
+  public async markQuestionAsUnanswered(
+    questionId: string
+  ): Promise<IQuestionPopulatedUser> {
+    return retryWrapperForConcurrency<IQuestionPopulatedUser>(async () => {
+      const question = await Question.findById(questionId).populate({
+        path: "userId",
+        model: User,
+      });
+
+      if (question.isAnswered) {
+        question.isAnswered = false;
+        delete question.dateTimeMarkAsAnsweredOperationLockAcquired;
+        await question.save();
+      }
+
+      return question;
+    });
   }
 
   /**

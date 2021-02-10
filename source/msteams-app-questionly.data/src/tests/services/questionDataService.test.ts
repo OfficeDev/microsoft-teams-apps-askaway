@@ -1,6 +1,7 @@
 import { IQuestion, Question } from "src/schemas/question";
 import mongoose from "mongoose";
 import { IQnASession, QnASession } from "src/schemas/qnaSession";
+import { DocumentNotAvailableForOperationError } from "src/errors/documentNotAvailableForOperationError";
 import {
   QuestionDataService,
   IQuestionDataService,
@@ -103,7 +104,7 @@ test("upvote question - invalid session id", async () => {
       testUserId,
       testUserName
     )
-  ).rejects.toThrow(`Invalid session id ${randomSessionId}`);
+  ).rejects.toThrow("QnA Session record not found");
 });
 
 test("upvote question - invalid conversation id", async () => {
@@ -134,7 +135,7 @@ test("upvote question - session is not active", async () => {
       testUserId,
       testUserName
     )
-  ).rejects.toThrow(`session ${testSession.id} is not active`);
+  ).rejects.toThrow("QnA session is no longer active.");
 });
 
 test("upvote question - invalid question id", async () => {
@@ -248,7 +249,7 @@ test("downvote question - invalid session id", async () => {
       testQuestionId,
       testUserId
     )
-  ).rejects.toThrow(`Invalid session id ${randomSessionId}`);
+  ).rejects.toThrow("QnA Session record not found");
 });
 
 test("downvote question - invalid conversation id", async () => {
@@ -277,7 +278,7 @@ test("downvote question - session is not active", async () => {
       testQuestionId,
       testUserId
     )
-  ).rejects.toThrow(`session ${testSession.id} is not active`);
+  ).rejects.toThrow("QnA session is no longer active.");
 });
 
 test("downvote question - invalid question id", async () => {
@@ -379,7 +380,7 @@ test("mark question as answered - invalid session id", async () => {
       randomSessionId,
       testQuestionId
     )
-  ).rejects.toThrow(`Invalid session id ${randomSessionId}`);
+  ).rejects.toThrow("QnA Session record not found");
 });
 
 test("mark question as answered - invalid conversation id", async () => {
@@ -406,7 +407,7 @@ test("mark question as answered - session is not active", async () => {
       testSession.id,
       testQuestionId
     )
-  ).rejects.toThrow(`session ${testSession.id} is not active`);
+  ).rejects.toThrow("QnA session is no longer active.");
 });
 
 test("mark question as answered - invalid question id", async () => {
@@ -452,6 +453,20 @@ test("mark question as answered", async () => {
   const question = <IQuestion>await Question.findById(testQuestion.id);
   expect(question.id).toEqual(testQuestion.id);
   expect(question.isAnswered).toBeTruthy();
+  expect(question.dateTimeMarkAsAnsweredOperationLockAcquired).toBeDefined();
+});
+
+test("mark question as unanswered", async () => {
+  testSession = await createDummyQnASession();
+  testQuestion = await createDummyQuestion(testSession.id, true);
+
+  expect(testQuestion.isAnswered).toBeTruthy();
+
+  await questionDataService.markQuestionAsUnanswered(testQuestion.id);
+
+  const question = <IQuestion>await Question.findById(testQuestion.id);
+  expect(question.id).toEqual(testQuestion.id);
+  expect(question.isAnswered).not.toBeTruthy();
 });
 
 test("mark question as answered - already answered question", async () => {
@@ -480,7 +495,40 @@ test("create question for not active session", async () => {
       "dummy",
       testConversationId
     )
-  ).rejects.toThrow(`QnA Session is not active`);
+  ).rejects.toThrow("QnA session is no longer active.");
+});
+
+test("delete question", async () => {
+  testSession = await createDummyQnASession();
+  testQuestion = await createDummyQuestion(testSession.id);
+
+  questionDataService.deleteQuestion(testQuestion.id);
+
+  const question = <IQuestion>await Question.findById(testQuestion.id);
+  expect(question).toBeNull();
+});
+
+test("2nd immediate mark as answered operation should fail due to loack acquired by the first process", async () => {
+  testSession = await createDummyQnASession();
+  testQuestion = await createDummyQuestion(testSession.id, false);
+
+  process.env.MarkQuestionAsAnsweredOperationLockValidityInMS = "500000";
+
+  await questionDataService.markQuestionAsAnswered(
+    testConversationId,
+    testSession.id,
+    testQuestion.id
+  );
+
+  try {
+    await questionDataService.markQuestionAsAnswered(
+      testConversationId,
+      testSession.id,
+      testQuestion.id
+    );
+  } catch (error) {
+    expect(error instanceof DocumentNotAvailableForOperationError).toBeTruthy();
+  }
 });
 
 test("retrieve most recent/top questions with three questions", async () => {
@@ -786,6 +834,8 @@ test("upvote question that has not been upvoted yet with existing user", async (
   await newQuestion.save();
 
   const response = await questionDataService.updateUpvote(
+    testConversationId,
+    testSession.id,
     newQuestion._id,
     testUserUpvoting._id,
     testUserUpvoting.userName
@@ -801,7 +851,7 @@ test("upvote question that has already been upvoted with existing user", async (
   testSession = await createDummyQnASession();
 
   const newQuestion = new Question({
-    qnaSessionId: testSession._id,
+    qnaSessionId: testSession.id,
     userId: testUserId,
     content: "This is a question to test upvotes?",
     isAnswered: false,
@@ -811,6 +861,8 @@ test("upvote question that has already been upvoted with existing user", async (
   await newQuestion.save();
 
   let response = await questionDataService.updateUpvote(
+    testConversationId,
+    testSession.id,
     newQuestion._id,
     testUserUpvoting._id,
     testUserUpvoting.userName
@@ -819,6 +871,8 @@ test("upvote question that has already been upvoted with existing user", async (
   expect(response.question.voters).toContain(testUserUpvoting._id);
 
   response = await questionDataService.updateUpvote(
+    testConversationId,
+    testSession.id,
     newQuestion._id,
     testUserUpvoting._id,
     testUserUpvoting.userName
@@ -849,6 +903,8 @@ test("upvote question with new user not in database", async () => {
   await newQuestion.save();
 
   const response = await questionDataService.updateUpvote(
+    testConversationId,
+    testSession.id,
     newQuestion._id,
     "134679",
     "New User Junior"

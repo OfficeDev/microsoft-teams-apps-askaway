@@ -34,13 +34,11 @@ export const createQnaSessionCreatedEvent = (qnaSession: IQnASession_populated):
  * Creates event data payload corresponding to qnaSession ended operation.
  * Updates event version in db and adds new version to the payload.
  * @param qnaSessionId - qnaSession id.
- * @param endedByUserAadObjectId - aadObject id of user who ended the qna session.
  * @returns - data event corresponding to qnaSession ended operation.
  */
-export const createQnaSessionEndedEvent = (qnaSessionId: string, endedByUserAadObjectId: string): IDataEvent => {
+export const createQnaSessionEndedEvent = (qnaSessionId: string): IDataEvent => {
     const data = {
         qnaSessionId: qnaSessionId,
-        endedByUserAadObjectId: endedByUserAadObjectId,
     };
 
     return {

@@ -13,6 +13,7 @@ import { getMicrosoftAppPassword } from 'src/util/keyvault';
 import { restApiErrorMiddleware } from 'src/routes/restApiErrorMiddleware';
 import { errorMessages } from 'src/errors/errorMessages';
 import { UnauthorizedAccessError, UnauthorizedAccessErrorCode } from 'src/errors/unauthorizedAccessError';
+import { triggerBackgroundJobForQnaSessionCreatedEvent } from 'src/background-job/backgroundJobTrigger';
 import { ClientDataContractFormatter, IClientDataContractFormatter } from 'src/util/clientDataContractFormatter';
 
 let app: ExpressType;
@@ -438,6 +439,9 @@ describe('test post conversations/:conversationId/sessions api', () => {
         (<any>getTeamsUserId) = jest.fn();
         (<any>mockQnASessionDataService.createQnASession) = jest.fn();
         (<any>conversationDataService.getConversationData) = jest.fn();
+        (<any>triggerBackgroundJobForQnaSessionCreatedEvent) = jest.fn(() => {
+            return Promise.resolve(true);
+        });
     });
 
     beforeEach(() => {
