@@ -10,14 +10,56 @@ import {
   Question,
 } from "./../schemas/question";
 import { User } from "./../schemas/user";
-import { qnaSessionDataService } from "./qnaSessionDataService";
-import { userDataService } from "./userDataService";
+import { IQnASessionDataService } from "./qnaSessionDataService";
+import { IUserDataService } from "./userDataService";
 
-export class QuestionDataService {
-  private qnaSessionDataService;
-  private userDataService;
+export interface IQuestionDataService {
+  createQuestion: (
+    qnaTeamsSessionId: string,
+    userAadObjId: string,
+    userTeamsName: string,
+    questionContent: string,
+    conversationId: string
+  ) => Promise<IQuestion>;
+  updateUpvote: (
+    questionId: string,
+    aadObjectId: string,
+    name: string
+  ) => Promise<{ question: IQuestion; upvoted: Boolean }>;
+  upVoteQuestion: (
+    conversationId: string,
+    sessionId: string,
+    questionId: string,
+    aadObjectId: string,
+    name: string
+  ) => Promise<IQuestionPopulatedUser>;
+  downVoteQuestion: (
+    conversationId: string,
+    sessionId: string,
+    questionId: string,
+    aadObjectId: string
+  ) => Promise<IQuestionPopulatedUser>;
+  markQuestionAsAnswered: (
+    conversationId: string,
+    sessionId: string,
+    questionId: string
+  ) => Promise<IQuestionPopulatedUser>;
+  getAllQuestions: (qnaSessionId: string) => Promise<IQuestionPopulatedUser[]>;
+  getQuestionsCountWithRecentAndTopNQuestions: (
+    qnaSessionId: string,
+    topN?: number
+  ) => Promise<{
+    topQuestions?: IQuestionPopulatedUser[];
+    recentQuestions?: IQuestionPopulatedUser[];
+    numQuestions: number;
+  }>;
+}
 
-  constructor(userDataService, qnaSessionDataService) {
+export class QuestionDataService implements IQuestionDataService {
+  private qnaSessionDataService: IQnASessionDataService;
+  private userDataService: IUserDataService;
+
+  constructor(userDataService: IUserDataService, qnaSessionDataService) {
     this.userDataService = userDataService;
     this.qnaSessionDataService = qnaSessionDataService;
   }
@@ -66,7 +108,7 @@ export class QuestionDataService {
    * @returns - Array of Question documents under the QnA.
    * @throws - Error thrown when finding questions or populating userId field of question documents fails.
    */
-  public async getQuestionData(
+  public async getAllQuestions(
     qnaSessionId: string
   ): Promise<IQuestionPopulatedUser[]> {
     const questionData: IQuestion[] = await retryWrapper<IQuestion[]>(() =>
@@ -89,7 +131,7 @@ export class QuestionDataService {
    * @param topN - number of questions to retrieve. Must be positive.
    * @returns - Array of Question documents in the QnA and total questions in QnA.
    */
-  public async getQuestions(
+  public async getQuestionsCountWithRecentAndTopNQuestions(
     qnaSessionId: string,
     topN?: number
   ): Promise<{
@@ -97,7 +139,7 @@ export class QuestionDataService {
     recentQuestions?: IQuestionPopulatedUser[];
     numQuestions: number;
   }> {
-    const questionData = await this.getQuestionData(qnaSessionId);
+    const questionData = await this.getAllQuestions(qnaSessionId);
     let voteSorted;
 
     // most recent question comes first at index 0
@@ -188,7 +230,7 @@ export class QuestionDataService {
     sessionId: string,
     questionId: string
   ): Promise<IQuestionPopulatedUser> {
-    const session = await qnaSessionDataService.getQnASession(sessionId);
+    const session = await this.qnaSessionDataService.getQnASession(sessionId);
 
     if (!session) {
       throw new Error(`Invalid session id ${sessionId}`);
@@ -342,8 +384,3 @@ export class QuestionDataService {
     return true;
   }
 }
-
-export const questionDataService = new QuestionDataService(
-  userDataService,
-  qnaSessionDataService
-);

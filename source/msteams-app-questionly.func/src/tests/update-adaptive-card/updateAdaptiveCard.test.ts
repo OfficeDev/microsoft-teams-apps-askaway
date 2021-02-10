@@ -1,7 +1,7 @@
 import { BotFrameworkAdapter, ConversationAccount } from "botbuilder";
-import { qnaSessionDataService } from "msteams-app-questionly.data";
 import { activityMockContext } from "../mocks/testContext";
 import httpFunction from "./../../../update-adaptive-card/index";
+import { qnaSessionDataService } from "../../utils/dbUtility";
 import {
   DataEventType,
   getUpdatedMainCard,

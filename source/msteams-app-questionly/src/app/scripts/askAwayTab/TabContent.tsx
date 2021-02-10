@@ -3,8 +3,8 @@ import './index.scss';
 import * as React from 'react';
 import { withTranslation, WithTranslation } from 'react-i18next';
 import * as microsoftTeams from '@microsoft/teams-js';
-import { ApplicationInsights } from '@microsoft/applicationinsights-web';
-import { Flex } from '@fluentui/react-northstar';
+import { ApplicationInsights, SeverityLevel } from '@microsoft/applicationinsights-web';
+import { Flex, Loader } from '@fluentui/react-northstar';
 import { HttpService } from './shared/HttpService';
 import { Helper } from './shared/Helper';
 import { TFunction } from 'i18next';
@@ -22,6 +22,8 @@ import {
     openStartQnASessionTaskModule,
     handleEndQnASessionFlow,
 } from './task-modules-utility/taskModuleHelper';
+import { ParticipantRoles } from '../../../enums/ParticipantRoles';
+import { getCurrentParticipantRole } from './shared/meetingUtility';
 
 export interface TabContentProps extends WithTranslation {
     teamsTabContext: microsoftTeams.Context;
@@ -31,6 +33,14 @@ export interface TabContentProps extends WithTranslation {
 }
 export interface TabContentState {
     activeSessionData: ClientDataContract.QnaSession;
+    /**
+     * current user's role in meeting.
+     */
+    userRole: ParticipantRoles;
+    /**
+     * Indicator to show loading experience when fetching data etc.
+     */
+    showLoader: boolean;
 }
 
 export class TabContent extends React.Component<TabContentProps, TabContentState> {
@@ -41,17 +51,49 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
         this.localize = this.props.t;
         this.state = {
             activeSessionData: this.props.helper.createEmptyActiveSessionData(),
+            userRole: ParticipantRoles.Attendee,
+            showLoader: false,
         };
     }
 
     componentDidMount() {
-        this.getActiveSession();
+        this.updateContent();
+    }
+
+    /**
+     * Fetches data needed to update session and user information.
+     */
+    private updateContent = async () => {
+        this.setState({ showLoader: true });
+        await this.updateUserRole();
+        await this.getActiveSession();
+        this.setState({ showLoader: false });
+    };
+
+    /**
+     * Fetches current user role and sets state accordingly.
+     */
+    private async updateUserRole() {
+        try {
+            const userRole = await getCurrentParticipantRole(this.props.httpService, this.props.teamsTabContext.chatId);
+            this.setState({ userRole: userRole });
+        } catch (error) {
+            // TODO: handle this as part of error handling story, Task:1475400.
+            this.props.appInsights.trackException({
+                exception: error,
+                severityLevel: SeverityLevel.Error,
+                properties: {
+                    meetingId: this.props.teamsTabContext.meetingId,
+                    userAadObjectId: this.props.teamsTabContext.userObjectId,
+                },
+            });
+        }
     }
 
     /**
      * To Identify Active Session
      */
-    getActiveSession = async (): Promise<ClientDataContract.QnaSession> => {
+    getActiveSession = async (): Promise<ClientDataContract.QnaSession | null> => {
         const response = await this.props.httpService.get(`/conversations/${this.props.teamsTabContext.chatId}/activesessions`);
 
         if (response?.data?.length > 0) {
@@ -59,9 +101,9 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
                 activeSessionData: response.data[0],
             });
             return response.data[0];
-        } else {
-            throw new Error('No active session to end.');
         }
+
+        return null;
     };
 
     /**
@@ -77,6 +119,11 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
     private endActiveSession = async (e?: any) => {
         try {
             const activeSessionData = await this.getActiveSession();
+
+            if (!activeSessionData) {
+                throw new Error('No active session to end.');
+            }
+
             await this.props.httpService.patch(`/conversations/${this.props.teamsTabContext.chatId}/sessions/${activeSessionData.sessionId}`, { action: 'end' });
             this.setState((prevState) => ({
                 activeSessionData: {
@@ -160,13 +207,35 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
      * The render() method to create the UI of the tab
      */
     public render() {
+        if (this.state.showLoader) {
+            return (
+                <div className="tab-content">
+                    <TabHeader
+                        activeSessionData={this.state.activeSessionData}
+                        showTaskModule={this.onShowTaskModule}
+                        t={this.localize}
+                        disableActions={true}
+                        userRole={this.state.userRole}
+                        refreshSession={this.updateContent}
+                        endSession={this.handleEndQnaSessionFlow}
+                    />
+                    <div className="centerContent">
+                        <Loader label="Loading information" />
+                    </div>
+                </div>
+            );
+        }
+
         const { activeSessionData } = this.state;
+
         return (
             <div className="tab-content">
                 <TabHeader
+                    disableActions={false}
+                    userRole={this.state.userRole}
                     t={this.localize}
                     activeSessionData={activeSessionData}
-                    refreshSession={this.getActiveSession}
+                    refreshSession={this.updateContent}
                     endSession={this.handleEndQnaSessionFlow}
                     showTaskModule={this.onShowTaskModule}
                 />
@@ -182,7 +251,7 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
                         </div>
                     </Flex>
                 ) : (
-                    <TabCreateSession t={this.localize} showTaskModule={this.onShowTaskModule} />
+                    <TabCreateSession userRole={this.state.userRole} t={this.localize} showTaskModule={this.onShowTaskModule} />
                 )}
             </div>
         );

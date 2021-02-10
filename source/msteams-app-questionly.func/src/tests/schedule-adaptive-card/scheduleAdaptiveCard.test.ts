@@ -1,7 +1,9 @@
-import { getConversationData } from "../../utils/dbUtility";
+import {
+  getConversationData,
+  qnaSessionDataService,
+} from "../../utils/dbUtility";
 import { activityMockContext } from "../mocks/testContext";
 import httpFunction from "./../../../schedule-adaptive-card/index";
-import { qnaSessionDataService } from "msteams-app-questionly.data";
 
 const sampleQnASessionId = "sampleQnASessionId";
 
@@ -13,6 +15,7 @@ const maxWaitTimeForAdaptiveCardRefreshInMs = Number(
 );
 const timeShorterThanMaxWaitTimeForAdaptiveCardRefreshInMs =
   maxWaitTimeForAdaptiveCardRefreshInMs - 3000;
+
 beforeAll(() => {
   (<any>getConversationData) = jest.fn();
   activityMockContext.bindings.name.sampleQnASessionId = sampleQnASessionId;

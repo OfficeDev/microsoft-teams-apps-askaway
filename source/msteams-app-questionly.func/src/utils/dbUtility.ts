@@ -2,11 +2,19 @@ import {
   initiateConnection,
   ConversationDataService,
   IConversation,
-  IConversationDataService,
+  QuestionDataService,
+  UserDataService,
+  QnASessionDataService,
 } from "msteams-app-questionly.data";
 
 let dbInstance = null;
-let conversationDataService: IConversationDataService = new ConversationDataService();
+const conversationDataService = new ConversationDataService();
+const userDataService = new UserDataService();
+export const qnaSessionDataService = new QnASessionDataService(userDataService);
+export const questionDataService = new QuestionDataService(
+  userDataService,
+  qnaSessionDataService
+);
 
 /**
  * Initiates the connection to the CosmosDB database if its not done already.

@@ -1,23 +1,7 @@
-import {
-    getMainCard,
-    getStartQnACard,
-    startQnASession,
-    generateLeaderboard,
-    setActivityId,
-    getNewQuestionCard,
-    submitNewQuestion,
-    updateUpvote,
-    getErrorCard,
-    endQnASession,
-    getResubmitQuestionCard,
-    isHost,
-    validateConversationId,
-    isActiveQnA,
-    markQuestionAsAnswered,
-} from 'src/controller';
+import { Controller, IController } from 'src/controller';
 import * as acb from 'src/adaptive-cards/adaptiveCardBuilder';
 import * as maincardBuilder from 'msteams-app-questionly.common';
-import { qnaSessionDataService, questionDataService, IConversation } from 'msteams-app-questionly.data';
+import { IQnASessionDataService, QnASessionDataService, QuestionDataService, IQuestionDataService, IConversation, UserDataService } from 'msteams-app-questionly.data';
 import { isPresenterOrOrganizer } from 'src/util/meetingsUtility';
 import {
     triggerBackgroundJobForQuestionPostedEvent,
@@ -47,6 +31,21 @@ const sampleMeetingId = 'meetingId';
 jest.mock('../adaptive-cards/adaptiveCardBuilder');
 jest.mock('msteams-app-questionly.data');
 jest.mock('msteams-app-questionly.common');
+
+const getMainCard = maincardBuilder.getMainCard;
+const getStartQnACard = acb.getStartQnACard;
+const getErrorCard = acb.getErrorCard;
+
+let controller: IController;
+let questionDataService: IQuestionDataService;
+let qnaSessionDataService: IQnASessionDataService;
+
+beforeAll(() => {
+    const userDataService = new UserDataService();
+    qnaSessionDataService = new QnASessionDataService(userDataService);
+    questionDataService = new QuestionDataService(userDataService, qnaSessionDataService);
+    controller = new Controller(questionDataService, qnaSessionDataService);
+});
 
 beforeEach(() => {
     process.env.debugMode = 'true';
@@ -79,7 +78,7 @@ test('start qna session in channel', async () => {
 
     (<any>triggerBackgroundJobForQnaSessionCreatedEvent) = jest.fn();
 
-    await startQnASession({
+    await controller.startQnASession({
         title: sampleTitle,
         description: sampleDescription,
         userName: sampleUserName,
@@ -122,7 +121,7 @@ test('start qna session in group chat', async () => {
 
     (<any>triggerBackgroundJobForQnaSessionCreatedEvent) = jest.fn();
 
-    await startQnASession({
+    await controller.startQnASession({
         title: sampleTitle,
         description: sampleDescription,
         userName: sampleUserName,
@@ -166,7 +165,7 @@ test('start qna session in meeting for attendee', async () => {
     }));
     (<any>triggerBackgroundJobForQnaSessionCreatedEvent) = jest.fn();
     await expect(
-        startQnASession({
+        controller.startQnASession({
             title: sampleTitle,
             description: sampleDescription,
             userName: sampleUserName,
@@ -188,9 +187,9 @@ test('start qna session in meeting for attendee', async () => {
 });
 
 test('generate leaderboard', async () => {
-    await generateLeaderboard(sampleQnASessionId, sampleUserAADObjId1, 'default');
-    expect(questionDataService.getQuestionData).toBeCalledTimes(1);
-    expect(questionDataService.getQuestionData).toBeCalledWith(sampleQnASessionId);
+    await controller.generateLeaderboard(sampleQnASessionId, sampleUserAADObjId1, 'default');
+    expect(questionDataService.getAllQuestions).toBeCalledTimes(1);
+    expect(questionDataService.getAllQuestions).toBeCalledWith(sampleQnASessionId);
     expect(qnaSessionDataService.isHost).toBeCalledTimes(1);
     expect(qnaSessionDataService.isHost).toBeCalledWith(sampleQnASessionId, sampleUserAADObjId1);
     expect(qnaSessionDataService.isActiveQnA).toBeCalledTimes(1);
@@ -198,14 +197,8 @@ test('generate leaderboard', async () => {
     expect(acb.generateLeaderboard).toBeCalledTimes(1);
 });
 
-test('set activity id', async () => {
-    await setActivityId(sampleQnASessionId, sampleActivityId);
-    expect(qnaSessionDataService.updateActivityId).toBeCalledTimes(1);
-    expect(qnaSessionDataService.updateActivityId).toBeCalledWith(sampleQnASessionId, sampleActivityId);
-});
-
 test('get new question card', async () => {
-    await getNewQuestionCard(sampleQnASessionId);
+    await controller.getNewQuestionCard(sampleQnASessionId);
     expect(acb.getNewQuestionCard).toBeCalledTimes(1);
     expect(acb.getNewQuestionCard).toBeCalledWith(sampleQnASessionId);
 });
@@ -213,7 +206,7 @@ test('get new question card', async () => {
 test('submit new question', async () => {
     (<any>triggerBackgroundJobForQuestionPostedEvent) = jest.fn();
 
-    await submitNewQuestion(sampleQnASessionId, sampleUserAADObjId1, sampleUserName, sampleQuestionContent, sampleConversationId, sampleServiceUrl, sampleMeetingId);
+    await controller.submitNewQuestion(sampleQnASessionId, sampleUserAADObjId1, sampleUserName, sampleQuestionContent, sampleConversationId, sampleServiceUrl, sampleMeetingId);
     expect(questionDataService.createQuestion).toBeCalledTimes(1);
     expect(questionDataService.createQuestion).toBeCalledWith(sampleQnASessionId, sampleUserAADObjId1, sampleUserName, sampleQuestionContent, sampleConversationId);
 
@@ -233,7 +226,7 @@ test('add upvote', async () => {
 
     (<any>triggerBackgroundJobForQuestionUpvotedEvent) = jest.fn();
 
-    await updateUpvote(sampleQnASessionId, sampleQuestionId, sampleUserAADObjId1, sampleUserName, sampleConversationId, 'default', sampleServiceUrl, sampleMeetingId);
+    await controller.updateUpvote(sampleQnASessionId, sampleQuestionId, sampleUserAADObjId1, sampleUserName, sampleConversationId, 'default', sampleServiceUrl, sampleMeetingId);
     expect(questionDataService.updateUpvote).toBeCalledTimes(1);
     expect(questionDataService.updateUpvote).toBeCalledWith(sampleQuestionId, sampleUserAADObjId1, sampleUserName);
 
@@ -253,7 +246,7 @@ test('remove upvote', async () => {
 
     (<any>triggerBackgroundJobForQuestionDownvotedEvent) = jest.fn();
 
-    await updateUpvote(sampleQnASessionId, sampleQuestionId, sampleUserAADObjId1, sampleUserName, sampleConversationId, 'default', sampleServiceUrl, sampleMeetingId);
+    await controller.updateUpvote(sampleQnASessionId, sampleQuestionId, sampleUserAADObjId1, sampleUserName, sampleConversationId, 'default', sampleServiceUrl, sampleMeetingId);
     expect(questionDataService.updateUpvote).toBeCalledTimes(1);
     expect(questionDataService.updateUpvote).toBeCalledWith(sampleQuestionId, sampleUserAADObjId1, sampleUserName);
 
@@ -271,7 +264,7 @@ test('end ama session', async () => {
     (<any>triggerBackgroundJobForQnaSessionEndedEvent) = jest.fn();
 
     await expect(
-        endQnASession({
+        controller.endQnASession({
             qnaSessionId: sampleQnASessionId,
             aadObjectId: sampleUserAADObjId1,
             conversationId: sampleConversationId,
@@ -301,7 +294,7 @@ test('end ama session - meeting', async () => {
 
     (<any>triggerBackgroundJobForQnaSessionEndedEvent) = jest.fn();
 
-    await endQnASession({
+    await controller.endQnASession({
         qnaSessionId: sampleQnASessionId,
         aadObjectId: sampleUserAADObjId1,
         conversationId: sampleConversationId,
@@ -333,7 +326,7 @@ test('end ama session - meeting for attendee', async () => {
     (<any>triggerBackgroundJobForQnaSessionEndedEvent) = jest.fn();
 
     await expect(
-        endQnASession({
+        controller.endQnASession({
             qnaSessionId: sampleQnASessionId,
             aadObjectId: sampleUserAADObjId1,
             conversationId: sampleConversationId,
@@ -355,13 +348,13 @@ test('end ama session - meeting for attendee', async () => {
 });
 
 test('get resubmit question card', async () => {
-    getResubmitQuestionCard(sampleQnASessionId, sampleQuestionContent);
+    controller.getResubmitQuestionCard(sampleQnASessionId, sampleQuestionContent);
     expect(acb.getResubmitQuestionErrorCard).toBeCalledTimes(1);
     expect(acb.getResubmitQuestionErrorCard).toBeCalledWith(sampleQnASessionId, sampleQuestionContent);
 });
 
 test('is host', async () => {
-    isHost(sampleQnASessionId, sampleUserAADObjId1);
+    controller.isHost(sampleQnASessionId, sampleUserAADObjId1);
     expect(qnaSessionDataService.isHost).toBeCalledTimes(1);
     expect(qnaSessionDataService.isHost).toBeCalledWith(sampleQnASessionId, sampleUserAADObjId1);
 });
@@ -371,13 +364,13 @@ test('validate conversation id', async () => {
         // arbitrary
         conversationId: 'string',
     }));
-    validateConversationId(sampleQnASessionId, sampleConversationId);
+    controller.validateConversationId(sampleQnASessionId, sampleConversationId);
     expect(qnaSessionDataService.getQnASessionData).toBeCalledTimes(1);
     expect(qnaSessionDataService.getQnASessionData).toBeCalledWith(sampleQnASessionId);
 });
 
 test('is active qna', async () => {
-    await isActiveQnA(sampleQnASessionId);
+    await controller.isActiveQnA(sampleQnASessionId);
     expect(qnaSessionDataService.isActiveQnA).toBeCalledTimes(1);
     expect(qnaSessionDataService.isActiveQnA).toBeCalledWith(sampleQnASessionId);
 });
@@ -390,7 +383,7 @@ test('mark question as answered api - user has sufficient permissions', async ()
         return true;
     });
 
-    await markQuestionAsAnswered(
+    await controller.markQuestionAsAnswered(
         // tslint:disable-next-line
         {
             id: sampleConversationId,
@@ -418,7 +411,7 @@ test('mark question as answered api - user does not have sufficient permissions'
     });
 
     await expect(
-        markQuestionAsAnswered(
+        controller.markQuestionAsAnswered(
             // tslint:disable-next-line
             {
                 id: sampleConversationId,

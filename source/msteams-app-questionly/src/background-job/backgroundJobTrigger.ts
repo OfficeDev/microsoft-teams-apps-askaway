@@ -50,7 +50,7 @@ export const triggerBackgroundJobForQnaSessionCreatedEvent = async (session: IQn
  * @param meetingId - meeting id.
  */
 export const triggerBackgroundJobForQnaSessionEndedEvent = async (conversationId: string, qnaSessionId: string, endedByUserId: string, serviceUrl: string, meetingId?: string) => {
-    const eventData = await createQnaSessionEndedEvent(qnaSessionId, endedByUserId);
+    const eventData = createQnaSessionEndedEvent(qnaSessionId, endedByUserId);
     await triggerBackgroundJob(conversationId, qnaSessionId, eventData, serviceUrl, meetingId);
 };
 
@@ -71,7 +71,7 @@ export const triggerBackgroundJobForQuestionUpvotedEvent = async (
     serviceUrl: string,
     meetingId?: string
 ) => {
-    const eventData = await createQuestionUpvotedEvent(qnaSessionId, questionId, upvotedByUserId);
+    const eventData = createQuestionUpvotedEvent(qnaSessionId, questionId, upvotedByUserId);
     await triggerBackgroundJob(conversationId, qnaSessionId, eventData, serviceUrl, meetingId);
 };
 
@@ -92,7 +92,7 @@ export const triggerBackgroundJobForQuestionDownvotedEvent = async (
     serviceUrl: string,
     meetingId?: string
 ) => {
-    const eventData = await createQuestionDownvotedEvent(qnaSessionId, questionId, downvotedByUserId);
+    const eventData = createQuestionDownvotedEvent(qnaSessionId, questionId, downvotedByUserId);
     await triggerBackgroundJob(conversationId, qnaSessionId, eventData, serviceUrl, meetingId);
 };
 
@@ -106,7 +106,7 @@ export const triggerBackgroundJobForQuestionDownvotedEvent = async (
  * @param meetingId - meeting id.
  */
 export const triggerBackgroundJobForQuestionPostedEvent = async (conversationId: string, question: IQuestion, qnaSessionId: string, postedByUserId: string, serviceUrl: string, meetingId?: string) => {
-    const eventData = await createQuestionAddedEvent(qnaSessionId, question, postedByUserId);
+    const eventData = createQuestionAddedEvent(qnaSessionId, question, postedByUserId);
     await triggerBackgroundJob(conversationId, qnaSessionId, eventData, serviceUrl, meetingId);
 };
 
@@ -127,7 +127,7 @@ export const triggerBackgroundJobForQuestionMarkedAsAnsweredEvent = async (
     serviceUrl: string,
     meetingId?: string
 ) => {
-    const eventData = await createQuestionMarkedAsAnsweredEvent(qnaSessionId, questionId, markedAnsweredByUserAadObjectId);
+    const eventData = createQuestionMarkedAsAnsweredEvent(qnaSessionId, questionId, markedAnsweredByUserAadObjectId);
     await triggerBackgroundJob(conversationId, qnaSessionId, eventData, serviceUrl, meetingId);
 };
 

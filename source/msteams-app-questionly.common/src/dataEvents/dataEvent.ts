@@ -13,5 +13,4 @@ export interface IDataEvent {
   qnaSessionId: string;
   type: string;
   data: any;
-  version: Number;
 }
