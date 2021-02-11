@@ -1,11 +1,11 @@
 // tslint:disable:no-relative-imports
 import './../index.scss';
 import * as React from 'react';
-import { Flex, Text, FlexItem, Menu, menuAsToolbarBehavior, ShorthandCollection, MenuItemProps, ThemePrepared } from '@fluentui/react-northstar';
+import { Flex, Text, FlexItem, Menu, menuAsToolbarBehavior, ShorthandCollection, MenuItemProps } from '@fluentui/react-northstar';
 import { MoreIcon, LeaveIcon, RetryIcon } from '@fluentui/react-icons-northstar';
 import { ParticipantRoles } from '../../../../enums/ParticipantRoles';
 import { isPresenterOrOrganizer } from '../shared/meetingUtility';
-import { withTheme } from '../shared/WithTheme';
+import { withTheme, ThemeProps } from '../shared/WithTheme';
 
 /**
  * Properties for the QnASessionHeader React component
@@ -17,10 +17,6 @@ export interface QnASessionHeaderProps {
     showToolBar: boolean;
     t: Function;
     userRole: ParticipantRoles;
-}
-
-interface ThemeProps {
-    theme: ThemePrepared;
 }
 
 const QnASessionHeader: React.FunctionComponent<QnASessionHeaderProps & ThemeProps> = (props) => {

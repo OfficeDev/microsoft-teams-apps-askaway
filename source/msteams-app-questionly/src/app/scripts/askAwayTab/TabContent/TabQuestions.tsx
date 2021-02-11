@@ -1,21 +1,17 @@
 import './../index.scss';
 import * as React from 'react';
-import { Flex, Avatar, ThemePrepared, Text, Button } from '@fluentui/react-northstar';
+import { Flex, Avatar, Text, Button } from '@fluentui/react-northstar';
 import Badge from '../shared/Badge';
 import { LikeIcon, ChevronDownMediumIcon, ChevronEndMediumIcon } from '@fluentui/react-icons-northstar';
 import { LikeIconFilled } from '../shared/Icons/LikeIconFilled';
 import { CONST } from '../shared/Constants';
 import { useState } from 'react';
 import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
-import { withTheme } from '../shared/WithTheme';
+import { withTheme, ThemeProps } from '../shared/WithTheme';
 
 /**
  * Properties for the TabQuestions React component
  */
-
-interface ThemeProps {
-    theme: ThemePrepared;
-}
 export interface TabQuestionsProps {
     activeSessionData: ClientDataContract.QnaSession;
     teamsTabContext: microsoftTeams.Context;
