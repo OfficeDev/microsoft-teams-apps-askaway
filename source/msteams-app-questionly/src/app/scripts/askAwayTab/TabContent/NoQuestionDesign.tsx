@@ -11,9 +11,9 @@ export interface NoQuestionDesignProps {
     isSessionActive: boolean;
 }
 const NoQuestionDesign: React.FunctionComponent<NoQuestionDesignProps> = (props) => {
-    const showSubText = (subText, className) => {
+    const showSubText = (subText) => {
         return (
-            <div className={className}>
+            <div className="text-center">
                 <Text weight="bold" content={subText} />
             </div>
         );
@@ -26,7 +26,7 @@ const NoQuestionDesign: React.FunctionComponent<NoQuestionDesignProps> = (props)
                     <Image src={NoQuestionImage} />
                 </Flex>
             </div>
-            {showSubText(!props.isSessionActive ? props.t('tab.whenSessionClosed') : props.t('tab.noQuestionsPosted'), 'text-center')}
+            {showSubText(!props.isSessionActive ? props.t('tab.whenSessionClosed') : props.t('tab.noQuestionsPosted'))}
         </div>
     );
 };

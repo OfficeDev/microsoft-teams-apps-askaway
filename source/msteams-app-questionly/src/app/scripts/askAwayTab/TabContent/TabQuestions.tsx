@@ -41,7 +41,7 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (p
      * @param authorId - user id as 'string'
      */
     const isUserOwnQuestion = (isActiveSession: boolean, authorId: string) => {
-        return isActiveSession && props.teamsTabContext.userObjectId === authorId ? false : true;
+        return props.teamsTabContext.userObjectId === authorId || !isActiveSession;
     };
 
     /**

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Provider, ThemePrepared } from '@fluentui/react-northstar';
 
-interface ThemeProps {
+export interface ThemeProps {
     theme: ThemePrepared;
 }
 

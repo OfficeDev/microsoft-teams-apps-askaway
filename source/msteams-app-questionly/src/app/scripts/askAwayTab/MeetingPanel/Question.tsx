@@ -1,7 +1,7 @@
 // tslint:disable:no-relative-imports
 import './../index.scss';
 import * as React from 'react';
-import { Flex, Button, Text, Avatar, ThemePrepared } from '@fluentui/react-northstar';
+import { Flex, Button, Text, Avatar } from '@fluentui/react-northstar';
 import { LikeIcon, AcceptIcon } from '@fluentui/react-icons-northstar';
 import { LikeIconFilled } from '../shared/Icons/LikeIconFilled';
 import { CONST } from '../shared/Constants';
@@ -9,7 +9,7 @@ import { useState } from 'react';
 import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
 import { ParticipantRoles } from '../../../../enums/ParticipantRoles';
 import { isPresenterOrOrganizer } from '../shared/meetingUtility';
-import { withTheme } from '../shared/WithTheme';
+import { withTheme, ThemeProps } from '../shared/WithTheme';
 
 type QuestionCompProps = {
     question: ClientDataContract.Question;
@@ -20,11 +20,8 @@ type QuestionCompProps = {
     onClickAction: any;
     userId: string;
     userRole: ParticipantRoles;
+    isSessionActive: boolean;
 };
-
-interface ThemeProps {
-    theme: ThemePrepared;
-}
 
 /**
  * Properties for the UnansweredQuestions React component
@@ -78,7 +75,7 @@ const Question: React.FunctionComponent<QuestionCompProps & ThemeProps> = (props
                         )}
 
                         <Button
-                            disabled={userId === question.author.id}
+                            disabled={userId === question.author.id || !props.isSessionActive}
                             onClick={() =>
                                 onClickAction({
                                     question,
@@ -90,7 +87,7 @@ const Question: React.FunctionComponent<QuestionCompProps & ThemeProps> = (props
                                 isUserLikedQuestion ? (
                                     <LikeIconFilled styles={{ color: hoverColor }} />
                                 ) : (
-                                    <LikeIcon styles={userId === question.author.id ? { color: disabledLikeButtonHoverColor } : { color: hoverColor }} outline />
+                                    <LikeIcon styles={userId === question.author.id || !props.isSessionActive ? { color: disabledLikeButtonHoverColor } : { color: hoverColor }} outline />
                                 )
                             }
                             className="like-icon-size"
