@@ -111,7 +111,7 @@ export const handleEndQnASessionFlow = (t: TFunction, endSessionHandler: () => v
  * @param theme - Teams's theme.
  */
 export const openStartQnASessionTaskModule = (t: TFunction, submitHandler: (err: string, result: string) => void, locale: string, theme?: string) => {
-    invokeIframeBasedTaskModule(t('TaskModuleMessages.StartQnATitle'), `https://${process.env.HostName}/askAwayTab/createsession.html?theme=${theme}&locale=${locale}`, submitHandler);
+    invokeIframeBasedTaskModule(t('TaskModuleMessages.StartQnATitle'), `https://${window.location.hostname}/askAwayTab/createsession.html?theme=${theme}&locale=${locale}`, submitHandler);
 };
 
 /**
@@ -123,7 +123,7 @@ export const openStartQnASessionTaskModule = (t: TFunction, submitHandler: (err:
  * @param theme - Teams's theme.
  */
 export const openSwitchSessionsTaskModule = (t: TFunction, submitHandler: (err: string, result: string) => void, conversationId?: string, preSelectedSessionId?: string, theme?: string) => {
-    const swicthSessionTaskModuleUrl = `https://${process.env.HostName}/askAwayTab/switchSession.html?conversationId=${conversationId}&selectedSessionId=${preSelectedSessionId}&theme=${theme}`;
+    const swicthSessionTaskModuleUrl = `https://${window.location.hostname}/askAwayTab/switchSession.html?conversationId=${conversationId}&selectedSessionId=${preSelectedSessionId}&theme=${theme}`;
     invokeIframeBasedTaskModule(t('TaskModuleMessages.SwitchSessionTitle'), swicthSessionTaskModuleUrl, submitHandler, 600, 600);
 };
 
