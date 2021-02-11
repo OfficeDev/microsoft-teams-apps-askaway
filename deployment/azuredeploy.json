@@ -410,10 +410,10 @@
           "family": "A",
           "name": "standard"
         },
-        "tenantId": "[parameters('tenantId')]",
+        "tenantId": "[subscription().tenantId]",
         "accessPolicies": [
           {
-            "tenantId": "[parameters('tenantId')]",
+            "tenantId": "[subscription().tenantId]",
             "objectId": "[reference(resourceId('Microsoft.Web/sites', variables('botAppName')), '2016-08-01', 'Full').identity.principalId]",
             "permissions": {
               "keys": [],
@@ -422,7 +422,7 @@
             }
           },
           {
-            "tenantId": "[parameters('tenantId')]",
+            "tenantId": "[subscription().tenantId]",
             "objectId": "[reference(resourceId('Microsoft.Web/sites', variables('functionAppName')), '2016-08-01', 'Full').identity.principalId]",
             "permissions": {
               "keys": [],
