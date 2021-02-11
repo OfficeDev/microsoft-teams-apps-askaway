@@ -92,6 +92,7 @@ local.settings.json for azure function layer:
     "MaxWaitTimeForAdaptiveCardRefreshInMs": 5000,
     "AvatarKey": "{{AvatarKey}}",
     "HostName": "{{HostName}}",
+    "ExpireInMemorySecretsAfterMs": "{{ExpireInMemorySecretsAfterMs}}",
     "MarkQuestionAsAnsweredOperationLockValidityInMS": 5000,
     "EndSessionOperationLockValidityInMS": 5000
   },
