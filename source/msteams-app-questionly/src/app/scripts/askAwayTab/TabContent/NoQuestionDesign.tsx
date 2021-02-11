@@ -24,10 +24,9 @@ const NoQuestionDesign: React.FunctionComponent<NoQuestionDesignProps> = (props)
             <div className="no-question-layout">
                 <Flex column>
                     <Image src={NoQuestionImage} />
-                    {props.isSessionActive && showSubText(props.t('tab.noQuestionsPosted'), 'sub-text')}
                 </Flex>
             </div>
-            {!props.isSessionActive && showSubText(props.t('tab.whenSessionClosed'), 'text-center')}
+            {showSubText(!props.isSessionActive ? props.t('tab.whenSessionClosed') : props.t('tab.noQuestionsPosted'), 'text-center')}
         </div>
     );
 };

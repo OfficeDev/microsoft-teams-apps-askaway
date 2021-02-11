@@ -114,9 +114,6 @@
         line-height: 21px;
     }
     .menuHeader {
-        svg {
-            fill: #ffffff;
-        }
         .ui-menu__item__submenu {
             border: none;
         }
@@ -131,27 +128,32 @@
         .card-divider {
             border-bottom: 1px solid #3b3a39;
             min-height: 4.5rem;
+            border-top-left-radius: 3px;
+            border-top-right-radius: 3px;
             .card-layout {
                 width: 100%;
-                padding: 0.5rem;
-                border-radius: 0rem;
+                padding: 14px;
+                padding-bottom: 2px;
                 .author-name {
                     font-size: 12px;
                     line-height: 20px;
                 }
                 .like-icon {
                     position: absolute;
-                    top: 0.3rem;
+                    margin-top: -0.5rem;
                     right: 1rem;
                     .like-icon-size {
-                        min-width: 1rem;
+                        min-width: 1.3rem;
                     }
                 }
-                .card-body-question {
-                    font-size: 14px;
-                    line-height: 20px;
-                    margin-top: 0.4rem;
-                }
+            }
+            .card-body-question {
+                font-size: 14px;
+                line-height: 20px;
+                padding-left: 15px;
+                padding-top: 5px;
+                padding-right: 3px;
+                padding-bottom: 11px;
             }
         }
     }

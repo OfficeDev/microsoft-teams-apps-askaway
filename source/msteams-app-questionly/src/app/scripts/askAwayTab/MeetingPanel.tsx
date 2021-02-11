@@ -62,7 +62,7 @@ export interface MeetingPanelState {
      */
     isActiveSessionEnded: boolean;
     /**
-     * boolean representing if alert is visbile or not
+     * To pass as a property to QuestionList to deal with question-card height
      */
     isNetworkAlertVisible: boolean;
 }
@@ -376,7 +376,12 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
      */
     public render() {
         const stateVal = this.state;
-        if (stateVal.showLoader) return <Loader label={this.localize('meetingPanel.loaderText')} />;
+        if (stateVal.showLoader)
+            return (
+                <div className="loader">
+                    <Loader label={this.localize('meetingPanel.loaderText')} />
+                </div>
+            );
         return (
             <React.Fragment>
                 <div className="meeting-panel">
