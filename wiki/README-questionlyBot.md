@@ -91,7 +91,9 @@ local.settings.json for azure function layer:
     "BroadcastActivityRetryAttemptCount": 2,
     "MaxWaitTimeForAdaptiveCardRefreshInMs": 5000,
     "AvatarKey": "{{AvatarKey}}",
-    "HostName": "{{HostName}}"
+    "HostName": "{{HostName}}",
+    "MarkQuestionAsAnsweredOperationLockValidityInMS": 5000,
+    "EndSessionOperationLockValidityInMS": 5000
   },
   "Host": {
     "LocalHttpPort": 7071,
