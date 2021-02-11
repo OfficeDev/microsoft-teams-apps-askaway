@@ -774,7 +774,7 @@
             },
             {
               "name": "HostName",
-              "value": "[variables('botAppDomain')]"
+              "value": "[variables('frontDoorDomain')]"
             },
             {
               "name": "AzureAd_ClientId",
@@ -803,6 +803,14 @@
             {
               "name": "IdentityObjectId_AppService",
               "value": "[reference(resourceId('Microsoft.Web/sites', variables('botAppName')), '2016-08-01', 'Full').identity.principalId]"
+            },
+            {
+              "name": "MarkQuestionAsAnsweredOperationLockValidityInMS",
+              "value": "5000"
+            },
+            {
+              "name": "EndSessionOperationLockValidityInMS ",
+              "value": "5000"
             }
           ],
           "cors": {
