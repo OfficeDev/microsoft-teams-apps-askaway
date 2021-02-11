@@ -17,7 +17,7 @@ import { IController } from 'src/controller';
 import { AdaptiveCard } from 'adaptivecards';
 import { endQnAStrings, askQuestionStrings, errorStrings, startQnAStrings, leaderboardStrings } from 'src/localization/locale';
 import { exceptionLogger } from 'src/util/exceptionTracking';
-import { IConversationDataService } from 'msteams-app-questionly.data';
+import { IConversationDataService, SessionIsNoLongerActiveError } from 'msteams-app-questionly.data';
 import { extractMainCardData, MainCardData } from 'msteams-app-questionly.common';
 import { getMeetingIdFromContext, isConverationTypeChannel } from 'src/util/meetingsUtility';
 import { TelemetryExceptions } from 'src/constants/telemetryConstants';
@@ -257,7 +257,12 @@ export class AskAway extends TeamsActivityHandler {
                 filename: module.id,
                 exceptionName: TelemetryExceptions.CreateQuestionFailed,
             });
-            return this.handleTeamsTaskModuleResubmitQuestion(qnaSessionId, questionContent);
+
+            if (error instanceof SessionIsNoLongerActiveError) {
+                return this.handleTeamsTaskModuleSessionIsNoMoreActiveError();
+            } else {
+                return this.handleTeamsTaskModuleResubmitQuestion(qnaSessionId, questionContent);
+            }
         }
         return NULL_RESPONSE;
     }
@@ -287,7 +292,12 @@ export class AskAway extends TeamsActivityHandler {
                 filename: module.id,
                 exceptionName: TelemetryExceptions.VoteQuestionFailed,
             });
-            return this._buildTaskModuleContinueResponse(getErrorCard(errorStrings('upvoting')));
+
+            if (error instanceof SessionIsNoLongerActiveError) {
+                return this.handleTeamsTaskModuleSessionIsNoMoreActiveError();
+            } else {
+                return this._buildTaskModuleContinueResponse(getErrorCard(errorStrings('upvoting')));
+            }
         }
     };
 
@@ -323,17 +333,26 @@ export class AskAway extends TeamsActivityHandler {
                     conversationId: context.activity.conversation.id,
                     qnaSessionId: qnaSessionId,
                     tenantId: conversation.tenantId,
-                    userAadObjectId: <string>context.activity.from.aadObjectId,
+                    userAadObjectId: context.activity.from.aadObjectId,
                     isChannel: isConverationTypeChannel(context),
                     meetingId: meetingId,
                     filename: module.id,
                     exceptionName: TelemetryExceptions.EndQnASessionFailed,
                 });
-                return this.handleTeamsTaskModuleSubmitError();
+
+                if (error instanceof SessionIsNoLongerActiveError) {
+                    return this.handleTeamsTaskModuleSessionIsNoMoreActiveError();
+                } else {
+                    return this.handleTeamsTaskModuleSubmitError();
+                }
             }
         }
 
         return NULL_RESPONSE;
+    }
+
+    private handleTeamsTaskModuleSessionIsNoMoreActiveError(): TaskModuleResponse {
+        return this._buildTaskModuleContinueResponse(getErrorCard(errorStrings('unableToPerformActivityOnEndedSession')));
     }
 
     private handleTeamsTaskModuleSubmitError(): TaskModuleResponse {
@@ -437,16 +456,39 @@ export class AskAway extends TeamsActivityHandler {
                 filename: module.id,
                 exceptionName: TelemetryExceptions.CreateQnASessionFailed,
             });
-            if (error.code === 'QnASessionLimitExhaustedError') {
-                await context.sendActivity(MessageFactory.text(errorStrings('qnasessionlimitexhaustedError')));
-            } else if (error['code'] === 'InsufficientPermissionsToCreateOrEndQnASessionError') {
-                await context.sendActivity(MessageFactory.text(errorStrings('insufficientPermissionsToCreateOrEndQnASessionError')));
-            } else {
-                await context.sendActivity(MessageFactory.text(errorStrings('qnasessionCreationError')));
-            }
+
+            await this.handleCreateQnaSessionFailure(context, error);
         }
 
         return NULL_RESPONSE;
+    }
+
+    /**
+     * handles error occurred in create qna session flow, sends appropriate response.
+     * @param context - turnContext.
+     * @param error - error occured while creating a session.
+     */
+    async handleCreateQnaSessionFailure(context: TurnContext, error: Error) {
+        let errorMessage: string;
+        switch (error['code']) {
+            case 'QnASessionLimitExhaustedError': {
+                errorMessage = errorStrings('qnasessionlimitexhaustedError');
+                break;
+            }
+            case 'InsufficientPermissionsToCreateOrEndQnASession': {
+                errorMessage = errorStrings('insufficientPermissionsToCreateOrEndQnASessionError');
+                break;
+            }
+            case 'RevertOperationFailedAfterBackgroundJobFailureError': {
+                errorMessage = errorStrings('unableToPostCardForSessionStartedEvent');
+                break;
+            }
+            default: {
+                errorMessage = errorStrings('qnasessionCreationError');
+            }
+        }
+
+        context.sendActivity(errorMessage);
     }
 
     async handleTeamsMessagingExtensionSubmitAction(context: TurnContext, action: MessagingExtensionAction): Promise<MessagingExtensionActionResponse> {

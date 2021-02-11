@@ -25,6 +25,10 @@ export interface TabHeaderProps {
      * Indicator if buttons should be disabled. This will be required when parent componet is showing loading experience.
      */
     disableActions: boolean;
+    /**
+     * function that invokes switch session task module.
+     */
+    onSwitchSessionClick: Function;
 }
 
 const TabHeader: React.FunctionComponent<TabHeaderProps> = (props) => {
@@ -55,7 +59,13 @@ const TabHeader: React.FunctionComponent<TabHeaderProps> = (props) => {
                         <Button.Content>{props.t('tab.startNewSession')}</Button.Content>
                     </Button>
                 )}
-                <Button disabled={props.disableActions} text>
+                <Button
+                    disabled={props.disableActions}
+                    onClick={() => {
+                        props.onSwitchSessionClick();
+                    }}
+                    text
+                >
                     <SwitchIcon outline xSpacing="after" />
                     <Button.Content>{props.t('tab.switchSession')}</Button.Content>
                 </Button>
@@ -78,4 +88,5 @@ const TabHeader: React.FunctionComponent<TabHeaderProps> = (props) => {
         </React.Fragment>
     );
 };
+
 export default TabHeader;

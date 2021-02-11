@@ -1,5 +1,6 @@
 import { IQnASession, QnASession } from "src/schemas/qnaSession";
 import mongoose from "mongoose";
+import { DocumentNotAvailableForOperationError } from "src/errors/documentNotAvailableForOperationError";
 import {
   IQnASessionDataService,
   QnASessionDataService,
@@ -40,11 +41,14 @@ const sampleEndedByName = "sampleEndedByName";
 const sampleEndedByUserId = "sampleEndedByUserId";
 let testHost: IUser, testUser: IUser, testUserUpvoting: IUser;
 
-const createDummyQnASession = async (dataEventVersion?: Number) => {
+const createDummyQnASession = async (
+  dataEventVersion?: Number,
+  isActive?: boolean
+) => {
   return await new QnASession({
     title: sampleTitle,
     description: sampleDescription,
-    isActive: true,
+    isActive: isActive ?? true,
     hostId: sampleUserAADObjId1,
     activityId: sampleActivityId,
     conversationId: sampleConversationId,
@@ -163,6 +167,110 @@ describe("tests updateDateTimeNextCardUpdateScheduled api", () => {
     expect(updatedQnaSession?.dateTimeNextCardUpdateScheduled).toEqual(
       dateTimeNextCardUpdateScheduled
     );
+  });
+});
+
+describe("tests deleteQnASession api", () => {
+  beforeAll(async () => {
+    await mongoose.connect(<string>process.env.MONGO_URL, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useFindAndModify: false,
+    });
+  });
+
+  afterAll(async () => {
+    await mongoose.disconnect();
+  });
+
+  it("delete document", async () => {
+    testSession = await createDummyQnASession();
+    await qnaSessionDataService.deleteQnASession(testSession.id);
+    const updatedQnaSession = await qnaSessionDataService.getQnASession(
+      testSession.id
+    );
+    expect(updatedQnaSession).toBeNull();
+  });
+});
+
+describe("tests activateQnASession api", () => {
+  beforeAll(async () => {
+    await mongoose.connect(<string>process.env.MONGO_URL, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useFindAndModify: false,
+    });
+  });
+
+  afterAll(async () => {
+    await mongoose.disconnect();
+  });
+
+  afterEach(async () => {
+    if (testSession) {
+      await QnASession.deleteOne({ _id: testSession.id });
+    }
+  });
+
+  it("reactivates qna session", async () => {
+    testSession = await createDummyQnASession(0, false);
+    await qnaSessionDataService.activateQnASession(testSession.id);
+    const updatedQnaSession = await qnaSessionDataService.getQnASession(
+      testSession.id
+    );
+    expect(updatedQnaSession?.isActive).toEqual(true);
+    expect(updatedQnaSession?.endedById).toEqual(null);
+    expect(updatedQnaSession?.endedByUserId).toEqual(null);
+    expect(updatedQnaSession?.dateTimeEnded).toEqual(null);
+    expect(updatedQnaSession?.dateTimeEndOperationLockAcquired).toEqual(null);
+  });
+});
+
+describe("tests lock on session document", () => {
+  beforeAll(async () => {
+    await mongoose.connect(<string>process.env.MONGO_URL, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useFindAndModify: false,
+    });
+  });
+
+  afterAll(async () => {
+    await mongoose.disconnect();
+  });
+
+  afterEach(async () => {
+    if (testSession) {
+      await QnASession.deleteOne({ _id: testSession.id });
+    }
+
+    delete process.env.EndSessionOperationLockValidityInMS;
+  });
+
+  it("2nd immediate end operation should fail due to loack acquired by the first process", async () => {
+    testSession = await createDummyQnASession(0, true);
+    process.env.EndSessionOperationLockValidityInMS = "500000";
+    await qnaSessionDataService.endQnASession(
+      testSession.id,
+      testSession.conversationId,
+      "user1id",
+      "user1id",
+      "user1id"
+    );
+
+    try {
+      await qnaSessionDataService.endQnASession(
+        testSession.id,
+        testSession.conversationId,
+        "user2id",
+        "user2id",
+        "user2id"
+      );
+    } catch (error) {
+      expect(
+        error instanceof DocumentNotAvailableForOperationError
+      ).toBeTruthy();
+    }
   });
 });
 
@@ -337,26 +445,32 @@ describe("tests ama session apis", () => {
     expect(qnaSessionData.isActive).toBe(true);
   });
 
-  it("get non-existing QnA session", async () => {
+  it("validate session for non-existing QnA session", async () => {
     await qnaSessionDataService
-      .isExistingQnASession(sampleQnASessionID, sampleConversationId)
+      .getAndCheckIfQnASessionCanBeUpdated(
+        sampleQnASessionID,
+        sampleConversationId
+      )
       .catch((error) => {
         expect(error).toEqual(new Error("QnA Session record not found"));
       });
   });
 
-  it("get existing QnA session", async () => {
-    const data = await qnaSessionDataService.isExistingQnASession(
+  it("validate session for existing QnA session", async () => {
+    const data = await qnaSessionDataService.getAndCheckIfQnASessionCanBeUpdated(
       testSession._id,
       sampleConversationId
     );
-    expect(data).toEqual(true);
+    expect(data).toBeDefined();
   });
 
-  it("get existing QnA session not belonging to provided conversation", async () => {
+  it("validate existing QnA session not belonging to provided conversation", async () => {
     const randomConversationId = "random";
     await qnaSessionDataService
-      .isExistingQnASession(testSession._id, randomConversationId)
+      .getAndCheckIfQnASessionCanBeUpdated(
+        testSession._id,
+        randomConversationId
+      )
       .catch((error) => {
         expect(error).toEqual(
           new Error(
@@ -538,10 +652,10 @@ describe("tests ama session apis", () => {
     expect(qnaSessions.length).toEqual(2);
     expect(qnaSessions[0].conversationId).toEqual(sampleConversationId);
     expect(qnaSessions[1].conversationId).toEqual(sampleConversationId);
-    expect(qnaSessions[0]._id).toEqual(testSession._id);
-    expect(qnaSessions[1]._id).toEqual(dummyQnASession._id);
-    expect(qnaSessions[0].hostId).toEqual(testSession.hostId);
-    expect(qnaSessions[1].hostId).toEqual(dummyQnASession.hostId);
+    expect(qnaSessions[1]._id).toEqual(testSession._id);
+    expect(qnaSessions[0]._id).toEqual(dummyQnASession._id);
+    expect(qnaSessions[1].hostId).toEqual(testSession.hostId);
+    expect(qnaSessions[0].hostId).toEqual(dummyQnASession.hostId);
 
     await QnASession.deleteOne({ _id: dummyQnASession._id });
   });

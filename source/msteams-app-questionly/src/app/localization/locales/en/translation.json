@@ -25,7 +25,8 @@
         "showAnsweredQuestions": "Answered questions",
         "pendingStatus": "Pending",
         "answeredStatus": "Answered",
-        "whenSessionClosed": "Surprising, but true. No questions were posted."
+        "whenSessionClosed": "Surprising, but true. No questions were posted.",
+        "loaderText": "Loading information"
     },
     "meetingPanel": {
         "successText": "Q&A session started",
@@ -37,7 +38,8 @@
         "noQuestionsPosted": "Q & A session is live...",
         "askAway": "Ask away!",
         "updatemessage": "New updates",
-        "bannerText": "Connection lost. Refresh to view content. if that doesn't do the trick, try again later.",
+        "bannerText": "Connection lost. {{RefreshLink}} to view content. If that doesn’t do the trick, try again later.",
+        "refreshLinkText": "Refresh",
         "inputPlaceholder": "Type a question here",
         "refreshSessionButton": "Refresh session",
         "endSessionButton": "End session",
@@ -58,7 +60,14 @@
         "createQnaSessionButton": "Create",
         "notificationTitle": "{{userName}} started a Q&A session",
         "notificationMessage": "Select the Ask Away icon at the top of the meeting view to participate",
-        "notificationButton": "Ok"
+        "notificationButton": "Ok",
+        "switchNow": "Switch now",
+        "cancel": "Cancel",
+        "noSessionsToSelect": "There are no sessions to select.",
+        "live": "Live",
+        "sessionCreatedDate": "Date created: {{date}}",
+        "loaderText": "Loading information",
+        "selectSession": "Select a session:"
     },
     "TaskModuleMessages": {
         "EndSession": "End session",
@@ -76,6 +85,7 @@
         "QnASessionEndPrompt": "Are you sure you want to stop gathering questions?",
         "Cancel": "Cancel",
         "StartQnATitle": "Start a Q&A session",
-        "EndQnATitle": "End a Q&A session"
+        "EndQnATitle": "End a Q&A session",
+        "SwitchSessionTitle": "Switch to another session"
     }
 }

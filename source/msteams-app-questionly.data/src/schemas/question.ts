@@ -29,6 +29,11 @@ const QuestionSchema = new mongoose.Schema(
       type: Boolean,
       required: true,
     },
+    // Time stamp when mark as answered operation is locked. If this field is not set, it means document is not locked.
+    dateTimeMarkAsAnsweredOperationLockAcquired: {
+      type: Date,
+      required: false,
+    },
   },
   { optimisticConcurrency: true }
 );
@@ -37,6 +42,7 @@ interface IQuestionBase extends mongoose.Document {
   content: string;
   dateTimeCreated: Date;
   isAnswered: Boolean;
+  dateTimeMarkAsAnsweredOperationLockAcquired?: Date;
 }
 
 /**

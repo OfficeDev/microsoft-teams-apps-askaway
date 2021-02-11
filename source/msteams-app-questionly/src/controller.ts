@@ -4,7 +4,7 @@ import { AdaptiveCard } from 'adaptivecards';
 import { exceptionLogger, trackCreateQnASessionEvent, trackCreateQuestionEvent } from 'src/util/exceptionTracking';
 import jimp from 'jimp';
 import { join } from 'path';
-import { IQuestion, IQuestionPopulatedUser, IQnASessionDataService, IQuestionDataService, IQnASession_populated, IConversation } from 'msteams-app-questionly.data';
+import { IQuestion, IQuestionPopulatedUser, IQnASessionDataService, IQuestionDataService, IQnASession_populated, IConversation, SessionIsNoLongerActiveError } from 'msteams-app-questionly.data';
 import { isPresenterOrOrganizer } from 'src/util/meetingsUtility';
 import { UnauthorizedAccessError, UnauthorizedAccessErrorCode } from 'src/errors/unauthorizedAccessError';
 import {
@@ -16,6 +16,9 @@ import {
     triggerBackgroundJobForQuestionUpvotedEvent,
 } from 'src/background-job/backgroundJobTrigger';
 import { isValidStringParameter } from 'src/util/typeUtility';
+import { ChangesRevertedDueToBackgroundJobFailureError } from 'src/errors/changesRevertedDueToBackgroundJobFailureError';
+import { RevertOperationFailedAfterBackgroundJobFailureError } from 'src/errors/revertOperationFailedAfterBackgroundJobFailureError';
+import { TelemetryExceptions } from './constants/telemetryConstants';
 
 export interface IController {
     startQnASession: (sessionParameters: {
@@ -45,7 +48,15 @@ export interface IController {
         serviceUrl: string,
         meetingId?: string
     ) => Promise<IQuestionPopulatedUser>;
-    downvoteQuestion: (conversationId: string, qnaSessionId: string, questionId: string, aadObjectId: string, serviceUrl: string, meetingId?: string) => Promise<IQuestionPopulatedUser>;
+    downvoteQuestion: (
+        conversationId: string,
+        qnaSessionId: string,
+        questionId: string,
+        aadObjectId: string,
+        userName: string,
+        serviceUrl: string,
+        meetingId?: string
+    ) => Promise<IQuestionPopulatedUser>;
     updateUpvote: (qnaSessionId: string, questionId: string, aadObjectId: string, name: string, conversationId: string, theme: string, serviceUrl: string, meetingId?: string) => Promise<AdaptiveCard>;
     getEndQnAConfirmationCard: (qnaSessionId: string) => AdaptiveCard;
     endQnASession: (sessionParameters: {
@@ -139,19 +150,33 @@ export class Controller implements IController {
             isMeetingGroupChat: isMeetingGroupChat,
         });
 
-        trackCreateQnASessionEvent({
-            qnaSessionId: response?._id,
-            tenantId: sessionParameters.tenantId,
-            hostUserId: sessionParameters.hostUserId,
-            isChannel: sessionParameters.isChannel,
-            meetingId: sessionParameters.meetingId,
-            conversationId: sessionParameters.conversationId,
-            sessionTitle: sessionParameters.title,
-        });
+        if (await triggerBackgroundJobForQnaSessionCreatedEvent(response, sessionParameters.serviceUrl, sessionParameters.meetingId)) {
+            trackCreateQnASessionEvent({
+                qnaSessionId: response?._id,
+                tenantId: sessionParameters.tenantId,
+                hostUserId: sessionParameters.hostUserId,
+                isChannel: sessionParameters.isChannel,
+                meetingId: sessionParameters.meetingId,
+                conversationId: sessionParameters.conversationId,
+                sessionTitle: sessionParameters.title,
+            });
 
-        await triggerBackgroundJobForQnaSessionCreatedEvent(response, sessionParameters.serviceUrl, sessionParameters.meetingId);
+            return response;
+        } else {
+            try {
+                // Revert changes if there is an error in triggering background job, as the card won't get posted and clients won't get event.
+                await this.qnaSessionDataService.deleteQnASession(response._id);
+            } catch (error) {
+                exceptionLogger(error, {
+                    message: `Failure in reverting created session after background job failure. session id ${response?._id}`,
+                    qnaSessionId: response?._id,
+                    exceptionName: TelemetryExceptions.RevertOperationFailedAfterBackgroundJobFailure,
+                });
+                throw new RevertOperationFailedAfterBackgroundJobFailureError(`Failure in reverting created session after background job failure. session id ${response?._id}`);
+            }
 
-        return response;
+            throw new ChangesRevertedDueToBackgroundJobFailureError();
+        }
     };
 
     /**
@@ -181,6 +206,31 @@ export class Controller implements IController {
     };
 
     /**
+     * If any of the QnA session operation throws error as the session is no more active, there is a probability that the
+     * adaptive card/ client app is not up to date with latest session state. Hence trigger bakground job for session ended event.
+     * @param error - error occured during session updatation.
+     * @param conversationId - conversation id of chat in which the session is created.
+     * @param sessionId - session id.
+     * @param serviceUrl - service url.
+     * @param meetingId - meeting id.
+     * @throws - this method should not throw any errors or exception as it is called from the error flows.
+     */
+    private handleOperationFailureForEndedSession = (error: any, conversationId: string, sessionId: string, serviceUrl: string, meetingId?: string) => {
+        try {
+            if (error instanceof SessionIsNoLongerActiveError) {
+                triggerBackgroundJobForQnaSessionEndedEvent(conversationId, sessionId, serviceUrl, meetingId);
+            }
+        } catch (error) {
+            exceptionLogger(error, {
+                conversationId: conversationId,
+                qnaSessionId: sessionId,
+                meetingId: meetingId,
+                filename: module?.id,
+            });
+        }
+    };
+
+    /**
      * Handles and formats the parameters, then sends new question details to the database.
      * Also triggers backgorund job.
      * @param qnaSessionId - id of the current QnA session
@@ -202,21 +252,29 @@ export class Controller implements IController {
         meetingId?: string
     ): Promise<IQuestion> => {
         try {
-            const question: IQuestion = await this.questionDataService.createQuestion(qnaSessionId, <string>userAadObjId, userName, questionContent, conversationId);
+            const question = await this.questionDataService.createQuestion(qnaSessionId, userAadObjId, userName, questionContent, conversationId);
 
-            trackCreateQuestionEvent({
-                questionId: question?._id,
-                qnaSessionId: qnaSessionId,
-                conversationId: conversationId,
-                questionContent: questionContent,
-            });
+            if (await triggerBackgroundJobForQuestionPostedEvent(conversationId, question, qnaSessionId, userAadObjId, serviceUrl, meetingId)) {
+                trackCreateQuestionEvent({ questionId: question?._id, qnaSessionId: qnaSessionId, conversationId: conversationId, questionContent: questionContent });
+                return question;
+            } else {
+                try {
+                    // Revert changes if there is an error in triggering background job, as the card won't get updated and clients won't get event.
+                    await this.questionDataService.deleteQuestion(question._id);
+                } catch (error) {
+                    exceptionLogger(error, {
+                        message: `Failure in reverting posted question after background job failure. question id ${question?._id}`,
+                        questionId: question?._id,
+                        exceptionName: TelemetryExceptions.RevertOperationFailedAfterBackgroundJobFailure,
+                    });
+                    throw new RevertOperationFailedAfterBackgroundJobFailureError(`Failure in reverting posted question after background job failure. question id ${question?._id}`);
+                }
 
-            triggerBackgroundJobForQuestionPostedEvent(conversationId, question, qnaSessionId, userAadObjId, serviceUrl, meetingId);
-
-            return question;
+                throw new ChangesRevertedDueToBackgroundJobFailureError();
+            }
         } catch (error) {
-            exceptionLogger(error);
-            throw new Error('Failed to submit new question');
+            this.handleOperationFailureForEndedSession(error, conversationId, qnaSessionId, serviceUrl, meetingId);
+            throw error;
         }
     };
 
@@ -238,14 +296,32 @@ export class Controller implements IController {
         aadObjectId: string,
         serviceUrl: string
     ): Promise<IQuestionPopulatedUser> => {
-        if (await isPresenterOrOrganizer(meetingId, aadObjectId, conversationData.tenantId, conversationData.serviceUrl)) {
-            const questionData = await this.questionDataService.markQuestionAsAnswered(conversationData._id, qnaSessionId, questionId);
+        try {
+            if (await isPresenterOrOrganizer(meetingId, aadObjectId, conversationData.tenantId, conversationData.serviceUrl)) {
+                const questionData = await this.questionDataService.markQuestionAsAnswered(conversationData._id, qnaSessionId, questionId);
 
-            await triggerBackgroundJobForQuestionMarkedAsAnsweredEvent(conversationData._id, questionId, qnaSessionId, aadObjectId, serviceUrl, meetingId);
-
-            return questionData;
-        } else {
-            throw new UnauthorizedAccessError(UnauthorizedAccessErrorCode.InsufficientPermissionsToMarkQuestionAsAnswered);
+                if (await triggerBackgroundJobForQuestionMarkedAsAnsweredEvent(conversationData._id, questionId, qnaSessionId, aadObjectId, serviceUrl, meetingId)) {
+                    return questionData;
+                } else {
+                    try {
+                        // Revert changes if there is an error in triggering background job, as clients won't get event.
+                        await this.questionDataService.markQuestionAsUnanswered(questionId);
+                    } catch (error) {
+                        exceptionLogger(error, {
+                            message: `Failure in marking question as unanswered after background job failure. question id ${questionData?._id}`,
+                            questionId: questionData?._id,
+                            exceptionName: TelemetryExceptions.RevertOperationFailedAfterBackgroundJobFailure,
+                        });
+                        throw new RevertOperationFailedAfterBackgroundJobFailureError(`Failure in marking question as unanswered after background job failure. question id ${questionData?._id}`);
+                    }
+                    throw new ChangesRevertedDueToBackgroundJobFailureError();
+                }
+            } else {
+                throw new UnauthorizedAccessError(UnauthorizedAccessErrorCode.InsufficientPermissionsToMarkQuestionAsAnswered);
+            }
+        } catch (error) {
+            this.handleOperationFailureForEndedSession(error, conversationData._id, qnaSessionId, serviceUrl, meetingId);
+            throw error;
         }
     };
 
@@ -269,11 +345,31 @@ export class Controller implements IController {
         serviceUrl: string,
         meetingId?: string
     ): Promise<IQuestionPopulatedUser> => {
-        const questionData = await this.questionDataService.upVoteQuestion(conversationId, qnaSessionId, questionId, aadObjectId, userName);
+        try {
+            const questionData = await this.questionDataService.upVoteQuestion(conversationId, qnaSessionId, questionId, aadObjectId, userName);
 
-        await triggerBackgroundJobForQuestionUpvotedEvent(conversationId, questionId, qnaSessionId, aadObjectId, serviceUrl, meetingId);
-
-        return questionData;
+            if (await triggerBackgroundJobForQuestionUpvotedEvent(conversationId, questionId, qnaSessionId, aadObjectId, serviceUrl, meetingId)) {
+                return questionData;
+            } else {
+                try {
+                    // Revert changes if there is an error in triggering background job, as the card won't get updated and clients won't get event.
+                    await this.questionDataService.downVoteQuestion(conversationId, qnaSessionId, questionId, aadObjectId);
+                } catch (error) {
+                    exceptionLogger(error, {
+                        message: `Failure in down voting question after background job failure. question id ${questionData?._id}, userId ${aadObjectId}`,
+                        questionId: questionData?._id,
+                        exceptionName: TelemetryExceptions.RevertOperationFailedAfterBackgroundJobFailure,
+                    });
+                    throw new RevertOperationFailedAfterBackgroundJobFailureError(
+                        `Failure in down voting question after background job failure. question id ${questionData?._id}, userId ${aadObjectId}`
+                    );
+                }
+                throw new ChangesRevertedDueToBackgroundJobFailureError();
+            }
+        } catch (error) {
+            this.handleOperationFailureForEndedSession(error, conversationId, qnaSessionId, serviceUrl, meetingId);
+            throw error;
+        }
     };
 
     /**
@@ -284,6 +380,7 @@ export class Controller implements IController {
      * @param aadObjectId - aad object id of user who downvoted question.
      * @param serviceUrl - bot service url.
      * @param meetingId - meeting id.
+     * @param userName - name of user who upvoted the question.
      * @returns - question document.
      */
     public downvoteQuestion = async (
@@ -291,14 +388,35 @@ export class Controller implements IController {
         qnaSessionId: string,
         questionId: string,
         aadObjectId: string,
+        userName: string,
         serviceUrl: string,
         meetingId?: string
     ): Promise<IQuestionPopulatedUser> => {
-        const questionData = await this.questionDataService.downVoteQuestion(conversationId, qnaSessionId, questionId, aadObjectId);
+        try {
+            const questionData = await this.questionDataService.downVoteQuestion(conversationId, qnaSessionId, questionId, aadObjectId);
 
-        await triggerBackgroundJobForQuestionDownvotedEvent(conversationId, questionId, qnaSessionId, aadObjectId, serviceUrl, meetingId);
-
-        return questionData;
+            if (await triggerBackgroundJobForQuestionDownvotedEvent(conversationId, questionId, qnaSessionId, aadObjectId, serviceUrl, meetingId)) {
+                return questionData;
+            } else {
+                try {
+                    // Revert changes if there is an error in triggering background job, as the card won't get updated and clients won't get event.
+                    await this.questionDataService.upVoteQuestion(conversationId, qnaSessionId, questionId, aadObjectId, userName);
+                } catch (error) {
+                    exceptionLogger(error, {
+                        message: `Failure in up voting question after background job failure. question id ${questionData?._id}, userId ${aadObjectId}`,
+                        questionId: questionData?._id,
+                        exceptionName: TelemetryExceptions.RevertOperationFailedAfterBackgroundJobFailure,
+                    });
+                    throw new RevertOperationFailedAfterBackgroundJobFailureError(
+                        `Failure in up voting question after background job failure. question id ${questionData?._id}, userId ${aadObjectId}`
+                    );
+                }
+                throw new ChangesRevertedDueToBackgroundJobFailureError();
+            }
+        } catch (error) {
+            this.handleOperationFailureForEndedSession(error, conversationId, qnaSessionId, serviceUrl, meetingId);
+            throw error;
+        }
     };
 
     /**
@@ -321,18 +439,37 @@ export class Controller implements IController {
         meetingId?: string
     ): Promise<AdaptiveCard> => {
         try {
-            const response = await this.questionDataService.updateUpvote(questionId, aadObjectId, name);
+            const response = await this.questionDataService.updateUpvote(conversationId, qnaSessionId, questionId, aadObjectId, name);
+            let backgroundJobStatus: boolean;
 
             if (response.upvoted) {
-                await triggerBackgroundJobForQuestionUpvotedEvent(conversationId, response.question._id, qnaSessionId, aadObjectId, serviceUrl, meetingId);
+                backgroundJobStatus = await triggerBackgroundJobForQuestionUpvotedEvent(conversationId, response.question._id, qnaSessionId, aadObjectId, serviceUrl, meetingId);
             } else {
-                await triggerBackgroundJobForQuestionDownvotedEvent(conversationId, response.question._id, qnaSessionId, aadObjectId, serviceUrl, meetingId);
+                backgroundJobStatus = await triggerBackgroundJobForQuestionDownvotedEvent(conversationId, response.question._id, qnaSessionId, aadObjectId, serviceUrl, meetingId);
+            }
+
+            if (!backgroundJobStatus) {
+                try {
+                    // Revert changes if there is an error in triggering background job, as the card won't get updated and clients won't get event.
+                    await this.questionDataService.updateUpvote(conversationId, qnaSessionId, questionId, aadObjectId, name);
+                } catch (error) {
+                    exceptionLogger(error, {
+                        message: `Failure in updating vote for a question after background job failure. question id ${response?.question?._id}, userId ${aadObjectId}`,
+                        questionId: questionId,
+                        exceptionName: TelemetryExceptions.RevertOperationFailedAfterBackgroundJobFailure,
+                    });
+                    throw new RevertOperationFailedAfterBackgroundJobFailureError(
+                        `Failure in updating vote for a question after background job failure. question id ${response?.question?._id}, userId ${aadObjectId}`
+                    );
+                }
+
+                throw new ChangesRevertedDueToBackgroundJobFailureError();
             }
 
             return this.generateLeaderboard(response.question.qnaSessionId, aadObjectId, theme);
         } catch (error) {
-            exceptionLogger(error);
-            throw new Error('Failed to upvote question.');
+            this.handleOperationFailureForEndedSession(error, conversationId, qnaSessionId, serviceUrl, meetingId);
+            throw error;
         }
     };
 
@@ -366,41 +503,49 @@ export class Controller implements IController {
         endedByUserId: string;
         meetingId?: string;
     }): Promise<void> => {
-        const isActive = await this.qnaSessionDataService.isActiveQnA(sessionParameters.qnaSessionId);
-        if (!isActive) {
-            throw new Error('The QnA session has already ended');
-        }
+        try {
+            //Only a Presenter or an Organizer can end QnA session in the meeting.
+            if (sessionParameters.meetingId) {
+                const canEndQnASession = await isPresenterOrOrganizer(sessionParameters.meetingId, sessionParameters.aadObjectId, sessionParameters.tenantId, sessionParameters.serviceURL);
 
-        const isHost = await this.qnaSessionDataService.isHost(sessionParameters.qnaSessionId, sessionParameters.aadObjectId);
+                if (!canEndQnASession) {
+                    throw new UnauthorizedAccessError(UnauthorizedAccessErrorCode.InsufficientPermissionsToCreateOrEndQnASession);
+                }
+            } else {
+                const isHost = await this.qnaSessionDataService.isHost(sessionParameters.qnaSessionId, sessionParameters.aadObjectId);
 
-        //Only a Presenter or an Organizer can end QnA session in the meeting.
-        if (sessionParameters.meetingId) {
-            const canEndQnASession = await isPresenterOrOrganizer(sessionParameters.meetingId, sessionParameters.aadObjectId, sessionParameters.tenantId, sessionParameters.serviceURL);
-
-            if (!canEndQnASession) {
-                throw new UnauthorizedAccessError(UnauthorizedAccessErrorCode.InsufficientPermissionsToCreateOrEndQnASession);
+                if (!isHost) {
+                    throw new Error('Insufficient permissions to end QnA session');
+                }
             }
-        } else {
-            if (!isHost) {
-                throw new Error('Insufficient permissions to end QnA session');
+
+            await this.qnaSessionDataService.endQnASession(
+                sessionParameters.qnaSessionId,
+                sessionParameters.conversationId,
+                sessionParameters.aadObjectId,
+                sessionParameters.userName,
+                sessionParameters.endedByUserId
+            );
+
+            if (!(await triggerBackgroundJobForQnaSessionEndedEvent(sessionParameters.conversationId, sessionParameters.qnaSessionId, sessionParameters.serviceURL, sessionParameters.meetingId))) {
+                try {
+                    // Revert changes if there is an error in triggering background job, as the card won't get updated and clients won't get event.
+                    await this.qnaSessionDataService.activateQnASession(sessionParameters.qnaSessionId);
+                } catch (error) {
+                    exceptionLogger(error, {
+                        message: `Failure in reactivating a session after background job failure. session id id ${sessionParameters.qnaSessionId}`,
+                        qnaSessionId: sessionParameters.qnaSessionId,
+                        exceptionName: TelemetryExceptions.RevertOperationFailedAfterBackgroundJobFailure,
+                    });
+                    throw new RevertOperationFailedAfterBackgroundJobFailureError(`Failure in reactivating a session after background job failure. session id id ${sessionParameters.qnaSessionId}`);
+                }
+
+                throw new ChangesRevertedDueToBackgroundJobFailureError();
             }
+        } catch (error) {
+            this.handleOperationFailureForEndedSession(error, sessionParameters.conversationId, sessionParameters.qnaSessionId, sessionParameters.serviceURL, sessionParameters.meetingId);
+            throw error;
         }
-
-        await this.qnaSessionDataService.endQnASession(
-            sessionParameters.qnaSessionId,
-            sessionParameters.conversationId,
-            sessionParameters.aadObjectId,
-            sessionParameters.userName,
-            sessionParameters.endedByUserId
-        );
-
-        await triggerBackgroundJobForQnaSessionEndedEvent(
-            sessionParameters.conversationId,
-            sessionParameters.qnaSessionId,
-            sessionParameters.aadObjectId,
-            sessionParameters.serviceURL,
-            sessionParameters.meetingId
-        );
     };
 
     /**

@@ -16,11 +16,17 @@ import {
     handleTaskModuleResponseForSuccessfulCreateQnASessionFlow,
     invokeAdaptiveCardBasedTaskModule,
 } from '../../task-modules-utility/taskModuleHelper';
-import { TaskModuleMessages } from '../../task-modules-utility/taskModuleMessages';
 
 describe('test handleTaskModuleErrorForCreateQnASessionFlow', () => {
     let testHandler: () => void;
-    const t = jest.fn();
+    let t: jest.Mock<any, any>;
+
+    beforeAll(() => {
+        t = jest.fn();
+        t.mockImplementation((key: string) => {
+            return key;
+        });
+    });
 
     beforeAll(() => {
         (<any>invokeAdaptiveCardBasedTaskModule) = jest.fn();
@@ -46,7 +52,7 @@ describe('test handleTaskModuleErrorForCreateQnASessionFlow', () => {
 
         handleTaskModuleErrorForCreateQnASessionFlow(t, error, testHandler);
         expect(invokeAdaptiveCardBasedTaskModule).toBeCalledTimes(1);
-        expect(invokeAdaptiveCardBasedTaskModule).toBeCalledWith(TaskModuleMessages.StartQnATitle, createCardForQnASessionLimitExhaustedError(), expect.anything());
+        expect(invokeAdaptiveCardBasedTaskModule).toBeCalledWith(`TaskModuleMessages.StartQnATitle`, createCardForQnASessionLimitExhaustedError(t), expect.anything());
     });
 
     it('test handler for InsufficientPermissionsToCreateOrEndQnASessionError', () => {
@@ -60,7 +66,7 @@ describe('test handleTaskModuleErrorForCreateQnASessionFlow', () => {
 
         handleTaskModuleErrorForCreateQnASessionFlow(t, error, testHandler);
         expect(invokeAdaptiveCardBasedTaskModule).toBeCalledTimes(1);
-        expect(invokeAdaptiveCardBasedTaskModule).toBeCalledWith(TaskModuleMessages.StartQnATitle, createCardForInsufficientPermissionsToCreateQnASessionError());
+        expect(invokeAdaptiveCardBasedTaskModule).toBeCalledWith(`TaskModuleMessages.StartQnATitle`, createCardForInsufficientPermissionsToCreateQnASessionError(t));
     });
 
     it('test handler for UnauthorizedAccessError', () => {
@@ -72,7 +78,7 @@ describe('test handleTaskModuleErrorForCreateQnASessionFlow', () => {
 
         handleTaskModuleErrorForCreateQnASessionFlow(t, error, testHandler);
         expect(invokeAdaptiveCardBasedTaskModule).toBeCalledTimes(1);
-        expect(invokeAdaptiveCardBasedTaskModule).toBeCalledWith(TaskModuleMessages.StartQnATitle, createCardForUnauthorizedAccessError());
+        expect(invokeAdaptiveCardBasedTaskModule).toBeCalledWith(`TaskModuleMessages.StartQnATitle`, createCardForUnauthorizedAccessError(t));
     });
 
     it('test handler for generic error', () => {
@@ -84,14 +90,18 @@ describe('test handleTaskModuleErrorForCreateQnASessionFlow', () => {
 
         handleTaskModuleErrorForCreateQnASessionFlow(t, error, testHandler);
         expect(invokeAdaptiveCardBasedTaskModule).toBeCalledTimes(1);
-        expect(invokeAdaptiveCardBasedTaskModule).toBeCalledWith(TaskModuleMessages.StartQnATitle, createGenericErrorCard());
+        expect(invokeAdaptiveCardBasedTaskModule).toBeCalledWith(`TaskModuleMessages.StartQnATitle`, createGenericErrorCard(t));
     });
 });
 
 describe('test handleTaskModuleErrorForEndQnASessionFlow', () => {
-    const t = jest.fn();
+    let t: jest.Mock<any, any>;
 
     beforeAll(() => {
+        t = jest.fn();
+        t.mockImplementation((key: string) => {
+            return key;
+        });
         (<any>invokeAdaptiveCardBasedTaskModule) = jest.fn();
     });
 
@@ -110,7 +120,7 @@ describe('test handleTaskModuleErrorForEndQnASessionFlow', () => {
 
         handleTaskModuleErrorForEndQnASessionFlow(t, error);
         expect(invokeAdaptiveCardBasedTaskModule).toBeCalledTimes(1);
-        expect(invokeAdaptiveCardBasedTaskModule).toBeCalledWith(t, TaskModuleMessages.EndQnATitle, createCardForInsufficientPermissionsToEndQnASessionError());
+        expect(invokeAdaptiveCardBasedTaskModule).toBeCalledWith(`TaskModuleMessages.EndQnATitle`, createCardForInsufficientPermissionsToEndQnASessionError(t));
     });
 
     it('test handler for UnauthorizedAccessError', () => {
@@ -122,7 +132,7 @@ describe('test handleTaskModuleErrorForEndQnASessionFlow', () => {
 
         handleTaskModuleErrorForEndQnASessionFlow(t, error);
         expect(invokeAdaptiveCardBasedTaskModule).toBeCalledTimes(1);
-        expect(invokeAdaptiveCardBasedTaskModule).toBeCalledWith(t, TaskModuleMessages.EndQnATitle, createCardForUnauthorizedAccessError());
+        expect(invokeAdaptiveCardBasedTaskModule).toBeCalledWith(`TaskModuleMessages.EndQnATitle`, createCardForUnauthorizedAccessError(t));
     });
 
     it('test handler for generic error', () => {
@@ -134,14 +144,18 @@ describe('test handleTaskModuleErrorForEndQnASessionFlow', () => {
 
         handleTaskModuleErrorForEndQnASessionFlow(t, error);
         expect(invokeAdaptiveCardBasedTaskModule).toBeCalledTimes(1);
-        expect(invokeAdaptiveCardBasedTaskModule).toBeCalledWith(t, TaskModuleMessages.EndQnATitle, createGenericErrorCard());
+        expect(invokeAdaptiveCardBasedTaskModule).toBeCalledWith(`TaskModuleMessages.EndQnATitle`, createGenericErrorCard(t));
     });
 });
 
 describe('test handleTaskModuleResponseForSuccessfulCreateQnASessionFlow', () => {
-    const t = jest.fn();
+    let t: jest.Mock<any, any>;
 
     beforeAll(() => {
+        t = jest.fn();
+        t.mockImplementation((key: string) => {
+            return key;
+        });
         (<any>invokeAdaptiveCardBasedTaskModule) = jest.fn();
     });
 
@@ -152,14 +166,18 @@ describe('test handleTaskModuleResponseForSuccessfulCreateQnASessionFlow', () =>
     it('test success card', () => {
         handleTaskModuleResponseForSuccessfulCreateQnASessionFlow(t);
         expect(invokeAdaptiveCardBasedTaskModule).toBeCalledTimes(1);
-        expect(invokeAdaptiveCardBasedTaskModule).toBeCalledWith(TaskModuleMessages.StartQnATitle, createSuccessAdaptiveCard(TaskModuleMessages.NewSessionCreated));
+        expect(invokeAdaptiveCardBasedTaskModule).toBeCalledWith(`TaskModuleMessages.StartQnATitle`, createSuccessAdaptiveCard(`TaskModuleMessages.NewSessionCreated`));
     });
 });
 
 describe('test handleTaskModuleResponseForEndQnASessionFlow', () => {
-    const t = jest.fn();
+    let t: jest.Mock<any, any>;
 
     beforeAll(() => {
+        t = jest.fn();
+        t.mockImplementation((key: string) => {
+            return key;
+        });
         (<any>invokeAdaptiveCardBasedTaskModule) = jest.fn();
     });
 
@@ -170,6 +188,6 @@ describe('test handleTaskModuleResponseForEndQnASessionFlow', () => {
     it('test success card', () => {
         handleTaskModuleResponseForEndQnASessionFlow(t);
         expect(invokeAdaptiveCardBasedTaskModule).toBeCalledTimes(1);
-        expect(invokeAdaptiveCardBasedTaskModule).toBeCalledWith(t, TaskModuleMessages.EndQnATitle, createSuccessAdaptiveCard(TaskModuleMessages.UnblockedToCreateNewSession));
+        expect(invokeAdaptiveCardBasedTaskModule).toBeCalledWith(`TaskModuleMessages.EndQnATitle`, createSuccessAdaptiveCard(`TaskModuleMessages.UnblockedToCreateNewSession`));
     });
 });

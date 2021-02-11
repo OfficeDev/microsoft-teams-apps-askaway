@@ -1,3 +1,5 @@
+let moment = require('moment');
+
 export class Helper {
     constructor() {}
 
@@ -25,6 +27,10 @@ export class Helper {
             answeredQuestions: [],
             unansweredQuestions: [],
         };
+    }
+
+    public createDateString(date: Date): string {
+        return moment(date).format('L');
     }
 }
 // tslint:disable-next-line:export-name
