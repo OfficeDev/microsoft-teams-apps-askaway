@@ -21,7 +21,8 @@
     "BroadcastActivityRetryAttemptCount": 2,
     "MaxWaitTimeForAdaptiveCardRefreshInMs": 5000,
     "AvatarKey": "{{AvatarKey}}",
-    "HostName": "{{HostName}}"
+    "HostName": "{{HostName}}",
+    "ExpireInMemorySecretsAfterMs": "{{ExpireInMemorySecretsAfterMs}}"
   },
   "Host": {
     "LocalHttpPort": 7071,
