@@ -24,6 +24,7 @@ import { setupWebServerApp, startWebServer } from 'src/util/webServerUtility';
 import { TelemetryExceptions } from 'src/constants/telemetryConstants';
 import { ClientDataContractFormatter } from 'src/util/clientDataContractFormatter';
 import { Controller } from 'src/controller';
+import { initializeCacheInstance } from './util/memoryCache';
 
 /**
  * Establishes DB connection.
@@ -52,6 +53,9 @@ async function initializeSupportingModules() {
 
     // Establish db connection.
     await setupDBConection();
+
+    // Initialize memory cache instance.
+    initializeCacheInstance();
 }
 
 /**

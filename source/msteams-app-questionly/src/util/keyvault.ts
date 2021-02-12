@@ -1,26 +1,22 @@
-import { DefaultAzureCredential } from '@azure/identity';
 import { SecretClient } from '@azure/keyvault-secrets';
 import { exceptionLogger } from 'src/util/exceptionTracking';
-import memoryCache, { CacheClass } from 'memory-cache';
 import { ifNumber } from 'src/util/typeUtility';
+import { getCredential } from './azureCredentialUtility';
+import { getFromMemoryCache, putIntoMemoryCache } from './memoryCache';
 
 const vaultName = process.env.KeyVaultName;
 const mongoURISecretName = 'MongoDbUri';
 const applicationInsightsInstrumentationKeySecretName = 'ApplicationInsightsInstrumentationKey';
 const microsoftAppPasswordSecretName = 'MicrosoftAppPassword';
 const avatarKeySecretName = 'AvatarKey';
-const backgroundFunctionKeySecretName = 'BackgroundFunctionKey';
 
-let memCache: CacheClass<string, string>;
 let keyVaultSecretClient: SecretClient;
 
 /**
  * Initialize memory cache and secret client for key vault.
  */
 export const initKeyVault = () => {
-    memCache = new memoryCache.Cache();
-
-    const credential = new DefaultAzureCredential();
+    const credential = getCredential();
     const url = `https://${vaultName}.vault.azure.net`;
 
     keyVaultSecretClient = new SecretClient(url, credential);
@@ -72,7 +68,7 @@ const getSecretFromVault = async (secretName: string): Promise<string> => {
  * @throws - Error that occurs while reading secret.
  */
 const getSecretFromCache = async (secretName: string): Promise<string> => {
-    const secretValueFromCache = memCache.get(secretName);
+    const secretValueFromCache = getFromMemoryCache(secretName);
 
     if (secretValueFromCache === null) {
         const secret = await getSecretFromVault(secretName);
@@ -81,7 +77,7 @@ const getSecretFromCache = async (secretName: string): Promise<string> => {
         // Currently only `AvatarKey` and `MicrosoftAppPassword` are set in cache as it's used multiple time.
         // All other secrets are used once during initialization hence fetched from key vault directly.
         const retryAfterMs = ifNumber(process.env.ExpireInMemorySecretsAfterMs, 24 * 60 * 60 * 1000);
-        memCache.put(secretName, secret, retryAfterMs);
+        putIntoMemoryCache(secretName, secret, retryAfterMs);
 
         return secret;
     } else {

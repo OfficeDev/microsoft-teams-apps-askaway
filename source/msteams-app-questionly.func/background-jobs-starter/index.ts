@@ -7,13 +7,11 @@ import {
 import { isValidParam, isValidToken } from "../src/utils/requestUtility";
 import { errorStrings } from "../src/constants/errorStrings";
 import { initiateDBConnection } from "../src/utils/dbUtility";
-import { exceptionLogger } from "../src/utils/exceptionTracking";
 
 const httpStart: AzureFunction = async function (
   context: Context,
   req: HttpRequest
 ): Promise<any> {
-  const operationId: string = req.body?.operationId;
   const authorizationHeader = req.headers.authorization;
 
   if (!isValidToken(authorizationHeader)) {
