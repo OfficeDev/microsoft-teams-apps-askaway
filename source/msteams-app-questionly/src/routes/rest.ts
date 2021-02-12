@@ -218,6 +218,7 @@ router.post('/:conversationId/sessions', async (req: Express.Request, res: Expre
         const response: ClientDataContract.QnaSession = {
             sessionId: session._id,
             title: session.title,
+            description: session.description,
             isActive: session.isActive,
             hostUser: { id: user._id, name: user.userName },
             dateTimeCreated: session.dateTimeCreated,

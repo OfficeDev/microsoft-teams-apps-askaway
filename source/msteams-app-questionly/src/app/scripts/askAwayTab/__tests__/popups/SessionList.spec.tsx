@@ -14,6 +14,7 @@ describe('Test SessionList Component', () => {
         testSessions = [
             {
                 title: 'test',
+                description: 'testDescription1',
                 isActive: false,
                 dateTimeCreated: new Date(),
                 answeredQuestions: [],
@@ -22,7 +23,8 @@ describe('Test SessionList Component', () => {
                 sessionId: 'sessionId',
             },
             {
-                title: 'test',
+                title: 'testDescription2',
+                description: 'test',
                 isActive: false,
                 dateTimeCreated: new Date(),
                 answeredQuestions: [],

@@ -12,6 +12,7 @@ export const createQnaSessionCreatedEvent = (qnaSession: IQnASession_populated):
     const qnaSessionData: ClientDataContract.QnaSession = {
         sessionId: qnaSession._id,
         title: qnaSession.title,
+        description: qnaSession.description,
         isActive: qnaSession.isActive,
         hostUser: {
             id: qnaSession.hostId._id,

@@ -3,6 +3,7 @@ import './../index.scss';
 import * as React from 'react';
 import { Menu, tabListBehavior } from '@fluentui/react-northstar';
 import { CONST } from './../shared/Constants';
+import { TFunction } from 'i18next';
 
 /**
  * Properties for the TabHeader React component
@@ -10,7 +11,7 @@ import { CONST } from './../shared/Constants';
 export interface TabHeaderProps {
     onSelectActiveTab: Function;
     tabActiveIndex: number;
-    t: Function;
+    t: TFunction;
 }
 const TabHeader: React.FunctionComponent<TabHeaderProps> = (props) => {
     const items = [

@@ -7,6 +7,9 @@ import { useState } from 'react';
 import { HttpService } from '../shared/HttpService';
 import * as microsoftTeams from '@microsoft/teams-js';
 import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
+import { ApplicationInsights, SeverityLevel } from '@microsoft/applicationinsights-web';
+import { invokeTaskModuleForQuestionPostFailure } from '../task-modules-utility/taskModuleHelper';
+import { TFunction } from 'i18next';
 
 /**
  * Properties for the NewQuestion React component
@@ -16,7 +19,8 @@ export interface NewQuestionProps {
     httpService: HttpService;
     teamsTabContext: microsoftTeams.Context;
     onAddNewQuestion: Function;
-    t: Function;
+    t: TFunction;
+    appInsights: ApplicationInsights;
 }
 const NewQuestion: React.FunctionComponent<NewQuestionProps> = (props) => {
     const [question, setQuestion] = useState('');
@@ -24,17 +28,29 @@ const NewQuestion: React.FunctionComponent<NewQuestionProps> = (props) => {
     /**
      * on Submit the questions
      */
-    const submitQuestion = () => {
-        if (question) {
-            props.httpService
-                .post(`/conversations/${props.teamsTabContext.chatId}/sessions/${props.activeSessionData.sessionId}/questions`, { questionContent: question })
-                .then((response: any) => {
-                    if (response && response.data && response.data.id) {
-                        setQuestion('');
-                        props.onAddNewQuestion(response.data);
-                    }
-                })
-                .catch((error) => {});
+    const submitQuestion = async () => {
+        try {
+            if (question) {
+                const response = await props.httpService.post(`/conversations/${props.teamsTabContext.chatId}/sessions/${props.activeSessionData.sessionId}/questions`, { questionContent: question });
+
+                if (response && response.data && response.data.id) {
+                    setQuestion('');
+                    props.onAddNewQuestion(response.data);
+                } else {
+                    throw new Error(`invalid response from post question api, response: ${response.status} ${response.statusText}`);
+                }
+            }
+        } catch (error) {
+            invokeTaskModuleForQuestionPostFailure(props.t);
+
+            props.appInsights.trackException({
+                exception: error,
+                severityLevel: SeverityLevel.Error,
+                properties: {
+                    meetingId: props.teamsTabContext.meetingId,
+                    userAadObjectId: props.teamsTabContext.userObjectId,
+                },
+            });
         }
     };
 

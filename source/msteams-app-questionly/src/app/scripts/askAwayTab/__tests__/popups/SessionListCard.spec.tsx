@@ -14,6 +14,7 @@ describe('Test SessionListCard Component', () => {
     beforeEach(() => {
         testSession = {
             title: 'test',
+            description: 'testDescription1',
             isActive: false,
             dateTimeCreated: new Date(),
             answeredQuestions: [],

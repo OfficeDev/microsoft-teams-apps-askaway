@@ -66,7 +66,10 @@
         "live": "Live",
         "sessionCreatedDate": "Date created: {{date}}",
         "loaderText": "Loading information",
-        "selectSession": "Select a session:"
+        "selectSession": "Select a session:",
+        "updateQuestionFailedTitle": "Update a question",
+        "postQuestionFailedTitle": "Post a question",
+        "genericFailureTitle": "Something went wrong"
     },
     "TaskModuleMessages": {
         "EndSession": "End session",

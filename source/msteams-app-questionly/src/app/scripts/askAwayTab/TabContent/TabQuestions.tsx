@@ -7,21 +7,18 @@ import { LikeIconFilled } from '../shared/Icons/LikeIconFilled';
 import { CONST } from '../shared/Constants';
 import { useState } from 'react';
 import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
-import { withTheme } from '../shared/WithTheme';
+import { ThemeProps, withTheme } from '../shared/WithTheme';
 
 /**
  * Properties for the TabQuestions React component
  */
-
-interface ThemeProps {
-    theme: ThemePrepared;
-}
 export interface TabQuestionsProps {
     activeSessionData: ClientDataContract.QnaSession;
     teamsTabContext: microsoftTeams.Context;
     onClickAction: Function;
     t: Function;
 }
+
 const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (props) => {
     const [isPendingTabOpen, setPendingTabOpen] = useState(true);
 
