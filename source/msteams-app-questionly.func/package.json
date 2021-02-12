@@ -18,9 +18,10 @@
     "azure-ad-jwt-lite": "^1.1.0",
     "botbuilder": "^4.10.4",
     "durable-functions": "^1.4.4",
-    "moment": "^2.29.1",
     "http-status-codes": "^2.1.4",
     "i18next": "^19.6.0",
+    "memory-cache": "^0.2.0",
+    "moment": "^2.29.1",
     "random": "^2.2.0",
     "seedrandom": "^3.0.5"
   },
