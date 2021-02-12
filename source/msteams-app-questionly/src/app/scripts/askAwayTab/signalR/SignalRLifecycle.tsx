@@ -85,6 +85,11 @@ export interface SignalRLifecycleProps {
      * signalR HubConnection for UTs only.
      */
     connection?: signalR.HubConnection;
+
+    /**
+     *  __FOR_UTs_ONLY_ flag disabling trans 'react-i18next' component.
+     */
+    __disableTransComponent?: boolean;
 }
 
 /**
@@ -248,7 +253,7 @@ const SignalRLifecycle: React.FunctionComponent<SignalRLifecycleProps> = (props)
     return (
         <div id="alertHolder">
             {props.enableLiveUpdates && (connectionStatus === ConnectionStatus.NotConnected || connectionStatus === ConnectionStatus.Reconnecting) && (
-                <ConnectionStatusAlert t={props.t} onRefreshConnection={refreshConnection}></ConnectionStatusAlert>
+                <ConnectionStatusAlert __disableTransComponent={props.__disableTransComponent} t={props.t} onRefreshConnection={refreshConnection}></ConnectionStatusAlert>
             )}
         </div>
     );

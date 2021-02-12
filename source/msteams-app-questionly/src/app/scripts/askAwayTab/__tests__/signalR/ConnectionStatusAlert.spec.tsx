@@ -3,6 +3,7 @@ import * as React from 'react';
 import Adapter from 'enzyme-adapter-react-16';
 import { Text, Button, ThemePrepared } from '@fluentui/react-northstar';
 import { ConnectionStatusAlert } from '../../signalR/ConnectionStatusAlert';
+import { Trans } from 'react-i18next';
 
 configure({ adapter: new Adapter() });
 
@@ -12,8 +13,8 @@ describe('Test ConnectionStatusAlert Component', () => {
 
     beforeAll(() => {
         t = jest.fn();
-        t.mockImplementation((key: string, obj: any) => {
-            return obj?.RefreshLink || key;
+        t.mockImplementation((key: string) => {
+            return key;
         });
     });
 
@@ -46,29 +47,9 @@ describe('Test ConnectionStatusAlert Component', () => {
         expect(wrapper.find(Text)).toHaveLength(1);
 
         // Make sure `refresh now` link is present.
-        expect(wrapper.find('a.refreshNowLink')).toHaveLength(1);
+        expect(wrapper.find(Trans)).toHaveLength(1);
 
         // Make sure dismiss action is present.
         expect(wrapper.find(Button)).toHaveLength(1);
-    });
-
-    it('should call `onRefreshConnection` callback on refresh now link', () => {
-        const wrapper = shallow(<ConnectionStatusAlert t={t} theme={createThemeForUTs()} onRefreshConnection={onRefreshConnection} />);
-
-        // Click on close button.
-        wrapper.find('a.refreshNowLink').simulate('click', { preventDefault: () => {} });
-        wrapper.update();
-
-        // Make sure connection status text is not present.
-        expect(wrapper.find(Text)).toHaveLength(1);
-
-        // Make sure `refresh now` link is not present.
-        expect(wrapper.find('a.refreshNowLink')).toHaveLength(1);
-
-        // Make sure dismiss action is not present.
-        expect(wrapper.find(Button)).toHaveLength(1);
-
-        // Make sure callback is called.
-        expect(onRefreshConnection).toBeCalledTimes(1);
     });
 });
