@@ -25,6 +25,7 @@ describe('Test SwitchSessionInternal Component', () => {
         testSessions = [
             {
                 title: 'test',
+                description: 'testDescription1',
                 isActive: false,
                 dateTimeCreated: new Date(),
                 answeredQuestions: [],
@@ -34,6 +35,7 @@ describe('Test SwitchSessionInternal Component', () => {
             },
             {
                 title: 'test',
+                description: 'testDescription2',
                 isActive: false,
                 dateTimeCreated: new Date(),
                 answeredQuestions: [],

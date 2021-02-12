@@ -1,18 +1,11 @@
-import { ThemePrepared, Text, Flex } from '@fluentui/react-northstar';
+import { Text, Flex } from '@fluentui/react-northstar';
 import { TFunction } from 'i18next';
 import * as React from 'react';
 import { ClientDataContract } from '../../../../../contracts/clientDataContract';
 import Badge from '../../shared/Badge';
 import Helper from '../../shared/Helper';
-import { withTheme } from '../../shared/WithTheme';
+import { ThemeProps, withTheme } from '../../shared/WithTheme';
 import './../../index.scss';
-
-/**
- * Theme properties taken from context
- */
-interface ThemeProps {
-    theme: ThemePrepared;
-}
 
 export interface SessionListCardProps {
     /**

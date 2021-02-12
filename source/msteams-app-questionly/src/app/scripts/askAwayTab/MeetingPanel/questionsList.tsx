@@ -9,6 +9,10 @@ import Question from './Question';
 import { CONST } from '../shared/Constants';
 import { ClientDataContract } from '../../../../contracts/clientDataContract';
 import { ParticipantRoles } from '../../../../enums/ParticipantRoles';
+import { invokeTaskModuleForQuestionUpdateFailure } from '../task-modules-utility/taskModuleHelper';
+import { ApplicationInsights, SeverityLevel } from '@microsoft/applicationinsights-web';
+import { TFunction } from 'i18next';
+
 /**
  * Properties for the QuestionsList React component
  */
@@ -16,8 +20,9 @@ export interface QuestionsListProps {
     activeSessionData: ClientDataContract.QnaSession;
     httpService: HttpService;
     teamsTabContext: microsoftTeams.Context;
-    t: Function;
+    t: TFunction;
     userRole: ParticipantRoles;
+    appInsights: ApplicationInsights;
 }
 
 export interface QuestionTab {
@@ -44,26 +49,41 @@ const QuestionsList: React.FunctionComponent<QuestionsListProps> = (props) => {
      * On click like icon in the answered and unanswered questions
      * @param event - question, key, actionValue
      */
-    const handleOnClickAction = (event) => {
-        props.httpService
-            .patch(`/conversations/${props.teamsTabContext.chatId}/sessions/${activeSessionData.sessionId}/questions/${event.question['id']}`, { action: event.actionValue })
-            .then((response: any) => {
-                if (response.data && response.data.id) {
-                    let questions = activeSessionData[event.key];
-                    const index = questions.findIndex((q) => q.id === response.data.id);
-                    if (event.actionValue === CONST.TAB_QUESTIONS.MARK_ANSWERED && event.key === CONST.TAB_QUESTIONS.UNANSWERED_Q) {
-                        questions.splice(index, 1);
-                        setActiveSessionData({ ...activeSessionData, ...questions });
-                        let questionsAnswered = activeSessionData[CONST.TAB_QUESTIONS.ANSWERED_Q];
-                        questionsAnswered.unshift(response.data);
-                        setActiveSessionData({ ...activeSessionData, ...questionsAnswered });
-                    } else {
-                        questions[index] = response.data;
-                        setActiveSessionData({ ...activeSessionData, ...questions });
-                    }
+    const handleOnClickAction = async (event) => {
+        try {
+            const response = await props.httpService.patch(`/conversations/${props.teamsTabContext.chatId}/sessions/${activeSessionData.sessionId}/questions/${event.question['id']}`, {
+                action: event.actionValue,
+            });
+
+            if (response.data && response.data.id) {
+                let questions = activeSessionData[event.key];
+                const index = questions.findIndex((q) => q.id === response.data.id);
+                if (event.actionValue === CONST.TAB_QUESTIONS.MARK_ANSWERED && event.key === CONST.TAB_QUESTIONS.UNANSWERED_Q) {
+                    questions.splice(index, 1);
+                    setActiveSessionData({ ...activeSessionData, ...questions });
+                    let questionsAnswered = activeSessionData[CONST.TAB_QUESTIONS.ANSWERED_Q];
+                    questionsAnswered.unshift(response.data);
+                    setActiveSessionData({ ...activeSessionData, ...questionsAnswered });
+                } else {
+                    questions[index] = response.data;
+                    setActiveSessionData({ ...activeSessionData, ...questions });
                 }
-            })
-            .catch((error) => {});
+            } else {
+                throw new Error(`invalid response from update question api. response: ${response.status} ${response.statusText}`);
+            }
+        } catch (error) {
+            invokeTaskModuleForQuestionUpdateFailure(props.t);
+            props.appInsights.trackException({
+                exception: error,
+                severityLevel: SeverityLevel.Error,
+                properties: {
+                    meetingId: props.teamsTabContext.meetingId,
+                    userAadObjectId: props.teamsTabContext.userObjectId,
+                    questionId: event?.question?.id,
+                    message: `Failure in updating question, update action ${event?.actionValue}`,
+                },
+            });
+        }
     };
 
     /**

@@ -2,8 +2,8 @@
 import './../index.scss';
 import * as React from 'react';
 import { useState } from 'react';
-import { Flex, Button, Text, FlexItem, CloseIcon, ThemePrepared } from '@fluentui/react-northstar';
-import { withTheme } from '../shared/WithTheme';
+import { Flex, Button, Text, FlexItem, CloseIcon } from '@fluentui/react-northstar';
+import { ThemeProps, withTheme } from '../shared/WithTheme';
 import { TFunction } from 'i18next';
 
 /**
@@ -19,13 +19,6 @@ export interface ConnectionStatusAlertProps {
      * TFunction to localize strings.
      */
     t: TFunction;
-}
-
-/**
- * Theme properties taken from context.
- */
-interface ThemeProps {
-    theme: ThemePrepared;
 }
 
 /**

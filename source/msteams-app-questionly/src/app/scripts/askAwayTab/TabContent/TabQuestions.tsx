@@ -7,7 +7,7 @@ import { LikeIconFilled } from '../shared/Icons/LikeIconFilled';
 import { CONST } from '../shared/Constants';
 import { useState } from 'react';
 import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
-import { withTheme, ThemeProps } from '../shared/WithTheme';
+import { ThemeProps, withTheme } from '../shared/WithTheme';
 
 /**
  * Properties for the TabQuestions React component
@@ -18,6 +18,7 @@ export interface TabQuestionsProps {
     onClickAction: Function;
     t: Function;
 }
+
 const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (props) => {
     const [isPendingTabOpen, setPendingTabOpen] = useState(true);
 

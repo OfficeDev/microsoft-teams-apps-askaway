@@ -44,6 +44,7 @@ export class ClientDataContractFormatter implements IClientDataContractFormatter
 
         return {
             sessionId: qnaSessionData._id,
+            description: qnaSessionData.description,
             title: qnaSessionData.title,
             isActive: qnaSessionData.isActive,
             dateTimeCreated: qnaSessionData.dateTimeCreated,

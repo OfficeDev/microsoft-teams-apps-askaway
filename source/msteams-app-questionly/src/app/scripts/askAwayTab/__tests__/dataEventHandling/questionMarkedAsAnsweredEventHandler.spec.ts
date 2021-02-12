@@ -30,6 +30,7 @@ describe('validates QuestionMarkedAsAnsweredEventHandler', () => {
             sessionId: testsessionId,
             isActive: true,
             title: '',
+            description: 'testDescription1',
             answeredQuestions: [],
             unansweredQuestions: [],
             hostUser: { id: '', name: '' },

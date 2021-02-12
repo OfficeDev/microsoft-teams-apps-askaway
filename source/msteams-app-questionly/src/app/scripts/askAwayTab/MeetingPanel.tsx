@@ -8,6 +8,7 @@ import {
     handleTaskModuleResponseForSuccessfulCreateQnASessionFlow,
     openStartQnASessionTaskModule,
     handleEndQnASessionFlow,
+    invokeTaskModuleForGenericError,
 } from './task-modules-utility/taskModuleHelper';
 import * as microsoftTeams from '@microsoft/teams-js';
 import { withTranslation, WithTranslation } from 'react-i18next';
@@ -89,24 +90,24 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
         this.updateContent();
     }
 
+    private logTelemetry = (error: Error) => {
+        this.props.appInsights.trackException({
+            exception: error,
+            severityLevel: SeverityLevel.Error,
+            properties: {
+                meetingId: this.props.teamsTabContext?.meetingId,
+                userAadObjectId: this.props.teamsTabContext?.userObjectId,
+                conversationId: this.props.teamsTabContext?.chatId,
+            },
+        });
+    };
+
     /**
      * Fetches current user role and sets state accordingly.
      */
     private async updateUserRole() {
-        try {
-            const userRole = await getCurrentParticipantRole(this.props.httpService, this.props.teamsTabContext.chatId);
-            this.setState({ userRole: userRole });
-        } catch (error) {
-            // TODO: handle this as part of error handling story, Task:1475400.
-            this.props.appInsights.trackException({
-                exception: error,
-                severityLevel: SeverityLevel.Error,
-                properties: {
-                    meetingId: this.props.teamsTabContext.meetingId,
-                    userAadObjectId: this.props.teamsTabContext.userObjectId,
-                },
-            });
-        }
+        const userRole = await getCurrentParticipantRole(this.props.httpService, this.props.teamsTabContext.chatId);
+        this.setState({ userRole: userRole });
     }
 
     /**
@@ -114,18 +115,28 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
      */
     private updateContent = async () => {
         this.setState({ showLoader: true });
-        await this.updateUserRole();
-        this.setState({ showLoader: true });
-        this.setState({ showNewUpdatesButton: false });
-        this.getActiveSession();
+        try {
+            await this.getActiveSession();
+            await this.updateUserRole();
+        } catch (error) {
+            this.logTelemetry(error);
+            invokeTaskModuleForGenericError(this.props.t);
+        }
+
+        this.setState({ showNewUpdatesButton: false, showLoader: false });
     };
 
     /**
      * Updates only qna session content without showing loader.
      */
-    private updateQnASessionContent = () => {
+    private updateQnASessionContent = async () => {
         this.setState({ showNewUpdatesButton: false });
-        this.getActiveSession();
+        try {
+            await this.getActiveSession();
+        } catch (error) {
+            this.logTelemetry(error);
+            invokeTaskModuleForGenericError(this.props.t);
+        }
     };
 
     /**
@@ -153,20 +164,16 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
     /**
      * To Identify Active Session
      */
-    getActiveSession = () => {
-        this.props.httpService
-            .get(`/conversations/${this.props.teamsTabContext.chatId}/activesessions`)
-            .then((response: any) => {
-                if (response?.data?.length > 0) {
-                    this.setState({
-                        activeSessionData: response.data[0],
-                    });
-                }
-                this.setState({ showLoader: false });
-            })
-            .catch((error) => {
-                this.setState({ showLoader: false });
+    getActiveSession = async () => {
+        const response = await this.props.httpService.get(`/conversations/${this.props.teamsTabContext.chatId}/activesessions`);
+
+        if (response?.data?.length > 0) {
+            this.setState({
+                activeSessionData: response.data[0],
             });
+        } else {
+            this.setState({ activeSessionData: this.props.helper.createEmptyActiveSessionData() });
+        }
     };
 
     /**
@@ -186,6 +193,8 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                     });
                 })
                 .catch((error) => {
+                    this.logTelemetry(error);
+
                     handleTaskModuleErrorForEndQnASessionFlow(this.localize, error);
                     this.setState({ showLoader: false });
                 });
@@ -229,6 +238,8 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                         }
                     })
                     .catch((error) => {
+                        this.logTelemetry(error);
+
                         handleTaskModuleErrorForCreateQnASessionFlow(this.localize, error, this.endActiveSession);
                     });
             }
@@ -332,6 +343,7 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                 />
                 {stateVal.activeSessionData.unansweredQuestions.length > 0 || stateVal.activeSessionData.answeredQuestions.length > 0 ? (
                     <QuestionsList
+                        appInsights={this.props.appInsights}
                         t={this.localize}
                         userRole={stateVal.userRole}
                         activeSessionData={stateVal.activeSessionData}
@@ -344,6 +356,7 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                     </div>
                 )}
                 <NewQuestion
+                    appInsights={this.props.appInsights}
                     t={this.localize}
                     activeSessionData={stateVal.activeSessionData}
                     httpService={this.props.httpService}

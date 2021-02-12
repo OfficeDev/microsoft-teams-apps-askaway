@@ -160,3 +160,30 @@ export const invokeAdaptiveCardBasedTaskModule = (title: string, card: AdaptiveC
 
     tasks.startTask(taskInfo, submitHandler);
 };
+
+/**
+ * Invokes task module with generic error when updating question fails.
+ * @param t - TFunction to localize strings.
+ */
+export const invokeTaskModuleForQuestionUpdateFailure = (t: TFunction) => {
+    const card = createGenericErrorCard(t);
+    invokeAdaptiveCardBasedTaskModule(t('popups.updateQuestionFailedTitle'), card);
+};
+
+/**
+ * Invokes task module with generic error when posting question fails.
+ * @param t - TFunction to localize strings.
+ */
+export const invokeTaskModuleForQuestionPostFailure = (t: TFunction) => {
+    const card = createGenericErrorCard(t);
+    invokeAdaptiveCardBasedTaskModule(t('popups.postQuestionFailedTitle'), card);
+};
+
+/**
+ * Invokes task module with generic error for any failure.
+ * @param t - TFunction to localize strings.
+ */
+export const invokeTaskModuleForGenericError = (t: TFunction) => {
+    const card = createGenericErrorCard(t);
+    invokeAdaptiveCardBasedTaskModule(t('popups.genericFailureTitle'), card);
+};

@@ -4,7 +4,7 @@ import { Flex, Text, Button, FlexItem, Card, Divider, Avatar, TextArea } from '@
 import Badge from '../shared/Badge';
 import { useState } from 'react';
 import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
-import { withTheme, ThemeProps } from '../shared/WithTheme';
+import { ThemeProps, withTheme } from '../shared/WithTheme';
 import Helper from '../shared/Helper';
 
 /**

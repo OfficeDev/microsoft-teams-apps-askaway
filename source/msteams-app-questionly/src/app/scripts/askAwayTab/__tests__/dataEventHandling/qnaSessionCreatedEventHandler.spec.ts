@@ -29,6 +29,7 @@ describe('validates QnaSessionCreatedEventHandler', () => {
         activeSessionData = {
             sessionId: testsessionId,
             isActive: true,
+            description: 'testDescription1',
             title: '',
             answeredQuestions: [],
             unansweredQuestions: [],

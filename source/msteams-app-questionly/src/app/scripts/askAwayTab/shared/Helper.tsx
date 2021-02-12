@@ -18,6 +18,7 @@ export class Helper {
         return {
             sessionId: '',
             title: '',
+            description: '',
             isActive: false,
             dateTimeCreated: new Date(),
             hostUser: {

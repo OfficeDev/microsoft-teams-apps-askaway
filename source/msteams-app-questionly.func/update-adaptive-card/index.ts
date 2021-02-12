@@ -28,10 +28,14 @@ import {
   qnaSessionDataService,
 } from "../src/utils/dbUtility";
 import { exceptionLogger } from "../src/utils/exceptionTracking";
+import {
+  getAvatarKey,
+  getMicrosoftAppPassword,
+} from "../src/utils/keyvaultUtility";
 
 let adapter = new BotFrameworkAdapter({
   appId: process.env.MicrosoftAppId.toString(),
-  appPassword: process.env.MicrosoftAppPassword.toString(),
+  appPassword: getMicrosoftAppPassword(),
 });
 
 /**
@@ -131,7 +135,7 @@ const activityFunction: AzureFunction = async function (
     questionDataService,
     qnaSessionId,
     isSessionEnded,
-    process.env.AvatarKey
+    getAvatarKey()
   );
 
   try {

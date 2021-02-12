@@ -15,6 +15,11 @@ export namespace ClientDataContract {
         title: string;
 
         /**
+         * Session description.
+         */
+        description: string;
+
+        /**
          * Boolean denoting if session is active.
          */
         isActive: boolean;
