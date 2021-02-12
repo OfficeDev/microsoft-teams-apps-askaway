@@ -282,14 +282,16 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                     showToolBar={false}
                 />
                 <Flex hAlign="center" vAlign="center">
-                    <EmptyTile image={image} line1={text1} line2={text2} />
-                    {isUserPresenterOrOrganizer && (
-                        <Flex.Item align="center">
-                            <Button className="button" onClick={this.onShowTaskModule}>
-                                <Button.Content>{this.localize('meetingPanel.createQnaSessionButton')}</Button.Content>
-                            </Button>
-                        </Flex.Item>
-                    )}
+                    <div className="no-question">
+                        <EmptyTile image={image} line1={text1} line2={text2} />
+                        {isUserPresenterOrOrganizer && (
+                            <Flex.Item align="center">
+                                <Button className="button" onClick={this.onShowTaskModule}>
+                                    <Button.Content>{this.localize('meetingPanel.createQnaSessionButton')}</Button.Content>
+                                </Button>
+                            </Flex.Item>
+                        )}
+                    </div>
                 </Flex>
             </React.Fragment>
         );
@@ -349,7 +351,9 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                         teamsTabContext={this.props.teamsTabContext}
                     />
                 ) : (
-                    <EmptyTile image={collaborationImage} line1={this.localize('meetingPanel.noQuestionsPosted')} line2={this.localize('meetingPanel.askAway')} />
+                    <div className="no-question">
+                        <EmptyTile image={collaborationImage} line1={this.localize('meetingPanel.noQuestionsPosted')} line2={this.localize('meetingPanel.askAway')} />
+                    </div>
                 )}
                 <NewQuestion
                     appInsights={this.props.appInsights}
@@ -368,19 +372,23 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
      */
     public render() {
         const stateVal = this.state;
-        if (stateVal.showLoader) return <Loader label={this.localize('meetingPanel.loaderText')} />;
-
+        if (stateVal.showLoader)
+            return (
+                <div className="loader">
+                    <Loader label={this.localize('meetingPanel.loaderText')} />
+                </div>
+            );
         return (
             <React.Fragment>
-                <SignalRLifecycle
-                    enableLiveUpdates={true}
-                    t={this.localize}
-                    conversationId={this.props.teamsTabContext.chatId}
-                    onEvent={this.updateEvent}
-                    httpService={this.props.httpService}
-                    appInsights={this.props.appInsights}
-                />
                 <div className="meeting-panel">
+                    <SignalRLifecycle
+                        enableLiveUpdates={true}
+                        t={this.localize}
+                        conversationId={this.props.teamsTabContext.chatId}
+                        onEvent={this.updateEvent}
+                        httpService={this.props.httpService}
+                        appInsights={this.props.appInsights}
+                    />
                     {this.state.showNewUpdatesButton && (
                         <Button primary onClick={this.updateQnASessionContent} className="newUpdatesButton">
                             <ArrowUpIcon xSpacing="after"></ArrowUpIcon>

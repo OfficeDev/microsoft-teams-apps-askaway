@@ -25,6 +25,7 @@
         "showAnsweredQuestions": "Answered questions",
         "pendingStatus": "Pending",
         "answeredStatus": "Answered",
+        "whenSessionClosed": "Surprising, but true. No questions were posted.",
         "loaderText": "Loading information"
     },
     "meetingPanel": {

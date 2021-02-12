@@ -4,8 +4,6 @@ import * as React from 'react';
 import { useState, useMemo } from 'react';
 import * as microsoftTeams from '@microsoft/teams-js';
 import { HttpService } from '../shared/HttpService';
-import { AcceptIcon } from '@fluentui/react-icons-northstar';
-import { Button } from '@fluentui/react-northstar';
 import TabHeader from './TabHeader';
 import Question from './Question';
 import { CONST } from '../shared/Constants';
@@ -26,6 +24,7 @@ export interface QuestionsListProps {
     userRole: ParticipantRoles;
     appInsights: ApplicationInsights;
 }
+
 export interface QuestionTab {
     selectedTab: string;
     defaultActiveIndex: number;
@@ -106,13 +105,6 @@ const QuestionsList: React.FunctionComponent<QuestionsListProps> = (props) => {
         return false;
     };
 
-    const renderAcceptButton = (data: object) => {
-        return (
-            <div>
-                <Button icon={<AcceptIcon />} onClick={() => handleOnClickAction(data)} className="like-icon-size answered-icon" iconOnly text />
-            </div>
-        );
-    };
     return (
         <React.Fragment>
             <TabHeader t={props.t} onSelectActiveTab={setActiveLiveTab} tabActiveIndex={liveTab.defaultActiveIndex} />
@@ -129,6 +121,7 @@ const QuestionsList: React.FunctionComponent<QuestionsListProps> = (props) => {
                                 questionTab={CONST.TAB_QUESTIONS.ANSWERED_Q}
                                 userId={props.teamsTabContext.userObjectId || ''}
                                 userRole={props.userRole}
+                                isSessionActive={activeSessionData.isActive}
                             />
                         );
                     })}
@@ -143,8 +136,9 @@ const QuestionsList: React.FunctionComponent<QuestionsListProps> = (props) => {
                                 isUserLikedQuestion={isUserLikedQuestion}
                                 questionTab={CONST.TAB_QUESTIONS.UNANSWERED_Q}
                                 userId={props.teamsTabContext.userObjectId || ''}
-                                renderHoverElement={renderAcceptButton({ question, key: CONST.TAB_QUESTIONS.UNANSWERED_Q, actionValue: CONST.TAB_QUESTIONS.MARK_ANSWERED })}
+                                renderHoverElement={true}
                                 userRole={props.userRole}
+                                isSessionActive={activeSessionData.isActive}
                             />
                         );
                     })}

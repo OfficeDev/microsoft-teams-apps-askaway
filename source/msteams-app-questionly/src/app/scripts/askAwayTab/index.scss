@@ -72,8 +72,10 @@
 }
 .meeting-panel {
     .button {
-        top: 67%;
-        position: absolute;
+        margin-left: auto;
+        margin-right: auto;
+        display: block;
+        margin-top: 17%;
     }
     .newUpdatesButton {
         top: 12%;
@@ -88,27 +90,22 @@
         font-weight: normal;
     }
     .no-question {
+        margin: 0 auto;
+        width: 100%;
         .text-caption-panel {
             font-size: 12px;
             line-height: 16px;
-            top: 55%;
-            position: absolute;
             text-align: center;
-            left: 50%;
-            width: 200px;
-            transform: translate(-50%, -50%);
-
+            margin-top: 14%;
             .text-section {
                 display: block;
             }
         }
         .create-session {
-            top: 35%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            position: absolute;
-            width: 200px;
-            height: 200px;
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+            margin-top: 9%;
         }
     }
     .session-title {
@@ -116,41 +113,43 @@
         line-height: 21px;
     }
     .menuHeader {
-        svg {
-            fill: #ffffff;
-        }
         .ui-menu__item__submenu {
             border: none;
         }
     }
     .question-card {
         margin-top: 1rem;
-        height: 20rem;
+        height: 21rem;
         overflow-x: hidden;
         .card-divider {
             border-bottom: 1px solid #3b3a39;
-            height: 4.5rem;
+            min-height: 4.5rem;
+            border-top-left-radius: 3px;
+            border-top-right-radius: 3px;
             .card-layout {
                 width: 100%;
-                padding: 0.5rem;
-                border-radius: 0rem;
+                padding: 14px;
+                padding-bottom: 2px;
                 .author-name {
                     font-size: 12px;
                     line-height: 20px;
                 }
                 .like-icon {
                     position: absolute;
-                    top: 0.3rem;
+                    margin-top: -0.5rem;
                     right: 1rem;
                     .like-icon-size {
-                        min-width: 1rem;
+                        min-width: 1.3rem;
                     }
                 }
-                .card-body-question {
-                    font-size: 14px;
-                    line-height: 20px;
-                    margin-top: 0.4rem;
-                }
+            }
+            .card-body-question {
+                font-size: 14px;
+                line-height: 20px;
+                padding-left: 15px;
+                padding-top: 5px;
+                padding-right: 3px;
+                padding-bottom: 11px;
             }
         }
     }
@@ -207,17 +206,21 @@
     width: 100%;
     .tab-nav-header {
         .btn-end-session {
-            margin-top: 0.3rem;
             margin-right: 1rem;
+            height: 2rem;
+            width: 7rem;
+            margin-top: 0rem;
         }
 
         span {
             font-weight: 500;
+            font-size: 14px;
+            line-height: 20px;
         }
     }
     .tab-container {
         margin: 0 auto;
-        width: 86.5%;
+        width: 54.2%;
         .post-new-question {
             margin-top: 2rem;
             padding: 0.1rem;
@@ -233,13 +236,16 @@
                 width: 100%;
                 box-shadow: 0px 0.15px 0.45px rgba(0, 0, 0, 0.11), 0px 0.8px 1.8px rgba(0, 0, 0, 0.13);
                 border-radius: 4px;
+                .ui-card__body {
+                    margin-bottom: 0.3rem;
+                }
                 .date-content-format {
                     font-size: 12px;
                     line-height: 16px;
                     padding-top: 0.15rem;
                 }
                 .session-title {
-                    padding-top: 0.5rem;
+                    padding-top: 0.3rem;
                     font-size: 18px;
                     line-height: 24px;
                 }
@@ -256,6 +262,8 @@
                 border-radius: 4px;
                 margin-top: 0.5rem;
                 margin-bottom: 0.5rem;
+                padding-left: 0.4rem;
+                padding-right: 0.2rem;
                 .ui-reaction {
                     position: relative;
                     right: 1rem;
@@ -269,6 +277,7 @@
                     top: -0.5rem;
                     font-size: 14px;
                     line-height: 20px;
+                    padding-left: 0.2rem;
                 }
                 .author-name {
                     font-size: 12px;
@@ -293,8 +302,12 @@
 
 .no-question-layout {
     margin: 0 auto;
-    width: 25%;
+    width: 100%;
     text-align: center;
+    img {
+        margin-left: auto;
+        margin-right: auto;
+    }
     .sub-text {
         width: 62%;
         margin: 0 auto;
@@ -306,7 +319,9 @@
     font-size: 14px;
     line-height: 20px;
 }
-
+.text-center {
+    text-align: center;
+}
 .centerContent {
     top: 50%;
     left: 50%;

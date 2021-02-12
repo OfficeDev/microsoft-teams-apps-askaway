@@ -1,6 +1,6 @@
 import './../index.scss';
 import * as React from 'react';
-import { Flex, Avatar, ThemePrepared, Text, Button } from '@fluentui/react-northstar';
+import { Flex, Avatar, Text, Button } from '@fluentui/react-northstar';
 import Badge from '../shared/Badge';
 import { LikeIcon, ChevronDownMediumIcon, ChevronEndMediumIcon } from '@fluentui/react-icons-northstar';
 import { LikeIconFilled } from '../shared/Icons/LikeIconFilled';
@@ -34,11 +34,10 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (p
 
     /**
      * Identifies user own questions
-     * @param isActiveSession - 'true' or 'false' identifies session is active
      * @param authorId - user id as 'string'
      */
-    const isUserOwnQuestion = (isActiveSession: boolean, authorId: string) => {
-        return isActiveSession && props.teamsTabContext.userObjectId === authorId ? false : true;
+    const isUserOwnQuestion = (authorId: string) => {
+        return props.teamsTabContext.userObjectId === authorId;
     };
 
     /**
@@ -47,7 +46,7 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (p
      * @param questionType - 'answered' or 'unanswered' will be the value
      * @param isQuestionsTabExpanded - 'true' or 'false' will be the value
      */
-    const showQuestions = (questions, questionType, isQuestionsTabExpanded) => {
+    const showQuestions = (questions, questionType, isQuestionsTabExpanded, isActive) => {
         if (questions.length > 0) {
             return (
                 <React.Fragment>
@@ -76,7 +75,7 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (p
                                         <Flex.Item push>
                                             <Flex gap="gap.small" vAlign="center" styles={{ position: 'relative', right: '1.5rem' }}>
                                                 <Button
-                                                    disabled={isUserOwnQuestion(questions.isActive, question.author.id)}
+                                                    disabled={isUserOwnQuestion(question.author.id) || !isActive}
                                                     onClick={() =>
                                                         props.onClickAction({
                                                             question,
@@ -155,8 +154,8 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (p
 
     return (
         <div className="question-container">
-            {showQuestions(props.activeSessionData.answeredQuestions, CONST.TAB_QUESTIONS.ANSWERED_Q, isAnsweredTabOpen)}
-            {showQuestions(props.activeSessionData.unansweredQuestions, CONST.TAB_QUESTIONS.UNANSWERED_Q, isPendingTabOpen)}
+            {showQuestions(props.activeSessionData.answeredQuestions, CONST.TAB_QUESTIONS.ANSWERED_Q, isAnsweredTabOpen, props.activeSessionData.isActive)}
+            {showQuestions(props.activeSessionData.unansweredQuestions, CONST.TAB_QUESTIONS.UNANSWERED_Q, isPendingTabOpen, props.activeSessionData.isActive)}
         </div>
     );
 };
