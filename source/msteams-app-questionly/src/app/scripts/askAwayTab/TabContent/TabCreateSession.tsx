@@ -26,7 +26,7 @@ const TabCreateSession: React.FunctionComponent<TabCreateSessionProps> = (props)
 
     return (
         <Flex hAlign="center" vAlign="center" className="screen">
-            <Image className="create-session" alt="image" src={imageSrc} />
+            <Image alt="image" src={imageSrc} />
             <Flex.Item align="center">
                 <Text className="text-caption" content={props.t('tab.welcomeText')} />
             </Flex.Item>

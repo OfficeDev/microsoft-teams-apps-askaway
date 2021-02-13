@@ -27,7 +27,7 @@ export interface EmptyTileProps {
 const EmptyTile: React.FunctionComponent<EmptyTileProps> = (props) => {
     return (
         <React.Fragment>
-            <Image className="create-session" alt="image" src={props.image} />
+            <Image alt="image" src={props.image} />
             <Flex.Item align="center">
                 <div className="text-caption-panel">
                     <Text className="text-section" content={props.line1} />
