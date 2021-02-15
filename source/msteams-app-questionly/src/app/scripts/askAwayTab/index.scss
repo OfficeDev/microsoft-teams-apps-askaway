@@ -29,6 +29,9 @@
     }
 }
 .meeting-panel {
+    display: flex;
+    flex-flow: column;
+    height: 51rem;
     .button {
         margin-left: auto;
         margin-right: auto;
@@ -79,9 +82,13 @@
         }
     }
     .question-card {
+        // margin-top: 1rem;
+        // height: 21rem;
+        // overflow-x: hidden;
         margin-top: 1rem;
-        height: 21rem;
+        min-height: 43rem;
         overflow-x: hidden;
+        margin-bottom: 1rem;
         .card-divider {
             border-bottom: 1px solid #3b3a39;
             min-height: 4.5rem;
@@ -94,6 +101,11 @@
                 .author-name {
                     font-size: 12px;
                     line-height: 20px;
+                }
+                .action-buttons {
+                    button {
+                        margin-right: -5px;
+                    }
                 }
                 .like-icon {
                     position: absolute;

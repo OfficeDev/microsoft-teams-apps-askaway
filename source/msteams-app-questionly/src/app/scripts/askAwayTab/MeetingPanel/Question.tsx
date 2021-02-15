@@ -54,7 +54,56 @@ const Question: React.FunctionComponent<QuestionCompProps & ThemeProps> = (props
             }}
         >
             <Flex gap="gap.small" className="card-layout">
-                <Avatar size={'smaller'} name={question.author.name} />
+                <Flex.Item size="size.large">
+                    <div>
+                        <Flex vAlign="center" gap="gap.small" padding="padding.medium">
+                            <Avatar size="small" name={question.author.name} />
+                            <Text className="author-name" content={question.author.name} />
+                        </Flex>
+                    </div>
+                </Flex.Item>
+                <Flex.Item push>
+                    <Flex className="action-buttons" gap="gap.small" vAlign="center">
+                        {isPresenterOrOrganizer(props.userRole) && isMouseHovered && renderHoverElement && (
+                            <Button
+                                icon={<AcceptIcon styles={{ color: hoverColor }} />}
+                                onClick={() =>
+                                    onClickAction({
+                                        question,
+                                        key: CONST.TAB_QUESTIONS.UNANSWERED_Q,
+                                        actionValue: CONST.TAB_QUESTIONS.MARK_ANSWERED,
+                                    })
+                                }
+                                className="accept-icon-size"
+                                iconOnly
+                                text
+                            />
+                        )}
+                        <Button
+                            disabled={userId === question.author.id || !props.isSessionActive}
+                            onClick={() =>
+                                onClickAction({
+                                    question,
+                                    key: questionTab,
+                                    actionValue: isUserLikedQuestion ? CONST.TAB_QUESTIONS.DOWN_VOTE : CONST.TAB_QUESTIONS.UP_VOTE,
+                                })
+                            }
+                            icon={
+                                isUserLikedQuestion ? (
+                                    <LikeIconFilled styles={{ color: hoverColor }} />
+                                ) : (
+                                    <LikeIcon styles={userId === question.author.id || !props.isSessionActive ? { color: disabledLikeButtonHoverColor } : { color: hoverColor }} outline />
+                                )
+                            }
+                            className="like-icon-size"
+                            iconOnly
+                            text
+                        />
+                        <Text content={question.votesCount} />
+                    </Flex>
+                </Flex.Item>
+
+                {/* <Avatar size={'smaller'} name={question.author.name} />
                 <Flex>
                     <Text className="author-name" content={question.author.name} weight="regular" />
                     <Flex vAlign="center" className="like-icon">
@@ -87,8 +136,8 @@ const Question: React.FunctionComponent<QuestionCompProps & ThemeProps> = (props
                                 isUserLikedQuestion ? (
                                     <LikeIconFilled styles={{ color: hoverColor }} />
                                 ) : (
-                                    <LikeIcon styles={userId === question.author.id || !props.isSessionActive ? { color: disabledLikeButtonHoverColor } : { color: hoverColor }} outline />
-                                )
+                                        <LikeIcon styles={userId === question.author.id || !props.isSessionActive ? { color: disabledLikeButtonHoverColor } : { color: hoverColor }} outline />
+                                    )
                             }
                             className="like-icon-size"
                             iconOnly
@@ -96,7 +145,7 @@ const Question: React.FunctionComponent<QuestionCompProps & ThemeProps> = (props
                         />
                         <Text content={question.votesCount} />
                     </Flex>
-                </Flex>
+                </Flex> */}
             </Flex>
             <Flex gap="gap.small">
                 <Text className="card-body-question" content={question.content} />
