@@ -56,22 +56,20 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (p
                             return (
                                 <div key={question.id} style={{ backgroundColor: colorScheme.default.background, border: `1px solid ${colorScheme.onyx.border1}` }} className="question-layout">
                                     <Flex gap="gap.small">
-                                        <Flex.Item size="size.large">
-                                            <div>
-                                                <Flex vAlign="center" gap="gap.small" padding="padding.medium">
-                                                    <Avatar size="small" name={question.author.name} />
-                                                    <Text className="author-name" content={question.author.name} />
-                                                    <Badge
-                                                        styles={
-                                                            CONST.TAB_QUESTIONS.UNANSWERED_Q === questionType
-                                                                ? { backgroundColor: colorScheme.brand.background, color: colorScheme.brand.foreground4 }
-                                                                : { backgroundColor: colorScheme.green.background, color: colorScheme.green.foreground1 }
-                                                        }
-                                                        text={CONST.TAB_QUESTIONS.UNANSWERED_Q === questionType ? props.t('tab.pendingStatus') : props.t('tab.answeredStatus')}
-                                                    />
-                                                </Flex>
-                                            </div>
-                                        </Flex.Item>
+                                        <Flex vAlign="center" gap="gap.small" padding="padding.medium">
+                                            <Avatar size="small" name={question.author.name} />
+                                            <Text className="author-name" content={question.author.name} />
+                                            <Flex vAlign="center">
+                                                <Badge
+                                                    styles={
+                                                        CONST.TAB_QUESTIONS.UNANSWERED_Q === questionType
+                                                            ? { backgroundColor: colorScheme.brand.background, color: colorScheme.brand.foreground4 }
+                                                            : { backgroundColor: colorScheme.green.background, color: colorScheme.green.foreground1 }
+                                                    }
+                                                    text={CONST.TAB_QUESTIONS.UNANSWERED_Q === questionType ? props.t('tab.pendingStatus') : props.t('tab.answeredStatus')}
+                                                />
+                                            </Flex>
+                                        </Flex>
                                         <Flex.Item push>
                                             <Flex gap="gap.small" vAlign="center" styles={{ position: 'relative', right: '1.5rem' }}>
                                                 <Button

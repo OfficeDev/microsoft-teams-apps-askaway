@@ -11,14 +11,14 @@ const AskAwayTabConfigInternal: React.FunctionComponent<AskAwayTabConfigInternal
     const { t } = useTranslation();
 
     return (
-        <div className="tab-config-container">
-            <Flex hAlign="center" vAlign="center">
+        <Flex hAlign="center" vAlign="center">
+            <div className="tab-config-container">
                 <Image alt="image" src={require('./../../web/assets/askaway_tab_added.png')} />
                 <Flex.Item align="center">
                     <Text className="text-configtab-caption" content={t('tab.configTabText')} />
                 </Flex.Item>
-            </Flex>
-        </div>
+            </div>
+        </Flex>
     );
 };
 export default AskAwayTabConfigInternal;
