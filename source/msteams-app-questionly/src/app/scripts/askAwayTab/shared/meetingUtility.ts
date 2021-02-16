@@ -10,7 +10,7 @@ import { HttpService } from './HttpService';
  */
 export const getCurrentParticipantRole = async (httpService: HttpService, conversationId?: string): Promise<ParticipantRoles> => {
     const response = await httpService.get(`/conversations/${conversationId}/me`);
-    return response.data;
+    return response.data.userRole;
 };
 
 /**
@@ -20,4 +20,16 @@ export const getCurrentParticipantRole = async (httpService: HttpService, conver
  */
 export const isPresenterOrOrganizer = (userRole: ParticipantRoles): boolean => {
     return userRole === ParticipantRoles.Organizer || userRole === ParticipantRoles.Presenter;
+};
+
+/**
+ * Gets meeting participant's username.
+ * @param httpService - httpService instance.
+ * @param conversationId - conversation Id.
+ * @returns - user name.
+ * @throws - any error occured while fetching user role.
+ */
+export const getCurrentParticipantUsername = async (httpService: HttpService, conversationId?: string): Promise<ParticipantRoles> => {
+    const response = await httpService.get(`/conversations/${conversationId}/me`);
+    return response.data.userName;
 };

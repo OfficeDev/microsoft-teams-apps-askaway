@@ -27,7 +27,7 @@ import {
     invokeTaskModuleForGenericError,
 } from './task-modules-utility/taskModuleHelper';
 import { ParticipantRoles } from '../../../enums/ParticipantRoles';
-import { getCurrentParticipantRole } from './shared/meetingUtility';
+import { getCurrentParticipantRole, getCurrentParticipantUsername } from './shared/meetingUtility';
 import SignalRLifecycle from './signalR/SignalRLifecycle';
 import { DataEventHandlerFactory } from './dataEventHandling/dataEventHandlerFactory';
 import { IDataEvent } from 'msteams-app-questionly.common';
@@ -53,6 +53,10 @@ export interface TabContentState {
      */
     userRole: ParticipantRoles;
     /**
+     * current user's name in meeting.
+     */
+    userName: string;
+    /**
      * Indicator to show loading experience when fetching data etc.
      */
     showLoader: boolean;
@@ -70,6 +74,7 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
         this.state = {
             selectedAmaSessionData: this.props.helper.createEmptyActiveSessionData(),
             userRole: ParticipantRoles.Attendee,
+            userName: '',
             showLoader: false,
             showNewUpdatesButton: false,
         };
@@ -110,6 +115,7 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
         try {
             await this.refreshSession();
             await this.updateUserRole();
+            await this.updateUserName();
         } catch (error) {
             this.logTelemetry(error);
             invokeTaskModuleForGenericError(this.props.t);
@@ -155,6 +161,14 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
     private async updateUserRole() {
         const userRole = await getCurrentParticipantRole(this.props.httpService, this.props.teamsTabContext.chatId);
         this.setState({ userRole: userRole });
+    }
+
+    /**
+     * Fetches current user's name
+     */
+    private async updateUserName() {
+        const userName = await getCurrentParticipantUsername(this.props.httpService, this.props.teamsTabContext.chatId);
+        this.setState({ userName: userName });
     }
 
     /**
@@ -363,7 +377,7 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
                                     <Button.Content className="newUpdatesButtonContent" content="New updates"></Button.Content>
                                 </Button>
                             )}
-                            <PostNewQuestions t={this.localize} activeSessionData={selectedAmaSessionData} onPostNewQuestion={this.handlePostNewQuestions} />
+                            <PostNewQuestions t={this.localize} activeSessionData={selectedAmaSessionData} userName={this.state.userName} onPostNewQuestion={this.handlePostNewQuestions} />
                             {selectedAmaSessionData.unansweredQuestions.length > 0 || selectedAmaSessionData.answeredQuestions.length > 0 ? (
                                 <TabQuestions t={this.localize} onClickAction={this.validateClickAction} activeSessionData={selectedAmaSessionData} teamsTabContext={this.props.teamsTabContext} />
                             ) : (
