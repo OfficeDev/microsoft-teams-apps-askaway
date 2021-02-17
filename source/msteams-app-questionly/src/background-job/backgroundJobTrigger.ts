@@ -20,7 +20,6 @@ const axiosConfig: AxiosRequestConfig = axios.defaults;
 let backgroundJobUri: string;
 
 const accessTokenName = 'AccessToken';
-const accessTokenExpiresOnTimestamp = 'AccessTokenExpiresOnTimestamp';
 
 // Load background job uri and function key in memory.
 // throws exception if these values failed to load.
@@ -189,8 +188,7 @@ const triggerBackgroundJob = async (conversationId: string, qnaSessionId: string
 };
 
 /**
- * Gets JWT access token from memory cache, if present, and checks for token expiry timestamp.
- * If the current timestamp is less than token expiry timestamp, returns the cached token.
+ * Gets JWT access token from memory cache, if present and not expired.
  * Otherwise, calls getToken using DefaultAzureCredential to get a new access token.
  * @returns access token.
  * @throws error if access token could not be fetched.
@@ -198,11 +196,7 @@ const triggerBackgroundJob = async (conversationId: string, qnaSessionId: string
 const getToken = async (): Promise<string> => {
     let token = getFromMemoryCache(accessTokenName);
     if (token) {
-        const expiresOnTimestamp = Number(getFromMemoryCache(accessTokenExpiresOnTimestamp));
-        const currentTimestamp = new Date().getTime();
-        if (currentTimestamp < expiresOnTimestamp) {
-            return token;
-        }
+        return token;
     }
     const accessToken = await getAccessToken();
     if (!accessToken) {
@@ -210,9 +204,9 @@ const getToken = async (): Promise<string> => {
     }
     token = accessToken.token;
 
-    const retryAfterMs = ifNumber(process.env.ExpireInMemorySecretsAfterMs, 24 * 60 * 60 * 1000);
-    putIntoMemoryCache(accessTokenName, token, retryAfterMs);
-    putIntoMemoryCache(accessTokenExpiresOnTimestamp, String(accessToken.expiresOnTimestamp), retryAfterMs);
+    const currentTimestamp = new Date().getTime();
+    const expiresAfterMs = accessToken.expiresOnTimestamp - currentTimestamp;
+    putIntoMemoryCache(accessTokenName, token, expiresAfterMs);
 
     return token;
 };

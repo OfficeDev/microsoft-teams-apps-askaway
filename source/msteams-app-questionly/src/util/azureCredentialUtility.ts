@@ -1,4 +1,5 @@
 import { DefaultAzureCredential } from '@azure/identity';
+import { exceptionLogger } from './exceptionTracking';
 
 let credential: DefaultAzureCredential;
 
@@ -16,6 +17,10 @@ export const getCredential = () => {
  * Get token using DefaultAzureCredential.
  */
 export const getAccessToken = async () => {
-    const accessToken = await getCredential().getToken('https://management.azure.com/.default');
+    if (!process.env.MicrosoftAppId) {
+        exceptionLogger(new Error('MicrosoftAppId missing in app settings.'));
+        throw new Error('MicrosoftAppId missing in app settings.');
+    }
+    const accessToken = await getCredential().getToken(process.env.MicrosoftAppId);
     return accessToken;
 };

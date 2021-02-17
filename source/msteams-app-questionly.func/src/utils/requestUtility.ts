@@ -1,4 +1,7 @@
+import { Context, HttpRequest } from "@azure/functions";
 import { DataEventType, IDataEvent } from "msteams-app-questionly.common";
+import { userIdParameterConstant } from "../constants/requestConstants";
+import { authenticateRequest } from "../services/authService";
 
 /**
  * Checks if parameter is defined.
@@ -41,22 +44,20 @@ export const isCardRefreshNeededForQuestionEvent = (
 
 /**
  * Checks if the token is valid, and oid received in token payload is equal to object id for managed identity in app service.
- * @param token - Bearer token in received in request.
+ * @param context - context
+ * @param req - http request
  */
-export const isValidToken = (token: string): Boolean => {
-  if (process.env.debugMode === "true") {
-    return true;
+export const validateToken = async (
+  context: Context,
+  req: HttpRequest
+): Promise<Boolean> => {
+  const isAuthenticRequest = await authenticateRequest(context, req);
+  if (isAuthenticRequest) {
+    if (
+      req[userIdParameterConstant] === process.env.IdentityObjectId_AppService
+    ) {
+      return true;
+    }
   }
-
-  if (!isValidParam(token) || !token.startsWith("Bearer")) {
-    return false;
-  }
-  token = token.replace("Bearer", "").trim();
-  const base64Payload = token.split(".")[1];
-  const payload = JSON.parse(Buffer.from(base64Payload, "base64").toString());
-
-  if (payload.oid !== process.env.IdentityObjectId_AppService) {
-    return false;
-  }
-  return true;
+  return false;
 };

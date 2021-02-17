@@ -1,5 +1,4 @@
 import memoryCache, { CacheClass } from 'memory-cache';
-import { DefaultAzureCredential } from '@azure/identity';
 
 let memCache: CacheClass<string, string>;
 

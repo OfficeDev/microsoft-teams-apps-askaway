@@ -4,7 +4,7 @@ import {
   createBadRequestResponse,
   createUnauthorizedErrorResponse,
 } from "../src/utils/responseUtility";
-import { isValidParam, isValidToken } from "../src/utils/requestUtility";
+import { isValidParam, validateToken } from "../src/utils/requestUtility";
 import { errorStrings } from "../src/constants/errorStrings";
 import { initiateDBConnection } from "../src/utils/dbUtility";
 
@@ -12,9 +12,8 @@ const httpStart: AzureFunction = async function (
   context: Context,
   req: HttpRequest
 ): Promise<any> {
-  const authorizationHeader = req.headers.authorization;
-
-  if (!isValidToken(authorizationHeader)) {
+  const isValidToken = await validateToken(context, req);
+  if (!isValidToken) {
     createUnauthorizedErrorResponse(context);
     return context.res;
   }
