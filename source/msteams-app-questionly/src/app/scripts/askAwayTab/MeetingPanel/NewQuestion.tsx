@@ -55,7 +55,7 @@ const NewQuestion: React.FunctionComponent<NewQuestionProps> = (props) => {
     };
 
     return (
-        <Flex hAlign="center" vAlign="end" className="input-text-field " gap="gap.small">
+        <Flex hAlign="center" vAlign="end" className="input-text-field" gap="gap.small">
             <FlexItem>
                 <TextArea
                     className="text-question"
