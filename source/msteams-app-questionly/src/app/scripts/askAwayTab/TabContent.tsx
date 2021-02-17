@@ -27,7 +27,7 @@ import {
     invokeTaskModuleForGenericError,
 } from './task-modules-utility/taskModuleHelper';
 import { ParticipantRoles } from '../../../enums/ParticipantRoles';
-import { getCurrentParticipantRole, getCurrentParticipantUsername } from './shared/meetingUtility';
+import { getCurrentParticipantData } from './shared/meetingUtility';
 import SignalRLifecycle from './signalR/SignalRLifecycle';
 import { DataEventHandlerFactory } from './dataEventHandling/dataEventHandlerFactory';
 import { IDataEvent } from 'msteams-app-questionly.common';
@@ -114,8 +114,7 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
         this.setState({ showLoader: true });
         try {
             await this.refreshSession();
-            await this.updateUserRole();
-            await this.updateUserName();
+            await this.updateUserData();
         } catch (error) {
             this.logTelemetry(error);
             invokeTaskModuleForGenericError(this.props.t);
@@ -156,19 +155,12 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
     };
 
     /**
-     * Fetches current user role and sets state accordingly.
+     * Fetches current user role and username and sets state accordingly.
      */
-    private async updateUserRole() {
-        const userRole = await getCurrentParticipantRole(this.props.httpService, this.props.teamsTabContext.chatId);
-        this.setState({ userRole: userRole });
-    }
-
-    /**
-     * Fetches current user's name
-     */
-    private async updateUserName() {
-        const userName = await getCurrentParticipantUsername(this.props.httpService, this.props.teamsTabContext.chatId);
-        this.setState({ userName: userName });
+    private async updateUserData() {
+        const userData = await getCurrentParticipantData(this.props.httpService, this.props.teamsTabContext.chatId);
+        this.setState({ userRole: userData.userRole as ParticipantRoles });
+        this.setState({ userName: userData.userName });
     }
 
     /**
@@ -210,7 +202,7 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
     /**
      * Ends active ama session.
      */
-    private endActiveSession = async (e?: any) => {
+    private endActiveSession = async () => {
         try {
             const activeSessionData = await this.getActiveSession();
 
