@@ -71,6 +71,7 @@ describe('SignalRLifecycle Component', () => {
                 appInsights={sampleAppInsights}
                 httpService={sampleHttpService}
                 connection={hubConnection}
+                __disableTransComponent={true}
             />
         );
         await act(async () => {
@@ -99,6 +100,7 @@ describe('SignalRLifecycle Component', () => {
                 appInsights={sampleAppInsights}
                 httpService={sampleHttpService}
                 connection={hubConnection}
+                __disableTransComponent={true}
             />
         );
         await act(async () => {
@@ -135,6 +137,7 @@ describe('SignalRLifecycle Component', () => {
                 appInsights={sampleAppInsights}
                 httpService={sampleHttpService}
                 connection={hubConnection}
+                __disableTransComponent={true}
             />
         );
         await act(async () => {
@@ -163,6 +166,7 @@ describe('SignalRLifecycle Component', () => {
                 appInsights={sampleAppInsights}
                 httpService={sampleHttpService}
                 connection={hubConnection}
+                __disableTransComponent={true}
             />
         );
         await act(async () => {
@@ -192,6 +196,7 @@ describe('SignalRLifecycle Component', () => {
                 appInsights={sampleAppInsights}
                 httpService={sampleHttpService}
                 connection={hubConnection}
+                __disableTransComponent={true}
             />
         );
         await act(async () => {
@@ -222,6 +227,7 @@ describe('SignalRLifecycle Component', () => {
                 appInsights={sampleAppInsights}
                 httpService={sampleHttpService}
                 connection={hubConnection}
+                __disableTransComponent={true}
             />
         );
         await act(async () => {
@@ -274,6 +280,7 @@ describe('SignalRLifecycle Component', () => {
                 appInsights={sampleAppInsights}
                 httpService={sampleHttpService}
                 connection={hubConnection}
+                __disableTransComponent={true}
             />
         );
         await act(async () => {
@@ -315,6 +322,7 @@ describe('SignalRLifecycle Component', () => {
                 appInsights={sampleAppInsights}
                 httpService={sampleHttpService}
                 connection={hubConnection}
+                __disableTransComponent={true}
             />
         );
         await act(async () => {
