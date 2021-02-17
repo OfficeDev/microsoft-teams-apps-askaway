@@ -71,6 +71,7 @@
     }
 }
 .meeting-panel {
+    height: 100vh;
     .button {
         margin-left: auto;
         margin-right: auto;
@@ -118,9 +119,8 @@
         }
     }
     .question-card {
-        margin-top: 1rem;
-        height: 21rem;
-        overflow-x: hidden;
+        overflow-y: scroll;
+        flex: 1;
         .card-divider {
             border-bottom: 1px solid #3b3a39;
             min-height: 4.5rem;
@@ -128,28 +128,15 @@
             border-top-right-radius: 3px;
             .card-layout {
                 width: 100%;
-                padding: 14px;
-                padding-bottom: 2px;
-                .author-name {
-                    font-size: 12px;
-                    line-height: 20px;
-                }
-                .like-icon {
-                    position: absolute;
-                    margin-top: -0.5rem;
-                    right: 1rem;
-                    .like-icon-size {
-                        min-width: 1.3rem;
+                padding: 10px 14px 0px 14px;
+                .action-buttons {
+                    button {
+                        margin-right: -5px;
                     }
                 }
             }
             .card-body-question {
-                font-size: 14px;
-                line-height: 20px;
-                padding-left: 15px;
-                padding-top: 5px;
-                padding-right: 3px;
-                padding-bottom: 11px;
+                padding: 5px 15px 11px 15px;
             }
         }
     }
@@ -163,17 +150,9 @@
         }
     }
     .input-text-field {
-        position: absolute;
-        bottom: 0.75rem;
-        width: 94%;
+        margin-bottom: 0.625rem;
         .text-question {
             height: 2.2rem;
-            margin-right: -0.5rem;
-            word-break: break-word;
-        }
-        .send-button {
-            position: relative;
-            left: 1rem;
         }
     }
 }
