@@ -54,10 +54,12 @@ const Question: React.FunctionComponent<QuestionCompProps & ThemeProps> = (props
             }}
         >
             <Flex gap="gap.small" className="card-layout">
-                <Avatar size={'smaller'} name={question.author.name} />
-                <Flex>
-                    <Text className="author-name" content={question.author.name} weight="regular" />
-                    <Flex vAlign="center" className="like-icon">
+                <Flex vAlign="center" gap="gap.small">
+                    <Avatar size={'smaller'} name={question.author.name} />
+                    <Text size="small" content={question.author.name} weight="regular" />
+                </Flex>
+                <Flex.Item push>
+                    <Flex className="action-buttons" gap="gap.small" vAlign="center">
                         {isPresenterOrOrganizer(props.userRole) && isMouseHovered && renderHoverElement && (
                             <Button
                                 icon={<AcceptIcon styles={{ color: hoverColor }} />}
@@ -68,12 +70,10 @@ const Question: React.FunctionComponent<QuestionCompProps & ThemeProps> = (props
                                         actionValue: CONST.TAB_QUESTIONS.MARK_ANSWERED,
                                     })
                                 }
-                                className="accept-icon-size"
                                 iconOnly
                                 text
                             />
                         )}
-
                         <Button
                             disabled={userId === question.author.id || !props.isSessionActive}
                             onClick={() =>
@@ -90,16 +90,15 @@ const Question: React.FunctionComponent<QuestionCompProps & ThemeProps> = (props
                                     <LikeIcon styles={userId === question.author.id || !props.isSessionActive ? { color: disabledLikeButtonHoverColor } : { color: hoverColor }} outline />
                                 )
                             }
-                            className="like-icon-size"
                             iconOnly
                             text
                         />
                         <Text content={question.votesCount} />
                     </Flex>
-                </Flex>
+                </Flex.Item>
             </Flex>
             <Flex gap="gap.small">
-                <Text className="card-body-question" content={question.content} />
+                <Text className="card-body-question" size="medium" content={question.content} />
             </Flex>
         </div>
     );

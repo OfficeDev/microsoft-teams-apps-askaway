@@ -1,7 +1,7 @@
 // tslint:disable:no-relative-imports
 import './index.scss';
 import * as React from 'react';
-import { ArrowUpIcon, Flex, Button, Loader } from '@fluentui/react-northstar';
+import { ArrowUpIcon, Flex, Button, Loader, FlexItem } from '@fluentui/react-northstar';
 import {
     handleTaskModuleErrorForCreateQnASessionFlow,
     handleTaskModuleErrorForEndQnASessionFlow,
@@ -355,14 +355,16 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                         <EmptyTile image={collaborationImage} line1={this.localize('meetingPanel.noQuestionsPosted')} line2={this.localize('meetingPanel.askAway')} />
                     </div>
                 )}
-                <NewQuestion
-                    appInsights={this.props.appInsights}
-                    t={this.localize}
-                    activeSessionData={stateVal.activeSessionData}
-                    httpService={this.props.httpService}
-                    teamsTabContext={this.props.teamsTabContext}
-                    onAddNewQuestion={this.handleOnAddNewQuestion}
-                />
+                <FlexItem push>
+                    <NewQuestion
+                        appInsights={this.props.appInsights}
+                        t={this.localize}
+                        activeSessionData={stateVal.activeSessionData}
+                        httpService={this.props.httpService}
+                        teamsTabContext={this.props.teamsTabContext}
+                        onAddNewQuestion={this.handleOnAddNewQuestion}
+                    />
+                </FlexItem>
             </React.Fragment>
         );
     };
@@ -380,15 +382,17 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
             );
         return (
             <React.Fragment>
-                <div className="meeting-panel">
-                    <SignalRLifecycle
-                        enableLiveUpdates={true}
-                        t={this.localize}
-                        conversationId={this.props.teamsTabContext.chatId}
-                        onEvent={this.updateEvent}
-                        httpService={this.props.httpService}
-                        appInsights={this.props.appInsights}
-                    />
+                <Flex column gap="gap.small" className="meeting-panel">
+                    <FlexItem>
+                        <SignalRLifecycle
+                            enableLiveUpdates={true}
+                            t={this.localize}
+                            conversationId={this.props.teamsTabContext.chatId}
+                            onEvent={this.updateEvent}
+                            httpService={this.props.httpService}
+                            appInsights={this.props.appInsights}
+                        />
+                    </FlexItem>
                     {this.state.showNewUpdatesButton && (
                         <Button primary onClick={this.updateQnASessionContent} className="newUpdatesButton">
                             <ArrowUpIcon xSpacing="after"></ArrowUpIcon>
@@ -396,7 +400,7 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                         </Button>
                     )}
                     {stateVal.activeSessionData.sessionId ? this.showSessionQuestions(stateVal) : this.createNewSessionLayout()}
-                </div>
+                </Flex>
             </React.Fragment>
         );
     }
