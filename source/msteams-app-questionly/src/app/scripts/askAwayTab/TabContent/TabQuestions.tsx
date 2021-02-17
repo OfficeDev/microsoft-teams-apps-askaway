@@ -58,7 +58,7 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (p
                                     <Flex gap="gap.small">
                                         <Flex vAlign="center" gap="gap.small" padding="padding.medium">
                                             <Avatar size="small" name={question.author.name} />
-                                            <Text className="author-name" content={question.author.name} />
+                                            <Text size="small" content={question.author.name} />
                                             <Flex vAlign="center">
                                                 <Badge
                                                     styles={
@@ -91,7 +91,7 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (p
                                         </Flex.Item>
                                     </Flex>
                                     <Flex gap="gap.small" padding="padding.medium">
-                                        <Text className="text-format" content={question.content} />
+                                        <Text className="text-format" size="medium" content={question.content} />
                                     </Flex>
                                 </div>
                             );

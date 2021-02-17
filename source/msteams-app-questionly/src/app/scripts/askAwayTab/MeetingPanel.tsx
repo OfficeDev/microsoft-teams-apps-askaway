@@ -1,7 +1,7 @@
 // tslint:disable:no-relative-imports
 import './index.scss';
 import * as React from 'react';
-import { ArrowUpIcon, Flex, Button, Loader } from '@fluentui/react-northstar';
+import { ArrowUpIcon, Flex, Button, Loader, FlexItem } from '@fluentui/react-northstar';
 import {
     handleTaskModuleErrorForCreateQnASessionFlow,
     handleTaskModuleErrorForEndQnASessionFlow,
@@ -281,17 +281,17 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                     onClickEndSession={this.handleEndQnaSessionFlow}
                     showToolBar={false}
                 />
-                <Flex hAlign="center" vAlign="center">
-                    <div className="no-question">
+                <Flex className="welcome-text" column gap="gap.medium" hAlign="center" vAlign="center">
+                    <FlexItem>
                         <EmptyTile image={image} line1={text1} line2={text2} />
-                        {isUserPresenterOrOrganizer && (
-                            <Flex.Item align="center">
-                                <Button className="button" onClick={this.onShowTaskModule}>
-                                    <Button.Content>{this.localize('meetingPanel.createQnaSessionButton')}</Button.Content>
-                                </Button>
-                            </Flex.Item>
-                        )}
-                    </div>
+                    </FlexItem>
+                    {isUserPresenterOrOrganizer && (
+                        <Flex.Item align="center">
+                            <Button onClick={this.onShowTaskModule}>
+                                <Button.Content>{this.localize('meetingPanel.createQnaSessionButton')}</Button.Content>
+                            </Button>
+                        </Flex.Item>
+                    )}
                 </Flex>
             </React.Fragment>
         );
@@ -333,36 +333,44 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
         const sessionTitle = stateVal.activeSessionData.title ?? stateVal.input.title;
         return (
             <React.Fragment>
-                <QnASessionHeader
-                    t={this.localize}
-                    userRole={this.state.userRole}
-                    title={sessionTitle}
-                    onClickRefreshSession={this.updateContent}
-                    onClickEndSession={this.handleEndQnaSessionFlow}
-                    showToolBar={true}
-                />
+                <FlexItem>
+                    <QnASessionHeader
+                        t={this.localize}
+                        userRole={this.state.userRole}
+                        title={sessionTitle}
+                        onClickRefreshSession={this.updateContent}
+                        onClickEndSession={this.handleEndQnaSessionFlow}
+                        showToolBar={true}
+                    />
+                </FlexItem>
                 {stateVal.activeSessionData.unansweredQuestions.length > 0 || stateVal.activeSessionData.answeredQuestions.length > 0 ? (
-                    <QuestionsList
+                    <FlexItem>
+                        <QuestionsList
+                            appInsights={this.props.appInsights}
+                            t={this.localize}
+                            userRole={stateVal.userRole}
+                            activeSessionData={stateVal.activeSessionData}
+                            httpService={this.props.httpService}
+                            teamsTabContext={this.props.teamsTabContext}
+                        />
+                    </FlexItem>
+                ) : (
+                    <Flex className="margin-top-bottom" column gap="gap.small" hAlign="center" vAlign="center">
+                        <FlexItem>
+                            <EmptyTile image={collaborationImage} line1={this.localize('meetingPanel.noQuestionsPosted')} line2={this.localize('meetingPanel.askAway')} />
+                        </FlexItem>
+                    </Flex>
+                )}
+                <FlexItem push>
+                    <NewQuestion
                         appInsights={this.props.appInsights}
                         t={this.localize}
-                        userRole={stateVal.userRole}
                         activeSessionData={stateVal.activeSessionData}
                         httpService={this.props.httpService}
                         teamsTabContext={this.props.teamsTabContext}
+                        onAddNewQuestion={this.handleOnAddNewQuestion}
                     />
-                ) : (
-                    <div className="no-question">
-                        <EmptyTile image={collaborationImage} line1={this.localize('meetingPanel.noQuestionsPosted')} line2={this.localize('meetingPanel.askAway')} />
-                    </div>
-                )}
-                <NewQuestion
-                    appInsights={this.props.appInsights}
-                    t={this.localize}
-                    activeSessionData={stateVal.activeSessionData}
-                    httpService={this.props.httpService}
-                    teamsTabContext={this.props.teamsTabContext}
-                    onAddNewQuestion={this.handleOnAddNewQuestion}
-                />
+                </FlexItem>
             </React.Fragment>
         );
     };
@@ -380,15 +388,17 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
             );
         return (
             <React.Fragment>
-                <div className="meeting-panel">
-                    <SignalRLifecycle
-                        enableLiveUpdates={true}
-                        t={this.localize}
-                        conversationId={this.props.teamsTabContext.chatId}
-                        onEvent={this.updateEvent}
-                        httpService={this.props.httpService}
-                        appInsights={this.props.appInsights}
-                    />
+                <Flex column gap="gap.small" className="meeting-panel">
+                    <FlexItem>
+                        <SignalRLifecycle
+                            enableLiveUpdates={true}
+                            t={this.localize}
+                            conversationId={this.props.teamsTabContext.chatId}
+                            onEvent={this.updateEvent}
+                            httpService={this.props.httpService}
+                            appInsights={this.props.appInsights}
+                        />
+                    </FlexItem>
                     {this.state.showNewUpdatesButton && (
                         <Button primary onClick={this.updateQnASessionContent} className="newUpdatesButton">
                             <ArrowUpIcon xSpacing="after"></ArrowUpIcon>
@@ -396,7 +406,7 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                         </Button>
                     )}
                     {stateVal.activeSessionData.sessionId ? this.showSessionQuestions(stateVal) : this.createNewSessionLayout()}
-                </div>
+                </Flex>
             </React.Fragment>
         );
     }

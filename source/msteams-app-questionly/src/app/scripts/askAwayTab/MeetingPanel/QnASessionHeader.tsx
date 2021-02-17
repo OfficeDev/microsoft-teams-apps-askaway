@@ -64,7 +64,7 @@ const QnASessionHeader: React.FunctionComponent<QnASessionHeaderProps & ThemePro
 
     return (
         <Flex gap="gap.large" vAlign="center">
-            <Text className="session-title" content={props.title} size="medium" />
+            <Text content={props.title} size="large" />
             {props.showToolBar && (
                 <FlexItem push>
                     <div className="menuHeader">

@@ -54,14 +54,10 @@ const Question: React.FunctionComponent<QuestionCompProps & ThemeProps> = (props
             }}
         >
             <Flex gap="gap.small" className="card-layout">
-                <Flex.Item size="size.large">
-                    <div>
-                        <Flex vAlign="center" gap="gap.small">
-                            <Avatar size={'smaller'} name={question.author.name} />
-                            <Text className="author-name" content={question.author.name} weight="regular" />
-                        </Flex>
-                    </div>
-                </Flex.Item>
+                <Flex vAlign="center" gap="gap.small">
+                    <Avatar size={'smaller'} name={question.author.name} />
+                    <Text size="small" content={question.author.name} weight="regular" />
+                </Flex>
                 <Flex.Item push>
                     <Flex className="action-buttons" gap="gap.small" vAlign="center">
                         {isPresenterOrOrganizer(props.userRole) && isMouseHovered && renderHoverElement && (
@@ -74,7 +70,6 @@ const Question: React.FunctionComponent<QuestionCompProps & ThemeProps> = (props
                                         actionValue: CONST.TAB_QUESTIONS.MARK_ANSWERED,
                                     })
                                 }
-                                className="accept-icon-size"
                                 iconOnly
                                 text
                             />
@@ -95,7 +90,6 @@ const Question: React.FunctionComponent<QuestionCompProps & ThemeProps> = (props
                                     <LikeIcon styles={userId === question.author.id || !props.isSessionActive ? { color: disabledLikeButtonHoverColor } : { color: hoverColor }} outline />
                                 )
                             }
-                            className="like-icon-size"
                             iconOnly
                             text
                         />
@@ -104,7 +98,7 @@ const Question: React.FunctionComponent<QuestionCompProps & ThemeProps> = (props
                 </Flex.Item>
             </Flex>
             <Flex gap="gap.small">
-                <Text className="card-body-question" content={question.content} />
+                <Text className="card-body-question" size="medium" content={question.content} />
             </Flex>
         </div>
     );

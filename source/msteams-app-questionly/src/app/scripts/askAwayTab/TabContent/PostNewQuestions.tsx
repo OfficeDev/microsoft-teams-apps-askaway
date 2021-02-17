@@ -55,7 +55,7 @@ const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps & ThemePro
                 </Card.Header>
                 <Card.Body>
                     <Flex column gap="gap.small">
-                        <Text className="session-title" weight="bold" content={props.activeSessionData.title} />
+                        <Text className="session-title" size="large" weight="bold" content={props.activeSessionData.title} />
                     </Flex>
                 </Card.Body>
                 {props.activeSessionData.isActive && (

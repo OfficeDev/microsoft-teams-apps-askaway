@@ -29,19 +29,17 @@
     }
 }
 .meeting-panel {
-    display: flex;
-    flex-flow: column;
-    height: calc(100vh - 65px);
-    > div,
-    > ul {
-        margin-top: 5px;
-        margin-bottom: 5px;
+    height: 100vh;
+    .margin-top-bottom {
+        margin-top: auto;
+        margin-bottom: auto !important;
+        .text-caption-panel {
+            display: contents;
+        }
     }
-    .button {
-        margin-left: auto;
-        margin-right: auto;
-        display: block;
-        margin-top: 17%;
+    .welcome-text {
+        margin-top: auto;
+        margin-bottom: auto;
     }
     .newUpdatesButton {
         top: 12%;
@@ -55,40 +53,13 @@
         font-size: medium;
         font-weight: normal;
     }
-    .no-question {
-        left: 50%;
-        margin-top: -197px;
-        margin-left: -100px;
-        position: absolute;
-        top: 50%;
-        .text-caption-panel {
-            font-size: 12px;
-            line-height: 16px;
-            text-align: center;
-            margin-top: 14%;
-            .text-section {
-                display: block;
-            }
-        }
-        .create-session {
-            margin-left: auto;
-            margin-right: auto;
-            display: block;
-            margin-top: 9%;
-        }
-    }
-    .session-title {
-        font-size: 18px;
-        line-height: 21px;
-    }
     .menuHeader {
         .ui-menu__item__submenu {
             border: none;
         }
     }
     .question-card {
-        margin-top: 1rem;
-        overflow: auto;
+        overflow-y: scroll;
         flex: 1;
         .card-divider {
             border-bottom: 1px solid #3b3a39;
@@ -98,31 +69,14 @@
             .card-layout {
                 width: 100%;
                 padding: 10px 14px 0px 14px;
-                .author-name {
-                    font-size: 12px;
-                    line-height: 20px;
-                }
                 .action-buttons {
                     button {
                         margin-right: -5px;
                     }
                 }
-                .like-icon {
-                    position: absolute;
-                    margin-top: -0.5rem;
-                    right: 1rem;
-                    .like-icon-size {
-                        min-width: 1.3rem;
-                    }
-                }
             }
             .card-body-question {
-                font-size: 14px;
-                line-height: 20px;
-                padding-left: 15px;
-                padding-top: 5px;
-                padding-right: 3px;
-                padding-bottom: 11px;
+                padding: 5px 15px 11px 15px;
             }
         }
     }
@@ -136,17 +90,9 @@
         }
     }
     .input-text-field {
-        position: absolute;
-        bottom: 0.75rem;
-        width: 94%;
+        margin-bottom: 0.625rem;
         .text-question {
             height: 2.2rem;
-            margin-right: -0.5rem;
-            word-break: break-word;
-        }
-        .send-button {
-            position: relative;
-            left: 1rem;
         }
     }
 }
@@ -173,20 +119,7 @@
 }
 
 .tab-config-container {
-    margin-top: 15%;
-    img {
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-    }
-    .text-configtab-caption {
-        font-size: 18px;
-        line-height: 24px;
-        font-weight: bold;
-        display: inline-flex;
-        margin-top: 5%;
-        text-align: center;
-    }
+    margin-top: 6rem;
 }
 
 .tab-content {
@@ -207,16 +140,11 @@
             margin-right: auto;
         }
         .text-caption {
-            font-size: 18px;
-            line-height: 24px;
-            font-weight: bold;
             text-align: center;
             display: block;
             margin-top: 10%;
         }
         .text-subcaption {
-            font-size: 14px;
-            line-height: 20px;
             text-align: center;
             margin-top: 3%;
             display: flex;
@@ -270,14 +198,10 @@
                     margin-bottom: 0.3rem;
                 }
                 .date-content-format {
-                    font-size: 12px;
-                    line-height: 16px;
                     padding-top: 0.15rem;
                 }
                 .session-title {
                     padding-top: 0.3rem;
-                    font-size: 18px;
-                    line-height: 24px;
                 }
             }
         }
@@ -301,13 +225,7 @@
                 .text-format {
                     position: relative;
                     top: -0.5rem;
-                    font-size: 14px;
-                    line-height: 20px;
                     padding-left: 0.2rem;
-                }
-                .author-name {
-                    font-size: 12px;
-                    line-height: 20px;
                 }
             }
             .padding-none {
@@ -337,15 +255,6 @@
     .sub-text {
         width: 62%;
         margin: 0 auto;
-    }
-}
-.notification-popup {
-    width: 99%;
-    .notification-title {
-        margin-top: 1rem;
-        margin-bottom: 1rem;
-        font-size: 14px;
-        line-height: 20px;
     }
 }
 
@@ -398,12 +307,7 @@
     border-radius: 3px;
     font-family: Segoe UI;
 
-    .sessionName {
-        font-size: 14px;
-        line-height: 20px;
-    }
     .sessionMetadata {
-        font-size: 12px;
         line-height: 20px;
     }
     .liveTag {
