@@ -5,7 +5,6 @@ import { PreventIframe } from 'express-msteams-host';
  */
 @PreventIframe('/askAwayTab/index.html')
 @PreventIframe('/askAwayTab/config.html')
-@PreventIframe('/askAwayTab/remove.html')
 @PreventIframe('/askAwayTab/popups/createsession.html')
 @PreventIframe('/askAwayTab/popups/qnaSessioncreatednotification.html')
 @PreventIframe('/askAwayTab/popups/switchSession.html')

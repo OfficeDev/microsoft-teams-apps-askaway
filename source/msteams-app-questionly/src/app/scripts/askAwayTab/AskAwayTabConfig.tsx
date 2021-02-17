@@ -42,7 +42,6 @@ export class AskAwayTabConfig extends msteamsReactBaseComponent<IAskAwayTabConfi
                 microsoftTeams.settings.setSettings({
                     contentUrl: host + '/askAwayTab/?name={loginHint}&tenant={tid}&group={groupId}&theme={theme}',
                     suggestedDisplayName: 'AskAway',
-                    removeUrl: host + `/askAwayTab/remove.html?theme={theme}&locale=${this.state.locale}`,
                     entityId: this.state.value,
                 });
                 saveEvent.notifySuccess();
