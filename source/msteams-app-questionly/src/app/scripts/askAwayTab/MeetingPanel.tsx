@@ -24,7 +24,7 @@ import { ClientDataContract } from '../../../../src/contracts/clientDataContract
 import { DataEventHandlerFactory } from './dataEventHandling/dataEventHandlerFactory';
 import { IDataEvent } from 'msteams-app-questionly.common';
 import { ParticipantRoles } from '../../../enums/ParticipantRoles';
-import { getCurrentParticipantRole, isPresenterOrOrganizer } from './shared/meetingUtility';
+import { getCurrentParticipantInfo, isPresenterOrOrganizer } from './shared/meetingUtility';
 import EmptyTile from './MeetingPanel/EmptyTile';
 
 const collaborationImage = require('./../../web/assets/collaboration.png');
@@ -106,8 +106,8 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
      * Fetches current user role and sets state accordingly.
      */
     private async updateUserRole() {
-        const userRole = await getCurrentParticipantRole(this.props.httpService, this.props.teamsTabContext.chatId);
-        this.setState({ userRole: userRole });
+        const userData = await getCurrentParticipantInfo(this.props.httpService, this.props.teamsTabContext.chatId);
+        this.setState({ userRole: userData.userRole as ParticipantRoles });
     }
 
     /**
