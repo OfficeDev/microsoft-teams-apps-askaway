@@ -55,8 +55,8 @@ const NewQuestion: React.FunctionComponent<NewQuestionProps> = (props) => {
     };
 
     return (
-        <div className="input-text-field">
-            <Flex gap="gap.small">
+        <Flex hAlign="center" vAlign="end" className="input-text-field" gap="gap.small">
+            <FlexItem>
                 <TextArea
                     className="text-question"
                     inverted
@@ -68,11 +68,11 @@ const NewQuestion: React.FunctionComponent<NewQuestionProps> = (props) => {
                     }}
                     value={question}
                 />
-                <FlexItem push>
-                    <Button className="send-button" icon={<SendIcon size="large" onClick={() => submitQuestion()} />} text iconOnly />
-                </FlexItem>
-            </Flex>
-        </div>
+            </FlexItem>
+            <FlexItem push>
+                <Button icon={<SendIcon size="large" onClick={() => submitQuestion()} />} text iconOnly />
+            </FlexItem>
+        </Flex>
     );
 };
 export default NewQuestion;

@@ -27,7 +27,7 @@ import {
     invokeTaskModuleForGenericError,
 } from './task-modules-utility/taskModuleHelper';
 import { ParticipantRoles } from '../../../enums/ParticipantRoles';
-import { getCurrentParticipantRole } from './shared/meetingUtility';
+import { getCurrentParticipantInfo } from './shared/meetingUtility';
 import SignalRLifecycle from './signalR/SignalRLifecycle';
 import { DataEventHandlerFactory } from './dataEventHandling/dataEventHandlerFactory';
 import { IDataEvent } from 'msteams-app-questionly.common';
@@ -53,6 +53,10 @@ export interface TabContentState {
      */
     userRole: ParticipantRoles;
     /**
+     * current user's name in meeting.
+     */
+    userName: string;
+    /**
      * Indicator to show loading experience when fetching data etc.
      */
     showLoader: boolean;
@@ -70,6 +74,7 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
         this.state = {
             selectedAmaSessionData: this.props.helper.createEmptyActiveSessionData(),
             userRole: ParticipantRoles.Attendee,
+            userName: '',
             showLoader: false,
             showNewUpdatesButton: false,
         };
@@ -109,7 +114,7 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
         this.setState({ showLoader: true });
         try {
             await this.refreshSession();
-            await this.updateUserRole();
+            await this.updateUserData();
         } catch (error) {
             this.logTelemetry(error);
             invokeTaskModuleForGenericError(this.props.t);
@@ -150,11 +155,14 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
     };
 
     /**
-     * Fetches current user role and sets state accordingly.
+     * Fetches current user role and username and sets state accordingly.
      */
-    private async updateUserRole() {
-        const userRole = await getCurrentParticipantRole(this.props.httpService, this.props.teamsTabContext.chatId);
-        this.setState({ userRole: userRole });
+    private async updateUserData() {
+        const userData = await getCurrentParticipantInfo(this.props.httpService, this.props.teamsTabContext.chatId);
+        this.setState({
+            userRole: userData.userRole as ParticipantRoles,
+            userName: userData.userName,
+        });
     }
 
     /**
@@ -196,7 +204,7 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
     /**
      * Ends active ama session.
      */
-    private endActiveSession = async (e?: any) => {
+    private endActiveSession = async () => {
         try {
             const activeSessionData = await this.getActiveSession();
 
@@ -363,7 +371,7 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
                                     <Button.Content className="newUpdatesButtonContent" content="New updates"></Button.Content>
                                 </Button>
                             )}
-                            <PostNewQuestions t={this.localize} activeSessionData={selectedAmaSessionData} onPostNewQuestion={this.handlePostNewQuestions} />
+                            <PostNewQuestions t={this.localize} activeSessionData={selectedAmaSessionData} userName={this.state.userName} onPostNewQuestion={this.handlePostNewQuestions} />
                             {selectedAmaSessionData.unansweredQuestions.length > 0 || selectedAmaSessionData.answeredQuestions.length > 0 ? (
                                 <TabQuestions t={this.localize} onClickAction={this.validateClickAction} activeSessionData={selectedAmaSessionData} teamsTabContext={this.props.teamsTabContext} />
                             ) : (

@@ -1,7 +1,7 @@
 // tslint:disable:no-relative-imports
 import './index.scss';
 import * as React from 'react';
-import { ArrowUpIcon, Flex, Button, Loader } from '@fluentui/react-northstar';
+import { ArrowUpIcon, Flex, Button, Loader, FlexItem } from '@fluentui/react-northstar';
 import {
     handleTaskModuleErrorForCreateQnASessionFlow,
     handleTaskModuleErrorForEndQnASessionFlow,
@@ -24,7 +24,7 @@ import { ClientDataContract } from '../../../../src/contracts/clientDataContract
 import { DataEventHandlerFactory } from './dataEventHandling/dataEventHandlerFactory';
 import { IDataEvent } from 'msteams-app-questionly.common';
 import { ParticipantRoles } from '../../../enums/ParticipantRoles';
-import { getCurrentParticipantRole, isPresenterOrOrganizer } from './shared/meetingUtility';
+import { getCurrentParticipantInfo, isPresenterOrOrganizer } from './shared/meetingUtility';
 import EmptyTile from './MeetingPanel/EmptyTile';
 
 const collaborationImage = require('./../../web/assets/collaboration.png');
@@ -106,8 +106,8 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
      * Fetches current user role and sets state accordingly.
      */
     private async updateUserRole() {
-        const userRole = await getCurrentParticipantRole(this.props.httpService, this.props.teamsTabContext.chatId);
-        this.setState({ userRole: userRole });
+        const userData = await getCurrentParticipantInfo(this.props.httpService, this.props.teamsTabContext.chatId);
+        this.setState({ userRole: userData.userRole as ParticipantRoles });
     }
 
     /**
@@ -355,14 +355,16 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                         <EmptyTile image={collaborationImage} line1={this.localize('meetingPanel.noQuestionsPosted')} line2={this.localize('meetingPanel.askAway')} />
                     </div>
                 )}
-                <NewQuestion
-                    appInsights={this.props.appInsights}
-                    t={this.localize}
-                    activeSessionData={stateVal.activeSessionData}
-                    httpService={this.props.httpService}
-                    teamsTabContext={this.props.teamsTabContext}
-                    onAddNewQuestion={this.handleOnAddNewQuestion}
-                />
+                <FlexItem push>
+                    <NewQuestion
+                        appInsights={this.props.appInsights}
+                        t={this.localize}
+                        activeSessionData={stateVal.activeSessionData}
+                        httpService={this.props.httpService}
+                        teamsTabContext={this.props.teamsTabContext}
+                        onAddNewQuestion={this.handleOnAddNewQuestion}
+                    />
+                </FlexItem>
             </React.Fragment>
         );
     };
@@ -380,7 +382,7 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
             );
         return (
             <React.Fragment>
-                <div className="meeting-panel">
+                <Flex column gap="gap.small" className="meeting-panel">
                     <SignalRLifecycle
                         enableLiveUpdates={true}
                         t={this.localize}
@@ -396,7 +398,7 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                         </Button>
                     )}
                     {stateVal.activeSessionData.sessionId ? this.showSessionQuestions(stateVal) : this.createNewSessionLayout()}
-                </div>
+                </Flex>
             </React.Fragment>
         );
     }
