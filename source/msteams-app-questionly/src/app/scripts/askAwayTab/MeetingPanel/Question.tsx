@@ -53,16 +53,14 @@ const Question: React.FunctionComponent<QuestionCompProps & ThemeProps> = (props
                 setDisabledLikeButtonHoverColor(colorScheme.default.foregroundDisabled1);
             }}
         >
-            <Flex gap="gap.small" className="card-layout">
-                <Flex vAlign="center" gap="gap.small">
-                    <Avatar size={'smaller'} name={question.author.name} />
-                    <Text size="small" content={question.author.name} weight="regular" />
-                </Flex>
+            <Flex gap="gap.small" vAlign="center" className="card-layout">
+                <Avatar size={'smaller'} name={question.author.name} />
+                <Text title={question.author.name} truncated size="small" content={question.author.name} weight="regular" />
                 <Flex.Item push>
-                    <Flex className="action-buttons" gap="gap.small" vAlign="center">
-                        {isPresenterOrOrganizer(props.userRole) && isMouseHovered && renderHoverElement && (
+                    <Flex className="action-buttons" gap="gap.smaller" vAlign="center">
+                        {isPresenterOrOrganizer(props.userRole) && (
                             <Button
-                                icon={<AcceptIcon styles={{ color: hoverColor }} />}
+                                icon={isMouseHovered && renderHoverElement && <AcceptIcon styles={{ color: hoverColor }} />}
                                 onClick={() =>
                                     onClickAction({
                                         question,
@@ -97,7 +95,7 @@ const Question: React.FunctionComponent<QuestionCompProps & ThemeProps> = (props
                     </Flex>
                 </Flex.Item>
             </Flex>
-            <Flex gap="gap.small">
+            <Flex gap="gap.small" padding="padding.medium" className="question-padding">
                 <Text className="card-body-question" size="medium" content={question.content} />
             </Flex>
         </div>

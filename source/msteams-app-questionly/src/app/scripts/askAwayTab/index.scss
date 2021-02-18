@@ -75,12 +75,18 @@
                     }
                 }
             }
-            .card-body-question {
-                padding: 5px 15px 11px 15px;
+            .question-padding {
+                padding-top: 0.2rem;
+                padding-right: 1rem;
+                .card-body-question {
+                    padding-left: 0.4rem;
+                }
             }
         }
     }
     .menu-bar {
+        padding-top: 0.2rem;
+        padding-bottom: 0.7rem;
         border-bottom: none;
         a {
             border-bottom-width: medium;
@@ -257,7 +263,6 @@
         margin: 0 auto;
     }
 }
-
 .text-center {
     text-align: center;
 }
