@@ -136,11 +136,13 @@
                 }
             }
             .card-body-question {
-                padding: 5px 15px 11px 15px;
+                padding-left: 0.4rem;
             }
         }
     }
     .menu-bar {
+        padding-top: 0.2rem;
+        padding-bottom: 0.7rem;
         border-bottom: none;
         a {
             border-bottom-width: medium;
@@ -291,12 +293,6 @@
         width: 62%;
         margin: 0 auto;
     }
-}
-.notification-title {
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-    font-size: 14px;
-    line-height: 20px;
 }
 .text-center {
     text-align: center;
