@@ -26,12 +26,12 @@ const TabCreateSession: React.FunctionComponent<TabCreateSessionProps> = (props)
 
     return (
         <Flex hAlign="center" vAlign="center" className="screen">
-            <Image className="create-session" alt="image" src={imageSrc} />
+            <Image alt="image" src={imageSrc} />
             <Flex.Item align="center">
-                <Text className="text-caption" content={props.t('tab.welcomeText')} />
+                <Text size="large" weight="bold" className="text-caption" content={props.t('tab.welcomeText')} />
             </Flex.Item>
             <Flex.Item align="center">
-                <Text className="text-subcaption" content={subText} />
+                <Text className="text-subcaption" size="medium" content={subText} />
             </Flex.Item>
             {isUserPresenterOrOrganizer && (
                 <Flex.Item align="center">

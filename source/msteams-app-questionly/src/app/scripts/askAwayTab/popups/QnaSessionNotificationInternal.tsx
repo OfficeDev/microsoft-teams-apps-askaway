@@ -1,6 +1,6 @@
 import './../index.scss';
 import * as React from 'react';
-import { Flex, Text, Button } from '@fluentui/react-northstar';
+import { Flex, Text, Button, FlexItem } from '@fluentui/react-northstar';
 import { useTranslation } from 'react-i18next';
 
 /**
@@ -18,24 +18,27 @@ const QnaSessionNotificationInternal: React.FunctionComponent<QnaSessionNotifica
     const userName = props.searchParams.get('username');
 
     return (
-        <Flex column>
-            <Text content={t('popups.notificationTitle', { userName: userName })} />
-            <div className="notification-title">
-                <Text content={sessionTitle} weight="bold" />
-            </div>
-            <Flex gap="gap.large" vAlign="center">
+        <Flex gap="gap.medium" padding="padding.medium" column>
+            <FlexItem>
+                <Text content={t('popups.notificationTitle', { userName: userName })} />
+            </FlexItem>
+            <FlexItem>
+                <Text size="medium" content={sessionTitle} weight="bold" />
+            </FlexItem>
+            <FlexItem>
                 <Text content={t('popups.notificationMessage')} />
+            </FlexItem>
+            <FlexItem align="end">
                 <Button
                     primary
                     type="submit"
                     size="small"
+                    content={t('popups.notificationButton')}
                     onClick={() => {
                         props.onSubmitSession();
                     }}
-                >
-                    <Button.Content>{t('popups.notificationButton')}</Button.Content>
-                </Button>
-            </Flex>
+                ></Button>
+            </FlexItem>
         </Flex>
     );
 };

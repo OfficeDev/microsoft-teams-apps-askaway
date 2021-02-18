@@ -281,17 +281,15 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                     onClickEndSession={this.handleEndQnaSessionFlow}
                     showToolBar={false}
                 />
-                <Flex hAlign="center" vAlign="center">
-                    <div className="no-question">
-                        <EmptyTile image={image} line1={text1} line2={text2} />
-                        {isUserPresenterOrOrganizer && (
-                            <Flex.Item align="center">
-                                <Button className="button" onClick={this.onShowTaskModule}>
-                                    <Button.Content>{this.localize('meetingPanel.createQnaSessionButton')}</Button.Content>
-                                </Button>
-                            </Flex.Item>
-                        )}
-                    </div>
+                <Flex className="welcome-text" column gap="gap.medium" hAlign="center" vAlign="center">
+                    <EmptyTile image={image} line1={text1} line2={text2} />
+                    {isUserPresenterOrOrganizer && (
+                        <Flex.Item align="center">
+                            <Button onClick={this.onShowTaskModule}>
+                                <Button.Content>{this.localize('meetingPanel.createQnaSessionButton')}</Button.Content>
+                            </Button>
+                        </Flex.Item>
+                    )}
                 </Flex>
             </React.Fragment>
         );
@@ -351,9 +349,9 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                         teamsTabContext={this.props.teamsTabContext}
                     />
                 ) : (
-                    <div className="no-question">
+                    <Flex className="margin-top-bottom" column gap="gap.small" hAlign="center" vAlign="center">
                         <EmptyTile image={collaborationImage} line1={this.localize('meetingPanel.noQuestionsPosted')} line2={this.localize('meetingPanel.askAway')} />
-                    </div>
+                    </Flex>
                 )}
                 <FlexItem push>
                     <NewQuestion
