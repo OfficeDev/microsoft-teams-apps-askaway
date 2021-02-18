@@ -1,7 +1,6 @@
 import { IBackgroundJobPayload, IDataEvent } from 'msteams-app-questionly.common';
 import axios, { AxiosRequestConfig } from 'axios';
 import { exceptionLogger, getOperationIdForCurrentRequest } from 'src/util/exceptionTracking';
-import { getBackgroundFunctionKey } from 'src/util/keyvault';
 import { IQnASession_populated, IQuestion } from 'msteams-app-questionly.data';
 import {
     createQnaSessionCreatedEvent,
@@ -13,15 +12,18 @@ import {
 } from 'src/background-job/events/dataEventUtility';
 import { StatusCodes } from 'http-status-codes';
 import { TelemetryExceptions } from 'src/constants/telemetryConstants';
+import { getFromMemoryCache, putIntoMemoryCache } from 'src/util/memoryCache';
+import { getAccessToken } from 'src/util/azureCredentialUtility';
 
 const axiosConfig: AxiosRequestConfig = axios.defaults;
 let backgroundJobUri: string;
 
+const accessTokenName = 'AccessToken';
+const oneMinuteToMs = 60000;
+
 // Load background job uri and function key in memory.
 // throws exception if these values failed to load.
 export const initBackgroundJobSetup = async () => {
-    axiosConfig.headers['x-functions-key'] = await getBackgroundFunctionKey();
-
     if (process.env.BackgroundJobUri === undefined) {
         exceptionLogger('backgroundJobUri is missing in app settings.');
         throw new Error('backgroundJobUri is missing in app settings.');
@@ -163,6 +165,9 @@ const triggerBackgroundJob = async (conversationId: string, qnaSessionId: string
     };
 
     try {
+        const token = await getToken();
+        axiosConfig.headers['Authorization'] = `Bearer ${token}`;
+
         const res = await axios.post(backgroundJobUri, backgroundJobPayload, axiosConfig);
 
         if (res.status != StatusCodes.ACCEPTED) {
@@ -180,4 +185,30 @@ const triggerBackgroundJob = async (conversationId: string, qnaSessionId: string
 
         return false;
     }
+};
+
+/**
+ * Gets JWT access token from memory cache, if present and not expired.
+ * Otherwise, calls getToken using DefaultAzureCredential to get a new access token.
+ * @returns access token.
+ * @throws error if access token could not be fetched.
+ */
+const getToken = async (): Promise<string> => {
+    let token = getFromMemoryCache(accessTokenName);
+    if (token) {
+        return token;
+    }
+    const accessToken = await getAccessToken();
+    if (!accessToken) {
+        throw new Error('Error while fetching access token for background job.');
+    }
+    token = accessToken.token;
+
+    const currentTimestamp = new Date().getTime();
+    const expiresAfterMs = accessToken.expiresOnTimestamp - currentTimestamp - oneMinuteToMs;
+    if (expiresAfterMs > 0) {
+        putIntoMemoryCache(accessTokenName, token, expiresAfterMs);
+    }
+
+    return token;
 };
