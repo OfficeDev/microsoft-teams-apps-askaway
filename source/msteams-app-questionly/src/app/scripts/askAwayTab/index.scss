@@ -75,8 +75,12 @@
                     }
                 }
             }
-            .card-body-question {
-                padding-left: 0.4rem;
+            .question-padding {
+                padding-top: 0.2rem;
+                padding-right: 1rem;
+                .card-body-question {
+                    padding-left: 0.4rem;
+                }
             }
         }
     }

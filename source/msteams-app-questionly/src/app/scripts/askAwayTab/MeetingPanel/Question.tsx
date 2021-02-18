@@ -95,7 +95,7 @@ const Question: React.FunctionComponent<QuestionCompProps & ThemeProps> = (props
                     </Flex>
                 </Flex.Item>
             </Flex>
-            <Flex gap="gap.small" padding="padding.medium">
+            <Flex gap="gap.small" padding="padding.medium" className="question-padding">
                 <Text className="card-body-question" size="medium" content={question.content} />
             </Flex>
         </div>
