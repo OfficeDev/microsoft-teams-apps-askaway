@@ -12,6 +12,7 @@ import Helper from '../shared/Helper';
  */
 export interface PostNewQuestionsProps {
     activeSessionData: ClientDataContract.QnaSession;
+    userName: string;
     t: Function;
     onPostNewQuestion: Function;
 }
@@ -37,8 +38,8 @@ const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps & ThemePro
                             <Badge
                                 styles={
                                     props.activeSessionData.isActive
-                                        ? { backgroundColor: colorScheme.green.background, color: colorScheme.green.foreground1 }
-                                        : { backgroundColor: colorScheme.default.background5, color: colorScheme.default.foregroundFocus1 }
+                                        ? { backgroundColor: colorScheme.green.background, color: colorScheme.green.foreground1, fontSize: '12px' }
+                                        : { backgroundColor: colorScheme.default.background5, color: colorScheme.default.foregroundFocus1, fontSize: '12px' }
                                 }
                                 text={props.activeSessionData.isActive ? props.t('tab.liveStatus') : props.t('tab.closedStatus')}
                             />
@@ -55,14 +56,14 @@ const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps & ThemePro
                 </Card.Header>
                 <Card.Body>
                     <Flex column gap="gap.small">
-                        <Text className="session-title" weight="bold" content={props.activeSessionData.title} />
+                        <Text className="session-title" size="large" weight="bold" content={props.activeSessionData.title} />
                     </Flex>
                 </Card.Body>
                 {props.activeSessionData.isActive && (
                     <Card.Footer>
                         <Divider />
                         <Flex className="question-input-flex" gap="gap.small" vAlign="center">
-                            <Avatar size="medium" name={props.activeSessionData.hostUser.name} />
+                            <Avatar size="medium" name={props.userName} />
                             <TextArea
                                 className="question-input"
                                 fluid
@@ -80,6 +81,11 @@ const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps & ThemePro
                                 </Button>
                             </FlexItem>
                         </Flex>
+                    </Card.Footer>
+                )}
+                {!props.activeSessionData.isActive && (
+                    <Card.Footer styles={{ marginBottom: '0' }}>
+                        <Text content={props.activeSessionData.description} />
                     </Card.Footer>
                 )}
             </Card>

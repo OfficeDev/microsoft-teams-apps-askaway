@@ -26,15 +26,11 @@ const SessionListCard: React.FunctionComponent<SessionListCardProps & ThemeProps
     const colorScheme = props.theme.siteVariables.colorScheme;
     return (
         <div key={qnaSession.sessionId} id="switchSessionListCard" style={{ borderColor: colorScheme.default.border }} className="switchSessionListCard">
-            <div className="sessionName">
-                <Flex gap="gap.small">
-                    <Text> {qnaSession.title} </Text>
-                    {qnaSession.isActive && (
-                        <Badge className="liveTag" styles={{ backgroundColor: colorScheme.green.background, color: colorScheme.green.foreground1 }} text={props.t('popups.live')} />
-                    )}
-                </Flex>
-            </div>
-            <Text styles={{ color: colorScheme.default.foreground1 }} className="sessionMetadata">
+            <Flex gap="gap.small">
+                <Text size="medium"> {qnaSession.title} </Text>
+                {qnaSession.isActive && <Badge className="liveTag" styles={{ backgroundColor: colorScheme.green.background, color: colorScheme.green.foreground1 }} text={props.t('popups.live')} />}
+            </Flex>
+            <Text styles={{ color: colorScheme.default.foreground1 }} size="small" className="sessionMetadata">
                 {props.t('popups.sessionCreatedDate', { date: Helper.createDateString(qnaSession.dateTimeCreated) })}
             </Text>
         </div>

@@ -109,4 +109,24 @@ export namespace ClientDataContract {
          */
         code?: string;
     }
+
+    /**
+     * Contract for user data for rest api response (/me)
+     */
+    export interface User {
+        /**
+         * User role in the meeting
+         */
+        userRole: string;
+
+        /**
+         * User name
+         */
+        userName: string;
+
+        /**
+         * User Id
+         */
+        userId: string;
+    }
 }
