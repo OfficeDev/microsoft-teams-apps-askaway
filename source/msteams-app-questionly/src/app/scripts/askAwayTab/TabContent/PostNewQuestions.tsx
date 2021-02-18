@@ -12,6 +12,7 @@ import Helper from '../shared/Helper';
  */
 export interface PostNewQuestionsProps {
     activeSessionData: ClientDataContract.QnaSession;
+    userName: string;
     t: Function;
     onPostNewQuestion: Function;
 }
@@ -62,7 +63,7 @@ const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps & ThemePro
                     <Card.Footer>
                         <Divider />
                         <Flex className="question-input-flex" gap="gap.small" vAlign="center">
-                            <Avatar size="medium" name={props.activeSessionData.hostUser.name} />
+                            <Avatar size="medium" name={props.userName} />
                             <TextArea
                                 className="question-input"
                                 fluid
