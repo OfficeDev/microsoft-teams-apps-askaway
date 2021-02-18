@@ -18,7 +18,7 @@ export const isPresenterOrOrganizer = (userRole: ParticipantRoles): boolean => {
  * @returns - user name.
  * @throws - any error occured while fetching user role.
  */
-export const getCurrentParticipantData = async (httpService: HttpService, conversationId?: string): Promise<ClientDataContract.User> => {
+export const getCurrentParticipantInfo = async (httpService: HttpService, conversationId?: string): Promise<ClientDataContract.User> => {
     const response = await httpService.get(`/conversations/${conversationId}/me`);
     return response.data;
 };

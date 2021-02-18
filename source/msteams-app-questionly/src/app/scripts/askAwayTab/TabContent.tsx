@@ -27,7 +27,7 @@ import {
     invokeTaskModuleForGenericError,
 } from './task-modules-utility/taskModuleHelper';
 import { ParticipantRoles } from '../../../enums/ParticipantRoles';
-import { getCurrentParticipantData } from './shared/meetingUtility';
+import { getCurrentParticipantInfo } from './shared/meetingUtility';
 import SignalRLifecycle from './signalR/SignalRLifecycle';
 import { DataEventHandlerFactory } from './dataEventHandling/dataEventHandlerFactory';
 import { IDataEvent } from 'msteams-app-questionly.common';
@@ -158,9 +158,11 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
      * Fetches current user role and username and sets state accordingly.
      */
     private async updateUserData() {
-        const userData = await getCurrentParticipantData(this.props.httpService, this.props.teamsTabContext.chatId);
-        this.setState({ userRole: userData.userRole as ParticipantRoles });
-        this.setState({ userName: userData.userName });
+        const userData = await getCurrentParticipantInfo(this.props.httpService, this.props.teamsTabContext.chatId);
+        this.setState({
+            userRole: userData.userRole as ParticipantRoles,
+            userName: userData.userName,
+        });
     }
 
     /**
