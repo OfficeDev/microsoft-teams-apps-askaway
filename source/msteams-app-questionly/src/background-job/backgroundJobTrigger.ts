@@ -166,9 +166,8 @@ const triggerBackgroundJob = async (conversationId: string, qnaSessionId: string
 
     try {
         const token = await getToken();
-        axiosConfig.headers['Authorization'] = `Bearer ${token}`;
 
-        const res = await axios.post(backgroundJobUri, backgroundJobPayload, axiosConfig);
+        const res = await axios.post(`${backgroundJobUri}?authorization=${token}`, backgroundJobPayload, axiosConfig);
 
         if (res.status != StatusCodes.ACCEPTED) {
             throw new Error(`Error in scheduling background job for conversation id ${conversationId}. returned status: ${res.status}, data: ${res.data}`);

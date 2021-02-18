@@ -18,6 +18,7 @@ import crypto from 'crypto';
 import { initKeyVault } from 'src/util/keyvault';
 import { IQuestionPopulatedUser } from 'msteams-app-questionly.data';
 import { CardConstants } from 'src/adaptive-cards/constants/cardConstants';
+import { initializeCacheInstance } from 'src/util/memoryCache';
 
 const sampleUserAADObjId1 = 'be36140g-9729-3024-8yg1-147bbi67g2c9';
 const sampleQnASessionID = '5f160b862655575054393a0e';
@@ -422,6 +423,8 @@ describe('initials avatar generation tests', () => {
         process.env.AvatarKey = crypto.randomBytes(13).toString();
         // Initialize key vault cache. Avatar key is first checked in cache.
         initKeyVault();
+        // Initialize cach instance since the initialization was moved from keyvault.ts to memoryCache.ts
+        initializeCacheInstance();
     });
 
     test('initials avatar image', async () => {

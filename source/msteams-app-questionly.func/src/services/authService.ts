@@ -78,13 +78,12 @@ export const authenticateRequest = async (
   context: Context,
   req: HttpRequest
 ): Promise<Boolean> => {
-  let token = req.headers[authorizationHeaderConstant];
+  let token = req.query[authorizationHeaderConstant];
 
   if (!token) {
     return false;
   }
 
-  token = token.replace("Bearer", "").trim();
   const options = getVerifyOptions();
 
   try {
