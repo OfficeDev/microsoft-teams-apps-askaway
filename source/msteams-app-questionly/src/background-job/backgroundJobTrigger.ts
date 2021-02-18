@@ -193,6 +193,9 @@ const triggerBackgroundJob = async (conversationId: string, qnaSessionId: string
  * @throws error if access token could not be fetched.
  */
 const getToken = async (): Promise<string> => {
+    if (process.env.debugMode === 'true') {
+        return '';
+    }
     let token = getFromMemoryCache(accessTokenName);
     if (token) {
         return token;
