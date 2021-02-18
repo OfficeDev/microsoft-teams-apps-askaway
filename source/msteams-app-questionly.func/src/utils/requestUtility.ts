@@ -47,17 +47,13 @@ export const isCardRefreshNeededForQuestionEvent = (
  * @param context - context
  * @param req - http request
  */
-export const validateToken = async (
+export const validateTokenFromAppService = async (
   context: Context,
   req: HttpRequest
 ): Promise<Boolean> => {
   const isAuthenticRequest = await authenticateRequest(context, req);
-  if (isAuthenticRequest) {
-    if (
-      req[userIdParameterConstant] === process.env.IdentityObjectId_AppService
-    ) {
-      return true;
-    }
-  }
-  return false;
+  return (
+    isAuthenticRequest &&
+    req[userIdParameterConstant] === process.env.IdentityObjectId_AppService
+  );
 };

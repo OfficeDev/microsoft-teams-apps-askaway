@@ -14,12 +14,12 @@ import { StatusCodes } from 'http-status-codes';
 import { TelemetryExceptions } from 'src/constants/telemetryConstants';
 import { getFromMemoryCache, putIntoMemoryCache } from 'src/util/memoryCache';
 import { getAccessToken } from 'src/util/azureCredentialUtility';
-import { ifNumber } from 'src/util/typeUtility';
 
 const axiosConfig: AxiosRequestConfig = axios.defaults;
 let backgroundJobUri: string;
 
 const accessTokenName = 'AccessToken';
+const oneMinuteToMs = 60000;
 
 // Load background job uri and function key in memory.
 // throws exception if these values failed to load.
@@ -205,8 +205,10 @@ const getToken = async (): Promise<string> => {
     token = accessToken.token;
 
     const currentTimestamp = new Date().getTime();
-    const expiresAfterMs = accessToken.expiresOnTimestamp - currentTimestamp;
-    putIntoMemoryCache(accessTokenName, token, expiresAfterMs);
+    const expiresAfterMs = accessToken.expiresOnTimestamp - currentTimestamp - oneMinuteToMs;
+    if (expiresAfterMs > 0) {
+        putIntoMemoryCache(accessTokenName, token, expiresAfterMs);
+    }
 
     return token;
 };
