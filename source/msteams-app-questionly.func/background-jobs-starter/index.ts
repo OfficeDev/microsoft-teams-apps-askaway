@@ -1,7 +1,13 @@
 ﻿import * as df from "durable-functions";
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
-import { createBadRequestResponse } from "../src/utils/responseUtility";
-import { isValidParam } from "../src/utils/requestUtility";
+import {
+  createBadRequestResponse,
+  createUnauthorizedErrorResponse,
+} from "../src/utils/responseUtility";
+import {
+  isValidParam,
+  validateTokenFromAppService,
+} from "../src/utils/requestUtility";
 import { errorStrings } from "../src/constants/errorStrings";
 import { initiateDBConnection } from "../src/utils/dbUtility";
 
@@ -9,6 +15,12 @@ const httpStart: AzureFunction = async function (
   context: Context,
   req: HttpRequest
 ): Promise<any> {
+  const isValidToken = await validateTokenFromAppService(context, req);
+  if (!isValidToken) {
+    createUnauthorizedErrorResponse(context);
+    return context.res;
+  }
+
   if (!isValidParam(req.body?.conversationId)) {
     createBadRequestResponse(
       context,
