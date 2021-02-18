@@ -282,9 +282,7 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                     showToolBar={false}
                 />
                 <Flex className="welcome-text" column gap="gap.medium" hAlign="center" vAlign="center">
-                    <FlexItem>
-                        <EmptyTile image={image} line1={text1} line2={text2} />
-                    </FlexItem>
+                    <EmptyTile image={image} line1={text1} line2={text2} />
                     {isUserPresenterOrOrganizer && (
                         <Flex.Item align="center">
                             <Button onClick={this.onShowTaskModule}>
@@ -333,32 +331,26 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
         const sessionTitle = stateVal.activeSessionData.title ?? stateVal.input.title;
         return (
             <React.Fragment>
-                <FlexItem>
-                    <QnASessionHeader
-                        t={this.localize}
-                        userRole={this.state.userRole}
-                        title={sessionTitle}
-                        onClickRefreshSession={this.updateContent}
-                        onClickEndSession={this.handleEndQnaSessionFlow}
-                        showToolBar={true}
-                    />
-                </FlexItem>
+                <QnASessionHeader
+                    t={this.localize}
+                    userRole={this.state.userRole}
+                    title={sessionTitle}
+                    onClickRefreshSession={this.updateContent}
+                    onClickEndSession={this.handleEndQnaSessionFlow}
+                    showToolBar={true}
+                />
                 {stateVal.activeSessionData.unansweredQuestions.length > 0 || stateVal.activeSessionData.answeredQuestions.length > 0 ? (
-                    <FlexItem>
-                        <QuestionsList
-                            appInsights={this.props.appInsights}
-                            t={this.localize}
-                            userRole={stateVal.userRole}
-                            activeSessionData={stateVal.activeSessionData}
-                            httpService={this.props.httpService}
-                            teamsTabContext={this.props.teamsTabContext}
-                        />
-                    </FlexItem>
+                    <QuestionsList
+                        appInsights={this.props.appInsights}
+                        t={this.localize}
+                        userRole={stateVal.userRole}
+                        activeSessionData={stateVal.activeSessionData}
+                        httpService={this.props.httpService}
+                        teamsTabContext={this.props.teamsTabContext}
+                    />
                 ) : (
                     <Flex className="margin-top-bottom" column gap="gap.small" hAlign="center" vAlign="center">
-                        <FlexItem>
-                            <EmptyTile image={collaborationImage} line1={this.localize('meetingPanel.noQuestionsPosted')} line2={this.localize('meetingPanel.askAway')} />
-                        </FlexItem>
+                        <EmptyTile image={collaborationImage} line1={this.localize('meetingPanel.noQuestionsPosted')} line2={this.localize('meetingPanel.askAway')} />
                     </Flex>
                 )}
                 <FlexItem push>
