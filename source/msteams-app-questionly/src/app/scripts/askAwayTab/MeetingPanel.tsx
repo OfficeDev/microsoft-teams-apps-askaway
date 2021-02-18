@@ -389,16 +389,14 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
         return (
             <React.Fragment>
                 <Flex column gap="gap.small" className="meeting-panel">
-                    <FlexItem>
-                        <SignalRLifecycle
-                            enableLiveUpdates={true}
-                            t={this.localize}
-                            conversationId={this.props.teamsTabContext.chatId}
-                            onEvent={this.updateEvent}
-                            httpService={this.props.httpService}
-                            appInsights={this.props.appInsights}
-                        />
-                    </FlexItem>
+                    <SignalRLifecycle
+                        enableLiveUpdates={true}
+                        t={this.localize}
+                        conversationId={this.props.teamsTabContext.chatId}
+                        onEvent={this.updateEvent}
+                        httpService={this.props.httpService}
+                        appInsights={this.props.appInsights}
+                    />
                     {this.state.showNewUpdatesButton && (
                         <Button primary onClick={this.updateQnASessionContent} className="newUpdatesButton">
                             <ArrowUpIcon xSpacing="after"></ArrowUpIcon>
