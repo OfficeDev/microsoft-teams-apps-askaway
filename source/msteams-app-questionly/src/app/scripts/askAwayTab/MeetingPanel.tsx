@@ -390,9 +390,9 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                         appInsights={this.props.appInsights}
                     />
                     {this.state.showNewUpdatesButton && (
-                        <Flex hAlign="center" vAlign="center">
-                            <Button primary size="medium" content={this.localize('meetingPanel.updatemessage')} onClick={this.updateQnASessionContent} className="newUpdatesButton" />
-                        </Flex>
+                        <div className="new-update-btn-wrapper">
+                            <Button primary size="medium" content={this.localize('meetingPanel.updatemessage')} onClick={this.updateQnASessionContent} className="new-updates-button" />
+                        </div>
                     )}
                     {stateVal.activeSessionData.sessionId ? this.showSessionQuestions(stateVal) : this.createNewSessionLayout()}
                 </Flex>

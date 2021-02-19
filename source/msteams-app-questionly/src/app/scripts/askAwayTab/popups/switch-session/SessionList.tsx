@@ -52,10 +52,8 @@ const SessionList: React.FunctionComponent<SessionListProps> = (props) => {
     if (qnaSessions.length) {
         return (
             <React.Fragment>
-                <div className="switchSessionListHolder">
-                    <Flex className="title" gap="gap.small">
-                        <Text content={props.t('popups.selectSession')} weight="regular" size="medium" align="start"></Text>
-                    </Flex>
+                <Flex column gap="gap.small" className="switchSessionListHolder">
+                    <Text className="title" content={props.t('popups.selectSession')} weight="regular" size="medium" align="start" />
                     <List
                         className="switchSessionList"
                         selectable
@@ -67,14 +65,10 @@ const SessionList: React.FunctionComponent<SessionListProps> = (props) => {
                             return <SessionListCard t={props.t} qnaSession={qnaSession}></SessionListCard>;
                         })}
                     ></List>
-                </div>
+                </Flex>
                 <Flex gap="gap.small" className="switchButton">
-                    <Button secondary type="submit" onClick={onCancel} size="medium">
-                        <Button.Content>{props.t('popups.cancel')}</Button.Content>
-                    </Button>
-                    <Button primary type="submit" onClick={onSubmit} size="medium">
-                        <Button.Content>{props.t('popups.switchNow')}</Button.Content>
-                    </Button>
+                    <Button secondary content={props.t('popups.cancel')} type="submit" onClick={onCancel} size="medium" />
+                    <Button primary content={props.t('popups.switchNow')} type="submit" onClick={onSubmit} size="medium" />
                 </Flex>
             </React.Fragment>
         );

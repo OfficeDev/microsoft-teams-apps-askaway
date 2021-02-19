@@ -367,9 +367,9 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
                         <div className="tab-container">
                             <PostNewQuestions t={this.localize} activeSessionData={selectedAmaSessionData} userName={this.state.userName} onPostNewQuestion={this.handlePostNewQuestions} />
                             {this.state.showNewUpdatesButton && (
-                                <Flex hAlign="center" vAlign="center">
-                                    <Button primary size="medium" content="New updates" onClick={this.refreshSession} className="newUpdatesButton" />
-                                </Flex>
+                                <div className="new-update-btn-wrapper">
+                                    <Button primary size="medium" content="New updates" onClick={this.refreshSession} className="new-updates-button" />
+                                </div>
                             )}
                             {selectedAmaSessionData.unansweredQuestions.length > 0 || selectedAmaSessionData.answeredQuestions.length > 0 ? (
                                 <TabQuestions t={this.localize} onClickAction={this.validateClickAction} activeSessionData={selectedAmaSessionData} teamsTabContext={this.props.teamsTabContext} />
