@@ -763,6 +763,7 @@ describe('test /conversations/:conversationId/me api', () => {
         const mockEnsureAuthenticated = (req, res, next) => {
             req.user = {
                 _id: testUserId,
+                userName: testUserName,
             };
             next();
         };
@@ -795,6 +796,11 @@ describe('test /conversations/:conversationId/me api', () => {
         };
 
         const testRole = 'testRole';
+        const response = {
+            userRole: testRole,
+            userName: testUserName,
+            userId: testUserId,
+        };
 
         (<any>conversationDataService.getConversationData).mockImplementationOnce(() => {
             return testConversation;
@@ -807,7 +813,7 @@ describe('test /conversations/:conversationId/me api', () => {
         const result = await request(app).get(`/api/conversations/${testConversation._id}/me`);
 
         expect(result).toBeDefined();
-        expect(result.text).toEqual(testRole);
+        expect(result.body).toEqual(response);
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(testConversation._id);
         expect(getParticipantRole).toBeCalledTimes(1);
