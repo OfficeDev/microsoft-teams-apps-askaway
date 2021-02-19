@@ -4,7 +4,7 @@ import * as React from 'react';
 import { withTranslation, WithTranslation } from 'react-i18next';
 import * as microsoftTeams from '@microsoft/teams-js';
 import { ApplicationInsights, SeverityLevel } from '@microsoft/applicationinsights-web';
-import { Flex, Loader } from '@fluentui/react-northstar';
+import { Flex, FlexItem, Loader } from '@fluentui/react-northstar';
 import { HttpService } from './shared/HttpService';
 import { Helper } from './shared/Helper';
 import { TFunction } from 'i18next';
@@ -365,13 +365,12 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
                 {selectedAmaSessionData.sessionId ? (
                     <Flex column>
                         <div className="tab-container">
-                            {this.state.showNewUpdatesButton && (
-                                <Button primary onClick={this.refreshSession} className="newUpdatesButton">
-                                    <ArrowUpIcon xSpacing="after"></ArrowUpIcon>
-                                    <Button.Content className="newUpdatesButtonContent" content="New updates"></Button.Content>
-                                </Button>
-                            )}
                             <PostNewQuestions t={this.localize} activeSessionData={selectedAmaSessionData} userName={this.state.userName} onPostNewQuestion={this.handlePostNewQuestions} />
+                            {this.state.showNewUpdatesButton && (
+                                <Flex hAlign="center" vAlign="center">
+                                    <Button primary size="medium" content="New updates" onClick={this.refreshSession} className="newUpdatesButton" />
+                                </Flex>
+                            )}
                             {selectedAmaSessionData.unansweredQuestions.length > 0 || selectedAmaSessionData.answeredQuestions.length > 0 ? (
                                 <TabQuestions t={this.localize} onClickAction={this.validateClickAction} activeSessionData={selectedAmaSessionData} teamsTabContext={this.props.teamsTabContext} />
                             ) : (
