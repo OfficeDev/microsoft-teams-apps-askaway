@@ -1,4 +1,4 @@
-import { BotFrameworkAdapter, ConversationReference, TeamsChannelAccount, TeamsInfo } from 'botbuilder';
+import { BotFrameworkAdapter, ConversationReference, ConversationAccount, TeamsChannelAccount, TeamsInfo } from 'botbuilder';
 import { Request } from 'express';
 import { verifyUserFromConversationId } from 'msteams-app-questionly.common';
 import { IConversation } from 'msteams-app-questionly.data';
@@ -71,11 +71,20 @@ export const ensureUserIsPartOfMeetingConversation = async (conversationData: IC
  */
 export const getTeamsUserId = async (userAadObjectId: string, conversationId: string, serviceUrl: string) => {
     try {
-        const conversationReference = {
+        const conversation: ConversationAccount = {
+            id: conversationId,
+            isGroup: false,
+            tenantId: '',
+            name: '',
+            conversationType: '',
+        };
+        const conversationReference: ConversationReference = {
             serviceUrl: serviceUrl,
             channelId: 'msteams',
-            conversation: {
-                id: conversationId,
+            conversation,
+            bot: {
+                name: '',
+                id: '',
             },
         };
 
