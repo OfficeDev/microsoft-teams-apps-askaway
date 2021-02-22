@@ -368,7 +368,7 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
                             <PostNewQuestions t={this.localize} activeSessionData={selectedAmaSessionData} userName={this.state.userName} onPostNewQuestion={this.handlePostNewQuestions} />
                             {this.state.showNewUpdatesButton && (
                                 <div className="new-update-btn-wrapper">
-                                    <Button primary size="medium" content="New updates" onClick={this.refreshSession} className="new-updates-button" />
+                                    <Button primary size="medium" content={this.props.t('tab.updatemessage')} onClick={this.refreshSession} className="new-updates-button" />
                                 </div>
                             )}
                             {selectedAmaSessionData.unansweredQuestions.length > 0 || selectedAmaSessionData.answeredQuestions.length > 0 ? (
