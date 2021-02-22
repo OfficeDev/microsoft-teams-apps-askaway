@@ -1,5 +1,5 @@
 import { AdaptiveCard, IAdaptiveCard, SubmitAction } from 'adaptivecards';
-import { ISubmitButtonData } from './ISubmitButtonData';
+import { ISubmitButtonData } from 'src/app/scripts/askAwayTab/task-modules-utility/ISubmitButtonData';
 
 /**
  * Creates a submit button.

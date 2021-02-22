@@ -1,6 +1,6 @@
+import { IQnASession_populated, IQuestionDataService, IQuestionPopulatedUser, IUser, IUserDataService } from 'msteams-app-questionly.data';
 import { ClientDataContract } from 'src/contracts/clientDataContract';
 import { exceptionLogger } from 'src/util/exceptionTracking';
-import { IQnASession_populated, IQuestionPopulatedUser, IUser, IQuestionDataService, IUserDataService } from 'msteams-app-questionly.data';
 
 export interface IClientDataContractFormatter {
     formatQnaSessionDataAsPerClientDataContract: (qnaSessionData: IQnASession_populated) => Promise<ClientDataContract.QnaSession>;

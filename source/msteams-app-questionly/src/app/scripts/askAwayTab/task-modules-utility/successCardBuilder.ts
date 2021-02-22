@@ -1,6 +1,6 @@
 import { AdaptiveCard, IAdaptiveCard } from 'adaptivecards';
 import * as ACData from 'adaptivecards-templating';
-import { _adaptiveCard } from './cardHelper';
+import { _adaptiveCard } from 'src/app/scripts/askAwayTab/task-modules-utility/cardHelper';
 
 /**
  * Base success card template.
@@ -35,7 +35,7 @@ const baseSuccessCard = () =>
  * Creates adaptive card for success scenarios.
  * @param successMessage - success message to be shown in card.
  */
-export const createSuccessAdaptiveCard = (successMessage: string): AdaptiveCard => {
+export const successCardBuilder = (successMessage: string): AdaptiveCard => {
     const successImageUrl = `https://${process.env.HostName}/images/success_image.png`;
     const template = new ACData.Template(baseSuccessCard()).expand({
         $root: {

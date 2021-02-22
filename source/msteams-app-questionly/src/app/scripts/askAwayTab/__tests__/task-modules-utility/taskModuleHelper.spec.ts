@@ -8,7 +8,7 @@ import {
     createCardForUnauthorizedAccessError,
     createGenericErrorCard,
 } from '../../task-modules-utility/errorCardBuilder';
-import { createSuccessAdaptiveCard } from '../../task-modules-utility/successCardBuilder';
+import { successCardBuilder } from '../../task-modules-utility/successCardBuilder';
 import {
     handleTaskModuleErrorForCreateQnASessionFlow,
     handleTaskModuleErrorForEndQnASessionFlow,
@@ -166,7 +166,7 @@ describe('test handleTaskModuleResponseForSuccessfulCreateQnASessionFlow', () =>
     it('test success card', () => {
         handleTaskModuleResponseForSuccessfulCreateQnASessionFlow(t);
         expect(invokeAdaptiveCardBasedTaskModule).toBeCalledTimes(1);
-        expect(invokeAdaptiveCardBasedTaskModule).toBeCalledWith(`TaskModuleMessages.StartQnATitle`, createSuccessAdaptiveCard(`TaskModuleMessages.NewSessionCreated`));
+        expect(invokeAdaptiveCardBasedTaskModule).toBeCalledWith(`TaskModuleMessages.StartQnATitle`, successCardBuilder(`TaskModuleMessages.NewSessionCreated`));
     });
 });
 
@@ -188,6 +188,6 @@ describe('test handleTaskModuleResponseForEndQnASessionFlow', () => {
     it('test success card', () => {
         handleTaskModuleResponseForEndQnASessionFlow(t);
         expect(invokeAdaptiveCardBasedTaskModule).toBeCalledTimes(1);
-        expect(invokeAdaptiveCardBasedTaskModule).toBeCalledWith(`TaskModuleMessages.EndQnATitle`, createSuccessAdaptiveCard(`TaskModuleMessages.UnblockedToCreateNewSession`));
+        expect(invokeAdaptiveCardBasedTaskModule).toBeCalledWith(`TaskModuleMessages.EndQnATitle`, successCardBuilder(`TaskModuleMessages.UnblockedToCreateNewSession`));
     });
 });

@@ -1,6 +1,6 @@
-import { ClientDataContract } from '../../../../contracts/clientDataContract';
-import { ParticipantRoles } from '../../../../enums/ParticipantRoles';
-import { HttpService } from './HttpService';
+import { HttpService } from 'src/app/scripts/askAwayTab/shared/HttpService';
+import { ClientDataContract } from 'src/contracts/clientDataContract';
+import { ParticipantRoles } from 'src/enums/ParticipantRoles';
 
 /**
  * Checks if user role is a presenter or organizer.

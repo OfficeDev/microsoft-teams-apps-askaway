@@ -3,8 +3,8 @@ import { IConversationDataService, IQnASessionDataService } from 'msteams-app-qu
 import { IController } from 'src/controller';
 import { initializeRouter, router } from 'src/routes/rest';
 import { restApiErrorMiddleware } from 'src/routes/restApiErrorMiddleware';
-import { initializeAuthService, ensureAuthenticated } from 'src/services/authService';
-import { IClientDataContractFormatter } from './clientDataContractFormatter';
+import { ensureAuthenticated, initializeAuthService } from 'src/services/authService';
+import { IClientDataContractFormatter } from 'src/util/clientDataContractFormatter';
 
 export const setupRestApis = (
     app: ExpressType,
