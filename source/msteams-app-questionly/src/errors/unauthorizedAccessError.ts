@@ -1,4 +1,5 @@
-import { errorMessages } from 'src/errors/errorMessages';
+// tslint:disable:no-relative-imports
+import { errorMessages } from './errorMessages';
 
 export enum UnauthorizedAccessErrorCode {
     InsufficientPermissionsToCreateOrEndQnASession = 'InsufficientPermissionsToCreateOrEndQnASession',

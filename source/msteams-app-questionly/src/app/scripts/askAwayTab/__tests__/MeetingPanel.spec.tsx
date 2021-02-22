@@ -16,10 +16,12 @@ import { i18next } from '../shared/i18next';
 configure({ adapter: new Adapter() });
 
 describe('Meeting Panel Component', () => {
-    const httpServiceIns = new HttpService(telemetryService.appInsights);
-    const t = jest.fn();
+    let httpServiceIns;
+    let t;
     const tReady = true;
     beforeAll(() => {
+        httpServiceIns = new HttpService(telemetryService.appInsights);
+        t = jest.fn();
         jest.mock('../shared/HttpService');
     });
 

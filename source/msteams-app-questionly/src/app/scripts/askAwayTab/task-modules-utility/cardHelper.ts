@@ -1,5 +1,6 @@
+// tslint:disable:no-relative-imports
 import { AdaptiveCard, IAdaptiveCard, SubmitAction } from 'adaptivecards';
-import { ISubmitButtonData } from 'src/app/scripts/askAwayTab/task-modules-utility/ISubmitButtonData';
+import { ISubmitButtonData } from './ISubmitButtonData';
 
 /**
  * Creates a submit button.
