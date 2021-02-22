@@ -15,7 +15,13 @@ export const newQuestionCard = () =>
                 type: 'TextBlock',
                 text: errorStrings('submittingQuestions'),
                 color: 'attention',
-                $when: '${question != null}',
+                $when: '${question != null && question != ""}',
+            },
+            {
+                type: 'TextBlock',
+                text: errorStrings('submittingEmptyQuestion'),
+                color: 'attention',
+                $when: '${question == ""}',
             },
             {
                 type: 'TextBlock',

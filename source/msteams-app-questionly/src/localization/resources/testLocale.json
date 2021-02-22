@@ -27,6 +27,7 @@
     "errors": {
         "upvoting": "upvoting",
         "submittingQuestions": "submittingQuestions",
+        "submittingEmptyQuestion": "submittingEmptyQuestion",
         "missingFields": "missingFields",
         "taskFetch": "taskFetch",
         "taskSubmit": "taskSubmit",
