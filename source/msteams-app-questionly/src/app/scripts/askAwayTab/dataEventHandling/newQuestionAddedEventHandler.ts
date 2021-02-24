@@ -1,4 +1,3 @@
-// tslint:disable:no-relative-imports
 import { IDataEvent } from 'msteams-app-questionly.common';
 import { IDataEventHandler } from './IDataEventHandler';
 import { ClientDataContract } from '../../../../contracts/clientDataContract';
@@ -20,6 +19,7 @@ export class NewQuestionAddedEventHandler implements IDataEventHandler {
         activeSessionData: ClientDataContract.QnaSession | null,
         updateQnASessionContent: () => void,
         showNewUpdatesButton: () => void,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         updateActiveSessionData: (sessionData: ClientDataContract.QnaSession | null) => void
     ) => {
         if (dataEvent.qnaSessionId !== activeSessionData?.sessionId) {

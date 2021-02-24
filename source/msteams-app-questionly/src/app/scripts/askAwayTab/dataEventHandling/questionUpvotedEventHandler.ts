@@ -1,4 +1,3 @@
-// tslint:disable:no-relative-imports
 import { IDataEvent } from 'msteams-app-questionly.common';
 import { ClientDataContract } from '../../../../contracts/clientDataContract';
 import { IDataEventHandler } from './IDataEventHandler';
@@ -20,6 +19,7 @@ export class QuestionUpvotedEventHandler implements IDataEventHandler {
         activeSessionData: ClientDataContract.QnaSession | null,
         updateQnASessionContent: () => void,
         showNewUpdatesButton: () => void,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         updateActiveSessionData: (sessionData: ClientDataContract.QnaSession | null) => void
     ) => {
         const upvotedByUserAadObjectId: string = dataEvent.data.upvotedByUserAadObjectId;

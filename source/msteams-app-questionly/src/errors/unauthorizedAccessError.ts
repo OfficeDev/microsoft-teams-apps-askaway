@@ -1,4 +1,3 @@
-// tslint:disable:no-relative-imports
 import { errorMessages } from './errorMessages';
 
 export enum UnauthorizedAccessErrorCode {

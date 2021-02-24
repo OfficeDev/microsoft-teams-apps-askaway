@@ -1,15 +1,15 @@
-import { shallow, configure } from 'enzyme';
+import { Loader } from '@fluentui/react-northstar';
+import { configure, shallow } from 'enzyme';
+import enzymeAdapterReact16 from 'enzyme-adapter-react-16';
 import * as React from 'react';
 import { ClientDataContract } from '../../../../../contracts/clientDataContract';
-import { SwitchSessionInternal } from '../../popups/switch-session/SwitchSessionInternal';
 import SessionList from '../../popups/switch-session/SessionList';
-import Adapter from 'enzyme-adapter-react-16';
-import { Loader } from '@fluentui/react-northstar';
+import { SwitchSessionInternal } from '../../popups/switch-session/SwitchSessionInternal';
 
 jest.mock('../../../telemetryService');
 jest.mock('history');
 
-configure({ adapter: new Adapter() });
+configure({ adapter: new enzymeAdapterReact16() });
 
 describe('Test SwitchSessionInternal Component', () => {
     let testSessions: ClientDataContract.QnaSession[];

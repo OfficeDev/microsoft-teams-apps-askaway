@@ -1,11 +1,11 @@
-import './../index.scss';
+import { Avatar, Button, Card, Divider, Flex, FlexItem, Text, TextArea } from '@fluentui/react-northstar';
 import * as React from 'react';
-import { Flex, Text, Button, FlexItem, Card, Divider, Avatar, TextArea } from '@fluentui/react-northstar';
-import Badge from '../shared/Badge';
 import { useState } from 'react';
 import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
-import { ThemeProps, withTheme } from '../shared/WithTheme';
+import Badge from '../shared/Badge';
 import Helper from '../shared/Helper';
+import { ThemeProps, withTheme } from '../shared/WithTheme';
+import './../index.scss';
 
 /**
  * Properties for the PostNewQuestions React component

@@ -1,12 +1,10 @@
-// tslint:disable:no-relative-imports
-import './../index.scss';
-import * as React from 'react';
 import { Provider } from '@fluentui/react-northstar';
-// tslint:disable:no-relative-imports
 import * as microsoftTeams from '@microsoft/teams-js';
 import msteamsReactBaseComponent, { ITeamsBaseComponentState } from 'msteams-react-base-component';
+import * as React from 'react';
 import Helper from '../shared/Helper';
 import { i18next } from '../shared/i18next';
+import './../index.scss';
 import CreateSessionInternal from './CreateSessionInternal';
 
 export interface CreateSessionProps {}

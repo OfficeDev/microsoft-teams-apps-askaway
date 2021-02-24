@@ -1,4 +1,3 @@
-// tslint:disable:no-relative-imports
 import { NewQuestionAddedEventHandler } from '../../dataEventHandling/newQuestionAddedEventHandler';
 import { ClientDataContract } from '../../../../../contracts/clientDataContract';
 import { IDataEvent } from 'msteams-app-questionly.common';

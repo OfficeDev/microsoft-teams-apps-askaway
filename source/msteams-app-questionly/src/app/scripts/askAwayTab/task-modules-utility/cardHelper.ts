@@ -1,4 +1,3 @@
-// tslint:disable:no-relative-imports
 import { AdaptiveCard, IAdaptiveCard, SubmitAction } from 'adaptivecards';
 import { ISubmitButtonData } from './ISubmitButtonData';
 

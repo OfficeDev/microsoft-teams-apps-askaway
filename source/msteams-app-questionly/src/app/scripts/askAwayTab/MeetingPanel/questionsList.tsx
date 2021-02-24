@@ -1,17 +1,16 @@
-// tslint:disable:no-relative-imports
-import './../index.scss';
-import * as React from 'react';
-import { useState, useMemo } from 'react';
+import { ApplicationInsights, SeverityLevel } from '@microsoft/applicationinsights-web';
 import * as microsoftTeams from '@microsoft/teams-js';
-import { HttpService } from '../shared/HttpService';
-import TabHeader from './TabHeader';
-import Question from './Question';
-import { CONST } from '../shared/Constants';
+import { TFunction } from 'i18next';
+import * as React from 'react';
+import { useMemo, useState } from 'react';
 import { ClientDataContract } from '../../../../contracts/clientDataContract';
 import { ParticipantRoles } from '../../../../enums/ParticipantRoles';
+import { CONST } from '../shared/Constants';
+import { HttpService } from '../shared/HttpService';
 import { invokeTaskModuleForQuestionUpdateFailure } from '../task-modules-utility/taskModuleHelper';
-import { ApplicationInsights, SeverityLevel } from '@microsoft/applicationinsights-web';
-import { TFunction } from 'i18next';
+import './../index.scss';
+import Question from './Question';
+import TabHeader from './TabHeader';
 
 /**
  * Properties for the QuestionsList React component

@@ -1,9 +1,8 @@
-// tslint:disable:no-relative-imports
-import { ActionSet, AdaptiveCard, TextBlock, TextWeight, TextSize, Container, VerticalAlignment, HorizontalAlignment, IAdaptiveCard } from 'adaptivecards';
-import { createSubmitButton, _adaptiveCard } from './cardHelper';
-import { SubmitButtonId } from './ISubmitButtonData';
+import { ActionSet, AdaptiveCard, Container, HorizontalAlignment, IAdaptiveCard, TextBlock, TextSize, TextWeight, VerticalAlignment } from 'adaptivecards';
 import * as ACData from 'adaptivecards-templating';
 import { TFunction } from 'i18next';
+import { createSubmitButton, _adaptiveCard } from './cardHelper';
+import { SubmitButtonId } from './ISubmitButtonData';
 
 /**
  * Creates adaptive card for generic errors.

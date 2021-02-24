@@ -1,15 +1,14 @@
-// tslint:disable:no-relative-imports
-import './../index.scss';
+import { AcceptIcon, LikeIcon } from '@fluentui/react-icons-northstar';
+import { Avatar, Button, Flex, Text } from '@fluentui/react-northstar';
 import * as React from 'react';
-import { Flex, Button, Text, Avatar } from '@fluentui/react-northstar';
-import { LikeIcon, AcceptIcon } from '@fluentui/react-icons-northstar';
-import { LikeIconFilled } from '../shared/Icons/LikeIconFilled';
-import { CONST } from '../shared/Constants';
 import { useState } from 'react';
 import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
 import { ParticipantRoles } from '../../../../enums/ParticipantRoles';
+import { CONST } from '../shared/Constants';
+import { LikeIconFilled } from '../shared/Icons/LikeIconFilled';
 import { isPresenterOrOrganizer } from '../shared/meetingUtility';
-import { withTheme, ThemeProps } from '../shared/WithTheme';
+import { ThemeProps, withTheme } from '../shared/WithTheme';
+import './../index.scss';
 
 type QuestionCompProps = {
     question: ClientDataContract.Question;
@@ -35,23 +34,27 @@ const Question: React.FunctionComponent<QuestionCompProps & ThemeProps> = (props
     const [hoverBackgroundColor, setHoverBackgroundColor] = useState(colorScheme.default.background);
     const [disabledLikeButtonHoverColor, setDisabledLikeButtonHoverColor] = useState(colorScheme.default.foregroundDisabled1);
 
+    const onMouseEnterChangeColor = () => {
+        setMouseHover(true);
+        setHoverColor(colorScheme.default.foreground4);
+        setHoverBackgroundColor(colorScheme.default.backgroundHover);
+        setDisabledLikeButtonHoverColor(colorScheme.default.foregroundDisabled);
+    };
+
+    const onMouseLeaveChangeColor = () => {
+        setMouseHover(false);
+        setHoverColor(colorScheme.default.foreground3);
+        setHoverBackgroundColor(colorScheme.default.background);
+        setDisabledLikeButtonHoverColor(colorScheme.default.foregroundDisabled1);
+    };
+
     return (
         <div
             className="card-divider"
             style={{ color: hoverColor, backgroundColor: hoverBackgroundColor }}
             key={questionId}
-            onMouseEnter={() => {
-                setMouseHover(true);
-                setHoverColor(colorScheme.default.foreground4);
-                setHoverBackgroundColor(colorScheme.default.backgroundHover);
-                setDisabledLikeButtonHoverColor(colorScheme.default.foregroundDisabled);
-            }}
-            onMouseLeave={() => {
-                setMouseHover(false);
-                setHoverColor(colorScheme.default.foreground3);
-                setHoverBackgroundColor(colorScheme.default.background);
-                setDisabledLikeButtonHoverColor(colorScheme.default.foregroundDisabled1);
-            }}
+            onMouseEnter={onMouseEnterChangeColor}
+            onMouseLeave={onMouseLeaveChangeColor}
         >
             <Flex gap="gap.small" vAlign="center" className="card-layout">
                 <Avatar size={'smaller'} name={question.author.name} />

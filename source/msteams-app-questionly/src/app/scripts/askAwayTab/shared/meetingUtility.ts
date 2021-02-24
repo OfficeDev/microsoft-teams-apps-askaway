@@ -1,4 +1,3 @@
-// tslint:disable:no-relative-imports
 import { ClientDataContract } from '../../../../contracts/clientDataContract';
 import { ParticipantRoles } from '../../../../enums/ParticipantRoles';
 import { HttpService } from './HttpService';

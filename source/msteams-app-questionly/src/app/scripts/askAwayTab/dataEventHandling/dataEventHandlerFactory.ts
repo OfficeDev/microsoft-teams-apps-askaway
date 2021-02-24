@@ -1,4 +1,3 @@
-// tslint:disable:no-relative-imports
 import { IDataEventHandler } from './IDataEventHandler';
 import { NewQuestionAddedEventHandler } from './newQuestionAddedEventHandler';
 import { QnaSessionCreatedEventHandler } from './qnaSessionCreatedEventHandler';

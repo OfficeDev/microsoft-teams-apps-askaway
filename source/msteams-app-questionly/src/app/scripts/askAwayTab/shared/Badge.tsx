@@ -1,13 +1,13 @@
-import './../index.scss';
-import { Properties as CSSProperties } from 'csstype';
+import { Properties } from 'csstype';
 import * as React from 'react';
+import './../index.scss';
 
 /**
  * Properties for the Badge React component
  */
 export interface BadgeProps {
     text: string;
-    styles: CSSProperties;
+    styles: Properties;
     className?: string;
 }
 const Badge: React.FunctionComponent<BadgeProps> = (props) => {

@@ -1,4 +1,3 @@
-// tslint:disable:no-relative-imports
 import { StatusCodes } from 'http-status-codes';
 import { UnauthorizedAccessErrorCode } from '../../../../../errors/unauthorizedAccessError';
 import {

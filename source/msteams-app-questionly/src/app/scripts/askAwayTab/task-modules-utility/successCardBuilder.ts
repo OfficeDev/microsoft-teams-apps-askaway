@@ -1,4 +1,3 @@
-// tslint:disable:no-relative-imports
 import { AdaptiveCard, IAdaptiveCard } from 'adaptivecards';
 import * as ACData from 'adaptivecards-templating';
 import { _adaptiveCard } from './cardHelper';

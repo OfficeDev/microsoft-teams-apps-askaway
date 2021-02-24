@@ -24,7 +24,7 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (p
 
     const [isAnsweredTabOpen, setAnsweredTabOpen] = useState(true);
 
-    const isUserLikedQuestion = (votes: Array<string>) => {
+    const isUserLikedQuestion = (votes: string[]) => {
         if (props.teamsTabContext.userObjectId) {
             return votes.includes(props.teamsTabContext.userObjectId);
         }

@@ -1,4 +1,3 @@
-// tslint:disable:no-relative-imports
 import { TaskInfo, tasks } from '@microsoft/teams-js';
 import { AdaptiveCard } from 'adaptivecards';
 import { StatusCodes } from 'http-status-codes';

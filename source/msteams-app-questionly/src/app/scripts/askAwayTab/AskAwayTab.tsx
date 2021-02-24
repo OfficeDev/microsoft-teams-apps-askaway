@@ -1,22 +1,17 @@
-// tslint:disable-next-line:no-relative-imports
-import './index.scss';
-// tslint:disable-next-line:no-relative-imports
-import Helper from './shared/Helper';
-// tslint:disable-next-line:no-relative-imports
-import MeetingPanel from './MeetingPanel';
-// tslint:disable-next-line:no-relative-imports
-import TabContent from './TabContent';
-import * as React from 'react';
 import { Provider } from '@fluentui/react-northstar';
-import msteamsReactBaseComponent, { ITeamsBaseComponentState } from 'msteams-react-base-component';
-import * as microsoftTeams from '@microsoft/teams-js';
-// tslint:disable-next-line:no-relative-imports
-import { i18next } from './../askAwayTab/shared/i18next';
-import { TFunction } from 'i18next';
 import { withAITracking } from '@microsoft/applicationinsights-react-js';
 import { SeverityLevel } from '@microsoft/applicationinsights-web';
-import { HttpService } from './shared/HttpService';
+import * as microsoftTeams from '@microsoft/teams-js';
+import { TFunction } from 'i18next';
+import msteamsReactBaseComponent, { ITeamsBaseComponentState } from 'msteams-react-base-component';
+import * as React from 'react';
+import { i18next } from './../askAwayTab/shared/i18next';
 import { telemetryService } from './../telemetryService';
+import './index.scss';
+import MeetingPanel from './MeetingPanel';
+import Helper from './shared/Helper';
+import { HttpService } from './shared/HttpService';
+import TabContent from './TabContent';
 
 /**
  * State for the askAwayTabTab React component

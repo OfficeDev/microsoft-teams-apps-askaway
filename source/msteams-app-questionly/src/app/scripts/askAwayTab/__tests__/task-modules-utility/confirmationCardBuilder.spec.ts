@@ -1,4 +1,3 @@
-// tslint:disable:no-relative-imports
 import { SubmitAction, TextBlock } from 'adaptivecards';
 import { confirmationCardBuilder } from '../../task-modules-utility/confirmationCardBuilder';
 

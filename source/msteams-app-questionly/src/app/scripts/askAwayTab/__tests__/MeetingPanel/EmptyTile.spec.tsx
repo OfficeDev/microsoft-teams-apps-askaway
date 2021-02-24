@@ -1,10 +1,10 @@
+import { Image, Text } from '@fluentui/react-northstar';
+import { configure, shallow } from 'enzyme';
+import enzymeAdapterReact16 from 'enzyme-adapter-react-16';
 import * as React from 'react';
-import { shallow, configure } from 'enzyme';
 import EmptyTile from '../../MeetingPanel/EmptyTile';
-import Adapter from 'enzyme-adapter-react-16';
-import { Text, Image } from '@fluentui/react-northstar';
 
-configure({ adapter: new Adapter() });
+configure({ adapter: new enzymeAdapterReact16() });
 
 describe('Test EmptyTile Component', () => {
     it('should render fine for two text lines', () => {

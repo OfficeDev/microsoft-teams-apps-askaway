@@ -1,37 +1,35 @@
-// tslint:disable:no-relative-imports
-import './index.scss';
+import { ArrowUpIcon, Button, Flex, Loader } from '@fluentui/react-northstar';
+import { ApplicationInsights, SeverityLevel } from '@microsoft/applicationinsights-web';
+import * as microsoftTeams from '@microsoft/teams-js';
+import { TFunction } from 'i18next';
+import { IDataEvent } from 'msteams-app-questionly.common';
 import * as React from 'react';
 import { withTranslation, WithTranslation } from 'react-i18next';
-import * as microsoftTeams from '@microsoft/teams-js';
-import { ApplicationInsights, SeverityLevel } from '@microsoft/applicationinsights-web';
-import { Flex, Loader } from '@fluentui/react-northstar';
-import { HttpService } from './shared/HttpService';
-import { Helper } from './shared/Helper';
-import { TFunction } from 'i18next';
-import TabHeader from './TabContent/TabHeader';
-import PostNewQuestions from './TabContent/PostNewQuestions';
-import NoQuestionDesign from './TabContent/NoQuestionDesign';
-import TabQuestions from './TabContent/TabQuestions';
-import TabCreateSession from './TabContent/TabCreateSession';
 import { ClientDataContract } from '../../../../src/contracts/clientDataContract';
-import {
-    handleTaskModuleErrorForCreateQnASessionFlow,
-    handleTaskModuleErrorForEndQnASessionFlow,
-    handleTaskModuleResponseForSuccessfulCreateQnASessionFlow,
-    handleTaskModuleResponseForEndQnASessionFlow,
-    openStartQnASessionTaskModule,
-    handleEndQnASessionFlow,
-    openSwitchSessionsTaskModule,
-    invokeTaskModuleForQuestionPostFailure,
-    invokeTaskModuleForQuestionUpdateFailure,
-    invokeTaskModuleForGenericError,
-} from './task-modules-utility/taskModuleHelper';
 import { ParticipantRoles } from '../../../enums/ParticipantRoles';
+import { DataEventHandlerFactory } from './dataEventHandling/dataEventHandlerFactory';
+import './index.scss';
+import { Helper } from './shared/Helper';
+import { HttpService } from './shared/HttpService';
 import { getCurrentParticipantInfo } from './shared/meetingUtility';
 import SignalRLifecycle from './signalR/SignalRLifecycle';
-import { DataEventHandlerFactory } from './dataEventHandling/dataEventHandlerFactory';
-import { IDataEvent } from 'msteams-app-questionly.common';
-import { ArrowUpIcon, Button } from '@fluentui/react-northstar';
+import NoQuestionDesign from './TabContent/NoQuestionDesign';
+import PostNewQuestions from './TabContent/PostNewQuestions';
+import TabCreateSession from './TabContent/TabCreateSession';
+import TabHeader from './TabContent/TabHeader';
+import TabQuestions from './TabContent/TabQuestions';
+import {
+    handleEndQnASessionFlow,
+    handleTaskModuleErrorForCreateQnASessionFlow,
+    handleTaskModuleErrorForEndQnASessionFlow,
+    handleTaskModuleResponseForEndQnASessionFlow,
+    handleTaskModuleResponseForSuccessfulCreateQnASessionFlow,
+    invokeTaskModuleForGenericError,
+    invokeTaskModuleForQuestionPostFailure,
+    invokeTaskModuleForQuestionUpdateFailure,
+    openStartQnASessionTaskModule,
+    openSwitchSessionsTaskModule,
+} from './task-modules-utility/taskModuleHelper';
 
 export interface TabContentProps extends WithTranslation {
     teamsTabContext: microsoftTeams.Context;
