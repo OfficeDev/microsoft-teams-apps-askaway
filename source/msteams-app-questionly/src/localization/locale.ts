@@ -26,6 +26,7 @@ export interface EndQnA {
 export interface Errors {
     upvoting: string;
     submittingQuestions: string;
+    submittingEmptyQuestion: string;
     missingFields: string;
     taskFetch: string;
     taskSubmit: string;

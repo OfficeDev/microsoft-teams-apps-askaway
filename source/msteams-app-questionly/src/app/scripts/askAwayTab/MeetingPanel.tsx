@@ -113,7 +113,7 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
      * Shows loader and updates entire content of the screen.
      */
     private updateContent = async () => {
-        this.setState({ showLoader: true });
+        this.setState({ showLoader: true, showNewUpdatesButton: false });
         try {
             await this.getActiveSession();
             await this.updateUserRole();
@@ -122,7 +122,7 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
             invokeTaskModuleForGenericError(this.props.t);
         }
 
-        this.setState({ showNewUpdatesButton: false, showLoader: false });
+        this.setState({ showLoader: false });
     };
 
     /**
@@ -154,9 +154,10 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
             this.setState({
                 activeSessionData: this.props.helper.createEmptyActiveSessionData(),
                 isActiveSessionEnded: true,
+                showNewUpdatesButton: false,
             });
         } else {
-            this.setState({ activeSessionData: sessionData });
+            this.setState({ activeSessionData: sessionData, showNewUpdatesButton: false });
         }
     };
 
@@ -188,6 +189,7 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                     this.setState({
                         showLoader: false,
                         isActiveSessionEnded: true,
+                        showNewUpdatesButton: false,
                         activeSessionData: this.props.helper.createEmptyActiveSessionData(),
                     });
                 })
@@ -352,6 +354,11 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                         <EmptyTile image={collaborationImage} line1={this.localize('meetingPanel.noQuestionsPosted')} line2={this.localize('meetingPanel.askAway')} />
                     </Flex>
                 )}
+                {this.state.activeSessionData.isActive && this.state.showNewUpdatesButton && (
+                    <div className="new-update-btn-wrapper">
+                        <Button primary size="medium" content={this.localize('meetingPanel.updatemessage')} onClick={this.updateQnASessionContent} className="new-updates-button" />
+                    </div>
+                )}
                 <FlexItem push>
                     <NewQuestion
                         appInsights={this.props.appInsights}
@@ -388,12 +395,6 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                         httpService={this.props.httpService}
                         appInsights={this.props.appInsights}
                     />
-                    {this.state.showNewUpdatesButton && (
-                        <Button primary onClick={this.updateQnASessionContent} className="newUpdatesButton">
-                            <ArrowUpIcon xSpacing="after"></ArrowUpIcon>
-                            <Button.Content className="newUpdatesButtonContent" content={this.localize('meetingPanel.updatemessage')}></Button.Content>
-                        </Button>
-                    )}
                     {stateVal.activeSessionData.sessionId ? this.showSessionQuestions(stateVal) : this.createNewSessionLayout()}
                 </Flex>
             </React.Fragment>

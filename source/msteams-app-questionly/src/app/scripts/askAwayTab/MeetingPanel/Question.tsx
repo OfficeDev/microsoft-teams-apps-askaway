@@ -94,7 +94,7 @@ const Question: React.FunctionComponent<QuestionCompProps & ThemeProps> = (props
                             iconOnly
                             text
                         />
-                        <Text content={question.votesCount} />
+                        <Text content={question.voterAadObjectIds.length} />
                     </Flex>
                 </Flex.Item>
             </Flex>

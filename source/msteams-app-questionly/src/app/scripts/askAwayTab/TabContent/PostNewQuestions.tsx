@@ -36,10 +36,11 @@ const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps & ThemePro
                     <Flex gap="gap.small">
                         <Flex column>
                             <Badge
+                                className="badge"
                                 styles={
                                     props.activeSessionData.isActive
-                                        ? { backgroundColor: colorScheme.green.background, color: colorScheme.green.foreground1, fontSize: '12px' }
-                                        : { backgroundColor: colorScheme.default.background5, color: colorScheme.default.foregroundFocus1, fontSize: '12px' }
+                                        ? { backgroundColor: colorScheme.green.background, color: colorScheme.green.foreground1 }
+                                        : { backgroundColor: colorScheme.default.background5, color: colorScheme.default.foregroundFocus1 }
                                 }
                                 text={props.activeSessionData.isActive ? props.t('tab.liveStatus') : props.t('tab.closedStatus')}
                             />
