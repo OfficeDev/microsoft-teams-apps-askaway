@@ -36,7 +36,7 @@ const baseSuccessCard = () =>
  * @param successMessage - success message to be shown in card.
  */
 export const createSuccessAdaptiveCard = (successMessage: string): AdaptiveCard => {
-    const successImageUrl = `https://${process.env.HostName}/images/success_image.png`;
+    const successImageUrl = `https://${window.location.host}/images/success_image.png`;
     const template = new ACData.Template(baseSuccessCard()).expand({
         $root: {
             successImageUrl,

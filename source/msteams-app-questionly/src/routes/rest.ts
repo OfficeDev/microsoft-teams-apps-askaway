@@ -312,3 +312,21 @@ router.get('/:conversationId/activesessions', async (req: Express.Request, res: 
         next(error);
     }
 });
+
+// Get all env variable from app setting
+router.get('/:variableName', async (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
+    try {
+        const varibaleName = req.params['variableName'];
+        const value = process.env[varibaleName];
+
+        if (value) {
+            res.status(StatusCodes.OK).send(value);
+            return;
+        } else {
+            res.status(StatusCodes.NOT_FOUND);
+            return;
+        }
+    } catch (error) {
+        next(error);
+    }
+});

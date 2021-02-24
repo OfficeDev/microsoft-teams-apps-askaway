@@ -16,7 +16,8 @@ import { TFunction } from 'i18next';
 import { withAITracking } from '@microsoft/applicationinsights-react-js';
 import { SeverityLevel } from '@microsoft/applicationinsights-web';
 import { HttpService } from './shared/HttpService';
-import { telemetryService } from './../telemetryService';
+import { getReactPlugin, initializeTelemetryService, trackTrace } from './../telemetryService';
+import { CONST } from './shared/Constants';
 
 /**
  * State for the askAwayTabTab React component
@@ -58,7 +59,18 @@ export class AskAwayTab extends msteamsReactBaseComponent<IAskAwayTabProps, IAsk
     public async componentWillMount() {
         this.updateTheme(this.getQueryVariable('theme'));
         await this.initializeTeams();
-        this.httpService = new HttpService(telemetryService.appInsights);
+        this.httpService = new HttpService();
+
+        const response = await this.httpService.get(`/config/${CONST.ENV_VARIABLES.APP_INSIGHTS_INSTRUMENTATION_KEY}`);
+        if (response?.data) {
+            initializeTelemetryService(response.data);
+        } else {
+            this.setState({ error: 'Could not initialize telemetry service. ApplicationInsightsInstrumentationKey not found' });
+            microsoftTeams.appInitialization.notifyFailure({
+                reason: microsoftTeams.appInitialization.FailedReason.Other,
+                message: 'Could not initialize telemetry service. ApplicationInsightsInstrumentationKey not found',
+            });
+        }
     }
 
     /**
@@ -99,10 +111,7 @@ export class AskAwayTab extends msteamsReactBaseComponent<IAskAwayTabProps, IAsk
                             reason: microsoftTeams.appInitialization.FailedReason.AuthFailed,
                             message,
                         });
-                        telemetryService.appInsights.trackTrace({
-                            message: 'Authentication failure. Could not get authentication token.',
-                            severityLevel: SeverityLevel.Error,
-                        });
+                        trackTrace('Authentication failure. Could not get authentication token.', SeverityLevel.Error);
                     },
                 });
             });
@@ -121,16 +130,12 @@ export class AskAwayTab extends msteamsReactBaseComponent<IAskAwayTabProps, IAsk
             <Provider style={{ background: 'unset' }} theme={this.state.theme}>
                 <div>
                     {this.state.dataEvent && <h1>{this.state.dataEvent.type}</h1>}
-                    {this.state.frameContext === microsoftTeams.FrameContexts.sidePanel && (
-                        <MeetingPanel teamsTabContext={this.state.teamContext} httpService={this.httpService} appInsights={telemetryService.appInsights} helper={Helper} />
-                    )}
-                    {this.state.frameContext === microsoftTeams.FrameContexts.content && (
-                        <TabContent teamsTabContext={this.state.teamContext} httpService={this.httpService} appInsights={telemetryService.appInsights} helper={Helper} />
-                    )}
+                    {this.state.frameContext === microsoftTeams.FrameContexts.sidePanel && <MeetingPanel teamsTabContext={this.state.teamContext} httpService={this.httpService} helper={Helper} />}
+                    {this.state.frameContext === microsoftTeams.FrameContexts.content && <TabContent teamsTabContext={this.state.teamContext} httpService={this.httpService} helper={Helper} />}
                 </div>
             </Provider>
         );
     }
 }
 
-export default withAITracking(telemetryService.reactPlugin, AskAwayTab);
+export default withAITracking(getReactPlugin(), AskAwayTab);

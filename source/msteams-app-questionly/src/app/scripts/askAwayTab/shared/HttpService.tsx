@@ -2,18 +2,9 @@ import axios, { AxiosResponse, AxiosRequestConfig } from 'axios';
 import * as microsoftTeams from '@microsoft/teams-js';
 // tslint:disable-next-line:no-relative-imports
 import { getBaseUrl } from './ConfigVariables';
-import { ApplicationInsights, SeverityLevel } from '@microsoft/applicationinsights-web';
+import { SeverityLevel } from '@microsoft/applicationinsights-web';
+import { trackException } from '../../telemetryService';
 export class HttpService {
-    private appInsights: ApplicationInsights;
-
-    /**
-     * Constructor that initializes app insights.
-     * @param appInsights - instance of application insights
-     */
-    constructor(appInsights: ApplicationInsights) {
-        this.appInsights = appInsights;
-    }
-
     /**
      * Get Method
      * @param url - `url` is the server URL that will be used for the request
@@ -152,10 +143,7 @@ export class HttpService {
      * @param error
      */
     public handleError(error: any): void {
-        this.appInsights.trackException({
-            exception: error,
-            severityLevel: SeverityLevel.Error,
-        });
+        trackException(error, SeverityLevel.Error);
         if (error.hasOwnProperty('response')) {
             /* if (errorStatus === 403) {
                 window.location.href = `/errorpage/403?locale=${i18n.language}`;

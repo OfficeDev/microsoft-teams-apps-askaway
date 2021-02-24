@@ -5,7 +5,6 @@ import * as microsoftTeams from '@microsoft/teams-js';
 import { Provider } from '@fluentui/react-northstar';
 import { ClientDataContract } from '../../../../../contracts/clientDataContract';
 import { HttpService } from '../../shared/HttpService';
-import { telemetryService } from '../../../telemetryService';
 import { SwitchSessionInternal } from './SwitchSessionInternal';
 import Helper from '../../shared/Helper';
 import { i18next } from '../../shared/i18next';
@@ -55,7 +54,7 @@ export class SwitchSession extends msteamsReactBaseComponent<SwitchSessionProps,
         const conversationId = searchParams.get('conversationId');
 
         try {
-            const response = await new HttpService(telemetryService.appInsights).get(`/conversations/${conversationId}/sessions`);
+            const response = await new HttpService().get(`/conversations/${conversationId}/sessions`);
 
             this.setState({ qnaSessions: response.data });
         } catch {

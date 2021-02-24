@@ -10,8 +10,9 @@ import { CONST } from '../shared/Constants';
 import { ClientDataContract } from '../../../../contracts/clientDataContract';
 import { ParticipantRoles } from '../../../../enums/ParticipantRoles';
 import { invokeTaskModuleForQuestionUpdateFailure } from '../task-modules-utility/taskModuleHelper';
-import { ApplicationInsights, SeverityLevel } from '@microsoft/applicationinsights-web';
+import { SeverityLevel } from '@microsoft/applicationinsights-web';
 import { TFunction } from 'i18next';
+import { trackException } from '../../telemetryService';
 
 /**
  * Properties for the QuestionsList React component
@@ -22,7 +23,6 @@ export interface QuestionsListProps {
     teamsTabContext: microsoftTeams.Context;
     t: TFunction;
     userRole: ParticipantRoles;
-    appInsights: ApplicationInsights;
 }
 
 export interface QuestionTab {
@@ -114,15 +114,11 @@ const QuestionsList: React.FunctionComponent<QuestionsListProps> = (props) => {
             // Revert vote since api call has failed.
             updateVote(true);
             invokeTaskModuleForQuestionUpdateFailure(props.t);
-            props.appInsights.trackException({
-                exception: error,
-                severityLevel: SeverityLevel.Error,
-                properties: {
-                    meetingId: props.teamsTabContext.meetingId,
-                    userAadObjectId: props.teamsTabContext.userObjectId,
-                    questionId: event?.question?.id,
-                    message: `Failure in updating question, update action ${event?.actionValue}`,
-                },
+            trackException(error, SeverityLevel.Error, {
+                meetingId: props.teamsTabContext.meetingId,
+                userAadObjectId: props.teamsTabContext.userObjectId,
+                questionId: event?.question?.id,
+                message: `Failure in updating question, update action ${event?.actionValue}`,
             });
         }
     };

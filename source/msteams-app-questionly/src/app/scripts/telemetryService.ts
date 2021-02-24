@@ -1,30 +1,47 @@
 import { ReactPlugin } from '@microsoft/applicationinsights-react-js';
-import { ApplicationInsights } from '@microsoft/applicationinsights-web';
+import { ApplicationInsights, SeverityLevel } from '@microsoft/applicationinsights-web';
 import { createBrowserHistory } from 'history';
 
 let reactPlugin: ReactPlugin;
 let appInsights: ApplicationInsights;
 
-const createTelemetryService = () => {
-    reactPlugin = new ReactPlugin();
-    const key = process.env.ApplicationInsightsInstrumentationKey;
+export const getReactPlugin = () => {
+    if (!reactPlugin) {
+        reactPlugin = new ReactPlugin();
+    }
+    return reactPlugin;
+};
+
+export const initializeTelemetryService = (applicationInsightsInstrumentationKey: string) => {
     const browserHistory = createBrowserHistory({ basename: '' });
 
     appInsights = new ApplicationInsights({
         config: {
-            instrumentationKey: key,
-            extensions: [reactPlugin],
+            instrumentationKey: applicationInsightsInstrumentationKey,
+            extensions: [getReactPlugin()],
             extensionConfig: {
-                [reactPlugin.identifier]: { history: browserHistory },
+                [getReactPlugin().identifier]: { history: browserHistory },
             },
         },
     });
     appInsights.loadAppInsights();
-
-    return {
-        reactPlugin,
-        appInsights,
-    };
 };
 
-export const telemetryService = createTelemetryService();
+export const trackTrace = (message: string, severityLevel: SeverityLevel) => {
+    if (appInsights) {
+        appInsights.trackTrace({
+            message: message,
+            severityLevel: severityLevel,
+        });
+    }
+};
+
+export const trackException = (exception: Error, severityLevel: SeverityLevel, properties?: any) => {
+    if (appInsights) {
+        appInsights.trackException({
+            exception: exception,
+            severityLevel: severityLevel,
+            properties: properties,
+        });
+    }
+};

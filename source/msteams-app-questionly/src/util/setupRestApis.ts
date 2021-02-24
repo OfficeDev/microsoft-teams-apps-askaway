@@ -19,6 +19,7 @@ export const setupRestApis = (
 
     // Rest endpoints
     app.use('/api/conversations', ensureAuthenticated(), router);
+    app.use('/api/config', ensureAuthenticated(), router);
     // Register error handling middleware for rest api routes.
     app.use(restApiErrorMiddleware);
 };

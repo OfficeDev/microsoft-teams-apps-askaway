@@ -119,7 +119,7 @@ const baseErrorCard = () =>
  * @returns - adaptive card.
  */
 const createBaseErrorAdaptiveCard = (errorMessages: string[]): AdaptiveCard => {
-    const errorImageUrl = `https://${process.env.HostName}/images/failure_image.png`;
+    const errorImageUrl = `https://${window.location.host}/images/failure_image.png`;
     const template = new ACData.Template(baseErrorCard()).expand({
         $root: {
             errorImageUrl,

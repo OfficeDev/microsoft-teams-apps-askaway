@@ -7,9 +7,10 @@ import { useState } from 'react';
 import { HttpService } from '../shared/HttpService';
 import * as microsoftTeams from '@microsoft/teams-js';
 import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
-import { ApplicationInsights, SeverityLevel } from '@microsoft/applicationinsights-web';
+import { SeverityLevel } from '@microsoft/applicationinsights-web';
 import { invokeTaskModuleForQuestionPostFailure } from '../task-modules-utility/taskModuleHelper';
 import { TFunction } from 'i18next';
+import { trackException } from '../../telemetryService';
 
 /**
  * Properties for the NewQuestion React component
@@ -20,7 +21,6 @@ export interface NewQuestionProps {
     teamsTabContext: microsoftTeams.Context;
     onAddNewQuestion: Function;
     t: TFunction;
-    appInsights: ApplicationInsights;
 }
 const NewQuestion: React.FunctionComponent<NewQuestionProps> = (props) => {
     const [question, setQuestion] = useState('');
@@ -43,13 +43,9 @@ const NewQuestion: React.FunctionComponent<NewQuestionProps> = (props) => {
         } catch (error) {
             invokeTaskModuleForQuestionPostFailure(props.t);
 
-            props.appInsights.trackException({
-                exception: error,
-                severityLevel: SeverityLevel.Error,
-                properties: {
-                    meetingId: props.teamsTabContext.meetingId,
-                    userAadObjectId: props.teamsTabContext.userObjectId,
-                },
+            trackException(error, SeverityLevel.Error, {
+                meetingId: props.teamsTabContext.meetingId,
+                userAadObjectId: props.teamsTabContext.userObjectId,
             });
         }
     };

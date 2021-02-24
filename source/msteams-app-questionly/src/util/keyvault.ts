@@ -1,6 +1,6 @@
 import { SecretClient } from '@azure/keyvault-secrets';
-import { exceptionLogger } from 'src/util/exceptionTracking';
-import { ifNumber } from 'src/util/typeUtility';
+import { exceptionLogger } from './exceptionTracking';
+import { ifNumber } from './typeUtility';
 import { getCredential } from './azureCredentialUtility';
 import { getFromMemoryCache, putIntoMemoryCache } from './memoryCache';
 

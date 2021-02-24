@@ -5,11 +5,10 @@
 import * as React from 'react';
 import SignalRLifecycle from '../../signalR/SignalRLifecycle';
 import Adapter from 'enzyme-adapter-react-16';
-import { configure, mount, shallow } from 'enzyme';
+import { configure, mount } from 'enzyme';
 import axios from 'axios';
 import { StatusCodes } from 'http-status-codes';
 import { HubConnection } from '@microsoft/signalr';
-import { ApplicationInsights } from '@microsoft/applicationinsights-web';
 import { HttpService } from './../../shared/HttpService';
 import ConnectionStatusAlert from '../../signalR/ConnectionStatusAlert';
 import { act } from 'react-dom/test-utils';
@@ -24,7 +23,6 @@ describe('SignalRLifecycle Component', () => {
     const updateEventCallback = jest.fn();
     let hubConnection: HubConnection;
     let sampleHttpService: HttpService;
-    let sampleAppInsights: ApplicationInsights;
     let t: jest.Mock<any, any>;
 
     beforeAll(() => {
@@ -39,9 +37,7 @@ describe('SignalRLifecycle Component', () => {
         const mockPostFunction = jest.fn();
         mockPostFunction.mockReturnValue(Promise.resolve({ status: StatusCodes.OK }));
         axios.post = mockPostFunction;
-        sampleAppInsights = new ApplicationInsights({ config: {} });
-        sampleAppInsights.trackException = jest.fn();
-        sampleHttpService = new HttpService(sampleAppInsights);
+        sampleHttpService = new HttpService();
         sampleHttpService.getAuthToken = jest.fn(() => {
             return Promise.resolve('testToken');
         });
@@ -68,7 +64,6 @@ describe('SignalRLifecycle Component', () => {
                 enableLiveUpdates={true}
                 conversationId={testConversationId}
                 onEvent={updateEventCallback}
-                appInsights={sampleAppInsights}
                 httpService={sampleHttpService}
                 connection={hubConnection}
                 __disableTransComponent={true}
@@ -97,7 +92,6 @@ describe('SignalRLifecycle Component', () => {
                 enableLiveUpdates={true}
                 conversationId={testConversationId}
                 onEvent={updateEventCallback}
-                appInsights={sampleAppInsights}
                 httpService={sampleHttpService}
                 connection={hubConnection}
                 __disableTransComponent={true}
@@ -134,7 +128,6 @@ describe('SignalRLifecycle Component', () => {
                 enableLiveUpdates={true}
                 conversationId={testConversationId}
                 onEvent={updateEventCallback}
-                appInsights={sampleAppInsights}
                 httpService={sampleHttpService}
                 connection={hubConnection}
                 __disableTransComponent={true}
@@ -163,7 +156,6 @@ describe('SignalRLifecycle Component', () => {
                 enableLiveUpdates={true}
                 conversationId={testConversationId}
                 onEvent={updateEventCallback}
-                appInsights={sampleAppInsights}
                 httpService={sampleHttpService}
                 connection={hubConnection}
                 __disableTransComponent={true}
@@ -193,7 +185,6 @@ describe('SignalRLifecycle Component', () => {
                 enableLiveUpdates={true}
                 conversationId={testConversationId}
                 onEvent={updateEventCallback}
-                appInsights={sampleAppInsights}
                 httpService={sampleHttpService}
                 connection={hubConnection}
                 __disableTransComponent={true}
@@ -224,7 +215,6 @@ describe('SignalRLifecycle Component', () => {
                 enableLiveUpdates={true}
                 conversationId={testConversationId}
                 onEvent={updateEventCallback}
-                appInsights={sampleAppInsights}
                 httpService={sampleHttpService}
                 connection={hubConnection}
                 __disableTransComponent={true}
@@ -277,7 +267,6 @@ describe('SignalRLifecycle Component', () => {
                 enableLiveUpdates={true}
                 conversationId={testConversationId}
                 onEvent={updateEventCallback}
-                appInsights={sampleAppInsights}
                 httpService={sampleHttpService}
                 connection={hubConnection}
                 __disableTransComponent={true}
@@ -319,7 +308,6 @@ describe('SignalRLifecycle Component', () => {
                 enableLiveUpdates={true}
                 conversationId={testConversationId}
                 onEvent={updateEventCallback}
-                appInsights={sampleAppInsights}
                 httpService={sampleHttpService}
                 connection={hubConnection}
                 __disableTransComponent={true}

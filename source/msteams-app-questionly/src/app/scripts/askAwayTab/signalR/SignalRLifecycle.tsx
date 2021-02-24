@@ -1,13 +1,14 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import * as signalR from '@microsoft/signalr';
-import axios from 'axios';
 import { StatusCodes } from 'http-status-codes';
-import { ApplicationInsights, SeverityLevel } from '@microsoft/applicationinsights-web';
+import { SeverityLevel } from '@microsoft/applicationinsights-web';
 import { HttpService } from '../shared/HttpService';
 import { IDataEvent } from 'msteams-app-questionly.common';
 import ConnectionStatusAlert from './ConnectionStatusAlert';
 import { TFunction } from 'i18next';
+import { trackException } from '../../telemetryService';
+import { CONST } from '../shared/Constants';
 
 /**
  * SignalR connection status
@@ -77,11 +78,6 @@ export interface SignalRLifecycleProps {
     httpService: HttpService;
 
     /**
-     * application insight client.
-     */
-    appInsights: ApplicationInsights;
-
-    /**
      * signalR HubConnection for UTs only.
      */
     connection?: signalR.HubConnection;
@@ -116,10 +112,9 @@ const SignalRLifecycle: React.FunctionComponent<SignalRLifecycleProps> = (props)
      */
     const showAutoRefreshEstablishingMessage = (error?: Error) => {
         setConnectionStatus(ConnectionStatus.Reconnecting);
-        props.appInsights.trackException({
-            exception: error,
-            severityLevel: SeverityLevel.Warning,
-        });
+        if (error) {
+            trackException(error, SeverityLevel.Warning);
+        }
     };
 
     /**
@@ -135,10 +130,7 @@ const SignalRLifecycle: React.FunctionComponent<SignalRLifecycleProps> = (props)
             setConnectionStatus(ConnectionStatus.NotConnected);
 
             if (error) {
-                props.appInsights.trackException({
-                    exception: error,
-                    severityLevel: SeverityLevel.Error,
-                });
+                trackException(error, SeverityLevel.Error);
             }
         }
     };
@@ -185,13 +177,12 @@ const SignalRLifecycle: React.FunctionComponent<SignalRLifecycleProps> = (props)
             conversationId: props.conversationId,
         };
 
-        const response = await props.httpService.post(`${process.env.SignalRFunctionBaseUrl}/api/add-to-group`, addToGroupInputDate, false, undefined, false);
+        let response = await props.httpService.get(`/config/${CONST.ENV_VARIABLES.SIGNALR_FUNCTION_BASEURL}`);
+        const signalRFunctionBaseUrl = response.data;
+        response = await props.httpService.post(`${signalRFunctionBaseUrl}/api/add-to-group`, addToGroupInputDate, false, undefined, false);
 
         if (response.status !== StatusCodes.OK) {
-            props.appInsights.trackException({
-                exception: new Error(`Error in adding connection to the group, conversationId: ${props.conversationId}, reason: ${response.statusText}`),
-                severityLevel: SeverityLevel.Error,
-            });
+            trackException(new Error(`Error in adding connection to the group, conversationId: ${props.conversationId}, reason: ${response.statusText}`), SeverityLevel.Error);
 
             handleConnectionError();
             return;
@@ -210,11 +201,14 @@ const SignalRLifecycle: React.FunctionComponent<SignalRLifecycleProps> = (props)
             setConnectionStatus(ConnectionStatus.Connecting);
             setConnectionLimit(ConnectionLimit.NotExhausted);
 
+            const response = await props.httpService.get(`/config/${CONST.ENV_VARIABLES.SIGNALR_FUNCTION_BASEURL}`);
+            const signalRFunctionBaseUrl = response.data;
+
             if (!connection) {
                 connection =
                     props.connection ??
                     new signalR.HubConnectionBuilder()
-                        .withUrl(`${process.env.SignalRFunctionBaseUrl}/api`, {
+                        .withUrl(`${signalRFunctionBaseUrl}/api`, {
                             accessTokenFactory: async () => {
                                 return await props.httpService.getAuthToken();
                             },
@@ -245,15 +239,9 @@ const SignalRLifecycle: React.FunctionComponent<SignalRLifecycleProps> = (props)
                 setConnectionLimit(ConnectionLimit.Exhausted);
 
                 // Too many connection can be logged as warning than error.
-                props.appInsights.trackException({
-                    exception: error,
-                    severityLevel: SeverityLevel.Warning,
-                });
+                trackException(error, SeverityLevel.Warning);
             } else {
-                props.appInsights.trackException({
-                    exception: error,
-                    severityLevel: SeverityLevel.Error,
-                });
+                trackException(error, SeverityLevel.Error);
             }
 
             handleConnectionError();
