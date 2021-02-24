@@ -188,7 +188,7 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
     private openSwitchSessionsTaskModule = () => {
         let submitHandler = (err: any, result: any) => {
             if (result) {
-                this.setState({ selectedAmaSessionData: result });
+                this.setState({ selectedAmaSessionData: result, showNewUpdatesButton: false });
             }
         };
 
@@ -219,6 +219,7 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
                     ...prevState.selectedAmaSessionData,
                     isActive: false,
                 },
+                showNewUpdatesButton: false,
             }));
             handleTaskModuleResponseForEndQnASessionFlow(this.localize);
         } catch (error) {
@@ -412,7 +413,7 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
                 {selectedAmaSessionData.sessionId ? (
                     <Flex column>
                         <div className="tab-container">
-                            {this.state.showNewUpdatesButton && (
+                            {this.state.selectedAmaSessionData.isActive && this.state.showNewUpdatesButton && (
                                 <Button primary onClick={this.refreshSession} className="newUpdatesButton">
                                     <ArrowUpIcon xSpacing="after"></ArrowUpIcon>
                                     <Button.Content className="newUpdatesButtonContent" content="New updates"></Button.Content>
