@@ -31,7 +31,7 @@ import { getCurrentParticipantInfo } from './shared/meetingUtility';
 import SignalRLifecycle from './signalR/SignalRLifecycle';
 import { DataEventHandlerFactory } from './dataEventHandling/dataEventHandlerFactory';
 import { IDataEvent } from 'msteams-app-questionly.common';
-import { ArrowUpIcon, Button } from '@fluentui/react-northstar';
+import { Button } from '@fluentui/react-northstar';
 import { CONST } from './shared/Constants';
 
 export interface TabContentProps extends WithTranslation {
@@ -413,13 +413,12 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
                 {selectedAmaSessionData.sessionId ? (
                     <Flex column>
                         <div className="tab-container">
-                            {this.state.selectedAmaSessionData.isActive && this.state.showNewUpdatesButton && (
-                                <Button primary onClick={this.refreshSession} className="newUpdatesButton">
-                                    <ArrowUpIcon xSpacing="after"></ArrowUpIcon>
-                                    <Button.Content className="newUpdatesButtonContent" content="New updates"></Button.Content>
-                                </Button>
-                            )}
                             <PostNewQuestions t={this.localize} activeSessionData={selectedAmaSessionData} userName={this.state.userName} onPostNewQuestion={this.handlePostNewQuestions} />
+                            {this.state.selectedAmaSessionData.isActive && this.state.showNewUpdatesButton && (
+                                <div className="new-update-btn-wrapper">
+                                    <Button primary size="medium" content={this.props.t('tab.updatemessage')} onClick={this.refreshSession} className="new-updates-button" />
+                                </div>
+                            )}
                             {selectedAmaSessionData.unansweredQuestions.length > 0 || selectedAmaSessionData.answeredQuestions.length > 0 ? (
                                 <TabQuestions t={this.localize} onClickAction={this.validateClickAction} activeSessionData={selectedAmaSessionData} teamsTabContext={this.props.teamsTabContext} />
                             ) : (

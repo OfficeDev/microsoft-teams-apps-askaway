@@ -355,6 +355,11 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                         <EmptyTile image={collaborationImage} line1={this.localize('meetingPanel.noQuestionsPosted')} line2={this.localize('meetingPanel.askAway')} />
                     </Flex>
                 )}
+                {this.state.activeSessionData.isActive && this.state.showNewUpdatesButton && (
+                    <div className="new-update-btn-wrapper">
+                        <Button primary size="medium" content={this.localize('meetingPanel.updatemessage')} onClick={this.updateQnASessionContent} className="new-updates-button" />
+                    </div>
+                )}
                 <FlexItem push>
                     <NewQuestion
                         appInsights={this.props.appInsights}
@@ -391,12 +396,6 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                         httpService={this.props.httpService}
                         appInsights={this.props.appInsights}
                     />
-                    {this.state.activeSessionData.isActive && this.state.showNewUpdatesButton && (
-                        <Button primary onClick={this.updateQnASessionContent} className="newUpdatesButton">
-                            <ArrowUpIcon xSpacing="after"></ArrowUpIcon>
-                            <Button.Content className="newUpdatesButtonContent" content={this.localize('meetingPanel.updatemessage')}></Button.Content>
-                        </Button>
-                    )}
                     {stateVal.activeSessionData.sessionId ? this.showSessionQuestions(stateVal) : this.createNewSessionLayout()}
                 </Flex>
             </React.Fragment>

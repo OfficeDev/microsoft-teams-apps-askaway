@@ -41,17 +41,18 @@
         margin-top: auto;
         margin-bottom: auto;
     }
-    .newUpdatesButton {
-        top: 12%;
-        display: block;
-        position: absolute;
-        text-align: center;
-        z-index: 99;
-        transform: translateX(40%);
+    .new-update-btn-wrapper {
+        position: relative;
+        width: 0;
+        height: 0;
+        margin: 0 auto;
+        left: 1.4rem;
     }
-    .newUpdatesButtonContent {
-        font-size: medium;
-        font-weight: normal;
+    .new-updates-button {
+        top: -1.4rem;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        height: 1.85rem;
     }
     .menuHeader {
         .ui-menu__item__submenu {
@@ -80,6 +81,8 @@
                 padding-right: 1rem;
                 .card-body-question {
                     padding-left: 0.4rem;
+                    overflow: auto;
+                    white-space: pre-wrap;
                 }
             }
         }
@@ -113,15 +116,15 @@
 
 .badge {
     width: 3.75rem;
-    font-family: Segoe UI semibold;
+    font-family: Segoe UI;
+    font-weight: 600;
     font-size: 10px;
-    padding: 0.43em 0.5em;
+    padding: 0.35em 0.5em;
     line-height: 12px;
     white-space: nowrap;
     vertical-align: baseline;
     border-radius: 0.75rem;
     text-align: center;
-    margin-bottom: 0.25rem;
 }
 
 .tab-config-container {
@@ -169,6 +172,7 @@
         }
     }
     .tab-nav-header {
+        padding: 10px 14px 0px 17px;
         .btn-end-session {
             margin-right: 1rem;
             height: 2rem;
@@ -185,6 +189,18 @@
     .tab-container {
         margin: 0 auto;
         width: 54.2%;
+        .new-update-btn-wrapper {
+            position: relative;
+            width: 0;
+            height: 0;
+            margin: 0 auto;
+            left: -4em;
+        }
+        .new-updates-button {
+            top: 1.2rem;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
         .post-new-question {
             margin-top: 2rem;
             padding: 0.1rem;
@@ -200,11 +216,15 @@
                 width: 100%;
                 box-shadow: 0px 0.15px 0.45px rgba(0, 0, 0, 0.11), 0px 0.8px 1.8px rgba(0, 0, 0, 0.13);
                 border-radius: 4px;
+                .badge {
+                    font-size: 12px;
+                    font-weight: bold;
+                }
                 .ui-card__body {
                     margin-bottom: 0.3rem;
                 }
                 .date-content-format {
-                    padding-top: 0.15rem;
+                    padding-top: 0.25rem;
                 }
                 .session-title {
                     padding-top: 0.3rem;
@@ -229,9 +249,10 @@
                     right: 1rem;
                 }
                 .text-format {
-                    position: relative;
-                    top: -0.5rem;
-                    padding-left: 0.2rem;
+                    padding-top: 0rem;
+                    padding-right: 1rem;
+                    overflow: auto;
+                    white-space: pre-wrap;
                 }
             }
             .padding-none {
@@ -302,6 +323,10 @@
     position: absolute;
     right: 5%;
     bottom: 5%;
+
+    button {
+        font-family: Segoe UI;
+    }
 }
 .switchSessionListCard {
     padding-right: 12px;
@@ -324,18 +349,6 @@
         font-size: 12px;
         padding-bottom: 3px;
         padding-top: 3px;
-    }
-}
-
-.tab-content {
-    .newUpdatesButton {
-        top: 45%;
-        display: block;
-        position: absolute;
-        text-align: center;
-        z-index: 99;
-        left: 50%;
-        transform: translate(-50%, -50%);
     }
 }
 

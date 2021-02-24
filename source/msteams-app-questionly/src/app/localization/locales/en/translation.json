@@ -26,7 +26,8 @@
         "pendingStatus": "Pending",
         "answeredStatus": "Answered",
         "whenSessionClosed": "Surprising, but true. No questions were posted.",
-        "loaderText": "Loading information"
+        "loaderText": "Loading information",
+        "updatemessage": "New updates"
     },
     "meetingPanel": {
         "successText": "Q&A session started",
