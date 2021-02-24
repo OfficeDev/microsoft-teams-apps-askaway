@@ -86,7 +86,7 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (p
                                                     iconOnly
                                                     text
                                                 />
-                                                <Text content={question.votesCount} />
+                                                <Text content={question.voterAadObjectIds.length} />
                                             </Flex>
                                         </Flex.Item>
                                     </Flex>
