@@ -4,7 +4,7 @@ import * as React from 'react';
 import { withTranslation, WithTranslation } from 'react-i18next';
 import * as microsoftTeams from '@microsoft/teams-js';
 import { ApplicationInsights, SeverityLevel } from '@microsoft/applicationinsights-web';
-import { Flex, FlexItem, Loader } from '@fluentui/react-northstar';
+import { Flex, Loader } from '@fluentui/react-northstar';
 import { HttpService } from './shared/HttpService';
 import { Helper } from './shared/Helper';
 import { TFunction } from 'i18next';
@@ -31,7 +31,7 @@ import { getCurrentParticipantInfo } from './shared/meetingUtility';
 import SignalRLifecycle from './signalR/SignalRLifecycle';
 import { DataEventHandlerFactory } from './dataEventHandling/dataEventHandlerFactory';
 import { IDataEvent } from 'msteams-app-questionly.common';
-import { ArrowUpIcon, Button } from '@fluentui/react-northstar';
+import { Button } from '@fluentui/react-northstar';
 import { CONST } from './shared/Constants';
 
 export interface TabContentProps extends WithTranslation {
