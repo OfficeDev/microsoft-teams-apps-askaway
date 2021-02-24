@@ -2,10 +2,7 @@ import axios, { AxiosResponse, AxiosRequestConfig } from 'axios';
 import * as microsoftTeams from '@microsoft/teams-js';
 // tslint:disable-next-line:no-relative-imports
 import { getBaseUrl } from './ConfigVariables';
-import {
-    ApplicationInsights,
-    SeverityLevel,
-} from '@microsoft/applicationinsights-web';
+import { ApplicationInsights, SeverityLevel } from '@microsoft/applicationinsights-web';
 export class HttpService {
     private appInsights: ApplicationInsights;
 
@@ -24,12 +21,7 @@ export class HttpService {
      * @param needAuthorizationHeader - to set the token in the header if it is required
      * @param config - `config` is the config that was provided to `axios` for the request
      */
-    public async get<T = any, R = AxiosResponse<T>>(
-        url: string,
-        handleError = true,
-        needAuthorizationHeader = true,
-        config?: AxiosRequestConfig
-    ): Promise<R> {
+    public async get<T = any, R = AxiosResponse<T>>(url: string, handleError = true, needAuthorizationHeader = true, config?: AxiosRequestConfig): Promise<R> {
         try {
             if (needAuthorizationHeader) {
                 config = await this.setupAuthorizationHeader(config);
@@ -51,11 +43,7 @@ export class HttpService {
      * @param handleError - handles the failure case
      * @param config -`config` is the config that was provided to `axios` for the request
      */
-    public async delete<T = any, R = AxiosResponse<T>>(
-        url: string,
-        handleError = true,
-        config?: AxiosRequestConfig
-    ): Promise<R> {
+    public async delete<T = any, R = AxiosResponse<T>>(url: string, handleError = true, config?: AxiosRequestConfig): Promise<R> {
         try {
             config = await this.setupAuthorizationHeader(config);
             return await axios.delete(getBaseUrl() + url, config);
@@ -75,16 +63,12 @@ export class HttpService {
      * @param data -`data` is the data to be sent as the request body. Only applicable for request methods 'PUT', 'POST', and 'PATCH'
      * @param handleError - handles the failure case
      * @param config - `config` is the config that was provided to `axios` for the request
+     * @param appendBaseUrl - if base url should be computed and appended.
      */
-    public async post<T = any, R = AxiosResponse<T>>(
-        url: string,
-        data?: any,
-        handleError = true,
-        config?: AxiosRequestConfig
-    ): Promise<R> {
+    public async post<T = any, R = AxiosResponse<T>>(url: string, data?: any, handleError = true, config?: AxiosRequestConfig, appendBaseUrl = true): Promise<R> {
         try {
             config = await this.setupAuthorizationHeader(config);
-            return await axios.post(getBaseUrl() + url, data, config);
+            return await axios.post(appendBaseUrl ? getBaseUrl() + url : url, data, config);
         } catch (error) {
             if (handleError) {
                 this.handleError(error);
@@ -102,12 +86,7 @@ export class HttpService {
      * @param handleError - handles the failure case
      * @param config - `config` is the config that was provided to `axios` for the request
      */
-    public async put<T = any, R = AxiosResponse<T>>(
-        url: string,
-        data?: any,
-        handleError = true,
-        config?: AxiosRequestConfig
-    ): Promise<R> {
+    public async put<T = any, R = AxiosResponse<T>>(url: string, data?: any, handleError = true, config?: AxiosRequestConfig): Promise<R> {
         try {
             config = await this.setupAuthorizationHeader(config);
             return await axios.put(getBaseUrl() + url, data, config);
@@ -128,12 +107,7 @@ export class HttpService {
      * @param handleError - handles the failure case
      * @param config - `config` is the config that was provided to `axios` for the request
      */
-    public async patch<T = any, R = AxiosResponse<T>>(
-        url: string,
-        data?: any,
-        handleError = true,
-        config?: AxiosRequestConfig
-    ): Promise<R> {
+    public async patch<T = any, R = AxiosResponse<T>>(url: string, data?: any, handleError = true, config?: AxiosRequestConfig): Promise<R> {
         try {
             config = await this.setupAuthorizationHeader(config);
             return await axios.patch(getBaseUrl() + url, data, config);
@@ -199,9 +173,7 @@ export class HttpService {
      * Set token in the header
      * @param config
      */
-    private async setupAuthorizationHeader(
-        config?: AxiosRequestConfig
-    ): Promise<AxiosRequestConfig> {
+    private async setupAuthorizationHeader(config?: AxiosRequestConfig): Promise<AxiosRequestConfig> {
         const authToken = await this.getAuthToken();
         if (!config) {
             config = axios.defaults;

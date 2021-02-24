@@ -128,13 +128,18 @@ const SignalRLifecycle: React.FunctionComponent<SignalRLifecycleProps> = (props)
      * @param error - error that occured while establishing connection. signalR client passes error to `onclose` callback.
      */
     const handleConnectionError = (error?: Error) => {
-        setConnectionStatus(ConnectionStatus.NotConnected);
+        // Putting this check to handle delayed callback, eg the active connection was stopped and then re-started.
+        // `onclose` callback in only called when stop is called on active connection,
+        // so we might not run into delayed callback as we restart the connection only if it is not active.
+        if (connection?.state !== signalR.HubConnectionState.Connected) {
+            setConnectionStatus(ConnectionStatus.NotConnected);
 
-        if (error) {
-            props.appInsights.trackException({
-                exception: error,
-                severityLevel: SeverityLevel.Error,
-            });
+            if (error) {
+                props.appInsights.trackException({
+                    exception: error,
+                    severityLevel: SeverityLevel.Error,
+                });
+            }
         }
     };
 
@@ -162,9 +167,9 @@ const SignalRLifecycle: React.FunctionComponent<SignalRLifecycleProps> = (props)
      * When `enableLiveUpdates` prop is changed, establish/ close connection.
      */
     useEffect(() => {
-        if (props.enableLiveUpdates) {
+        if (props.enableLiveUpdates && (!connection || connection.state !== signalR.HubConnectionState.Connected)) {
             initiateConnectionSetup();
-        } else {
+        } else if (!props.enableLiveUpdates) {
             // `onclose` callback is called on `connection.stop`, hence no need to update state.
             connection?.stop();
         }
@@ -175,14 +180,12 @@ const SignalRLifecycle: React.FunctionComponent<SignalRLifecycleProps> = (props)
      * @param connectionId - connection id.
      */
     const addConnectionToGroup = async (connectionId: string) => {
-        const token = await props.httpService.getAuthToken();
-
         const addToGroupInputDate = {
             connectionId: connectionId,
             conversationId: props.conversationId,
         };
 
-        const response = await axios.post(`${process.env.SignalRFunctionBaseUrl}/api/add-to-group?authorization=${token}`, addToGroupInputDate);
+        const response = await props.httpService.post(`${process.env.SignalRFunctionBaseUrl}/api/add-to-group`, addToGroupInputDate, false, undefined, false);
 
         if (response.status !== StatusCodes.OK) {
             props.appInsights.trackException({
@@ -207,16 +210,25 @@ const SignalRLifecycle: React.FunctionComponent<SignalRLifecycleProps> = (props)
             setConnectionStatus(ConnectionStatus.Connecting);
             setConnectionLimit(ConnectionLimit.NotExhausted);
 
-            const token = await props.httpService.getAuthToken();
+            if (!connection) {
+                connection =
+                    props.connection ??
+                    new signalR.HubConnectionBuilder()
+                        .withUrl(`${process.env.SignalRFunctionBaseUrl}/api`, {
+                            accessTokenFactory: async () => {
+                                return await props.httpService.getAuthToken();
+                            },
+                        })
+                        // Configures the signalr.HubConnection to automatically attempt to reconnect if the connection is lost.
+                        // By default, the client will wait 0, 2, 10 and 30 seconds respectively before trying up to 4 reconnect attempts.
+                        .withAutomaticReconnect()
+                        .build();
 
-            connection =
-                props.connection ??
-                new signalR.HubConnectionBuilder()
-                    .withUrl(`${process.env.SignalRFunctionBaseUrl}/api?authorization=${token}`)
-                    // Configures the signalr.HubConnection to automatically attempt to reconnect if the connection is lost.
-                    // By default, the client will wait 0, 2, 10 and 30 seconds respectively before trying up to 4 reconnect attempts.
-                    .withAutomaticReconnect()
-                    .build();
+                registerCallbacksOnConnection();
+            } else {
+                // Stops existing connection so that new connection can be established.
+                await connection.stop();
+            }
 
             // Establish connection with signalR service.
             await connection.start();
@@ -227,8 +239,6 @@ const SignalRLifecycle: React.FunctionComponent<SignalRLifecycleProps> = (props)
             } else {
                 throw new Error(`SignalR connection id is not resolved for conersationId: ${props.conversationId}`);
             }
-
-            registerCallbacksOnConnection();
         } catch (error) {
             // SignalR connection limit is reached.
             if (error.statusCode === StatusCodes.TOO_MANY_REQUESTS) {
