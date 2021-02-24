@@ -27,6 +27,7 @@
     "errors": {
         "upvoting": "Upvoting failed. Please try again.",
         "submittingQuestions": "There was an error submitting your question. Please try again.",
+        "submittingEmptyQuestion": "Please enter a question.",
         "missingFields": "Fields cannot be empty",
         "taskFetch": "Something went wrong. Please try opening again.",
         "taskSubmit": "Your submission encountered an error. Please try submitting again!",

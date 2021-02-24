@@ -50,6 +50,45 @@ const QuestionsList: React.FunctionComponent<QuestionsListProps> = (props) => {
      * @param event - question, key, actionValue
      */
     const handleOnClickAction = async (event) => {
+        const userObjectId = props.teamsTabContext.userObjectId;
+
+        /**
+         * updates vote without api call.
+         * @param revert - revert user vote if api call fails later.
+         */
+        const updateVote = (revert: boolean) => {
+            if (event.actionValue === CONST.TAB_QUESTIONS.DOWN_VOTE || event.actionValue === CONST.TAB_QUESTIONS.UP_VOTE) {
+                let questions = activeSessionData[event.key];
+                const index = questions.findIndex((q) => q.id === event.question['id']);
+                const question: ClientDataContract.Question = questions[index];
+
+                if (userObjectId) {
+                    if (!revert) {
+                        if (event.actionValue === CONST.TAB_QUESTIONS.DOWN_VOTE) {
+                            question.voterAadObjectIds = question.voterAadObjectIds.filter(function (userId) {
+                                return userId != userObjectId;
+                            });
+                        } else if (event.actionValue === CONST.TAB_QUESTIONS.UP_VOTE && !question.voterAadObjectIds.includes(userObjectId)) {
+                            question.voterAadObjectIds.push(userObjectId);
+                        }
+                    } else {
+                        if (event.actionValue === CONST.TAB_QUESTIONS.UP_VOTE) {
+                            question.voterAadObjectIds = question.voterAadObjectIds.filter(function (userId) {
+                                return userId != userObjectId;
+                            });
+                        } else if (event.actionValue === CONST.TAB_QUESTIONS.DOWN_VOTE && !question.voterAadObjectIds.includes(userObjectId)) {
+                            question.voterAadObjectIds.push(userObjectId);
+                        }
+                    }
+
+                    setActiveSessionData({ ...activeSessionData, ...questions });
+                }
+            }
+        };
+
+        // Update vote without backend call, so that user does not have to wait till network round trip.
+        updateVote(false);
+
         try {
             const response = await props.httpService.patch(`/conversations/${props.teamsTabContext.chatId}/sessions/${activeSessionData.sessionId}/questions/${event.question['id']}`, {
                 action: event.actionValue,
@@ -72,6 +111,8 @@ const QuestionsList: React.FunctionComponent<QuestionsListProps> = (props) => {
                 throw new Error(`invalid response from update question api. response: ${response.status} ${response.statusText}`);
             }
         } catch (error) {
+            // Revert vote since api call has failed.
+            updateVote(true);
             invokeTaskModuleForQuestionUpdateFailure(props.t);
             props.appInsights.trackException({
                 exception: error,

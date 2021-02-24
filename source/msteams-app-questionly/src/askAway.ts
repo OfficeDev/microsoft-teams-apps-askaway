@@ -19,7 +19,7 @@ import { endQnAStrings, askQuestionStrings, errorStrings, startQnAStrings, leade
 import { exceptionLogger } from 'src/util/exceptionTracking';
 import { IConversationDataService, SessionIsNoLongerActiveError } from 'msteams-app-questionly.data';
 import { extractMainCardData, MainCardData } from 'msteams-app-questionly.common';
-import { getMeetingIdFromContext, isConverationTypeChannel } from 'src/util/meetingsUtility';
+import { getMeetingIdFromContext, isConverationTypeChannel, isPresenterOrOrganizer } from 'src/util/meetingsUtility';
 import { TelemetryExceptions } from 'src/constants/telemetryConstants';
 import * as maincardBuilder from 'msteams-app-questionly.common';
 import * as adaptiveCardBuilder from 'src/adaptive-cards/adaptiveCardBuilder';
@@ -371,9 +371,15 @@ export class AskAway extends TeamsActivityHandler {
     //          ANCHOR Bot Framework messaging extension method overrides         //
     // -------------------------------------------------------------------------- //
 
-    async handleTeamsMessagingExtensionFetchTask(): Promise<MessagingExtensionActionResponse> {
+    async handleTeamsMessagingExtensionFetchTask(context: TurnContext, action: MessagingExtensionAction): Promise<MessagingExtensionActionResponse> {
         // commandId: 'startQnA'
-        return this._buildTaskModuleContinueResponse(getStartQnACard(), startQnAStrings('taskModuleTitle'));
+        const meetingId = getMeetingIdFromContext(context);
+        // Only presenters and organizers can start a Q&A session in meeting chat.
+        if (meetingId && !(await isPresenterOrOrganizer(meetingId, <string>context.activity.from.aadObjectId, context.activity.conversation.tenantId, context.activity.serviceUrl))) {
+            return this._buildTaskModuleContinueResponse(getErrorCard(errorStrings('insufficientPermissionsToCreateOrEndQnASessionError')));
+        } else {
+            return this._buildTaskModuleContinueResponse(getStartQnACard(), startQnAStrings('taskModuleTitle'));
+        }
     }
 
     async handleTeamsMessagingExtensionBotMessagePreviewEdit(context: TurnContext, action: MessagingExtensionAction): Promise<MessagingExtensionActionResponse> {

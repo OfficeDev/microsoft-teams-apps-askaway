@@ -114,7 +114,7 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
      * Shows loader and updates entire content of the screen.
      */
     private updateContent = async () => {
-        this.setState({ showLoader: true });
+        this.setState({ showLoader: true, showNewUpdatesButton: false });
         try {
             await this.getActiveSession();
             await this.updateUserRole();
@@ -123,7 +123,7 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
             invokeTaskModuleForGenericError(this.props.t);
         }
 
-        this.setState({ showNewUpdatesButton: false, showLoader: false });
+        this.setState({ showLoader: false });
     };
 
     /**
@@ -155,9 +155,10 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
             this.setState({
                 activeSessionData: this.props.helper.createEmptyActiveSessionData(),
                 isActiveSessionEnded: true,
+                showNewUpdatesButton: false,
             });
         } else {
-            this.setState({ activeSessionData: sessionData });
+            this.setState({ activeSessionData: sessionData, showNewUpdatesButton: false });
         }
     };
 
@@ -189,6 +190,7 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                     this.setState({
                         showLoader: false,
                         isActiveSessionEnded: true,
+                        showNewUpdatesButton: false,
                         activeSessionData: this.props.helper.createEmptyActiveSessionData(),
                     });
                 })
@@ -353,7 +355,7 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                         <EmptyTile image={collaborationImage} line1={this.localize('meetingPanel.noQuestionsPosted')} line2={this.localize('meetingPanel.askAway')} />
                     </Flex>
                 )}
-                {this.state.showNewUpdatesButton && (
+                {this.state.activeSessionData.isActive && this.state.showNewUpdatesButton && (
                     <div className="new-update-btn-wrapper">
                         <Button primary size="medium" content={this.localize('meetingPanel.updatemessage')} onClick={this.updateQnASessionContent} className="new-updates-button" />
                     </div>

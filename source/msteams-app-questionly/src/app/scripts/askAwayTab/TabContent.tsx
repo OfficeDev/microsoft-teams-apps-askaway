@@ -32,6 +32,7 @@ import SignalRLifecycle from './signalR/SignalRLifecycle';
 import { DataEventHandlerFactory } from './dataEventHandling/dataEventHandlerFactory';
 import { IDataEvent } from 'msteams-app-questionly.common';
 import { ArrowUpIcon, Button } from '@fluentui/react-northstar';
+import { CONST } from './shared/Constants';
 
 export interface TabContentProps extends WithTranslation {
     teamsTabContext: microsoftTeams.Context;
@@ -187,7 +188,7 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
     private openSwitchSessionsTaskModule = () => {
         let submitHandler = (err: any, result: any) => {
             if (result) {
-                this.setState({ selectedAmaSessionData: result });
+                this.setState({ selectedAmaSessionData: result, showNewUpdatesButton: false });
             }
         };
 
@@ -218,6 +219,7 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
                     ...prevState.selectedAmaSessionData,
                     isActive: false,
                 },
+                showNewUpdatesButton: false,
             }));
             handleTaskModuleResponseForEndQnASessionFlow(this.localize);
         } catch (error) {
@@ -282,6 +284,50 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
     };
 
     private validateClickAction = async (event) => {
+        const userObjectId = this.props.teamsTabContext.userObjectId;
+
+        /**
+         * updates vote without api call.
+         * @param revert - revert user vote if api call fails later.
+         */
+        const updateVote = (revert: boolean) => {
+            if (event.actionValue === CONST.TAB_QUESTIONS.DOWN_VOTE || event.actionValue === CONST.TAB_QUESTIONS.UP_VOTE) {
+                let questions = this.state.selectedAmaSessionData[event.key];
+                const index = questions.findIndex((q) => q.id === event.question['id']);
+                const question: ClientDataContract.Question = questions[index];
+
+                if (userObjectId) {
+                    if (!revert) {
+                        if (event.actionValue === CONST.TAB_QUESTIONS.DOWN_VOTE) {
+                            question.voterAadObjectIds = question.voterAadObjectIds.filter(function (userId) {
+                                return userId != userObjectId;
+                            });
+                        } else if (event.actionValue === CONST.TAB_QUESTIONS.UP_VOTE && !question.voterAadObjectIds.includes(userObjectId)) {
+                            question.voterAadObjectIds.push(userObjectId);
+                        }
+                    } else {
+                        if (event.actionValue === CONST.TAB_QUESTIONS.UP_VOTE) {
+                            question.voterAadObjectIds = question.voterAadObjectIds.filter(function (userId) {
+                                return userId != userObjectId;
+                            });
+                        } else if (event.actionValue === CONST.TAB_QUESTIONS.DOWN_VOTE && !question.voterAadObjectIds.includes(userObjectId)) {
+                            question.voterAadObjectIds.push(userObjectId);
+                        }
+                    }
+
+                    this.setState((prevState) => ({
+                        selectedAmaSessionData: {
+                            ...prevState.selectedAmaSessionData,
+                            ...questions,
+                        },
+                    }));
+                }
+            }
+        };
+
+        // Update vote without backend call, so that user does not have to wait till network round trip.
+        updateVote(false);
+
         try {
             const response = await this.props.httpService.patch(
                 `/conversations/${this.props.teamsTabContext.chatId}/sessions/${this.state.selectedAmaSessionData.sessionId}/questions/${event.question['id']}`,
@@ -302,6 +348,8 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
                 throw new Error(`invalid response from update question api. response: ${response.status} ${response.statusText}`);
             }
         } catch (error) {
+            // Revert vote since api call has failed.
+            updateVote(true);
             invokeTaskModuleForQuestionUpdateFailure(this.props.t);
             this.props.appInsights.trackException({
                 exception: error,
@@ -366,7 +414,7 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
                     <Flex column>
                         <div className="tab-container">
                             <PostNewQuestions t={this.localize} activeSessionData={selectedAmaSessionData} userName={this.state.userName} onPostNewQuestion={this.handlePostNewQuestions} />
-                            {this.state.showNewUpdatesButton && (
+                            {this.state.selectedAmaSessionData.isActive && this.state.showNewUpdatesButton && (
                                 <div className="new-update-btn-wrapper">
                                     <Button primary size="medium" content={this.props.t('tab.updatemessage')} onClick={this.refreshSession} className="new-updates-button" />
                                 </div>
