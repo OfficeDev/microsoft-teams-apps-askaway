@@ -580,7 +580,7 @@ export class Controller implements IController {
      */
     public generateInitialsImage = async (initials: string, index: number): Promise<jimp> => {
         const image = new jimp(52, 52, this.avatarColors[index]);
-        const font = await jimp.loadFont(join(__dirname, 'public/segoeUiSemiboldWhite.fnt'));
+        const font = await jimp.loadFont(jimp.FONT_SANS_128_WHITE);
         return image.print(
             font,
             0,
