@@ -3,6 +3,15 @@ import { Container, Image, TextBlock } from 'adaptivecards';
 import { createSuccessAdaptiveCard } from '../../task-modules-utility/successCardBuilder';
 
 describe('test errorCardBuilder', () => {
+    beforeAll(() => {
+        Object.defineProperty(window, 'location', {
+            value: {
+                host: `${process.env.HostName}`,
+            },
+            writable: true,
+        });
+    });
+
     it('test success card', () => {
         const testSuccessMessage = 'testSuccessMessage';
         const card = createSuccessAdaptiveCard(testSuccessMessage);

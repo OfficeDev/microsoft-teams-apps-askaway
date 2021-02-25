@@ -1615,3 +1615,45 @@ describe('test get /:conversationId/activesessions api', () => {
         expect(verifyUserFromConversationId).toBeCalledTimes(1);
     });
 });
+
+describe('test get /config/:variableName api', () => {
+    beforeAll(async () => {
+        app = Express();
+
+        mockUserDataService = new UserDataService();
+        mockQnASessionDataService = new QnASessionDataService(mockUserDataService);
+        mockQuestionDataService = new QuestionDataService(mockUserDataService, mockQnASessionDataService);
+        mockClientDataContractFormatter = new ClientDataContractFormatter(mockUserDataService, mockQuestionDataService);
+        mockController = new Controller(mockQuestionDataService, mockQnASessionDataService);
+        initializeRouter(conversationDataService, mockQnASessionDataService, mockClientDataContractFormatter, mockController);
+
+        const mockEnsureAuthenticated = (req, res, next) => {
+            req.user = {
+                _id: sampleUserId,
+                userName: sampleUserName,
+            };
+            next();
+        };
+        // Rest endpoints
+        app.use('/api/config', mockEnsureAuthenticated, router);
+        app.use(restApiErrorMiddleware);
+    });
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
+    it('variable defined in app env', async () => {
+        process.env.variable1 = 'random';
+        const result = await request(app).get(`/api/config/variable1`);
+
+        expect(result).toBeDefined();
+        expect(result.text).toEqual('random');
+    });
+
+    it('variable undefined in app env', async () => {
+        const result = await request(app).get(`/api/config/variable2`);
+
+        expect(result.status).toEqual(StatusCodes.NOT_FOUND);
+    });
+});

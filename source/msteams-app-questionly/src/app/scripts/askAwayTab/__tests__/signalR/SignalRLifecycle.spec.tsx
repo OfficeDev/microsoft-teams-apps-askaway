@@ -37,6 +37,9 @@ describe('SignalRLifecycle Component', () => {
         const mockPostFunction = jest.fn();
         mockPostFunction.mockReturnValue(Promise.resolve({ status: StatusCodes.OK }));
         axios.post = mockPostFunction;
+        const mockGetFunction = jest.fn();
+        mockGetFunction.mockReturnValue(Promise.resolve({ status: StatusCodes.OK, data: 'random' }));
+        axios.get = mockGetFunction;
         sampleHttpService = new HttpService();
         sampleHttpService.getAuthToken = jest.fn(() => {
             return Promise.resolve('testToken');

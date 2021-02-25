@@ -179,6 +179,12 @@ const SignalRLifecycle: React.FunctionComponent<SignalRLifecycleProps> = (props)
 
         let response = await props.httpService.get(`/config/${CONST.ENV_VARIABLES.SIGNALR_FUNCTION_BASEURL}`);
         const signalRFunctionBaseUrl = response.data;
+        if (!signalRFunctionBaseUrl) {
+            trackException(new Error('Error while calling /config API. Could not get SignalRFunctionBaseUrl'), SeverityLevel.Error);
+            handleConnectionError();
+            return;
+        }
+
         response = await props.httpService.post(`${signalRFunctionBaseUrl}/api/add-to-group`, addToGroupInputDate, false, undefined, false);
 
         if (response.status !== StatusCodes.OK) {
@@ -202,7 +208,10 @@ const SignalRLifecycle: React.FunctionComponent<SignalRLifecycleProps> = (props)
             setConnectionLimit(ConnectionLimit.NotExhausted);
 
             const response = await props.httpService.get(`/config/${CONST.ENV_VARIABLES.SIGNALR_FUNCTION_BASEURL}`);
-            const signalRFunctionBaseUrl = response.data;
+            const signalRFunctionBaseUrl = response?.data;
+            if (!signalRFunctionBaseUrl) {
+                throw new Error('Error while calling /config API. Could not get SignalRFunctionBaseUrl');
+            }
 
             if (!connection) {
                 connection =
