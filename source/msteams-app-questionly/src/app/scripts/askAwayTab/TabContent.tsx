@@ -297,17 +297,13 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
                 if (userObjectId) {
                     if (!revert) {
                         if (event.actionValue === CONST.TAB_QUESTIONS.DOWN_VOTE) {
-                            question.voterAadObjectIds = question.voterAadObjectIds.filter(function (userId) {
-                                return userId != userObjectId;
-                            });
+                            question.voterAadObjectIds = question.voterAadObjectIds.filter((userId) => userId != userObjectId);
                         } else if (event.actionValue === CONST.TAB_QUESTIONS.UP_VOTE && !question.voterAadObjectIds.includes(userObjectId)) {
                             question.voterAadObjectIds.push(userObjectId);
                         }
                     } else {
                         if (event.actionValue === CONST.TAB_QUESTIONS.UP_VOTE) {
-                            question.voterAadObjectIds = question.voterAadObjectIds.filter(function (userId) {
-                                return userId != userObjectId;
-                            });
+                            question.voterAadObjectIds = question.voterAadObjectIds.filter((userId) => userId != userObjectId);
                         } else if (event.actionValue === CONST.TAB_QUESTIONS.DOWN_VOTE && !question.voterAadObjectIds.includes(userObjectId)) {
                             question.voterAadObjectIds.push(userObjectId);
                         }

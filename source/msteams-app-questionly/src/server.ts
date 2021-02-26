@@ -2,20 +2,6 @@ import debug from 'debug';
 import { config as dotenvConfig } from 'dotenv';
 import Express from 'express';
 import { Express as ExpressType } from 'express-serve-static-core';
-import { ConversationDataService, initiateConnection, QnASessionDataService, QuestionDataService, UserDataService } from 'msteams-app-questionly.data';
-import { initBackgroundJobSetup } from 'src/background-job/backgroundJobTrigger';
-import { TelemetryExceptions } from 'src/constants/telemetryConstants';
-import { Controller } from 'src/controller';
-import { initLocalization } from 'src/localization/locale';
-import { ClientDataContractFormatter } from 'src/util/clientDataContractFormatter';
-// The import of components has to be done AFTER the dotenv config.
-import { exceptionLogger, initiateAIClient } from 'src/util/exceptionTracking';
-import { getMongoURI, initKeyVault } from 'src/util/keyvault';
-import { initializeCacheInstance } from 'src/util/memoryCache';
-import { setupBot } from 'src/util/setupBot';
-import { setupClientApp } from 'src/util/setupClientApp';
-import { setupRestApis } from 'src/util/setupRestApis';
-import { setupWebServerApp, startWebServer } from 'src/util/webServerUtility';
 
 // Initialize debug logging module
 const log = debug('msteams');
@@ -24,6 +10,21 @@ log(`Initializing Microsoft Teams Express hosted App...`);
 
 // Initialize dotenv, to use .env file settings if existing.
 dotenvConfig();
+
+// The import of components has to be done AFTER the dotenv config.
+import { exceptionLogger, initiateAIClient } from 'src/util/exceptionTracking';
+import { ConversationDataService, initiateConnection, UserDataService, QuestionDataService, QnASessionDataService } from 'msteams-app-questionly.data';
+import { getMongoURI, initKeyVault } from 'src/util/keyvault';
+import { setupBot } from 'src/util/setupBot';
+import { setupClientApp } from 'src/util/setupClientApp';
+import { setupRestApis } from 'src/util/setupRestApis';
+import { initBackgroundJobSetup } from 'src/background-job/backgroundJobTrigger';
+import { initLocalization } from 'src/localization/locale';
+import { setupWebServerApp, startWebServer } from 'src/util/webServerUtility';
+import { TelemetryExceptions } from 'src/constants/telemetryConstants';
+import { ClientDataContractFormatter } from 'src/util/clientDataContractFormatter';
+import { Controller } from 'src/controller';
+import { initializeCacheInstance } from './util/memoryCache';
 
 /**
  * Establishes DB connection.
