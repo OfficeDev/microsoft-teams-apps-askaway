@@ -18,6 +18,7 @@ configure({ adapter: new Adapter() });
 
 describe('TabContent Component', () => {
     const httpServiceIns = new HttpService();
+    const envConfig: { [key: string]: any } = {};
     const t = jest.fn();
     const tReady = true;
 
@@ -30,13 +31,17 @@ describe('TabContent Component', () => {
     });
 
     it('should render TabCreateSession when there is no active session', () => {
-        const component = shallow(<TabContent t={t} tReady={tReady} i18n={i18next} teamsTabContext={{ entityId: '', locale: '' }} httpService={httpServiceIns} helper={Helper} />);
+        const component = shallow(
+            <TabContent t={t} tReady={tReady} i18n={i18next} teamsTabContext={{ entityId: '', locale: '' }} httpService={httpServiceIns} helper={Helper} envConfig={envConfig} />
+        );
 
         expect(component.find(TabCreateSession)).toHaveLength(1);
     });
 
     it('should render PostNewQuestions when there is an active session', () => {
-        const component = shallow(<TabContent t={t} tReady={tReady} i18n={i18next} teamsTabContext={{ entityId: '', locale: '' }} httpService={httpServiceIns} helper={Helper} />);
+        const component = shallow(
+            <TabContent t={t} tReady={tReady} i18n={i18next} teamsTabContext={{ entityId: '', locale: '' }} httpService={httpServiceIns} helper={Helper} envConfig={envConfig} />
+        );
         component.setState({
             activeSessionData: {
                 sessionId: 'some-id',
@@ -56,7 +61,9 @@ describe('TabContent Component', () => {
     });
 
     it('should render NoQuestionDesign when there is an active session and no questions', () => {
-        const component = shallow(<TabContent t={t} tReady={tReady} i18n={i18next} teamsTabContext={{ entityId: '', locale: '' }} httpService={httpServiceIns} helper={Helper} />);
+        const component = shallow(
+            <TabContent t={t} tReady={tReady} i18n={i18next} teamsTabContext={{ entityId: '', locale: '' }} httpService={httpServiceIns} helper={Helper} envConfig={envConfig} />
+        );
         component.setState({
             activeSessionData: {
                 sessionId: 'some-id',
@@ -76,7 +83,9 @@ describe('TabContent Component', () => {
     });
 
     it('should render TabQuestions when there is an active session and have questions', () => {
-        const component = shallow(<TabContent t={t} tReady={tReady} i18n={i18next} teamsTabContext={{ entityId: '', locale: '' }} httpService={httpServiceIns} helper={Helper} />);
+        const component = shallow(
+            <TabContent t={t} tReady={tReady} i18n={i18next} teamsTabContext={{ entityId: '', locale: '' }} httpService={httpServiceIns} helper={Helper} envConfig={envConfig} />
+        );
         component.setState({
             activeSessionData: {
                 sessionId: 'some-id',

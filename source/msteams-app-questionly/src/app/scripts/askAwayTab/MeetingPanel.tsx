@@ -38,6 +38,7 @@ export interface MeetingPanelProps extends WithTranslation {
     teamsTabContext: microsoftTeams.Context;
     httpService: HttpService;
     helper: Helper;
+    envConfig: { [key: string]: any };
 }
 
 /**
@@ -379,7 +380,14 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
         return (
             <React.Fragment>
                 <Flex column gap="gap.small" className="meeting-panel">
-                    <SignalRLifecycle enableLiveUpdates={true} t={this.localize} conversationId={this.props.teamsTabContext.chatId} onEvent={this.updateEvent} httpService={this.props.httpService} />
+                    <SignalRLifecycle
+                        enableLiveUpdates={true}
+                        t={this.localize}
+                        conversationId={this.props.teamsTabContext.chatId}
+                        onEvent={this.updateEvent}
+                        httpService={this.props.httpService}
+                        envConfig={this.props.envConfig}
+                    />
                     {stateVal.activeSessionData.sessionId ? this.showSessionQuestions(stateVal) : this.createNewSessionLayout()}
                 </Flex>
             </React.Fragment>

@@ -39,6 +39,7 @@ export interface TabContentProps extends WithTranslation {
     teamsTabContext: microsoftTeams.Context;
     httpService: HttpService;
     helper: Helper;
+    envConfig: { [key: string]: any };
 }
 export interface TabContentState {
     /**
@@ -397,6 +398,7 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
                     conversationId={this.props.teamsTabContext.chatId}
                     onEvent={this.updateEvent}
                     httpService={this.props.httpService}
+                    envConfig={this.props.envConfig}
                 />
                 {selectedAmaSessionData.sessionId ? (
                     <Flex column>

@@ -1644,16 +1644,28 @@ describe('test get /config/:variableName api', () => {
     });
 
     it('variable defined in app env', async () => {
-        process.env.variable1 = 'random';
-        const result = await request(app).get(`/api/config/variable1`);
+        process.env.ApplicationInsightsInstrumentationKey = 'random';
+        process.env.SignalRFunctionBaseUrl = 'random';
+        const result = await request(app).get(`/api/config`);
 
+        expect(result.status).toEqual(StatusCodes.OK);
         expect(result).toBeDefined();
-        expect(result.text).toEqual('random');
+        const res = JSON.parse(result.text);
+        expect(res.ApplicationInsightsInstrumentationKey).toEqual('random');
+        expect(res.SignalRFunctionBaseUrl).toEqual('random');
     });
 
-    it('variable undefined in app env', async () => {
-        const result = await request(app).get(`/api/config/variable2`);
+    it('variable not defined in app env', async () => {
+        delete process.env.ApplicationInsightsInstrumentationKey;
+        const result = await request(app).get(`/api/config`);
 
-        expect(result.status).toEqual(StatusCodes.NOT_FOUND);
+        expect(result.status).toEqual(StatusCodes.INTERNAL_SERVER_ERROR);
+    });
+
+    it('variable not defined in app env', async () => {
+        delete process.env.SignalRFunctionBaseUrl;
+        const result = await request(app).get(`/api/config`);
+
+        expect(result.status).toEqual(StatusCodes.INTERNAL_SERVER_ERROR);
     });
 });

@@ -86,6 +86,11 @@ export interface SignalRLifecycleProps {
      *  __FOR_UTs_ONLY_ flag disabling trans 'react-i18next' component.
      */
     __disableTransComponent?: boolean;
+
+    /**
+     * Env variables
+     */
+    envConfig: { [key: string]: any };
 }
 
 /**
@@ -177,15 +182,13 @@ const SignalRLifecycle: React.FunctionComponent<SignalRLifecycleProps> = (props)
             conversationId: props.conversationId,
         };
 
-        let response = await props.httpService.get(`/config/${CONST.ENV_VARIABLES.SIGNALR_FUNCTION_BASEURL}`);
-        const signalRFunctionBaseUrl = response.data;
-        if (!signalRFunctionBaseUrl) {
+        if (!props.envConfig.SignalRFunctionBaseUrl) {
             trackException(new Error('Error while calling /config API. Could not get SignalRFunctionBaseUrl'), SeverityLevel.Error);
             handleConnectionError();
             return;
         }
 
-        response = await props.httpService.post(`${signalRFunctionBaseUrl}/api/add-to-group`, addToGroupInputDate, false, undefined, false);
+        const response = await props.httpService.post(`${props.envConfig.SignalRFunctionBaseUrl}/api/add-to-group`, addToGroupInputDate, false, undefined, false);
 
         if (response.status !== StatusCodes.OK) {
             trackException(new Error(`Error in adding connection to the group, conversationId: ${props.conversationId}, reason: ${response.statusText}`), SeverityLevel.Error);
@@ -207,9 +210,7 @@ const SignalRLifecycle: React.FunctionComponent<SignalRLifecycleProps> = (props)
             setConnectionStatus(ConnectionStatus.Connecting);
             setConnectionLimit(ConnectionLimit.NotExhausted);
 
-            const response = await props.httpService.get(`/config/${CONST.ENV_VARIABLES.SIGNALR_FUNCTION_BASEURL}`);
-            const signalRFunctionBaseUrl = response?.data;
-            if (!signalRFunctionBaseUrl) {
+            if (!props.envConfig.SignalRFunctionBaseUrl) {
                 throw new Error('Error while calling /config API. Could not get SignalRFunctionBaseUrl');
             }
 
@@ -217,7 +218,7 @@ const SignalRLifecycle: React.FunctionComponent<SignalRLifecycleProps> = (props)
                 connection =
                     props.connection ??
                     new signalR.HubConnectionBuilder()
-                        .withUrl(`${signalRFunctionBaseUrl}/api`, {
+                        .withUrl(`${props.envConfig.SignalRFunctionBaseUrl}/api`, {
                             accessTokenFactory: async () => {
                                 return await props.httpService.getAuthToken();
                             },

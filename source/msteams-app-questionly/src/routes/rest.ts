@@ -314,16 +314,18 @@ router.get('/:conversationId/activesessions', async (req: Express.Request, res: 
 });
 
 // Get variable from app env
-router.get('/:variableName', async (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
+router.get('/', async (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
     try {
-        const varibaleName = req.params['variableName'];
-        const value = process.env[varibaleName];
+        if (process.env.ApplicationInsightsInstrumentationKey && process.env.SignalRFunctionBaseUrl) {
+            const response = {
+                ApplicationInsightsInstrumentationKey: `${process.env.ApplicationInsightsInstrumentationKey}`,
+                SignalRFunctionBaseUrl: `${process.env.SignalRFunctionBaseUrl}`,
+            };
 
-        if (value) {
-            res.status(StatusCodes.OK).send(value);
+            res.status(StatusCodes.OK).send(response);
             return;
         } else {
-            res.status(StatusCodes.NOT_FOUND).send();
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).send();
             return;
         }
     } catch (error) {

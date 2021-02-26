@@ -23,6 +23,7 @@ describe('SignalRLifecycle Component', () => {
     const updateEventCallback = jest.fn();
     let hubConnection: HubConnection;
     let sampleHttpService: HttpService;
+    let envConfig: { [key: string]: any };
     let t: jest.Mock<any, any>;
 
     beforeAll(() => {
@@ -44,6 +45,9 @@ describe('SignalRLifecycle Component', () => {
         sampleHttpService.getAuthToken = jest.fn(() => {
             return Promise.resolve('testToken');
         });
+        envConfig = {
+            SignalRFunctionBaseUrl: 'random',
+        };
 
         // tslint:disable-next-line
         hubConnection = ({
@@ -70,6 +74,7 @@ describe('SignalRLifecycle Component', () => {
                 httpService={sampleHttpService}
                 connection={hubConnection}
                 __disableTransComponent={true}
+                envConfig={envConfig}
             />
         );
         await act(async () => {
@@ -98,6 +103,7 @@ describe('SignalRLifecycle Component', () => {
                 httpService={sampleHttpService}
                 connection={hubConnection}
                 __disableTransComponent={true}
+                envConfig={envConfig}
             />
         );
         await act(async () => {
@@ -134,6 +140,7 @@ describe('SignalRLifecycle Component', () => {
                 httpService={sampleHttpService}
                 connection={hubConnection}
                 __disableTransComponent={true}
+                envConfig={envConfig}
             />
         );
         await act(async () => {
@@ -162,6 +169,7 @@ describe('SignalRLifecycle Component', () => {
                 httpService={sampleHttpService}
                 connection={hubConnection}
                 __disableTransComponent={true}
+                envConfig={envConfig}
             />
         );
         await act(async () => {
@@ -191,6 +199,7 @@ describe('SignalRLifecycle Component', () => {
                 httpService={sampleHttpService}
                 connection={hubConnection}
                 __disableTransComponent={true}
+                envConfig={envConfig}
             />
         );
         await act(async () => {
@@ -221,6 +230,7 @@ describe('SignalRLifecycle Component', () => {
                 httpService={sampleHttpService}
                 connection={hubConnection}
                 __disableTransComponent={true}
+                envConfig={envConfig}
             />
         );
         await act(async () => {
@@ -273,6 +283,7 @@ describe('SignalRLifecycle Component', () => {
                 httpService={sampleHttpService}
                 connection={hubConnection}
                 __disableTransComponent={true}
+                envConfig={envConfig}
             />
         );
         await act(async () => {
@@ -314,6 +325,7 @@ describe('SignalRLifecycle Component', () => {
                 httpService={sampleHttpService}
                 connection={hubConnection}
                 __disableTransComponent={true}
+                envConfig={envConfig}
             />
         );
         await act(async () => {

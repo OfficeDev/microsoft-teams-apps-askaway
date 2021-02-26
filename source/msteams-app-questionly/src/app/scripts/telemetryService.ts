@@ -36,7 +36,7 @@ export const trackTrace = (message: string, severityLevel: SeverityLevel) => {
     }
 };
 
-export const trackException = (exception: Error, severityLevel: SeverityLevel, properties?: any) => {
+export const trackException = (exception: Error, severityLevel: SeverityLevel, properties?: { [key: string]: any }) => {
     if (appInsights) {
         appInsights.trackException({
             exception: exception,
