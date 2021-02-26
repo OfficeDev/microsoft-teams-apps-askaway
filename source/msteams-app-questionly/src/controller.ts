@@ -2,7 +2,6 @@
 import { AdaptiveCard } from 'adaptivecards';
 import jimp from 'jimp';
 import { IConversation, IQnASessionDataService, IQnASession_populated, IQuestion, IQuestionDataService, IQuestionPopulatedUser, SessionIsNoLongerActiveError } from 'msteams-app-questionly.data';
-import { join } from 'path';
 import * as adaptiveCardBuilder from 'src/adaptive-cards/adaptiveCardBuilder'; // To populate adaptive cards
 import {
     triggerBackgroundJobForQnaSessionCreatedEvent,
@@ -12,13 +11,13 @@ import {
     triggerBackgroundJobForQuestionPostedEvent,
     triggerBackgroundJobForQuestionUpvotedEvent,
 } from 'src/background-job/backgroundJobTrigger';
-import { TelemetryExceptions } from 'src/constants/telemetryConstants';
 import { ChangesRevertedDueToBackgroundJobFailureError } from 'src/errors/changesRevertedDueToBackgroundJobFailureError';
 import { RevertOperationFailedAfterBackgroundJobFailureError } from 'src/errors/revertOperationFailedAfterBackgroundJobFailureError';
 import { UnauthorizedAccessError, UnauthorizedAccessErrorCode } from 'src/errors/unauthorizedAccessError';
 import { exceptionLogger, trackCreateQnASessionEvent, trackCreateQuestionEvent } from 'src/util/exceptionTracking';
 import { isPresenterOrOrganizer } from 'src/util/meetingsUtility';
 import { isValidStringParameter } from 'src/util/typeUtility';
+import { TelemetryExceptions } from './constants/telemetryConstants';
 
 export interface IController {
     startQnASession: (sessionParameters: {
@@ -580,7 +579,7 @@ export class Controller implements IController {
      */
     public generateInitialsImage = async (initials: string, index: number): Promise<jimp> => {
         const image = new jimp(52, 52, this.avatarColors[index]);
-        const font = await jimp.loadFont(join(__dirname, 'public/segoeUiSemiboldWhite.fnt'));
+        const font = await jimp.loadFont(jimp.FONT_SANS_16_WHITE);
         return image.print(
             font,
             0,

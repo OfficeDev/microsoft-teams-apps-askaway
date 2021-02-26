@@ -4,7 +4,6 @@ import { exceptionLogger } from 'src/util/exceptionTracking';
 import { getFromMemoryCache, putIntoMemoryCache } from 'src/util/memoryCache';
 import { ifNumber } from 'src/util/typeUtility';
 
-const vaultName = process.env.KeyVaultName;
 const mongoURISecretName = 'MongoDbUri';
 const applicationInsightsInstrumentationKeySecretName = 'ApplicationInsightsInstrumentationKey';
 const microsoftAppPasswordSecretName = 'MicrosoftAppPassword';
@@ -16,6 +15,7 @@ let keyVaultSecretClient: SecretClient;
  * Initialize memory cache and secret client for key vault.
  */
 export const initKeyVault = () => {
+    const vaultName = process.env.KeyVaultName;
     const credential = getCredential();
     const url = `https://${vaultName}.vault.azure.net`;
 

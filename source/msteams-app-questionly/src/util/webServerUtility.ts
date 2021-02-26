@@ -9,7 +9,9 @@ import debug from 'debug';
 // Initialize debug logging module
 const log = debug('msteams');
 
-const port = process.env.port || process.env.PORT || 3007;
+const getPort = () => {
+    return process.env.port || process.env.PORT || 3007;
+};
 
 /**
  * Configures express app with necessary middlewares.
@@ -17,7 +19,7 @@ const port = process.env.port || process.env.PORT || 3007;
  */
 export const setupWebServerApp = (express: ExpressType) => {
     // Set the port
-    express.set('port', port);
+    express.set('port', getPort());
 
     // Inject the raw request body onto the request object
     express.use(
@@ -45,6 +47,7 @@ export const setupWebServerApp = (express: ExpressType) => {
  * @param express - express app.
  */
 export const startWebServer = (express: ExpressType) => {
+    const port = getPort();
     // Start the webserver
     http.createServer(express).listen(port, () => {
         log(`Server running on ${port}`);
