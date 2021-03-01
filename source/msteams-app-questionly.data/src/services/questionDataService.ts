@@ -103,6 +103,13 @@ export class QuestionDataService implements IQuestionDataService {
       isAnswered: false,
     });
 
+    // MongoDB does not recreate the index.
+    // https://docs.mongodb.com/manual/reference/method/db.collection.createIndex/#recreating-an-existing-index
+    // A wildcard index on all fields.
+    await Question.collection.createIndex({
+      "$**": 1,
+    });
+
     const savedQuestion: IQuestion = await retryWrapper(
       () => question.save(),
       new ExponentialBackOff()
