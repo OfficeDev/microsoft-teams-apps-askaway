@@ -3,7 +3,6 @@ import * as adaptiveCardBuilder from 'src/adaptive-cards/adaptiveCardBuilder'; /
 import { AdaptiveCard } from 'adaptivecards';
 import { exceptionLogger, trackCreateQnASessionEvent, trackCreateQuestionEvent } from 'src/util/exceptionTracking';
 import jimp from 'jimp';
-import { join } from 'path';
 import { IQuestion, IQuestionPopulatedUser, IQnASessionDataService, IQuestionDataService, IQnASession_populated, IConversation, SessionIsNoLongerActiveError } from 'msteams-app-questionly.data';
 import { isPresenterOrOrganizer } from 'src/util/meetingsUtility';
 import { UnauthorizedAccessError, UnauthorizedAccessErrorCode } from 'src/errors/unauthorizedAccessError';
@@ -580,7 +579,7 @@ export class Controller implements IController {
      */
     public generateInitialsImage = async (initials: string, index: number): Promise<jimp> => {
         const image = new jimp(52, 52, this.avatarColors[index]);
-        const font = await jimp.loadFont(jimp.FONT_SANS_128_WHITE);
+        const font = await jimp.loadFont(jimp.FONT_SANS_16_WHITE);
         return image.print(
             font,
             0,
