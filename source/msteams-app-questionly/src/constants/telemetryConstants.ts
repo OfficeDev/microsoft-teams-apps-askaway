@@ -4,6 +4,8 @@
 export const TelemetryEvents = {
     CreateQnASessionEvent: 'QnASessionCreated',
     CreateQuestionEvent: 'QuestionCreated',
+    BackgroundFunctionTriggerEvent: 'BackgroundFunctionTriggerEvent',
+    SignalREventReceived: 'SignalREventReceived',
 };
 
 /**

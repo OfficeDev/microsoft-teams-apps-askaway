@@ -7,6 +7,7 @@ import { ConversationDataService, IQuestionDataService, IUserDataService, UserDa
 import { getMeetingIdFromContext } from 'src/util/meetingsUtility';
 import * as maincardBuilder from 'msteams-app-questionly.common';
 import * as adaptiveCardBuilder from 'src/adaptive-cards/adaptiveCardBuilder';
+import { EventInitiator } from 'src/enums/eventInitiator';
 
 jest.mock('msteams-app-questionly.common');
 jest.mock('src/adaptive-cards/adaptiveCardBuilder');
@@ -445,6 +446,7 @@ test('bot message preview send', async () => {
         isChannel: false,
         serviceUrl: context.activity.serviceUrl,
         meetingId: sampleMeetingId,
+        caller: EventInitiator.MainCard,
     });
 });
 

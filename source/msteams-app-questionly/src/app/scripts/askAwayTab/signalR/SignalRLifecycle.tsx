@@ -1,13 +1,14 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import * as signalR from '@microsoft/signalr';
-import axios from 'axios';
+import * as microsoftTeams from '@microsoft/teams-js';
 import { StatusCodes } from 'http-status-codes';
 import { ApplicationInsights, SeverityLevel } from '@microsoft/applicationinsights-web';
 import { HttpService } from '../shared/HttpService';
 import { IDataEvent } from 'msteams-app-questionly.common';
 import ConnectionStatusAlert from './ConnectionStatusAlert';
 import { TFunction } from 'i18next';
+import { TelemetryEvents } from '../../../../constants/telemetryConstants';
 
 /**
  * SignalR connection status
@@ -51,6 +52,11 @@ enum ConnectionLimit {
 }
 
 export interface SignalRLifecycleProps {
+    /**
+     * Current Teams context the frame is running in.
+     */
+    teamsTabContext: microsoftTeams.Context;
+
     /**
      * TFunction to localize strings.
      */
@@ -105,8 +111,15 @@ const SignalRLifecycle: React.FunctionComponent<SignalRLifecycleProps> = (props)
      * This function is triggered on events from signalR connection.
      * @param dataEvent - event received.
      */
-    const onEvent = (dataEvent: any) => {
+    const onEvent = (dataEvent: IDataEvent) => {
         props.onEvent(dataEvent);
+
+        props.appInsights.trackEvent({name: TelemetryEvents.SignalREventReceived}, {
+            conversationId: props.conversationId,
+            event: dataEvent,
+            userAadObjectId: props.teamsTabContext?.userObjectId,
+            meetingId: props.teamsTabContext?.meetingId,
+        });
     };
 
     /**

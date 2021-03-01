@@ -23,6 +23,7 @@ import { getMeetingIdFromContext, isConverationTypeChannel, isPresenterOrOrganiz
 import { TelemetryExceptions } from 'src/constants/telemetryConstants';
 import * as maincardBuilder from 'msteams-app-questionly.common';
 import * as adaptiveCardBuilder from 'src/adaptive-cards/adaptiveCardBuilder';
+import { EventInitiator } from 'src/enums/eventInitiator';
 
 const getMainCard = maincardBuilder.getMainCard;
 const getStartQnACard = adaptiveCardBuilder.getStartQnACard;
@@ -245,7 +246,7 @@ export class AskAway extends TeamsActivityHandler {
         }
 
         try {
-            await this.controller.submitNewQuestion(qnaSessionId, userAadObjectId, userName, questionContent, conversationId, context.activity.serviceUrl, getMeetingIdFromContext(context));
+            await this.controller.submitNewQuestion(qnaSessionId, userAadObjectId, userName, questionContent, conversationId, context.activity.serviceUrl, EventInitiator.MainCard, getMeetingIdFromContext(context));
         } catch (error) {
             exceptionLogger(error, {
                 conversationId: conversationId,
@@ -277,6 +278,7 @@ export class AskAway extends TeamsActivityHandler {
                 context.activity.conversation.id,
                 taskModuleRequest.context ? <string>taskModuleRequest.context.theme : 'default',
                 context.activity.serviceUrl,
+                EventInitiator.MainCard,
                 getMeetingIdFromContext(context)
             );
 
@@ -327,6 +329,7 @@ export class AskAway extends TeamsActivityHandler {
                     userName: context.activity.from.name,
                     endedByUserId: context.activity.from.id,
                     meetingId: meetingId,
+                    caller: EventInitiator.MainCard,
                 });
             } catch (error) {
                 exceptionLogger(error, {
@@ -449,6 +452,7 @@ export class AskAway extends TeamsActivityHandler {
                 isChannel: isChannel,
                 serviceUrl: serviceURL,
                 meetingId: meetingId,
+                caller: EventInitiator.MainCard,
             });
         } catch (error) {
             exceptionLogger(error, {
