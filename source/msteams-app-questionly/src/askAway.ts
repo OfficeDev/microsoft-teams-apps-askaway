@@ -11,7 +11,7 @@ import {
     InputHints,
     Activity,
     ChannelAccount,
-    BotMessagePreviewActionType,
+    BotMessagePreviewType,
 } from 'botbuilder';
 import { IController } from 'src/controller';
 import { AdaptiveCard } from 'adaptivecards';
@@ -96,7 +96,7 @@ export class AskAway extends TeamsActivityHandler {
         return <TaskModuleResponse>{
             task: {
                 // `type` should actually be of type `BotMessagePreviewType`, it's a bug on the Sdk's end
-                type: <BotMessagePreviewActionType>(<unknown>'continue'),
+                type: 'continue',
                 value: {
                     card: {
                         contentType: 'application/vnd.microsoft.card.adaptive',
@@ -447,7 +447,7 @@ export class AskAway extends TeamsActivityHandler {
                 activityId: activityId,
                 conversationId: context.activity.conversation.id,
                 tenantId: tenantId,
-                scopeId: scopeId,
+                scopeId: scopeId!,
                 hostUserId: hostUserId,
                 isChannel: isChannel,
                 serviceUrl: serviceURL,

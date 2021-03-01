@@ -5,7 +5,6 @@ import * as ACData from "adaptivecards-templating";
 import random from "random";
 import seedrandom from "seedrandom";
 import * as jwt from "jsonwebtoken";
-import { clone } from "lodash";
 
 import {
   IQuestionPopulatedUser,
@@ -62,7 +61,7 @@ export const getMainCard = async (
   const _processQuestions = async (questions: IQuestionPopulatedUser[]) =>
     await Promise.all(
       questions.map(async (question: IQuestionPopulatedUser) => {
-        const questionObject = <any>clone(question);
+        const questionObject = <any>question;
         questionObject.userId.picture = await getPersonImage(
           questionObject.userId.userName,
           question.userId._id,
