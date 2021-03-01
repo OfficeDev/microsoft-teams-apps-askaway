@@ -9,6 +9,7 @@ import { ClientDataContract } from 'src/contracts/clientDataContract';
 import { IClientDataContractFormatter } from 'src/util/clientDataContractFormatter';
 import { QuestionPatchAction } from 'src/enums/questionPatchAction';
 import { QnaSessionPatchAction } from 'src/enums/qnaSessionPatchAction';
+import { EventInitiator } from 'src/enums/eventInitiator';
 
 export const router = Express.Router();
 let conversationDataService: IConversationDataService;
@@ -121,7 +122,7 @@ router.post('/:conversationId/sessions/:sessionId/questions', async (req: Expres
 
         await ensureUserIsPartOfMeetingConversation(conversationData, userId);
 
-        const result = await controller.submitNewQuestion(req.params['sessionId'], user._id, user.userName, questionContent, conversationId, conversationData.serviceUrl, conversationData.meetingId);
+        const result = await controller.submitNewQuestion(req.params['sessionId'], user._id, user.userName, questionContent, conversationId, conversationData.serviceUrl, EventInitiator.RestApi, conversationData.meetingId);
 
         const response: ClientDataContract.Question = {
             id: result._id,
@@ -175,6 +176,7 @@ router.patch('/:conversationId/sessions/:sessionId', async (req: Express.Request
                 meetingId: <string>conversationData.meetingId,
                 userName: user.userName,
                 endedByUserId: endedByUserId,
+                caller: EventInitiator.RestApi,
             });
         }
 
@@ -217,6 +219,7 @@ router.post('/:conversationId/sessions', async (req: Express.Request, res: Expre
             hostUserId: hostUserId,
             isChannel: isChannel,
             serviceUrl: serviceUrl,
+            caller: EventInitiator.RestApi,
             // `ensureConversationBelongsToMeetingChat` makes sure meeting id is available
             meetingId: <string>meetingId,
         });
@@ -262,12 +265,12 @@ router.patch('/:conversationId/sessions/:sessionId/questions/:questionId', async
         if (action === QuestionPatchAction.Upvote) {
             await ensureUserIsPartOfMeetingConversation(conversationData, user._id);
 
-            question = await controller.upvoteQuestion(conversationId, sessionId, questionId, user._id, user.userName, conversationData.serviceUrl, conversationData.meetingId);
+            question = await controller.upvoteQuestion(conversationId, sessionId, questionId, user._id, user.userName, conversationData.serviceUrl, EventInitiator.RestApi, conversationData.meetingId);
 
             res.status(StatusCodes.OK).send(clientDataContractFormatter.formatQuestionDataAsPerClientDataContract(question));
         } else if (action === QuestionPatchAction.Downvote) {
             await ensureUserIsPartOfMeetingConversation(conversationData, user._id);
-            question = await controller.downvoteQuestion(conversationId, sessionId, questionId, user._id, user.userName, conversationData.serviceUrl, conversationData.meetingId);
+            question = await controller.downvoteQuestion(conversationId, sessionId, questionId, user._id, user.userName, conversationData.serviceUrl, EventInitiator.RestApi, conversationData.meetingId);
 
             res.status(StatusCodes.OK).send(clientDataContractFormatter.formatQuestionDataAsPerClientDataContract(question));
         } else if (action === QuestionPatchAction.MarkAnswered) {
@@ -280,7 +283,8 @@ router.patch('/:conversationId/sessions/:sessionId/questions/:questionId', async
                 sessionId,
                 questionId,
                 user._id,
-                conversationData.serviceUrl
+                conversationData.serviceUrl,
+                EventInitiator.RestApi,
             );
 
             res.status(StatusCodes.OK).send(clientDataContractFormatter.formatQuestionDataAsPerClientDataContract(question));

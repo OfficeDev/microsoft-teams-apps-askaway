@@ -403,6 +403,7 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
                     onEvent={this.updateEvent}
                     httpService={this.props.httpService}
                     appInsights={this.props.appInsights}
+                    teamsTabContext={this.props.teamsTabContext}
                 />
                 {selectedAmaSessionData.sessionId ? (
                     <Flex column>

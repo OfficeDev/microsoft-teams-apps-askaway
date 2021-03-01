@@ -48,6 +48,9 @@ const orchestrator = df.orchestrator(function* (context) {
     const broadcastActivityInput = {
       conversationId: conversationId,
       eventData: payload.eventData,
+      meetingId: meetingId,
+      operationId: operationId,
+      qnaSessionId: payload.qnaSessionId,
     };
 
     const updateAdaptivecardActivityInput = {
@@ -56,6 +59,7 @@ const orchestrator = df.orchestrator(function* (context) {
       serviceUrl: serviceUrl,
       qnaSessionId: payload.qnaSessionId,
       meetingId: meetingId,
+      operationId: operationId,
     };
 
     const parallelTasks = [];

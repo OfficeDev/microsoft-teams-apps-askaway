@@ -1,17 +1,17 @@
 {
   "name": "msteams-app-questionly.common",
-  "version": "1.0.0",
-  "description": "Ask away common",
+  "version": "2.0.0",
+  "description": "Common libraries for the Ask Away project",
   "scripts": {
     "build": "webpack",
     "test": "jest",
-    "covergae": "jest --coverage"
+    "coverage": "jest --coverage"
   },
   "dependencies": {
     "adaptivecards": "^2.5.0",
     "adaptivecards-templating": "^1.0.0-rc.0",
     "applicationinsights": "^1.8.8",
-    "botbuilder": "^4.10.4",
+    "botbuilder": "^4.11.1",
     "i18next": "^19.8.4",
     "random": "^2.2.0",
     "seedrandom": "^3.0.5"
