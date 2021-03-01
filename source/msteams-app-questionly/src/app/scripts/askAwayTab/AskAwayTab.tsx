@@ -1,23 +1,22 @@
 // tslint:disable-next-line:no-relative-imports
-import './index.scss';
+import { Provider } from '@fluentui/react-northstar';
+import { withAITracking } from '@microsoft/applicationinsights-react-js';
+import { SeverityLevel } from '@microsoft/applicationinsights-web';
+import * as microsoftTeams from '@microsoft/teams-js';
+import { TFunction } from 'i18next';
+import msteamsReactBaseComponent, { ITeamsBaseComponentState } from 'msteams-react-base-component';
+import * as React from 'react';
 // tslint:disable-next-line:no-relative-imports
-import Helper from './shared/Helper';
+import { i18next } from './../askAwayTab/shared/i18next';
+import { telemetryService } from './../telemetryService';
+import './index.scss';
 // tslint:disable-next-line:no-relative-imports
 import MeetingPanel from './MeetingPanel';
 // tslint:disable-next-line:no-relative-imports
-import TabContent from './TabContent';
-import * as React from 'react';
-import { Provider } from '@fluentui/react-northstar';
-import msteamsReactBaseComponent, { ITeamsBaseComponentState } from 'msteams-react-base-component';
-import * as microsoftTeams from '@microsoft/teams-js';
-// tslint:disable-next-line:no-relative-imports
-import { i18next } from './../askAwayTab/shared/i18next';
-import { TFunction } from 'i18next';
-import { withAITracking } from '@microsoft/applicationinsights-react-js';
-import { SeverityLevel } from '@microsoft/applicationinsights-web';
+import Helper from './shared/Helper';
 import { HttpService } from './shared/HttpService';
-import { telemetryService } from './../telemetryService';
-
+// tslint:disable-next-line:no-relative-imports
+import TabContent from './TabContent';
 /**
  * State for the askAwayTabTab React component
  */
@@ -36,6 +35,7 @@ export interface IAskAwayTabState extends ITeamsBaseComponentState {
     theme: any;
     teamContext: microsoftTeams.Context;
     frameContext?: string;
+    direction?: string;
 }
 /**
  * Properties for the askAwayTabTab React component
@@ -77,8 +77,11 @@ export class AskAwayTab extends msteamsReactBaseComponent<IAskAwayTabProps, IAsk
                 }));
             });
             microsoftTeams.getContext((context) => {
-                // Set Language for Localization
-                Helper.setI18nextLocale(i18next, context.locale);
+                Helper.setI18nextLocale(i18next, context.locale, () => {
+                    this.setState({
+                        direction: i18next.dir(),
+                    });
+                });
                 microsoftTeams.authentication.getAuthToken({
                     successCallback: (token: string) => {
                         microsoftTeams.appInitialization.notifySuccess();
@@ -118,7 +121,7 @@ export class AskAwayTab extends msteamsReactBaseComponent<IAskAwayTabProps, IAsk
      */
     public render() {
         return (
-            <Provider style={{ background: 'unset' }} theme={this.state.theme}>
+            <Provider rtl={this.state.direction == 'rtl'} style={{ background: 'unset' }} theme={this.state.theme}>
                 <div>
                     {this.state.dataEvent && <h1>{this.state.dataEvent.type}</h1>}
                     {this.state.frameContext === microsoftTeams.FrameContexts.sidePanel && (

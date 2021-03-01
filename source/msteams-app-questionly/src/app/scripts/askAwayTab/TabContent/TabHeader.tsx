@@ -78,7 +78,7 @@ const TabHeader: React.FunctionComponent<TabHeaderProps> = (props) => {
                             onClick={(e) => {
                                 props.endSession(e);
                             }}
-                            size="small"
+                            size="medium"
                             content={props.t('tab.endSessionButton')}
                         />
                     </FlexItem>

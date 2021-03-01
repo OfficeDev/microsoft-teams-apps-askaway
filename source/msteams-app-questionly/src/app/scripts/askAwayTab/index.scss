@@ -50,8 +50,8 @@
     }
     .new-updates-button {
         top: -1.4rem;
-        padding-left: 1rem;
-        padding-right: 1rem;
+        padding-inline-start: 1rem;
+        padding-inline-end: 1rem;
         height: 1.85rem;
     }
     .menuHeader {
@@ -72,15 +72,15 @@
                 padding: 10px 14px 0px 14px;
                 .action-buttons {
                     button {
-                        margin-right: -5px;
+                        margin-inline-end: -5px;
                     }
                 }
             }
             .question-padding {
                 padding-top: 0.2rem;
-                padding-right: 1rem;
+                padding-inline-end: 1rem;
                 .card-body-question {
-                    padding-left: 0.4rem;
+                    padding-inline-start: 0.4rem;
                     overflow: auto;
                     white-space: pre-wrap;
                 }
@@ -111,7 +111,7 @@
     top: 50%;
     left: 50%;
     margin-top: -50px;
-    margin-left: -100px;
+    margin-inline-start: -100px;
 }
 
 .badge {
@@ -139,14 +139,14 @@
     .screen {
         left: 50%;
         margin-top: -172px;
-        margin-left: -100px;
+        margin-inline-start: -100px;
         position: absolute;
         top: 50%;
         display: block;
         img {
             display: block;
-            margin-left: auto;
-            margin-right: auto;
+            margin-inline-start: auto;
+            margin-inline-end: auto;
         }
         .text-caption {
             text-align: center;
@@ -159,8 +159,8 @@
             display: flex;
         }
         .button {
-            margin-left: auto;
-            margin-right: auto;
+            margin-inline-start: auto;
+            margin-inline-end: auto;
             display: block;
             margin-top: 7%;
         }
@@ -174,16 +174,12 @@
     .tab-nav-header {
         padding: 10px 14px 0px 17px;
         .btn-end-session {
-            margin-right: 1rem;
-            height: 2rem;
-            width: 7rem;
-            margin-top: 0rem;
+            height: auto;
+            margin-inline-end: 1rem;
         }
 
         span {
             font-weight: 500;
-            font-size: 14px;
-            line-height: 20px;
         }
     }
     .tab-container {
@@ -198,8 +194,8 @@
         }
         .new-updates-button {
             top: 1.2rem;
-            padding-left: 1rem;
-            padding-right: 1rem;
+            padding-inline-start: 1rem;
+            padding-inline-end: 1rem;
         }
         .post-new-question {
             margin-top: 2rem;
@@ -242,15 +238,15 @@
                 border-radius: 4px;
                 margin-top: 0.5rem;
                 margin-bottom: 0.5rem;
-                padding-left: 0.4rem;
-                padding-right: 0.2rem;
+                padding-inline-start: 0.4rem;
+                padding-inline-end: 0.2rem;
                 .ui-reaction {
                     position: relative;
                     right: 1rem;
                 }
                 .text-format {
                     padding-top: 0rem;
-                    padding-right: 1rem;
+                    padding-inline-end: 1rem;
                     overflow: auto;
                     white-space: pre-wrap;
                 }
@@ -276,8 +272,8 @@
     width: 100%;
     text-align: center;
     img {
-        margin-left: auto;
-        margin-right: auto;
+        margin-inline-start: auto;
+        margin-inline-end: auto;
     }
     .sub-text {
         width: 62%;
@@ -295,8 +291,8 @@
     font-family: Segoe UI;
 }
 .switchSessionListHolder {
-    padding-left: 30px;
-    padding-right: 30px;
+    padding-inline-start: 30px;
+    padding-inline-end: 30px;
     margin-bottom: 12px;
     overflow: scroll;
     max-height: 450px;
@@ -310,12 +306,12 @@
     .switchSessionList {
         li {
             margin-bottom: 12px;
-            padding-left: 0px;
-            padding-right: 0px;
+            padding-inline-start: 0px;
+            padding-inline-end: 0px;
         }
 
         .fn {
-            margin-right: 0rem;
+            margin-inline-end: 0rem;
         }
     }
 }
@@ -329,8 +325,8 @@
     }
 }
 .switchSessionListCard {
-    padding-right: 12px;
-    padding-left: 12px;
+    padding-inline-end: 12px;
+    padding-inline-start: 12px;
     padding-top: 11px;
     padding-bottom: 11px;
     border: solid;
@@ -342,9 +338,9 @@
     }
     .liveTag {
         font-weight: bold;
-        padding-left: 1rem;
+        padding-inline-start: 1rem;
         border-radius: 0.75rem;
-        padding-right: 1rem;
+        padding-inline-end: 1rem;
         line-height: 14px;
         font-size: 12px;
         padding-bottom: 3px;
@@ -357,7 +353,7 @@
     margin-bottom: 0.25rem;
 
     .alertContent {
-        margin-left: 0.5rem;
+        margin-inline-start: 0.5rem;
         margin-bottom: 0.25rem;
         margin-top: 0.25rem;
     }
@@ -366,3 +362,5 @@
         color: inherit;
     }
 }
+
+// *[dir="rtl"] {}

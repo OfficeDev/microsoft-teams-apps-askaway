@@ -70,6 +70,10 @@ var config = [
                         from: path.join(__dirname, 'src/app/localization/locales/en'),
                         to: path.join(__dirname, 'dist/web/locales/en'),
                     },
+                    {
+                        from: path.join(__dirname, 'src/app/localization/locales/ar'),
+                        to: path.join(__dirname, 'dist/web/locales/ar'),
+                    },
                 ],
             }),
         ],
