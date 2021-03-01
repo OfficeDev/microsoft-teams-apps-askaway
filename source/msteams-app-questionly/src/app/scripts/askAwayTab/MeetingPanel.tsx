@@ -329,24 +329,25 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
     /**
      * Display session questions
      */
-    showSessionQuestions = (stateVal) => {
-        const sessionTitle = stateVal.activeSessionData.title ?? stateVal.input.title;
+    showSessionQuestions = () => {
+        const { activeSessionData, input, userRole, showNewUpdatesButton } = this.state;
+        const sessionTitle = activeSessionData.title ?? input.title;
         return (
             <React.Fragment>
                 <QnASessionHeader
                     t={this.localize}
-                    userRole={this.state.userRole}
+                    userRole={userRole}
                     title={sessionTitle}
                     onClickRefreshSession={this.updateContent}
                     onClickEndSession={this.handleEndQnaSessionFlow}
                     showToolBar={true}
                 />
-                {stateVal.activeSessionData.unansweredQuestions.length > 0 || stateVal.activeSessionData.answeredQuestions.length > 0 ? (
+                {activeSessionData.unansweredQuestions.length > 0 || activeSessionData.answeredQuestions.length > 0 ? (
                     <QuestionsList
                         appInsights={this.props.appInsights}
                         t={this.localize}
-                        userRole={stateVal.userRole}
-                        activeSessionData={stateVal.activeSessionData}
+                        userRole={userRole}
+                        activeSessionData={activeSessionData}
                         httpService={this.props.httpService}
                         teamsTabContext={this.props.teamsTabContext}
                     />
@@ -355,7 +356,7 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                         <EmptyTile image={collaborationImage} line1={this.localize('meetingPanel.noQuestionsPosted')} line2={this.localize('meetingPanel.askAway')} />
                     </Flex>
                 )}
-                {this.state.activeSessionData.isActive && this.state.showNewUpdatesButton && (
+                {activeSessionData.isActive && showNewUpdatesButton && (
                     <div className="new-update-btn-wrapper">
                         <Button primary size="medium" content={this.localize('meetingPanel.updatemessage')} onClick={this.updateQnASessionContent} className="new-updates-button" />
                     </div>
@@ -364,7 +365,7 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                     <NewQuestion
                         appInsights={this.props.appInsights}
                         t={this.localize}
-                        activeSessionData={stateVal.activeSessionData}
+                        activeSessionData={activeSessionData}
                         httpService={this.props.httpService}
                         teamsTabContext={this.props.teamsTabContext}
                         onAddNewQuestion={this.handleOnAddNewQuestion}
@@ -378,26 +379,27 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
      * The render() method to create the UI of the meeting panel
      */
     public render() {
-        const stateVal = this.state;
-        if (stateVal.showLoader)
-            return (
-                <div className="loader">
-                    <Loader label={this.localize('meetingPanel.loaderText')} />
-                </div>
-            );
+        const { showLoader, activeSessionData } = this.state;
         return (
             <React.Fragment>
-                <Flex column gap="gap.small" className="meeting-panel">
-                    <SignalRLifecycle
-                        enableLiveUpdates={true}
-                        t={this.localize}
-                        conversationId={this.props.teamsTabContext.chatId}
-                        onEvent={this.updateEvent}
-                        httpService={this.props.httpService}
-                        appInsights={this.props.appInsights}
-                    />
-                    {stateVal.activeSessionData.sessionId ? this.showSessionQuestions(stateVal) : this.createNewSessionLayout()}
-                </Flex>
+                {showLoader && (
+                    <Flex vAlign="center" hAlign="center" column gap="gap.small" className="meeting-panel">
+                        <Loader label={this.localize('meetingPanel.loaderText')} />
+                    </Flex>
+                )}
+                {!showLoader && (
+                    <Flex column gap="gap.small" className="meeting-panel">
+                        <SignalRLifecycle
+                            enableLiveUpdates={true}
+                            t={this.localize}
+                            conversationId={this.props.teamsTabContext.chatId}
+                            onEvent={this.updateEvent}
+                            httpService={this.props.httpService}
+                            appInsights={this.props.appInsights}
+                        />
+                        {activeSessionData.sessionId ? this.showSessionQuestions() : this.createNewSessionLayout()}
+                    </Flex>
+                )}
             </React.Fragment>
         );
     }

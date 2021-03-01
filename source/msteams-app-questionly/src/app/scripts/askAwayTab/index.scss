@@ -106,14 +106,6 @@
     }
 }
 
-.loader {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    margin-top: -50px;
-    margin-inline-start: -100px;
-}
-
 .badge {
     width: 3.75rem;
     font-family: Segoe UI;
@@ -363,4 +355,15 @@
     }
 }
 
-// *[dir="rtl"] {}
+.ui-provider[dir='rtl'] {
+    .meeting-panel {
+        .new-update-btn-wrapper {
+            left: -1.4rem;
+        }
+    }
+    .tab-container {
+        .new-update-btn-wrapper {
+            right: -4rem;
+        }
+    }
+}
