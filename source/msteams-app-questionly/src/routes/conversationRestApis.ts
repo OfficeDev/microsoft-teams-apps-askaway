@@ -10,7 +10,7 @@ import { IClientDataContractFormatter } from 'src/util/clientDataContractFormatt
 import { QuestionPatchAction } from 'src/enums/questionPatchAction';
 import { QnaSessionPatchAction } from 'src/enums/qnaSessionPatchAction';
 
-export const router = Express.Router();
+export const conversationRouter = Express.Router();
 let conversationDataService: IConversationDataService;
 let qnaSessionDataService: IQnASessionDataService;
 let clientDataContractFormatter: IClientDataContractFormatter;
@@ -35,7 +35,7 @@ export const initializeRouter = (
 };
 
 // Get session details
-router.get('/:conversationId/sessions/:sessionId', async (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
+conversationRouter.get('/:conversationId/sessions/:sessionId', async (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
     try {
         const user: any = req.user;
         const userId = user._id;
@@ -53,7 +53,7 @@ router.get('/:conversationId/sessions/:sessionId', async (req: Express.Request, 
 });
 
 // Get all sessions
-router.get('/:conversationId/sessions', async (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
+conversationRouter.get('/:conversationId/sessions', async (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
     try {
         const user = <IUser>req.user;
         const userId = user._id;
@@ -79,7 +79,7 @@ router.get('/:conversationId/sessions', async (req: Express.Request, res: Expres
 });
 
 // Get user information
-router.get('/:conversationId/me', async (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
+conversationRouter.get('/:conversationId/me', async (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
     try {
         const user: any = req.user;
         const userId = user._id;
@@ -109,7 +109,7 @@ router.get('/:conversationId/me', async (req: Express.Request, res: Express.Resp
 });
 
 // Post a question
-router.post('/:conversationId/sessions/:sessionId/questions', async (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
+conversationRouter.post('/:conversationId/sessions/:sessionId/questions', async (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
     try {
         const questionContent = getAndEnsureRequestBodyContainsParameter(req, 'questionContent');
 
@@ -143,7 +143,7 @@ router.post('/:conversationId/sessions/:sessionId/questions', async (req: Expres
 });
 
 // Update ama session
-router.patch('/:conversationId/sessions/:sessionId', async (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
+conversationRouter.patch('/:conversationId/sessions/:sessionId', async (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
     try {
         const action = getAndEnsureRequestBodyContainsParameter(req, 'action');
 
@@ -185,7 +185,7 @@ router.patch('/:conversationId/sessions/:sessionId', async (req: Express.Request
 });
 
 // Create a new qna session
-router.post('/:conversationId/sessions', async (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
+conversationRouter.post('/:conversationId/sessions', async (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
     try {
         const user = <IUser>req.user;
         const sessionTitle = getAndEnsureRequestBodyContainsParameter(req, 'title');
@@ -239,7 +239,7 @@ router.post('/:conversationId/sessions', async (req: Express.Request, res: Expre
 });
 
 // Update question
-router.patch('/:conversationId/sessions/:sessionId/questions/:questionId', async (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
+conversationRouter.patch('/:conversationId/sessions/:sessionId/questions/:questionId', async (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
     try {
         const action = getAndEnsureRequestBodyContainsParameter(req, 'action');
 
@@ -291,7 +291,7 @@ router.patch('/:conversationId/sessions/:sessionId/questions/:questionId', async
 });
 
 // Get all active ama sessions
-router.get('/:conversationId/activesessions', async (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
+conversationRouter.get('/:conversationId/activesessions', async (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
     try {
         const user: any = req.user;
         const userId = user._id;
@@ -306,26 +306,6 @@ router.get('/:conversationId/activesessions', async (req: Express.Request, res: 
             return;
         } else {
             res.send(await clientDataContractFormatter.formatQnaSessionDataArrayAsPerClientDataContract(activeSessions));
-            return;
-        }
-    } catch (error) {
-        next(error);
-    }
-});
-
-// Get variable from app env
-router.get('/', async (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
-    try {
-        if (process.env.ApplicationInsightsInstrumentationKey && process.env.SignalRFunctionBaseUrl) {
-            const response = {
-                ApplicationInsightsInstrumentationKey: `${process.env.ApplicationInsightsInstrumentationKey}`,
-                SignalRFunctionBaseUrl: `${process.env.SignalRFunctionBaseUrl}`,
-            };
-
-            res.status(StatusCodes.OK).send(response);
-            return;
-        } else {
-            res.status(StatusCodes.INTERNAL_SERVER_ERROR).send();
             return;
         }
     } catch (error) {

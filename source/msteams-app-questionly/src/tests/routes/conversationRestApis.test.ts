@@ -1,7 +1,7 @@
 import Express from 'express';
 import request from 'supertest';
 import { Express as ExpressType } from 'express-serve-static-core';
-import { router, initializeRouter } from 'src/routes/rest';
+import { conversationRouter, initializeRouter } from 'src/routes/conversationRestApis';
 import { ConversationDataService, IQnASessionDataService, QnASessionDataService, UserDataService, IUserDataService, IQuestionDataService, QuestionDataService } from 'msteams-app-questionly.data';
 import { getTeamsUserId } from 'src/routes/restUtils';
 import { generateUniqueId } from 'adaptivecards';
@@ -60,7 +60,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId api', () => {
             next();
         };
         // Rest endpoints
-        app.use('/api/conversations', mockEnsureAuthenticated, router);
+        app.use('/api/conversations', mockEnsureAuthenticated, conversationRouter);
         app.use(restApiErrorMiddleware);
 
         (<any>verifyUserFromConversationId) = jest.fn();
@@ -211,7 +211,7 @@ describe('test conversations/:conversationId/sessions api', () => {
             next();
         };
         // Rest endpoints
-        app.use('/api/conversations', mockEnsureAuthenticated, router);
+        app.use('/api/conversations', mockEnsureAuthenticated, conversationRouter);
         app.use(restApiErrorMiddleware);
         (<any>mockQnASessionDataService.getAllQnASessionData) = jest.fn();
         (<any>mockClientDataContractFormatter.formatQnaSessionDataArrayAsPerClientDataContract) = jest.fn();
@@ -432,7 +432,7 @@ describe('test post conversations/:conversationId/sessions api', () => {
             next();
         };
         // Rest endpoints
-        app.use('/api/conversations', mockEnsureAuthenticated, router);
+        app.use('/api/conversations', mockEnsureAuthenticated, conversationRouter);
         app.use(restApiErrorMiddleware);
 
         (<any>isPresenterOrOrganizer) = jest.fn();
@@ -603,7 +603,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
         (<any>conversationDataService.getConversationData) = jest.fn();
 
         // Rest endpoints
-        app.use('/api/conversations', mockEnsureAuthenticated, router);
+        app.use('/api/conversations', mockEnsureAuthenticated, conversationRouter);
         app.use(restApiErrorMiddleware);
     });
 
@@ -779,7 +779,7 @@ describe('test /conversations/:conversationId/me api', () => {
         (<any>conversationDataService.getConversationData) = jest.fn();
 
         // Rest endpoints
-        app.use('/api/conversations', mockEnsureAuthenticated, router);
+        app.use('/api/conversations', mockEnsureAuthenticated, conversationRouter);
         app.use(restApiErrorMiddleware);
     });
 
@@ -920,7 +920,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
         };
 
         // Rest endpoints
-        app.use('/api/conversations', mockEnsureAuthenticated, router);
+        app.use('/api/conversations', mockEnsureAuthenticated, conversationRouter);
         app.use(restApiErrorMiddleware);
 
         (<any>mockController.upvoteQuestion) = jest.fn();
@@ -1289,7 +1289,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
         (<any>conversationDataService.getConversationData) = jest.fn();
 
         // Rest endpoints
-        app.use('/api/conversations', mockEnsureAuthenticated, router);
+        app.use('/api/conversations', mockEnsureAuthenticated, conversationRouter);
         app.use(restApiErrorMiddleware);
     });
 
@@ -1427,7 +1427,7 @@ describe('test get /:conversationId/activesessions api', () => {
             next();
         };
         // Rest endpoints
-        app.use('/api/conversations', mockEnsureAuthenticated, router);
+        app.use('/api/conversations', mockEnsureAuthenticated, conversationRouter);
         app.use(restApiErrorMiddleware);
 
         (<any>mockQnASessionDataService.getAllActiveQnASessionData) = jest.fn();
@@ -1613,59 +1613,5 @@ describe('test get /:conversationId/activesessions api', () => {
         expect(conversationDataService.getConversationData).toBeCalledTimes(1);
         expect(conversationDataService.getConversationData).toBeCalledWith(sampleConversationId);
         expect(verifyUserFromConversationId).toBeCalledTimes(1);
-    });
-});
-
-describe('test get /config/:variableName api', () => {
-    beforeAll(async () => {
-        app = Express();
-
-        mockUserDataService = new UserDataService();
-        mockQnASessionDataService = new QnASessionDataService(mockUserDataService);
-        mockQuestionDataService = new QuestionDataService(mockUserDataService, mockQnASessionDataService);
-        mockClientDataContractFormatter = new ClientDataContractFormatter(mockUserDataService, mockQuestionDataService);
-        mockController = new Controller(mockQuestionDataService, mockQnASessionDataService);
-        initializeRouter(conversationDataService, mockQnASessionDataService, mockClientDataContractFormatter, mockController);
-
-        const mockEnsureAuthenticated = (req, res, next) => {
-            req.user = {
-                _id: sampleUserId,
-                userName: sampleUserName,
-            };
-            next();
-        };
-        // Rest endpoints
-        app.use('/api/config', mockEnsureAuthenticated, router);
-        app.use(restApiErrorMiddleware);
-    });
-
-    beforeEach(() => {
-        jest.clearAllMocks();
-    });
-
-    it('variable defined in app env', async () => {
-        process.env.ApplicationInsightsInstrumentationKey = 'random';
-        process.env.SignalRFunctionBaseUrl = 'random';
-        const result = await request(app).get(`/api/config`);
-
-        expect(result.status).toEqual(StatusCodes.OK);
-        expect(result).toBeDefined();
-        const res = JSON.parse(result.text);
-        expect(res.ApplicationInsightsInstrumentationKey).toEqual('random');
-        expect(res.SignalRFunctionBaseUrl).toEqual('random');
-    });
-
-    it('variable not defined in app env', async () => {
-        delete process.env.ApplicationInsightsInstrumentationKey;
-        const result = await request(app).get(`/api/config`);
-
-        expect(result.status).toEqual(StatusCodes.INTERNAL_SERVER_ERROR);
-    });
-
-    it('variable not defined in app env', async () => {
-        delete process.env.SignalRFunctionBaseUrl;
-        const result = await request(app).get(`/api/config`);
-
-        expect(result.status).toEqual(StatusCodes.INTERNAL_SERVER_ERROR);
     });
 });
