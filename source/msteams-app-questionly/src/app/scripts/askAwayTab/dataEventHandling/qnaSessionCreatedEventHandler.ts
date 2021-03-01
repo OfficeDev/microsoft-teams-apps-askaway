@@ -18,9 +18,7 @@ export class QnaSessionCreatedEventHandler implements IDataEventHandler {
         dataEvent: IDataEvent,
         activeSessionData: ClientDataContract.QnaSession | null,
         updateQnASessionContent: () => void,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         showNewUpdatesButton: () => void,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         updateActiveSessionData: (sessionData: ClientDataContract.QnaSession | null) => void
     ) => {
         // No need to update screen if event corresponds to current state `activeSessionData`.

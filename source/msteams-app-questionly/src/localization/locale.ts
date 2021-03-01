@@ -1,6 +1,6 @@
 import i18next from 'i18next';
 import enJson from './resources/en.json';
-import { exceptionLogger } from '../util/exceptionTracking';
+import { exceptionLogger } from 'src/util/exceptionTracking';
 
 export interface Strings {
     leaderboard: Leaderboard;

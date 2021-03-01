@@ -19,7 +19,6 @@ export class QuestionMarkedAsAnsweredEventHandler implements IDataEventHandler {
         activeSessionData: ClientDataContract.QnaSession | null,
         updateQnASessionContent: () => void,
         showNewUpdatesButton: () => void,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         updateActiveSessionData: (sessionData: ClientDataContract.QnaSession | null) => void
     ) => {
         if (activeSessionData?.sessionId !== dataEvent.qnaSessionId) {
