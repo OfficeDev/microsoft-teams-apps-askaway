@@ -396,6 +396,7 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                             onEvent={this.updateEvent}
                             httpService={this.props.httpService}
                             appInsights={this.props.appInsights}
+                            teamsTabContext={this.props.teamsTabContext}
                         />
                         {activeSessionData.sessionId ? this.showSessionQuestions() : this.createNewSessionLayout()}
                     </Flex>

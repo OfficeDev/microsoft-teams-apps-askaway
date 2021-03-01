@@ -29,7 +29,10 @@ export interface IQnASessionDataService {
     isChannel: boolean;
     isMeetingGroupChat: boolean;
   }) => Promise<IQnASession_populated>;
-  updateActivityId: (qnaSessionId: string, activityId: string) => Promise<void>;
+  updateActivityIdAndExpiry: (
+    qnaSessionId: string,
+    activityId: string
+  ) => Promise<void>;
   getQnASessionData: (qnaSessionId: string) => Promise<IQnASession_populated>;
   endQnASession: (
     qnaSessionId: string,
@@ -71,6 +74,11 @@ export class QnASessionDataService implements IQnASessionDataService {
   constructor(userDataService: IUserDataService) {
     this.userDataService = userDataService;
   }
+
+  private orphanedAmaSessionExpiryInSeconds = ifNumber(
+    process.env.OrphanedAmaSessionExpiryInSeconds,
+    24 * 60 * 60
+  );
 
   /**
    * Creates initial QnA session document and stores it in the database
@@ -137,6 +145,26 @@ export class QnASessionDataService implements IQnASessionDataService {
         isChannel: sessionParameters.isChannel,
       },
       dataEventVersion: 0,
+      ttl: sessionParameters.isMeetingGroupChat
+        ? null
+        : this.orphanedAmaSessionExpiryInSeconds,
+    });
+
+    // MongoDB does not recreate the index.
+    // https://docs.mongodb.com/manual/reference/method/db.collection.createIndex/#recreating-an-existing-index
+    // ttl index
+    await QnASession.collection.createIndex(
+      {
+        _ts: 1,
+      },
+      {
+        expireAfterSeconds: -1,
+      }
+    );
+
+    // A wildcard index on all fields.
+    await QnASession.collection.createIndex({
+      "$**": 1,
     });
 
     const savedSession: IQnASession_populated = await retryWrapper(() =>
@@ -148,13 +176,23 @@ export class QnASessionDataService implements IQnASessionDataService {
   }
 
   /**
-   * Updates the activity id of an existing QnA session
+   * Updates the activity id of an existing QnA session and sets ttl to -1 (meaning never expire this document)
    * @param qnaSessionId - document database id of the QnA session
    * @param activityId - id of the master card message used for proactive updating of the card
    */
-  public async updateActivityId(qnaSessionId: string, activityId: string) {
+  public async updateActivityIdAndExpiry(
+    qnaSessionId: string,
+    activityId: string
+  ) {
     await retryWrapperForConcurrency(
-      () => QnASession.findByIdAndUpdate({ _id: qnaSessionId }, { activityId }),
+      () =>
+        QnASession.findByIdAndUpdate(
+          { _id: qnaSessionId },
+          {
+            $set: { activityId: activityId },
+            ttl: null,
+          }
+        ),
       new ExponentialBackOff()
     );
   }

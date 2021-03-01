@@ -72,6 +72,7 @@ describe('SignalRLifecycle Component', () => {
                 httpService={sampleHttpService}
                 connection={hubConnection}
                 __disableTransComponent={true}
+                teamsTabContext={{ entityId: '', locale: '' }}
             />
         );
         await act(async () => {
@@ -101,6 +102,7 @@ describe('SignalRLifecycle Component', () => {
                 httpService={sampleHttpService}
                 connection={hubConnection}
                 __disableTransComponent={true}
+                teamsTabContext={{ entityId: '', locale: '' }}
             />
         );
         await act(async () => {
@@ -138,6 +140,7 @@ describe('SignalRLifecycle Component', () => {
                 httpService={sampleHttpService}
                 connection={hubConnection}
                 __disableTransComponent={true}
+                teamsTabContext={{ entityId: '', locale: '' }}
             />
         );
         await act(async () => {
@@ -167,6 +170,7 @@ describe('SignalRLifecycle Component', () => {
                 httpService={sampleHttpService}
                 connection={hubConnection}
                 __disableTransComponent={true}
+                teamsTabContext={{ entityId: '', locale: '' }}
             />
         );
         await act(async () => {
@@ -197,6 +201,7 @@ describe('SignalRLifecycle Component', () => {
                 httpService={sampleHttpService}
                 connection={hubConnection}
                 __disableTransComponent={true}
+                teamsTabContext={{ entityId: '', locale: '' }}
             />
         );
         await act(async () => {
@@ -228,6 +233,7 @@ describe('SignalRLifecycle Component', () => {
                 httpService={sampleHttpService}
                 connection={hubConnection}
                 __disableTransComponent={true}
+                teamsTabContext={{ entityId: '', locale: '' }}
             />
         );
         await act(async () => {
@@ -281,6 +287,7 @@ describe('SignalRLifecycle Component', () => {
                 httpService={sampleHttpService}
                 connection={hubConnection}
                 __disableTransComponent={true}
+                teamsTabContext={{ entityId: '', locale: '' }}
             />
         );
         await act(async () => {
@@ -323,6 +330,7 @@ describe('SignalRLifecycle Component', () => {
                 httpService={sampleHttpService}
                 connection={hubConnection}
                 __disableTransComponent={true}
+                teamsTabContext={{ entityId: '', locale: '' }}
             />
         );
         await act(async () => {

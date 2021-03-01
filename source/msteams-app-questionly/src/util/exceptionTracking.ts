@@ -65,3 +65,19 @@ export const trackCreateQuestionEvent = (traceData: TraceData) => {
         });
     }
 };
+
+/**
+ * Logs background function trigger event.
+ * `traceData` should contain caller (maincard/ rest api) information for the event.
+ * If the caller is rest api, then we know for sure that some web clients must be connected to signalr service and they should receive events.
+ * In case of maincard, there may or may not be any web clients connected.
+ * @param traceData - custom properties to log for this event
+ */
+export const trackBackgroundFunctionTriggerEvent = (traceData: TraceData) => {
+    if (process.env.debugMode !== 'true') {
+        aiClient?.trackEvent({
+            name: TelemetryEvents.BackgroundFunctionTriggerEvent,
+            properties: traceData,
+        });
+    }
+};

@@ -101,16 +101,20 @@ const sendOrUpdateCard = async (
         type: ActivityTypes.Message,
       });
     } else {
-      // For any reason, if the card was not posted earlier, post the card now.
+      // For any reason, if the card was not posted earlier, post the card now,
+      // this is only possible from tab interaction i.e. only for meeting chat ama sessions.
       const resource = await context.sendActivity({
         attachments: [CardFactory.adaptiveCard(card)],
         type: ActivityTypes.Message,
         channelData: channelData,
       });
 
-      // update activity id in DB.
+      // Update activity id in DB. Also this will make sure that non meeting chat ama sessions won't expire.
       if (resource !== undefined) {
-        await qnaSessionDataService.updateActivityId(qnaSessionId, resource.id);
+        await qnaSessionDataService.updateActivityIdAndExpiry(
+          qnaSessionId,
+          resource.id
+        );
       }
     }
   });

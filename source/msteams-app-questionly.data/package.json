@@ -1,14 +1,14 @@
 {
   "name": "msteams-app-questionly.data",
-  "version": "1.0.0",
-  "description": "Data layer for ask away project.",
+  "version": "2.0.0",
+  "description": "Data layer for Ask Away project.",
   "scripts": {
     "build": "webpack",
     "test": "jest",
-    "covergae": "jest --coverage"
+    "coverage": "jest --coverage"
   },
   "dependencies": {
-    "mongoose": "^5.9.25"
+    "mongoose": "^5.10.11"
   },
   "devDependencies": {
     "@shelf/jest-mongodb": "^1.1.5",

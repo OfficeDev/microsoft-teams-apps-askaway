@@ -1,7 +1,7 @@
 {
   "name": "msteams-app-questionly.func",
-  "version": "1.0.0",
-  "description": "",
+  "version": "2.0.0",
+  "description": "Azure functions for the Ask Away project",
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
@@ -14,14 +14,15 @@
     "adaptivecards": "^1.2.6",
     "adaptivecards-templating": "^1.0.0-rc.0",
     "applicationinsights": "^1.8.8",
-    "axios": "^0.20.0",
+    "axios": "^0.21.1",
     "azure-ad-jwt-lite": "^1.1.0",
-    "botbuilder": "^4.10.4",
-    "durable-functions": "^1.4.4",
+    "botbuilder": "^4.11.1",
+    "durable-functions": "^1.4.6",
     "http-status-codes": "^2.1.4",
     "i18next": "^19.6.0",
     "memory-cache": "^0.2.0",
     "moment": "^2.29.1",
+    "mongoose": "^5.10.11",
     "random": "^2.2.0",
     "seedrandom": "^3.0.5"
   },
@@ -32,8 +33,7 @@
     "@types/mongoose": "^5.10.2",
     "@types/node": "^14.11.8",
     "@types/moment": "^2.13.0",
-    "jest": "^26.6.0",
-    "mongoose": "^5.10.12",
+    "jest": "^26.6.1",
     "typescript": "^3.9.7",
     "ts-jest": "^26.4.1"
   }
