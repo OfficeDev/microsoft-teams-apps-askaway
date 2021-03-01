@@ -1,11 +1,11 @@
-import { Flex, Button, Text, List } from '@fluentui/react-northstar';
-import * as React from 'react';
-import { ClientDataContract } from '../../../../../contracts/clientDataContract';
-import SessionListCard from './SessionListCard';
+import { Button, Flex, List, Text } from '@fluentui/react-northstar';
 import * as microsoftTeams from '@microsoft/teams-js';
-import './../../index.scss';
-import { useState } from 'react';
 import { TFunction } from 'i18next';
+import * as React from 'react';
+import { useState } from 'react';
+import { ClientDataContract } from '../../../../../contracts/clientDataContract';
+import './../../index.scss';
+import SessionListCard from './SessionListCard';
 
 export interface SessionListProps {
     /**

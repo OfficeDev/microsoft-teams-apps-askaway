@@ -1,8 +1,8 @@
 import { SecretClient } from '@azure/keyvault-secrets';
+import { getCredential } from 'src/util/azureCredentialUtility';
 import { exceptionLogger } from 'src/util/exceptionTracking';
+import { getFromMemoryCache, putIntoMemoryCache } from 'src/util/memoryCache';
 import { ifNumber } from 'src/util/typeUtility';
-import { getCredential } from './azureCredentialUtility';
-import { getFromMemoryCache, putIntoMemoryCache } from './memoryCache';
 
 const mongoURISecretName = 'MongoDbUri';
 const applicationInsightsInstrumentationKeySecretName = 'ApplicationInsightsInstrumentationKey';

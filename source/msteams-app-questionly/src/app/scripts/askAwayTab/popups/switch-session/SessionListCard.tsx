@@ -1,4 +1,4 @@
-import { Text, Flex } from '@fluentui/react-northstar';
+import { Flex, Text } from '@fluentui/react-northstar';
 import { TFunction } from 'i18next';
 import * as React from 'react';
 import { ClientDataContract } from '../../../../../contracts/clientDataContract';

@@ -1,7 +1,6 @@
-// tslint:disable:no-relative-imports
-import './../index.scss';
+import { Flex, Image, Text } from '@fluentui/react-northstar';
 import * as React from 'react';
-import { Flex, Text, Image } from '@fluentui/react-northstar';
+import './../index.scss';
 
 /**
  * Properties of empty tile component

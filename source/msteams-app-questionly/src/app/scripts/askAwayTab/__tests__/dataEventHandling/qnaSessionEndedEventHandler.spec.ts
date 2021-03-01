@@ -1,6 +1,5 @@
-// tslint:disable:no-relative-imports
-import { ClientDataContract } from '../../../../../contracts/clientDataContract';
 import { IDataEvent } from 'msteams-app-questionly.common';
+import { ClientDataContract } from '../../../../../contracts/clientDataContract';
 import { QnaSessionEndedEventHandler } from '../../dataEventHandling/qnaSessionEndedEventHandler';
 
 describe('validates QnaSessionEndedEventHandler', () => {

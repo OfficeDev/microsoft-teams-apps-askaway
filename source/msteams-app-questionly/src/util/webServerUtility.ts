@@ -11,7 +11,7 @@ const log = debug('msteams');
 
 const getPort = () => {
     return process.env.port || process.env.PORT || 3007;
-}
+};
 
 /**
  * Configures express app with necessary middlewares.

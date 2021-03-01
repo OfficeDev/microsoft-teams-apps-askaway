@@ -1,30 +1,30 @@
 /**
  * @jest-environment jsdom
  */
-
+import { configure, shallow } from 'enzyme';
+import enzymeAdapterReact16 from 'enzyme-adapter-react-16';
 import * as React from 'react';
-import { shallow, configure } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import Adapter from 'enzyme-adapter-react-16';
-import { TabContent } from '../TabContent';
 import { telemetryService } from '../../telemetryService';
-import { HttpService } from '../shared/HttpService';
 import Helper from '../shared/Helper';
+import { HttpService } from '../shared/HttpService';
 import { i18next } from '../shared/i18next';
-import TabCreateSession from '../TabContent/TabCreateSession';
-import PostNewQuestions from '../TabContent/PostNewQuestions';
+import { TabContent } from '../TabContent';
 import NoQuestionDesign from '../TabContent/NoQuestionDesign';
+import PostNewQuestions from '../TabContent/PostNewQuestions';
+import TabCreateSession from '../TabContent/TabCreateSession';
 import TabQuestions from '../TabContent/TabQuestions';
 
-configure({ adapter: new Adapter() });
+configure({ adapter: new enzymeAdapterReact16() });
 
 describe('TabContent Component', () => {
-    const httpServiceIns = new HttpService(telemetryService.appInsights);
-    const t = jest.fn();
+    let httpServiceIns;
+    let t;
     const tReady = true;
 
     beforeAll(() => {
         jest.mock('../shared/HttpService');
+        httpServiceIns = new HttpService(telemetryService.appInsights);
+        t = jest.fn();
     });
 
     afterAll(() => {
