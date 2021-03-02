@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { ChevronDownMediumIcon, ChevronEndMediumIcon, LikeIcon } from '@fluentui/react-icons-northstar';
 import { Avatar, Button, Flex, Text } from '@fluentui/react-northstar';
 import * as React from 'react';

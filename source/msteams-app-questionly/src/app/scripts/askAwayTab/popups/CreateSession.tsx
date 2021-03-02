@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { Provider } from '@fluentui/react-northstar';
 import * as microsoftTeams from '@microsoft/teams-js';
 import msteamsReactBaseComponent, { ITeamsBaseComponentState } from 'msteams-react-base-component';

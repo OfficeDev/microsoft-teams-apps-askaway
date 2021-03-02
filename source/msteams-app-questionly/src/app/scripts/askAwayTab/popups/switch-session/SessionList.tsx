@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { Button, Flex, List, Text } from '@fluentui/react-northstar';
 import * as microsoftTeams from '@microsoft/teams-js';
 import { TFunction } from 'i18next';

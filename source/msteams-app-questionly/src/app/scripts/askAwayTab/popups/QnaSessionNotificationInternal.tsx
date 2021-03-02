@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import './../index.scss';
 import * as React from 'react';
 import { Flex, Text, Button, FlexItem } from '@fluentui/react-northstar';

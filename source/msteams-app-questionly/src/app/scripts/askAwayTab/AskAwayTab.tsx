@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { Provider } from '@fluentui/react-northstar';
 import { withAITracking } from '@microsoft/applicationinsights-react-js';
 import { SeverityLevel } from '@microsoft/applicationinsights-web';
