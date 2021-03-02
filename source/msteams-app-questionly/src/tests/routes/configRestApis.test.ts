@@ -9,19 +9,12 @@ let app: ExpressType;
 const sampleUserId = 'sampleUserId';
 const sampleUserName = 'sampleUserName';
 
-describe('test get /config/:variableName api', () => {
+describe('test get /config api', () => {
     beforeAll(async () => {
         app = Express();
 
-        const mockEnsureAuthenticated = (req, res, next) => {
-            req.user = {
-                _id: sampleUserId,
-                userName: sampleUserName,
-            };
-            next();
-        };
         // Rest endpoints
-        app.use('/api/config', mockEnsureAuthenticated, configRouter);
+        app.use('/api', configRouter);
         app.use(restApiErrorMiddleware);
     });
 
@@ -30,15 +23,15 @@ describe('test get /config/:variableName api', () => {
     });
 
     it('variable defined in app env', async () => {
-        process.env.ApplicationInsightsInstrumentationKey = 'random';
-        process.env.SignalRFunctionBaseUrl = 'random';
+        process.env.ApplicationInsightsInstrumentationKey = 'val1';
+        process.env.SignalRFunctionBaseUrl = 'val2';
         const result = await request(app).get(`/api/config`);
 
         expect(result.status).toEqual(StatusCodes.OK);
         expect(result).toBeDefined();
         const res = JSON.parse(result.text);
-        expect(res.ApplicationInsightsInstrumentationKey).toEqual('random');
-        expect(res.SignalRFunctionBaseUrl).toEqual('random');
+        expect(res.ApplicationInsightsInstrumentationKey).toEqual('val1');
+        expect(res.SignalRFunctionBaseUrl).toEqual('val2');
     });
 
     it('variable not defined in app env', async () => {

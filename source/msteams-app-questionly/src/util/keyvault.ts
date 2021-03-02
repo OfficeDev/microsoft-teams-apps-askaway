@@ -1,8 +1,8 @@
 import { SecretClient } from '@azure/keyvault-secrets';
-import { exceptionLogger } from './exceptionTracking';
-import { ifNumber } from './typeUtility';
-import { getCredential } from './azureCredentialUtility';
-import { getFromMemoryCache, putIntoMemoryCache } from './memoryCache';
+import { getCredential } from 'src/util/azureCredentialUtility';
+import { exceptionLogger } from 'src/util/exceptionTracking';
+import { getFromMemoryCache, putIntoMemoryCache } from 'src/util/memoryCache';
+import { ifNumber } from 'src/util/typeUtility';
 
 const vaultName = process.env.KeyVaultName;
 const mongoURISecretName = 'MongoDbUri';
