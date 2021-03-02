@@ -17,6 +17,15 @@ describe('test errorCardBuilder', () => {
         });
     });
 
+    beforeAll(() => {
+        Object.defineProperty(window, 'location', {
+            value: {
+                host: `${process.env.HostName}`,
+            },
+            writable: true,
+        });
+    });
+
     it('test generic error card', () => {
         const card = createGenericErrorCard(t);
 

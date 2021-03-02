@@ -38,8 +38,25 @@ export interface IController {
     }) => Promise<IQnASession_populated>;
     generateLeaderboard: (qnaSessionId: string, aadObjectId: string, theme: string) => Promise<AdaptiveCard>;
     getNewQuestionCard: (qnaSessionId: string) => AdaptiveCard;
-    submitNewQuestion: (qnaSessionId: string, userAadObjId: string, userName: string, questionContent: string, conversationId: string, serviceUrl: string, caller: EventInitiator, meetingId?: string) => Promise<IQuestion>;
-    markQuestionAsAnswered: (conversationData: IConversation, meetingId: string, qnaSessionId: string, questionId: string, aadObjectId: string, serviceUrl: string, caller: EventInitiator) => Promise<IQuestionPopulatedUser>;
+    submitNewQuestion: (
+        qnaSessionId: string,
+        userAadObjId: string,
+        userName: string,
+        questionContent: string,
+        conversationId: string,
+        serviceUrl: string,
+        caller: EventInitiator,
+        meetingId?: string
+    ) => Promise<IQuestion>;
+    markQuestionAsAnswered: (
+        conversationData: IConversation,
+        meetingId: string,
+        qnaSessionId: string,
+        questionId: string,
+        aadObjectId: string,
+        serviceUrl: string,
+        caller: EventInitiator
+    ) => Promise<IQuestionPopulatedUser>;
     upvoteQuestion: (
         conversationId: string,
         qnaSessionId: string,
@@ -60,7 +77,17 @@ export interface IController {
         caller: EventInitiator,
         meetingId?: string
     ) => Promise<IQuestionPopulatedUser>;
-    updateUpvote: (qnaSessionId: string, questionId: string, aadObjectId: string, name: string, conversationId: string, theme: string, serviceUrl: string, caller: EventInitiator, meetingId?: string) => Promise<AdaptiveCard>;
+    updateUpvote: (
+        qnaSessionId: string,
+        questionId: string,
+        aadObjectId: string,
+        name: string,
+        conversationId: string,
+        theme: string,
+        serviceUrl: string,
+        caller: EventInitiator,
+        meetingId?: string
+    ) => Promise<AdaptiveCard>;
     getEndQnAConfirmationCard: (qnaSessionId: string) => AdaptiveCard;
     endQnASession: (sessionParameters: {
         qnaSessionId: string;
@@ -121,7 +148,7 @@ export class Controller implements IController {
         hostUserId: string;
         isChannel: boolean;
         serviceUrl: string;
-        caller: EventInitiator,
+        caller: EventInitiator;
         meetingId?: string;
     }): Promise<IQnASession_populated> => {
         const isMeetingGroupChat = isValidStringParameter(sessionParameters.meetingId);
@@ -305,7 +332,7 @@ export class Controller implements IController {
         questionId: string,
         aadObjectId: string,
         serviceUrl: string,
-        caller: EventInitiator,
+        caller: EventInitiator
     ): Promise<IQuestionPopulatedUser> => {
         try {
             if (await isPresenterOrOrganizer(meetingId, aadObjectId, conversationData.tenantId, conversationData.serviceUrl)) {
@@ -519,7 +546,7 @@ export class Controller implements IController {
         serviceURL: string;
         userName: string;
         endedByUserId: string;
-        caller: EventInitiator,
+        caller: EventInitiator;
         meetingId?: string;
     }): Promise<void> => {
         try {
@@ -546,7 +573,15 @@ export class Controller implements IController {
                 sessionParameters.endedByUserId
             );
 
-            if (!(await triggerBackgroundJobForQnaSessionEndedEvent(sessionParameters.conversationId, sessionParameters.qnaSessionId, sessionParameters.serviceURL, sessionParameters.caller, sessionParameters.meetingId))) {
+            if (
+                !(await triggerBackgroundJobForQnaSessionEndedEvent(
+                    sessionParameters.conversationId,
+                    sessionParameters.qnaSessionId,
+                    sessionParameters.serviceURL,
+                    sessionParameters.caller,
+                    sessionParameters.meetingId
+                ))
+            ) {
                 try {
                     // Revert changes if there is an error in triggering background job, as the card won't get updated and clients won't get event.
                     await this.qnaSessionDataService.activateQnASession(sessionParameters.qnaSessionId);
@@ -562,7 +597,14 @@ export class Controller implements IController {
                 throw new ChangesRevertedDueToBackgroundJobFailureError();
             }
         } catch (error) {
-            this.handleOperationFailureForEndedSession(error, sessionParameters.conversationId, sessionParameters.qnaSessionId, sessionParameters.serviceURL, sessionParameters.caller, sessionParameters.meetingId);
+            this.handleOperationFailureForEndedSession(
+                error,
+                sessionParameters.conversationId,
+                sessionParameters.qnaSessionId,
+                sessionParameters.serviceURL,
+                sessionParameters.caller,
+                sessionParameters.meetingId
+            );
             throw error;
         }
     };

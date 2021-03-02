@@ -7,4 +7,9 @@ export const CONST = Object.freeze({
         DOWN_VOTE: 'downvote',
         MARK_ANSWERED: 'markAnswered',
     },
+
+    ENV_VARIABLES: {
+        APP_INSIGHTS_INSTRUMENTATION_KEY: 'ApplicationInsightsInstrumentationKey',
+        SIGNALR_FUNCTION_BASEURL: 'SignalRFunctionBaseUrl',
+    },
 });

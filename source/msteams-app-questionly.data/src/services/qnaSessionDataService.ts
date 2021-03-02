@@ -75,7 +75,10 @@ export class QnASessionDataService implements IQnASessionDataService {
     this.userDataService = userDataService;
   }
 
-  private orphanedAmaSessionExpiryInSeconds = ifNumber(process.env.OrphanedAmaSessionExpiryInSeconds, 24 * 60 * 60);
+  private orphanedAmaSessionExpiryInSeconds = ifNumber(
+    process.env.OrphanedAmaSessionExpiryInSeconds,
+    24 * 60 * 60
+  );
 
   /**
    * Creates initial QnA session document and stores it in the database

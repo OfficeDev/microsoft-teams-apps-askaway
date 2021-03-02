@@ -11,7 +11,7 @@ import { QuestionPatchAction } from 'src/enums/questionPatchAction';
 import { QnaSessionPatchAction } from 'src/enums/qnaSessionPatchAction';
 import { EventInitiator } from 'src/enums/eventInitiator';
 
-export const router = Express.Router();
+export const conversationRouter = Express.Router();
 let conversationDataService: IConversationDataService;
 let qnaSessionDataService: IQnASessionDataService;
 let clientDataContractFormatter: IClientDataContractFormatter;
@@ -36,7 +36,7 @@ export const initializeRouter = (
 };
 
 // Get session details
-router.get('/:conversationId/sessions/:sessionId', async (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
+conversationRouter.get('/:conversationId/sessions/:sessionId', async (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
     try {
         const user: any = req.user;
         const userId = user._id;
@@ -54,7 +54,7 @@ router.get('/:conversationId/sessions/:sessionId', async (req: Express.Request, 
 });
 
 // Get all sessions
-router.get('/:conversationId/sessions', async (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
+conversationRouter.get('/:conversationId/sessions', async (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
     try {
         const user = <IUser>req.user;
         const userId = user._id;
@@ -80,7 +80,7 @@ router.get('/:conversationId/sessions', async (req: Express.Request, res: Expres
 });
 
 // Get user information
-router.get('/:conversationId/me', async (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
+conversationRouter.get('/:conversationId/me', async (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
     try {
         const user: any = req.user;
         const userId = user._id;
@@ -110,7 +110,7 @@ router.get('/:conversationId/me', async (req: Express.Request, res: Express.Resp
 });
 
 // Post a question
-router.post('/:conversationId/sessions/:sessionId/questions', async (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
+conversationRouter.post('/:conversationId/sessions/:sessionId/questions', async (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
     try {
         const questionContent = getAndEnsureRequestBodyContainsParameter(req, 'questionContent');
 
@@ -122,7 +122,16 @@ router.post('/:conversationId/sessions/:sessionId/questions', async (req: Expres
 
         await ensureUserIsPartOfMeetingConversation(conversationData, userId);
 
-        const result = await controller.submitNewQuestion(req.params['sessionId'], user._id, user.userName, questionContent, conversationId, conversationData.serviceUrl, EventInitiator.RestApi, conversationData.meetingId);
+        const result = await controller.submitNewQuestion(
+            req.params['sessionId'],
+            user._id,
+            user.userName,
+            questionContent,
+            conversationId,
+            conversationData.serviceUrl,
+            EventInitiator.RestApi,
+            conversationData.meetingId
+        );
 
         const response: ClientDataContract.Question = {
             id: result._id,
@@ -144,7 +153,7 @@ router.post('/:conversationId/sessions/:sessionId/questions', async (req: Expres
 });
 
 // Update ama session
-router.patch('/:conversationId/sessions/:sessionId', async (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
+conversationRouter.patch('/:conversationId/sessions/:sessionId', async (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
     try {
         const action = getAndEnsureRequestBodyContainsParameter(req, 'action');
 
@@ -187,7 +196,7 @@ router.patch('/:conversationId/sessions/:sessionId', async (req: Express.Request
 });
 
 // Create a new qna session
-router.post('/:conversationId/sessions', async (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
+conversationRouter.post('/:conversationId/sessions', async (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
     try {
         const user = <IUser>req.user;
         const sessionTitle = getAndEnsureRequestBodyContainsParameter(req, 'title');
@@ -242,7 +251,7 @@ router.post('/:conversationId/sessions', async (req: Express.Request, res: Expre
 });
 
 // Update question
-router.patch('/:conversationId/sessions/:sessionId/questions/:questionId', async (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
+conversationRouter.patch('/:conversationId/sessions/:sessionId/questions/:questionId', async (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
     try {
         const action = getAndEnsureRequestBodyContainsParameter(req, 'action');
 
@@ -270,7 +279,16 @@ router.patch('/:conversationId/sessions/:sessionId/questions/:questionId', async
             res.status(StatusCodes.OK).send(clientDataContractFormatter.formatQuestionDataAsPerClientDataContract(question));
         } else if (action === QuestionPatchAction.Downvote) {
             await ensureUserIsPartOfMeetingConversation(conversationData, user._id);
-            question = await controller.downvoteQuestion(conversationId, sessionId, questionId, user._id, user.userName, conversationData.serviceUrl, EventInitiator.RestApi, conversationData.meetingId);
+            question = await controller.downvoteQuestion(
+                conversationId,
+                sessionId,
+                questionId,
+                user._id,
+                user.userName,
+                conversationData.serviceUrl,
+                EventInitiator.RestApi,
+                conversationData.meetingId
+            );
 
             res.status(StatusCodes.OK).send(clientDataContractFormatter.formatQuestionDataAsPerClientDataContract(question));
         } else if (action === QuestionPatchAction.MarkAnswered) {
@@ -284,7 +302,7 @@ router.patch('/:conversationId/sessions/:sessionId/questions/:questionId', async
                 questionId,
                 user._id,
                 conversationData.serviceUrl,
-                EventInitiator.RestApi,
+                EventInitiator.RestApi
             );
 
             res.status(StatusCodes.OK).send(clientDataContractFormatter.formatQuestionDataAsPerClientDataContract(question));
@@ -295,7 +313,7 @@ router.patch('/:conversationId/sessions/:sessionId/questions/:questionId', async
 });
 
 // Get all active ama sessions
-router.get('/:conversationId/activesessions', async (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
+conversationRouter.get('/:conversationId/activesessions', async (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
     try {
         const user: any = req.user;
         const userId = user._id;

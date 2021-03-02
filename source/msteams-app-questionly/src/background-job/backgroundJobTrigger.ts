@@ -193,7 +193,7 @@ const triggerBackgroundJob = async (conversationId: string, qnaSessionId: string
             properties: {
                 event: dataEvent,
                 caller: caller,
-            }
+            },
         });
 
         return true;

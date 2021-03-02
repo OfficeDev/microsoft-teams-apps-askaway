@@ -1,7 +1,6 @@
 /**
  * @jest-environment jsdom
  */
-import { ApplicationInsights } from '@microsoft/applicationinsights-web';
 import { HubConnection } from '@microsoft/signalr';
 import axios from 'axios';
 import { configure, mount } from 'enzyme';
@@ -23,7 +22,7 @@ describe('SignalRLifecycle Component', () => {
     let updateEventCallback;
     let hubConnection: HubConnection;
     let sampleHttpService: HttpService;
-    let sampleAppInsights: ApplicationInsights;
+    let envConfig: { [key: string]: any };
     let t: jest.Mock<any, any>;
 
     beforeAll(() => {
@@ -39,12 +38,16 @@ describe('SignalRLifecycle Component', () => {
         const mockPostFunction = jest.fn();
         mockPostFunction.mockReturnValue(Promise.resolve({ status: StatusCodes.OK }));
         axios.post = mockPostFunction;
-        sampleAppInsights = new ApplicationInsights({ config: {} });
-        sampleAppInsights.trackException = jest.fn();
-        sampleHttpService = new HttpService(sampleAppInsights);
+        const mockGetFunction = jest.fn();
+        mockGetFunction.mockReturnValue(Promise.resolve({ status: StatusCodes.OK, data: 'random' }));
+        axios.get = mockGetFunction;
+        sampleHttpService = new HttpService();
         sampleHttpService.getAuthToken = jest.fn(() => {
             return Promise.resolve('testToken');
         });
+        envConfig = {
+            SignalRFunctionBaseUrl: 'random',
+        };
 
         // tslint:disable-next-line
         hubConnection = ({
@@ -68,10 +71,10 @@ describe('SignalRLifecycle Component', () => {
                 enableLiveUpdates={true}
                 conversationId={testConversationId}
                 onEvent={updateEventCallback}
-                appInsights={sampleAppInsights}
                 httpService={sampleHttpService}
                 connection={hubConnection}
                 __disableTransComponent={true}
+                envConfig={envConfig}
                 teamsTabContext={{ entityId: '', locale: '' }}
             />
         );
@@ -98,10 +101,10 @@ describe('SignalRLifecycle Component', () => {
                 enableLiveUpdates={true}
                 conversationId={testConversationId}
                 onEvent={updateEventCallback}
-                appInsights={sampleAppInsights}
                 httpService={sampleHttpService}
                 connection={hubConnection}
                 __disableTransComponent={true}
+                envConfig={envConfig}
                 teamsTabContext={{ entityId: '', locale: '' }}
             />
         );
@@ -136,10 +139,10 @@ describe('SignalRLifecycle Component', () => {
                 enableLiveUpdates={true}
                 conversationId={testConversationId}
                 onEvent={updateEventCallback}
-                appInsights={sampleAppInsights}
                 httpService={sampleHttpService}
                 connection={hubConnection}
                 __disableTransComponent={true}
+                envConfig={envConfig}
                 teamsTabContext={{ entityId: '', locale: '' }}
             />
         );
@@ -166,10 +169,10 @@ describe('SignalRLifecycle Component', () => {
                 enableLiveUpdates={true}
                 conversationId={testConversationId}
                 onEvent={updateEventCallback}
-                appInsights={sampleAppInsights}
                 httpService={sampleHttpService}
                 connection={hubConnection}
                 __disableTransComponent={true}
+                envConfig={envConfig}
                 teamsTabContext={{ entityId: '', locale: '' }}
             />
         );
@@ -197,10 +200,10 @@ describe('SignalRLifecycle Component', () => {
                 enableLiveUpdates={true}
                 conversationId={testConversationId}
                 onEvent={updateEventCallback}
-                appInsights={sampleAppInsights}
                 httpService={sampleHttpService}
                 connection={hubConnection}
                 __disableTransComponent={true}
+                envConfig={envConfig}
                 teamsTabContext={{ entityId: '', locale: '' }}
             />
         );
@@ -229,10 +232,10 @@ describe('SignalRLifecycle Component', () => {
                 enableLiveUpdates={true}
                 conversationId={testConversationId}
                 onEvent={updateEventCallback}
-                appInsights={sampleAppInsights}
                 httpService={sampleHttpService}
                 connection={hubConnection}
                 __disableTransComponent={true}
+                envConfig={envConfig}
                 teamsTabContext={{ entityId: '', locale: '' }}
             />
         );
@@ -283,10 +286,10 @@ describe('SignalRLifecycle Component', () => {
                 enableLiveUpdates={true}
                 conversationId={testConversationId}
                 onEvent={updateEventCallback}
-                appInsights={sampleAppInsights}
                 httpService={sampleHttpService}
                 connection={hubConnection}
                 __disableTransComponent={true}
+                envConfig={envConfig}
                 teamsTabContext={{ entityId: '', locale: '' }}
             />
         );
@@ -326,10 +329,10 @@ describe('SignalRLifecycle Component', () => {
                 enableLiveUpdates={true}
                 conversationId={testConversationId}
                 onEvent={updateEventCallback}
-                appInsights={sampleAppInsights}
                 httpService={sampleHttpService}
                 connection={hubConnection}
                 __disableTransComponent={true}
+                envConfig={envConfig}
                 teamsTabContext={{ entityId: '', locale: '' }}
             />
         );

@@ -32,7 +32,7 @@ export const exceptionLogger = (
 
 /**
  * Logs event for broadcasting updates to clients.
- * @param operationId - operation id to correlate logs from service layer.  
+ * @param operationId - operation id to correlate logs from service layer.
  * @param traceData - custom properties to log for this event.
  */
 export const trackBroadcastMessageEvent = (
@@ -49,7 +49,7 @@ export const trackBroadcastMessageEvent = (
       aiClient.context.tags["ai.operation.parentId"] = operationId;
     }
     aiClient?.trackEvent({
-      name: 'EventBroadcasted',
+      name: "EventBroadcasted",
       properties: traceData,
     });
   }

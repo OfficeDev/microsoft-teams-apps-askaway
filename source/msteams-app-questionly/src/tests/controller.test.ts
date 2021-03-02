@@ -301,7 +301,17 @@ test('add upvote', async () => {
         return Promise.resolve(true);
     });
 
-    await controller.updateUpvote(sampleQnASessionId, sampleQuestionId, sampleUserAADObjId1, sampleUserName, sampleConversationId, 'default', sampleServiceUrl, EventInitiator.RestApi, sampleMeetingId);
+    await controller.updateUpvote(
+        sampleQnASessionId,
+        sampleQuestionId,
+        sampleUserAADObjId1,
+        sampleUserName,
+        sampleConversationId,
+        'default',
+        sampleServiceUrl,
+        EventInitiator.RestApi,
+        sampleMeetingId
+    );
     expect(questionDataService.updateUpvote).toBeCalledTimes(1);
 
     // Make sure background job is triggered.
@@ -346,7 +356,17 @@ test('remove upvote', async () => {
         return Promise.resolve(true);
     });
 
-    await controller.updateUpvote(sampleQnASessionId, sampleQuestionId, sampleUserAADObjId1, sampleUserName, sampleConversationId, 'default', sampleServiceUrl, EventInitiator.MainCard, sampleMeetingId);
+    await controller.updateUpvote(
+        sampleQnASessionId,
+        sampleQuestionId,
+        sampleUserAADObjId1,
+        sampleUserName,
+        sampleConversationId,
+        'default',
+        sampleServiceUrl,
+        EventInitiator.MainCard,
+        sampleMeetingId
+    );
     expect(questionDataService.updateUpvote).toBeCalledTimes(1);
 
     // Make sure background job is triggered.
@@ -551,7 +571,7 @@ test('mark question as answered api - user has sufficient permissions', async ()
         sampleQuestionId,
         sampleUserAADObjId1,
         sampleServiceUrl,
-        EventInitiator.RestApi,
+        EventInitiator.RestApi
     );
 
     expect(<any>questionDataService.markQuestionAsAnswered).toBeCalledTimes(1);
@@ -581,7 +601,7 @@ test('mark question as answered api - revert changes if background function is n
             sampleQuestionId,
             sampleUserAADObjId1,
             sampleServiceUrl,
-            EventInitiator.RestApi,
+            EventInitiator.RestApi
         )
     ).rejects.toThrow();
 
@@ -616,7 +636,7 @@ test('mark question as answered api - user does not have sufficient permissions'
             sampleQuestionId,
             sampleUserAADObjId1,
             sampleServiceUrl,
-            EventInitiator.RestApi,
+            EventInitiator.RestApi
         )
     ).rejects.toThrow();
 

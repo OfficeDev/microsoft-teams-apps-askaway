@@ -1,5 +1,5 @@
 import { Button, Flex, Loader } from '@fluentui/react-northstar';
-import { ApplicationInsights, SeverityLevel } from '@microsoft/applicationinsights-web';
+import { SeverityLevel } from '@microsoft/applicationinsights-web';
 import * as microsoftTeams from '@microsoft/teams-js';
 import { TFunction } from 'i18next';
 import { IDataEvent } from 'msteams-app-questionly.common';
@@ -31,12 +31,13 @@ import {
     openSwitchSessionsTaskModule,
 } from './task-modules-utility/taskModuleHelper';
 import { CONST } from './shared/Constants';
+import { trackException } from '../telemetryService';
 
 export interface TabContentProps extends WithTranslation {
     teamsTabContext: microsoftTeams.Context;
     httpService: HttpService;
-    appInsights: ApplicationInsights;
     helper: Helper;
+    envConfig: { [key: string]: any };
 }
 export interface TabContentState {
     /**
@@ -99,10 +100,7 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
         if (eventHandler) {
             eventHandler.handleEvent(dataEvent, this.state.selectedAmaSessionData, this.refreshSession, this.showNewUpdatesButton, this.refreshSession);
         } else {
-            this.props.appInsights.trackException({
-                exception: new Error(`Cant find event handler for ${dataEvent.type}`),
-                severityLevel: SeverityLevel.Error,
-            });
+            trackException(new Error(`Cant find event handler for ${dataEvent.type}`), SeverityLevel.Error);
         }
     };
 
@@ -142,14 +140,10 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
     };
 
     private logTelemetry = (error: Error) => {
-        this.props.appInsights.trackException({
-            exception: error,
-            severityLevel: SeverityLevel.Error,
-            properties: {
-                meetingId: this.props.teamsTabContext?.meetingId,
-                userAadObjectId: this.props.teamsTabContext?.userObjectId,
-                conversationId: this.props.teamsTabContext?.chatId,
-            },
+        trackException(error, SeverityLevel.Error, {
+            meetingId: this.props.teamsTabContext?.meetingId,
+            userAadObjectId: this.props.teamsTabContext?.userObjectId,
+            conversationId: this.props.teamsTabContext?.chatId,
         });
     };
 
@@ -345,15 +339,11 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
             // Revert vote since api call has failed.
             updateVote(true);
             invokeTaskModuleForQuestionUpdateFailure(this.props.t);
-            this.props.appInsights.trackException({
-                exception: error,
-                severityLevel: SeverityLevel.Error,
-                properties: {
-                    meetingId: this.props.teamsTabContext.meetingId,
-                    userAadObjectId: this.props.teamsTabContext.userObjectId,
-                    questionId: event?.question?.id,
-                    message: `Failure in updating question, update action ${event?.actionValue}`,
-                },
+            trackException(error, SeverityLevel.Error, {
+                meetingId: this.props.teamsTabContext.meetingId,
+                userAadObjectId: this.props.teamsTabContext.userObjectId,
+                questionId: event?.question?.id,
+                message: `Failure in updating question, update action ${event?.actionValue}`,
             });
         }
     };
@@ -402,7 +392,7 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
                     conversationId={this.props.teamsTabContext.chatId}
                     onEvent={this.updateEvent}
                     httpService={this.props.httpService}
-                    appInsights={this.props.appInsights}
+                    envConfig={this.props.envConfig}
                     teamsTabContext={this.props.teamsTabContext}
                 />
                 {selectedAmaSessionData.sessionId ? (

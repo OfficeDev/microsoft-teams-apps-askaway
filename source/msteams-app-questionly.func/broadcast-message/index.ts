@@ -32,8 +32,8 @@ const activityFunction: AzureFunction = async function (
     meetingId: meetingId,
     conversationId: conversationId,
     properties: {
-        event: eventData,
-    }
+      event: eventData,
+    },
   });
 };
 

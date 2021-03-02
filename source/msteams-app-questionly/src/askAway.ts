@@ -246,7 +246,16 @@ export class AskAway extends TeamsActivityHandler {
         }
 
         try {
-            await this.controller.submitNewQuestion(qnaSessionId, userAadObjectId, userName, questionContent, conversationId, context.activity.serviceUrl, EventInitiator.MainCard, getMeetingIdFromContext(context));
+            await this.controller.submitNewQuestion(
+                qnaSessionId,
+                userAadObjectId,
+                userName,
+                questionContent,
+                conversationId,
+                context.activity.serviceUrl,
+                EventInitiator.MainCard,
+                getMeetingIdFromContext(context)
+            );
         } catch (error) {
             exceptionLogger(error, {
                 conversationId: conversationId,
