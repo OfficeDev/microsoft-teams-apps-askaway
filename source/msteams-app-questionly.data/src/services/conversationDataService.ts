@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { Conversation, IConversation } from "./../schemas/conversation";
 import { retryWrapper } from "./../utils/retryPolicies";
 

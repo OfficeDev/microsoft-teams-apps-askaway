@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { retryWrapper } from "./../utils/retryPolicies";
 import { IUser, User } from "./../schemas/user";
 

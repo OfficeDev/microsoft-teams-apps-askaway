@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { IQnASession, QnASession } from "src/schemas/qnaSession";
 import mongoose from "mongoose";
 import { DocumentNotAvailableForOperationError } from "src/errors/documentNotAvailableForOperationError";
