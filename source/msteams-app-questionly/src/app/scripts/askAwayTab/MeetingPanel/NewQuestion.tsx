@@ -1,15 +1,14 @@
-// tslint:disable:no-relative-imports
-import './../index.scss';
-import * as React from 'react';
-import { Flex, Button, TextArea, FlexItem } from '@fluentui/react-northstar';
 import { SendIcon } from '@fluentui/react-icons-northstar';
-import { useState } from 'react';
-import { HttpService } from '../shared/HttpService';
-import * as microsoftTeams from '@microsoft/teams-js';
-import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
+import { Button, Flex, FlexItem, TextArea } from '@fluentui/react-northstar';
 import { ApplicationInsights, SeverityLevel } from '@microsoft/applicationinsights-web';
-import { invokeTaskModuleForQuestionPostFailure } from '../task-modules-utility/taskModuleHelper';
+import * as microsoftTeams from '@microsoft/teams-js';
 import { TFunction } from 'i18next';
+import * as React from 'react';
+import { useState } from 'react';
+import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
+import { HttpService } from '../shared/HttpService';
+import { invokeTaskModuleForQuestionPostFailure } from '../task-modules-utility/taskModuleHelper';
+import './../index.scss';
 
 /**
  * Properties for the NewQuestion React component
@@ -54,23 +53,17 @@ const NewQuestion: React.FunctionComponent<NewQuestionProps> = (props) => {
         }
     };
 
+    const onChangeSetQuestion = (e) => {
+        setQuestion(e.target['value']);
+    };
+
     return (
         <Flex hAlign="center" vAlign="end" className="input-text-field" gap="gap.small">
             <FlexItem>
-                <TextArea
-                    className="text-question"
-                    inverted
-                    fluid
-                    maxLength={250}
-                    placeholder={props.t('meetingPanel.inputPlaceholder')}
-                    onChange={(e) => {
-                        setQuestion(e.target['value']);
-                    }}
-                    value={question}
-                />
+                <TextArea className="text-question" inverted fluid maxLength={250} placeholder={props.t('meetingPanel.inputPlaceholder')} onChange={onChangeSetQuestion} value={question} />
             </FlexItem>
             <FlexItem push>
-                <Button icon={<SendIcon size="large" onClick={() => submitQuestion()} />} text iconOnly />
+                <Button icon={<SendIcon size="large" onClick={submitQuestion} />} text iconOnly />
             </FlexItem>
         </Flex>
     );

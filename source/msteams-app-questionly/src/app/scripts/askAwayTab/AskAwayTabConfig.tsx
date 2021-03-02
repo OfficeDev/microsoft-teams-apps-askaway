@@ -1,10 +1,10 @@
-import './index.scss';
-import * as React from 'react';
 import { Provider } from '@fluentui/react-northstar';
-import msteamsReactBaseComponent, { ITeamsBaseComponentState } from 'msteams-react-base-component';
 import * as microsoftTeams from '@microsoft/teams-js';
-import AskAwayTabConfigInternal from './AskAwayTabConfigInternal';
+import msteamsReactBaseComponent, { ITeamsBaseComponentState } from 'msteams-react-base-component';
+import * as React from 'react';
 import { i18next } from './../askAwayTab/shared/i18next';
+import AskAwayTabConfigInternal from './AskAwayTabConfigInternal';
+import './index.scss';
 import Helper from './shared/Helper';
 
 export interface IAskAwayTabConfigState extends ITeamsBaseComponentState {

@@ -1,6 +1,6 @@
-import './../index.scss';
+import { Flex, Image, Text } from '@fluentui/react-northstar';
 import * as React from 'react';
-import { Image, Text, Flex } from '@fluentui/react-northstar';
+import './../index.scss';
 
 const NoQuestionImage = require('./../../../web/assets/no-question.png');
 /**

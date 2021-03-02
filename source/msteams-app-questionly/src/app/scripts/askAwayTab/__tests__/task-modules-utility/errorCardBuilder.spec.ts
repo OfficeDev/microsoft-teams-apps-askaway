@@ -1,4 +1,3 @@
-// tslint:disable:no-relative-imports
 import { Container, Image, TextBlock, SubmitAction, ActionSet } from 'adaptivecards';
 import {
     createCardForInsufficientPermissionsToCreateQnASessionError,

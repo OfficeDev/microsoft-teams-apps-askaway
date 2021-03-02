@@ -1,14 +1,13 @@
-// tslint:disable:no-relative-imports
 import { AdaptiveCard, IAdaptiveCard } from 'adaptivecards';
-import { _adaptiveCard } from './cardHelper';
-import { ISubmitButtonData, SubmitButtonId } from './ISubmitButtonData';
 import * as ACData from 'adaptivecards-templating';
 import { TFunction } from 'i18next';
+import { _adaptiveCard } from './cardHelper';
+import { ISubmitButtonData, SubmitButtonId } from './ISubmitButtonData';
 
 /**
  * Creates a card for end Q&A session end confirmation.
  */
-export const createEndQnAConfirmationAdaptiveCard = (t: TFunction): AdaptiveCard => {
+export const confirmationCardBuilder = (t: TFunction): AdaptiveCard => {
     return createConfirmationAdaptiveCard(
         t('TaskModuleMessages.QnASessionEndPrompt'),
         { title: t('TaskModuleMessages.Cancel'), id: SubmitButtonId.Cancel },

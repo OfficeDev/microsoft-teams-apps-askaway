@@ -1,6 +1,5 @@
-// tslint:disable:no-relative-imports
 import { SubmitAction, TextBlock } from 'adaptivecards';
-import { createEndQnAConfirmationAdaptiveCard } from '../../task-modules-utility/confirmationCardBuilder';
+import { confirmationCardBuilder } from '../../task-modules-utility/confirmationCardBuilder';
 
 describe('test confirmationCardBuilder', () => {
     it('test confirmation card for end qna session flow', () => {
@@ -9,7 +8,7 @@ describe('test confirmationCardBuilder', () => {
             return key;
         });
 
-        const card = createEndQnAConfirmationAdaptiveCard(t);
+        const card = confirmationCardBuilder(t);
 
         expect(card.getItemAt(0) instanceof TextBlock).toBeTruthy();
         expect((<TextBlock>card.getItemAt(0)).text).toBe(`TaskModuleMessages.QnASessionEndPrompt`);

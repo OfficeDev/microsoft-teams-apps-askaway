@@ -295,5 +295,5 @@ const getAllQuestionsContainer = () => {
                 $data: '${$root.questions}',
             },
         ],
-    }
+    };
 };

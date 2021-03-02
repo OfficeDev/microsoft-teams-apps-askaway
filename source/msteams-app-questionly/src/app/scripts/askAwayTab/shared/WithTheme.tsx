@@ -5,7 +5,7 @@ export interface ThemeProps {
     theme: ThemePrepared;
 }
 
-/** Creates dummy color schemes for unit tests */
+// Creates dummy color schemes for unit tests
 const createThemeForUTs = (): ThemePrepared => {
     return ({
         siteVariables: {

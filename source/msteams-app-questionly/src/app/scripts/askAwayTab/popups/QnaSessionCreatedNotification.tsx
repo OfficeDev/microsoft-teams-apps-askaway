@@ -1,10 +1,10 @@
-import msteamsReactBaseComponent, { ITeamsBaseComponentState } from 'msteams-react-base-component';
-import * as microsoftTeams from '@microsoft/teams-js';
-import * as React from 'react';
-import './../index.scss';
 import { Provider } from '@fluentui/react-northstar';
+import * as microsoftTeams from '@microsoft/teams-js';
+import msteamsReactBaseComponent, { ITeamsBaseComponentState } from 'msteams-react-base-component';
+import * as React from 'react';
 import Helper from '../shared/Helper';
 import { i18next } from '../shared/i18next';
+import './../index.scss';
 import QnaSessionNotificationInternal from './QnaSessionNotificationInternal';
 
 export interface QnaSessionCreatedNotificationProps {}

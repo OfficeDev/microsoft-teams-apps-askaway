@@ -1,12 +1,11 @@
-// tslint:disable:no-relative-imports
-import './../index.scss';
-import * as React from 'react';
-import { Flex, Button, FlexItem, Divider } from '@fluentui/react-northstar';
-import { SwitchIcon } from '../shared/Icons/SwitchIcon';
 import { AddIcon, RetryIcon } from '@fluentui/react-icons-northstar';
+import { Button, Divider, Flex, FlexItem } from '@fluentui/react-northstar';
+import * as React from 'react';
 import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
 import { ParticipantRoles } from '../../../../enums/ParticipantRoles';
 import { isPresenterOrOrganizer } from '.././shared/meetingUtility';
+import { SwitchIcon } from '../shared/Icons/SwitchIcon';
+import './../index.scss';
 
 /**
  * Properties for the TabHeader React component

@@ -1,13 +1,13 @@
-import './../index.scss';
+import { ChevronDownMediumIcon, ChevronEndMediumIcon, LikeIcon } from '@fluentui/react-icons-northstar';
+import { Avatar, Button, Flex, Text } from '@fluentui/react-northstar';
 import * as React from 'react';
-import { Flex, Avatar, Text, Button } from '@fluentui/react-northstar';
-import Badge from '../shared/Badge';
-import { LikeIcon, ChevronDownMediumIcon, ChevronEndMediumIcon } from '@fluentui/react-icons-northstar';
-import { LikeIconFilled } from '../shared/Icons/LikeIconFilled';
-import { CONST } from '../shared/Constants';
 import { useState } from 'react';
 import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
+import Badge from '../shared/Badge';
+import { CONST } from '../shared/Constants';
+import { LikeIconFilled } from '../shared/Icons/LikeIconFilled';
 import { ThemeProps, withTheme } from '../shared/WithTheme';
+import './../index.scss';
 
 /**
  * Properties for the TabQuestions React component
@@ -24,7 +24,7 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (p
 
     const [isAnsweredTabOpen, setAnsweredTabOpen] = useState(true);
 
-    const isUserLikedQuestion = (votes: Array<string>) => {
+    const isUserLikedQuestion = (votes: string[]) => {
         if (props.teamsTabContext.userObjectId) {
             return votes.includes(props.teamsTabContext.userObjectId);
         }

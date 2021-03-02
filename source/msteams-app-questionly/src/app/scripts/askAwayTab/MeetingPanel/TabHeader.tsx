@@ -1,9 +1,8 @@
-// tslint:disable:no-relative-imports
-import './../index.scss';
-import * as React from 'react';
 import { Menu, tabListBehavior } from '@fluentui/react-northstar';
-import { CONST } from './../shared/Constants';
 import { TFunction } from 'i18next';
+import * as React from 'react';
+import './../index.scss';
+import { CONST } from './../shared/Constants';
 
 /**
  * Properties for the TabHeader React component

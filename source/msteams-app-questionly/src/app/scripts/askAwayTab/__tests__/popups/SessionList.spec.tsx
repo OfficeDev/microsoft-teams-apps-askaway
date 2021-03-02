@@ -1,11 +1,11 @@
-import { shallow, configure } from 'enzyme';
+import { Button, List, ListProps } from '@fluentui/react-northstar';
+import { configure, shallow } from 'enzyme';
+import enzymeAdapterReact16 from 'enzyme-adapter-react-16';
 import * as React from 'react';
 import { ClientDataContract } from '../../../../../contracts/clientDataContract';
 import SessionList from '../../popups/switch-session/SessionList';
-import Adapter from 'enzyme-adapter-react-16';
-import { Button, List, ListProps } from '@fluentui/react-northstar';
 
-configure({ adapter: new Adapter() });
+configure({ adapter: new enzymeAdapterReact16() });
 
 describe('Test SessionList Component', () => {
     let testSessions: ClientDataContract.QnaSession[];

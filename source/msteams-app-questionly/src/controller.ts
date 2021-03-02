@@ -1,11 +1,8 @@
 // Middleman file to allow for communication between the bot, database, and adaptive card builder.
-import * as adaptiveCardBuilder from 'src/adaptive-cards/adaptiveCardBuilder'; // To populate adaptive cards
 import { AdaptiveCard } from 'adaptivecards';
-import { exceptionLogger, trackCreateQnASessionEvent, trackCreateQuestionEvent } from 'src/util/exceptionTracking';
 import jimp from 'jimp';
-import { IQuestion, IQuestionPopulatedUser, IQnASessionDataService, IQuestionDataService, IQnASession_populated, IConversation, SessionIsNoLongerActiveError } from 'msteams-app-questionly.data';
-import { isPresenterOrOrganizer } from 'src/util/meetingsUtility';
-import { UnauthorizedAccessError, UnauthorizedAccessErrorCode } from 'src/errors/unauthorizedAccessError';
+import { IConversation, IQnASessionDataService, IQnASession_populated, IQuestion, IQuestionDataService, IQuestionPopulatedUser, SessionIsNoLongerActiveError } from 'msteams-app-questionly.data';
+import * as adaptiveCardBuilder from 'src/adaptive-cards/adaptiveCardBuilder'; // To populate adaptive cards
 import {
     triggerBackgroundJobForQnaSessionCreatedEvent,
     triggerBackgroundJobForQnaSessionEndedEvent,
@@ -14,9 +11,12 @@ import {
     triggerBackgroundJobForQuestionPostedEvent,
     triggerBackgroundJobForQuestionUpvotedEvent,
 } from 'src/background-job/backgroundJobTrigger';
-import { isValidStringParameter } from 'src/util/typeUtility';
 import { ChangesRevertedDueToBackgroundJobFailureError } from 'src/errors/changesRevertedDueToBackgroundJobFailureError';
 import { RevertOperationFailedAfterBackgroundJobFailureError } from 'src/errors/revertOperationFailedAfterBackgroundJobFailureError';
+import { UnauthorizedAccessError, UnauthorizedAccessErrorCode } from 'src/errors/unauthorizedAccessError';
+import { exceptionLogger, trackCreateQnASessionEvent, trackCreateQuestionEvent } from 'src/util/exceptionTracking';
+import { isPresenterOrOrganizer } from 'src/util/meetingsUtility';
+import { isValidStringParameter } from 'src/util/typeUtility';
 import { TelemetryExceptions } from './constants/telemetryConstants';
 import { EventInitiator } from 'src/enums/eventInitiator';
 

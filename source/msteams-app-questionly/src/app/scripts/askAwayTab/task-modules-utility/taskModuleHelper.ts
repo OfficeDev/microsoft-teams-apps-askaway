@@ -1,19 +1,18 @@
-// tslint:disable:no-relative-imports
 import { TaskInfo, tasks } from '@microsoft/teams-js';
 import { AdaptiveCard } from 'adaptivecards';
 import { StatusCodes } from 'http-status-codes';
+import { TFunction } from 'i18next';
 import { UnauthorizedAccessErrorCode } from '../../../../errors/unauthorizedAccessError';
-import { createEndQnAConfirmationAdaptiveCard } from './confirmationCardBuilder';
+import { confirmationCardBuilder } from './confirmationCardBuilder';
 import {
-    createGenericErrorCard,
     createCardForInsufficientPermissionsToCreateQnASessionError,
     createCardForInsufficientPermissionsToEndQnASessionError,
     createCardForQnASessionLimitExhaustedError,
     createCardForUnauthorizedAccessError,
+    createGenericErrorCard,
 } from './errorCardBuilder';
 import { SubmitButtonId } from './ISubmitButtonData';
-import { createSuccessAdaptiveCard } from './successCardBuilder';
-import { TFunction } from 'i18next';
+import { successCardBuilder } from './successCardBuilder';
 
 /**
  * Handles a case where creating a QnA session fails from task module.
@@ -72,7 +71,7 @@ export const handleTaskModuleErrorForEndQnASessionFlow = (t: TFunction, error: a
  * handles a case where new session creation is successful.
  */
 export const handleTaskModuleResponseForSuccessfulCreateQnASessionFlow = (t: TFunction) => {
-    const card = createSuccessAdaptiveCard(t('TaskModuleMessages.NewSessionCreated'));
+    const card = successCardBuilder(t('TaskModuleMessages.NewSessionCreated'));
     invokeAdaptiveCardBasedTaskModule(t('TaskModuleMessages.StartQnATitle'), card);
 };
 
@@ -81,7 +80,7 @@ export const handleTaskModuleResponseForSuccessfulCreateQnASessionFlow = (t: TFu
  * handles a case where a session is successfully ended.
  */
 export const handleTaskModuleResponseForEndQnASessionFlow = (t: TFunction) => {
-    const card = createSuccessAdaptiveCard(t('TaskModuleMessages.UnblockedToCreateNewSession'));
+    const card = successCardBuilder(t('TaskModuleMessages.UnblockedToCreateNewSession'));
     invokeAdaptiveCardBasedTaskModule(t('TaskModuleMessages.EndQnATitle'), card);
 };
 
@@ -99,7 +98,7 @@ export const handleEndQnASessionFlow = (t: TFunction, endSessionHandler: () => v
         }
     };
 
-    const card = createEndQnAConfirmationAdaptiveCard(t);
+    const card = confirmationCardBuilder(t);
     invokeAdaptiveCardBasedTaskModule(t('TaskModuleMessages.EndQnATitle'), card, submitHandler);
 };
 
