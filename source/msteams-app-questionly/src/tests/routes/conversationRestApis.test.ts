@@ -8,7 +8,7 @@ import { triggerBackgroundJobForQnaSessionCreatedEvent } from 'src/background-jo
 import { Controller, IController } from 'src/controller';
 import { errorMessages } from 'src/errors/errorMessages';
 import { UnauthorizedAccessError, UnauthorizedAccessErrorCode } from 'src/errors/unauthorizedAccessError';
-import { initializeRouter, router } from 'src/routes/rest';
+import { conversationRouter, initializeRouter } from 'src/routes/conversationRestApis';
 import { restApiErrorMiddleware } from 'src/routes/restApiErrorMiddleware';
 import { getTeamsUserId } from 'src/routes/restUtils';
 import { ClientDataContractFormatter, IClientDataContractFormatter } from 'src/util/clientDataContractFormatter';
@@ -61,7 +61,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId api', () => {
             next();
         };
         // Rest endpoints
-        app.use('/api/conversations', mockEnsureAuthenticated, router);
+        app.use('/api/conversations', mockEnsureAuthenticated, conversationRouter);
         app.use(restApiErrorMiddleware);
 
         (<any>verifyUserFromConversationId) = jest.fn();
@@ -212,7 +212,7 @@ describe('test conversations/:conversationId/sessions api', () => {
             next();
         };
         // Rest endpoints
-        app.use('/api/conversations', mockEnsureAuthenticated, router);
+        app.use('/api/conversations', mockEnsureAuthenticated, conversationRouter);
         app.use(restApiErrorMiddleware);
         (<any>mockQnASessionDataService.getAllQnASessionData) = jest.fn();
         (<any>mockClientDataContractFormatter.formatQnaSessionDataArrayAsPerClientDataContract) = jest.fn();
@@ -433,7 +433,7 @@ describe('test post conversations/:conversationId/sessions api', () => {
             next();
         };
         // Rest endpoints
-        app.use('/api/conversations', mockEnsureAuthenticated, router);
+        app.use('/api/conversations', mockEnsureAuthenticated, conversationRouter);
         app.use(restApiErrorMiddleware);
 
         (<any>isPresenterOrOrganizer) = jest.fn();
@@ -604,7 +604,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions api'
         (<any>conversationDataService.getConversationData) = jest.fn();
 
         // Rest endpoints
-        app.use('/api/conversations', mockEnsureAuthenticated, router);
+        app.use('/api/conversations', mockEnsureAuthenticated, conversationRouter);
         app.use(restApiErrorMiddleware);
     });
 
@@ -780,7 +780,7 @@ describe('test /conversations/:conversationId/me api', () => {
         (<any>conversationDataService.getConversationData) = jest.fn();
 
         // Rest endpoints
-        app.use('/api/conversations', mockEnsureAuthenticated, router);
+        app.use('/api/conversations', mockEnsureAuthenticated, conversationRouter);
         app.use(restApiErrorMiddleware);
     });
 
@@ -921,7 +921,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId/questions/:que
         };
 
         // Rest endpoints
-        app.use('/api/conversations', mockEnsureAuthenticated, router);
+        app.use('/api/conversations', mockEnsureAuthenticated, conversationRouter);
         app.use(restApiErrorMiddleware);
 
         (<any>mockController.upvoteQuestion) = jest.fn();
@@ -1290,7 +1290,7 @@ describe('test /conversations/:conversationId/sessions/:sessionId patch api', ()
         (<any>conversationDataService.getConversationData) = jest.fn();
 
         // Rest endpoints
-        app.use('/api/conversations', mockEnsureAuthenticated, router);
+        app.use('/api/conversations', mockEnsureAuthenticated, conversationRouter);
         app.use(restApiErrorMiddleware);
     });
 
@@ -1428,7 +1428,7 @@ describe('test get /:conversationId/activesessions api', () => {
             next();
         };
         // Rest endpoints
-        app.use('/api/conversations', mockEnsureAuthenticated, router);
+        app.use('/api/conversations', mockEnsureAuthenticated, conversationRouter);
         app.use(restApiErrorMiddleware);
 
         (<any>mockQnASessionDataService.getAllActiveQnASessionData) = jest.fn();

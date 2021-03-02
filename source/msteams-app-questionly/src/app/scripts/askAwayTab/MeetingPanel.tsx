@@ -1,5 +1,5 @@
-import { ArrowUpIcon, Button, Flex, FlexItem, Loader } from '@fluentui/react-northstar';
-import { ApplicationInsights, SeverityLevel } from '@microsoft/applicationinsights-web';
+import { Button, Flex, FlexItem, Loader } from '@fluentui/react-northstar';
+import { SeverityLevel } from '@microsoft/applicationinsights-web';
 import * as microsoftTeams from '@microsoft/teams-js';
 import { TFunction } from 'i18next';
 import { IDataEvent } from 'msteams-app-questionly.common';
@@ -7,6 +7,7 @@ import * as React from 'react';
 import { withTranslation, WithTranslation } from 'react-i18next';
 import { ClientDataContract } from '../../../../src/contracts/clientDataContract';
 import { ParticipantRoles } from '../../../enums/ParticipantRoles';
+import { trackException } from '../telemetryService';
 import { DataEventHandlerFactory } from './dataEventHandling/dataEventHandlerFactory';
 import './index.scss';
 import EmptyTile from './MeetingPanel/EmptyTile';
@@ -35,8 +36,8 @@ const noSessionImageForAttendees = require('./../../web/assets/relax_and_wait.pn
 export interface MeetingPanelProps extends WithTranslation {
     teamsTabContext: microsoftTeams.Context;
     httpService: HttpService;
-    appInsights: ApplicationInsights;
     helper: Helper;
+    envConfig: { [key: string]: any };
 }
 
 /**
@@ -90,14 +91,10 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
     }
 
     private logTelemetry = (error: Error) => {
-        this.props.appInsights.trackException({
-            exception: error,
-            severityLevel: SeverityLevel.Error,
-            properties: {
-                meetingId: this.props.teamsTabContext?.meetingId,
-                userAadObjectId: this.props.teamsTabContext?.userObjectId,
-                conversationId: this.props.teamsTabContext?.chatId,
-            },
+        trackException(error, SeverityLevel.Error, {
+            meetingId: this.props.teamsTabContext?.meetingId,
+            userAadObjectId: this.props.teamsTabContext?.userObjectId,
+            conversationId: this.props.teamsTabContext?.chatId,
         });
     };
 
@@ -180,12 +177,12 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
      * To End the active session
      * @param e - event
      */
-    endActiveSession = (e?: any) => {
+    endActiveSession = () => {
         if (this.state?.activeSessionData?.sessionId) {
             this.setState({ showLoader: true });
             this.props.httpService
                 .patch(`/conversations/${this.props.teamsTabContext.chatId}/sessions/${this.state.activeSessionData.sessionId}`, { action: 'end' })
-                .then((response: any) => {
+                .then(() => {
                     this.setState({
                         showLoader: false,
                         isActiveSessionEnded: true,
@@ -305,10 +302,7 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
         if (eventHandler) {
             eventHandler.handleEvent(dataEvent, this.state.activeSessionData, this.updateQnASessionContent, this.showNewUpdatesButton, this.updateActiveSessionData);
         } else {
-            this.props.appInsights.trackException({
-                exception: new Error(`Cant find event handler for ${dataEvent.type}`),
-                severityLevel: SeverityLevel.Error,
-            });
+            trackException(new Error(`Cant find event handler for ${dataEvent.type}`), SeverityLevel.Error);
         }
     };
 
@@ -342,14 +336,7 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                     showToolBar={true}
                 />
                 {activeSessionData.unansweredQuestions.length > 0 || activeSessionData.answeredQuestions.length > 0 ? (
-                    <QuestionsList
-                        appInsights={this.props.appInsights}
-                        t={this.localize}
-                        userRole={userRole}
-                        activeSessionData={activeSessionData}
-                        httpService={this.props.httpService}
-                        teamsTabContext={this.props.teamsTabContext}
-                    />
+                    <QuestionsList t={this.localize} userRole={userRole} activeSessionData={activeSessionData} httpService={this.props.httpService} teamsTabContext={this.props.teamsTabContext} />
                 ) : (
                     <Flex className="margin-top-bottom" column gap="gap.small" hAlign="center" vAlign="center">
                         <EmptyTile image={collaborationImage} line1={this.localize('meetingPanel.noQuestionsPosted')} line2={this.localize('meetingPanel.askAway')} />
@@ -362,7 +349,6 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                 )}
                 <FlexItem push>
                     <NewQuestion
-                        appInsights={this.props.appInsights}
                         t={this.localize}
                         activeSessionData={activeSessionData}
                         httpService={this.props.httpService}
@@ -394,8 +380,8 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                             conversationId={this.props.teamsTabContext.chatId}
                             onEvent={this.updateEvent}
                             httpService={this.props.httpService}
-                            appInsights={this.props.appInsights}
                             teamsTabContext={this.props.teamsTabContext}
+                            envConfig={this.props.envConfig}
                         />
                         {activeSessionData.sessionId ? this.showSessionQuestions() : this.createNewSessionLayout()}
                     </Flex>

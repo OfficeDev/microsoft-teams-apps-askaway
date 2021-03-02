@@ -1,11 +1,12 @@
 import { SendIcon } from '@fluentui/react-icons-northstar';
 import { Button, Flex, FlexItem, TextArea } from '@fluentui/react-northstar';
-import { ApplicationInsights, SeverityLevel } from '@microsoft/applicationinsights-web';
+import { SeverityLevel } from '@microsoft/applicationinsights-web';
 import * as microsoftTeams from '@microsoft/teams-js';
 import { TFunction } from 'i18next';
 import * as React from 'react';
 import { useState } from 'react';
 import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
+import { trackException } from '../../telemetryService';
 import { HttpService } from '../shared/HttpService';
 import { invokeTaskModuleForQuestionPostFailure } from '../task-modules-utility/taskModuleHelper';
 import './../index.scss';
@@ -19,7 +20,6 @@ export interface NewQuestionProps {
     teamsTabContext: microsoftTeams.Context;
     onAddNewQuestion: Function;
     t: TFunction;
-    appInsights: ApplicationInsights;
 }
 const NewQuestion: React.FunctionComponent<NewQuestionProps> = (props) => {
     const [question, setQuestion] = useState('');
@@ -42,13 +42,9 @@ const NewQuestion: React.FunctionComponent<NewQuestionProps> = (props) => {
         } catch (error) {
             invokeTaskModuleForQuestionPostFailure(props.t);
 
-            props.appInsights.trackException({
-                exception: error,
-                severityLevel: SeverityLevel.Error,
-                properties: {
-                    meetingId: props.teamsTabContext.meetingId,
-                    userAadObjectId: props.teamsTabContext.userObjectId,
-                },
+            trackException(error, SeverityLevel.Error, {
+                meetingId: props.teamsTabContext.meetingId,
+                userAadObjectId: props.teamsTabContext.userObjectId,
             });
         }
     };

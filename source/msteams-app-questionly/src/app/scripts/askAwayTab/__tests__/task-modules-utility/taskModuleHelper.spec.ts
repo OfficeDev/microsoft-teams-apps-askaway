@@ -36,6 +36,15 @@ describe('test handleTaskModuleErrorForCreateQnASessionFlow', () => {
         };
     });
 
+    beforeAll(() => {
+        Object.defineProperty(window, 'location', {
+            value: {
+                host: `${process.env.HostName}`,
+            },
+            writable: true,
+        });
+    });
+
     beforeEach(() => {
         jest.clearAllMocks();
     });

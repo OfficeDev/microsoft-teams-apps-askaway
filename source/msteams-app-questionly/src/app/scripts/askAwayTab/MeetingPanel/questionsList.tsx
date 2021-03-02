@@ -1,10 +1,11 @@
-import { ApplicationInsights, SeverityLevel } from '@microsoft/applicationinsights-web';
+import { SeverityLevel } from '@microsoft/applicationinsights-web';
 import * as microsoftTeams from '@microsoft/teams-js';
 import { TFunction } from 'i18next';
 import * as React from 'react';
 import { useMemo, useState } from 'react';
 import { ClientDataContract } from '../../../../contracts/clientDataContract';
 import { ParticipantRoles } from '../../../../enums/ParticipantRoles';
+import { trackException } from '../../telemetryService';
 import { CONST } from '../shared/Constants';
 import { HttpService } from '../shared/HttpService';
 import { invokeTaskModuleForQuestionUpdateFailure } from '../task-modules-utility/taskModuleHelper';
@@ -21,7 +22,6 @@ export interface QuestionsListProps {
     teamsTabContext: microsoftTeams.Context;
     t: TFunction;
     userRole: ParticipantRoles;
-    appInsights: ApplicationInsights;
 }
 
 export interface QuestionTab {
@@ -109,15 +109,11 @@ const QuestionsList: React.FunctionComponent<QuestionsListProps> = (props) => {
             // Revert vote since api call has failed.
             updateVote(true);
             invokeTaskModuleForQuestionUpdateFailure(props.t);
-            props.appInsights.trackException({
-                exception: error,
-                severityLevel: SeverityLevel.Error,
-                properties: {
-                    meetingId: props.teamsTabContext.meetingId,
-                    userAadObjectId: props.teamsTabContext.userObjectId,
-                    questionId: event?.question?.id,
-                    message: `Failure in updating question, update action ${event?.actionValue}`,
-                },
+            trackException(error, SeverityLevel.Error, {
+                meetingId: props.teamsTabContext.meetingId,
+                userAadObjectId: props.teamsTabContext.userObjectId,
+                questionId: event?.question?.id,
+                message: `Failure in updating question, update action ${event?.actionValue}`,
             });
         }
     };

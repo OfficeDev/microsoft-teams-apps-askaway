@@ -3,12 +3,13 @@ import { useEffect, useState } from 'react';
 import * as signalR from '@microsoft/signalr';
 import * as microsoftTeams from '@microsoft/teams-js';
 import { StatusCodes } from 'http-status-codes';
-import { ApplicationInsights, SeverityLevel } from '@microsoft/applicationinsights-web';
+import { SeverityLevel } from '@microsoft/applicationinsights-web';
 import { HttpService } from '../shared/HttpService';
 import { IDataEvent } from 'msteams-app-questionly.common';
 import ConnectionStatusAlert from './ConnectionStatusAlert';
 import { TFunction } from 'i18next';
 import { TelemetryEvents } from '../../../../constants/telemetryConstants';
+import { trackEvent, trackException } from '../../telemetryService';
 
 /**
  * SignalR connection status
@@ -83,11 +84,6 @@ export interface SignalRLifecycleProps {
     httpService: HttpService;
 
     /**
-     * application insight client.
-     */
-    appInsights: ApplicationInsights;
-
-    /**
      * signalR HubConnection for UTs only.
      */
     connection?: signalR.HubConnection;
@@ -96,6 +92,11 @@ export interface SignalRLifecycleProps {
      *  __FOR_UTs_ONLY_ flag disabling trans 'react-i18next' component.
      */
     __disableTransComponent?: boolean;
+
+    /**
+     * Env variables
+     */
+    envConfig: { [key: string]: any };
 }
 
 /**
@@ -114,15 +115,12 @@ const SignalRLifecycle: React.FunctionComponent<SignalRLifecycleProps> = (props)
     const onEvent = (dataEvent: IDataEvent) => {
         props.onEvent(dataEvent);
 
-        props.appInsights.trackEvent(
-            { name: TelemetryEvents.SignalREventReceived },
-            {
-                conversationId: props.conversationId,
-                event: dataEvent,
-                userAadObjectId: props.teamsTabContext?.userObjectId,
-                meetingId: props.teamsTabContext?.meetingId,
-            }
-        );
+        trackEvent(TelemetryEvents.SignalREventReceived, {
+            conversationId: props.conversationId,
+            event: dataEvent,
+            userAadObjectId: props.teamsTabContext?.userObjectId,
+            meetingId: props.teamsTabContext?.meetingId,
+        });
     };
 
     /**
@@ -132,10 +130,9 @@ const SignalRLifecycle: React.FunctionComponent<SignalRLifecycleProps> = (props)
      */
     const showAutoRefreshEstablishingMessage = (error?: Error) => {
         setConnectionStatus(ConnectionStatus.Reconnecting);
-        props.appInsights.trackException({
-            exception: error,
-            severityLevel: SeverityLevel.Warning,
-        });
+        if (error) {
+            trackException(error, SeverityLevel.Warning);
+        }
     };
 
     /**
@@ -151,10 +148,7 @@ const SignalRLifecycle: React.FunctionComponent<SignalRLifecycleProps> = (props)
             setConnectionStatus(ConnectionStatus.NotConnected);
 
             if (error) {
-                props.appInsights.trackException({
-                    exception: error,
-                    severityLevel: SeverityLevel.Error,
-                });
+                trackException(error, SeverityLevel.Error);
             }
         }
     };
@@ -201,13 +195,16 @@ const SignalRLifecycle: React.FunctionComponent<SignalRLifecycleProps> = (props)
             conversationId: props.conversationId,
         };
 
-        const response = await props.httpService.post(`${process.env.SignalRFunctionBaseUrl}/api/add-to-group`, addToGroupInputDate, false, undefined, false);
+        if (!props.envConfig.SignalRFunctionBaseUrl) {
+            trackException(new Error('Error while calling /config API. Could not get SignalRFunctionBaseUrl'), SeverityLevel.Error);
+            handleConnectionError();
+            return;
+        }
+
+        const response = await props.httpService.post(`${props.envConfig.SignalRFunctionBaseUrl}/api/add-to-group`, addToGroupInputDate, false, undefined, false);
 
         if (response.status !== StatusCodes.OK) {
-            props.appInsights.trackException({
-                exception: new Error(`Error in adding connection to the group, conversationId: ${props.conversationId}, reason: ${response.statusText}`),
-                severityLevel: SeverityLevel.Error,
-            });
+            trackException(new Error(`Error in adding connection to the group, conversationId: ${props.conversationId}, reason: ${response.statusText}`), SeverityLevel.Error);
 
             handleConnectionError();
             return;
@@ -226,11 +223,15 @@ const SignalRLifecycle: React.FunctionComponent<SignalRLifecycleProps> = (props)
             setConnectionStatus(ConnectionStatus.Connecting);
             setConnectionLimit(ConnectionLimit.NotExhausted);
 
+            if (!props.envConfig.SignalRFunctionBaseUrl) {
+                throw new Error('Error while calling /config API. Could not get SignalRFunctionBaseUrl');
+            }
+
             if (!connection) {
                 connection =
                     props.connection ??
                     new signalR.HubConnectionBuilder()
-                        .withUrl(`${process.env.SignalRFunctionBaseUrl}/api`, {
+                        .withUrl(`${props.envConfig.SignalRFunctionBaseUrl}/api`, {
                             accessTokenFactory: async () => {
                                 return await props.httpService.getAuthToken();
                             },
@@ -261,15 +262,9 @@ const SignalRLifecycle: React.FunctionComponent<SignalRLifecycleProps> = (props)
                 setConnectionLimit(ConnectionLimit.Exhausted);
 
                 // Too many connection can be logged as warning than error.
-                props.appInsights.trackException({
-                    exception: error,
-                    severityLevel: SeverityLevel.Warning,
-                });
+                trackException(error, SeverityLevel.Warning);
             } else {
-                props.appInsights.trackException({
-                    exception: error,
-                    severityLevel: SeverityLevel.Error,
-                });
+                trackException(error, SeverityLevel.Error);
             }
 
             handleConnectionError();

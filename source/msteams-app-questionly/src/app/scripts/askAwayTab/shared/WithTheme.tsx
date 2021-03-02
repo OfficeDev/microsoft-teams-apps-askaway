@@ -30,7 +30,7 @@ export function withTheme<TProps>(base: React.FunctionComponent<TProps & ThemePr
     return (props: TProps) => (
         <Provider.Consumer
             render={(theme: any) => {
-                if (!theme?.siteVariables?.colorScheme && process.env.debugMode === 'true') {
+                if (!theme?.siteVariables?.colorScheme) {
                     theme = createThemeForUTs();
                 }
                 return base({ ...props, theme });
