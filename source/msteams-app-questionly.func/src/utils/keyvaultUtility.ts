@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import memoryCache, { CacheClass } from "memory-cache";
 import { exceptionLogger } from "./exceptionTracking";
 import { ifNumber } from "./typeUtility";

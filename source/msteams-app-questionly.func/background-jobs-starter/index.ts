@@ -1,4 +1,7 @@
-﻿import * as df from "durable-functions";
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+import * as df from "durable-functions";
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 import {
   createBadRequestResponse,

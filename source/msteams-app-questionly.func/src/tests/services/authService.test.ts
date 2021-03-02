@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { authenticateRequest } from "../../services/authService";
 import { triggerMockContext } from "./../mocks/testContext";
 import { HttpRequest } from "@azure/functions";

@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 import { userIdParameterConstant } from "../src/constants/requestConstants";
 import { verifyUserFromConversationId } from "msteams-app-questionly.common";

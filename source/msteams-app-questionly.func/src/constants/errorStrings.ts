@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 export const errorStrings = {
   TenantIdMissingError: "Tenant id is missing in the settings.",
   AzureAdValidIssuersMissingError:
