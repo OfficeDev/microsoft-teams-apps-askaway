@@ -1,24 +1,25 @@
-import { shallow, configure } from 'enzyme';
+import { Button, Text, ThemePrepared } from '@fluentui/react-northstar';
+import { configure, shallow } from 'enzyme';
+import enzymeAdapterReact16 from 'enzyme-adapter-react-16';
 import * as React from 'react';
-import Adapter from 'enzyme-adapter-react-16';
-import { Text, Button, ThemePrepared } from '@fluentui/react-northstar';
-import { ConnectionStatusAlert } from '../../signalR/ConnectionStatusAlert';
 import { Trans } from 'react-i18next';
+import { ConnectionStatusAlert } from '../../signalR/ConnectionStatusAlert';
 
-configure({ adapter: new Adapter() });
+configure({ adapter: new enzymeAdapterReact16() });
 
 describe('Test ConnectionStatusAlert Component', () => {
-    const onRefreshConnection = jest.fn();
+    let onRefreshConnection;
     let t: jest.Mock<any, any>;
 
     beforeAll(() => {
         t = jest.fn();
+        onRefreshConnection = jest.fn();
         t.mockImplementation((key: string) => {
             return key;
         });
     });
 
-    /** Creates dummy color schemes for unit tests */
+    // Creates dummy color schemes for unit tests
     const createThemeForUTs = (): ThemePrepared => {
         return ({
             siteVariables: {

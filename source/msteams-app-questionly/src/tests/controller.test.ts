@@ -11,6 +11,7 @@ import {
     triggerBackgroundJobForQnaSessionEndedEvent,
     triggerBackgroundJobForQuestionUpvotedEvent,
 } from 'src/background-job/backgroundJobTrigger';
+import { EventInitiator } from 'src/enums/eventInitiator';
 
 const sampleUserAADObjId1 = 'be36140g-9729-3024-8yg1-147bbi67g2c9';
 const sampleUserName = 'Sample Name';
@@ -92,6 +93,7 @@ test('start qna session in channel', async () => {
         hostUserId: sampleHostUserId,
         isChannel: true,
         serviceUrl: sampleServiceUrl,
+        caller: EventInitiator.MainCard,
     });
     expect(qnaSessionDataService.createQnASession).toBeCalledTimes(1);
     expect(qnaSessionDataService.createQnASession).toBeCalledWith({
@@ -138,6 +140,7 @@ test('start qna session in group chat', async () => {
         isChannel: false,
         serviceUrl: sampleServiceUrl,
         meetingId: sampleMeetingId,
+        caller: EventInitiator.MainCard,
     });
     expect(qnaSessionDataService.createQnASession).toBeCalledTimes(1);
     expect(qnaSessionDataService.createQnASession).toBeCalledWith({
@@ -186,6 +189,7 @@ test('create qna session - revert changes if background function is not triggere
             isChannel: false,
             serviceUrl: sampleServiceUrl,
             meetingId: sampleMeetingId,
+            caller: EventInitiator.MainCard,
         })
     ).rejects.toThrow();
     expect(qnaSessionDataService.createQnASession).toBeCalledTimes(1);
@@ -223,6 +227,7 @@ test('start qna session in meeting for attendee', async () => {
             isChannel: false,
             serviceUrl: sampleServiceUrl,
             meetingId: sampleMeetingId,
+            caller: EventInitiator.MainCard,
         })
     ).rejects.toThrow();
     expect(qnaSessionDataService.createQnASession).toBeCalledTimes(0);
@@ -258,7 +263,7 @@ test('submit new question - revert changes if background function is not trigger
     });
 
     await expect(
-        controller.submitNewQuestion(sampleQnASessionId, sampleUserAADObjId1, sampleUserName, sampleQuestionContent, sampleConversationId, sampleServiceUrl, sampleMeetingId)
+        controller.submitNewQuestion(sampleQnASessionId, sampleUserAADObjId1, sampleUserName, sampleQuestionContent, sampleConversationId, sampleServiceUrl, EventInitiator.RestApi, sampleMeetingId)
     ).rejects.toThrow();
     expect(questionDataService.createQuestion).toBeCalledTimes(1);
 
@@ -274,7 +279,7 @@ test('submit new question - ', async () => {
         return Promise.resolve(true);
     });
 
-    await controller.submitNewQuestion(sampleQnASessionId, sampleUserAADObjId1, sampleUserName, sampleQuestionContent, sampleConversationId, sampleServiceUrl, sampleMeetingId);
+    await controller.submitNewQuestion(sampleQnASessionId, sampleUserAADObjId1, sampleUserName, sampleQuestionContent, sampleConversationId, sampleServiceUrl, EventInitiator.RestApi, sampleMeetingId);
     expect(questionDataService.createQuestion).toBeCalledTimes(1);
     expect(questionDataService.createQuestion).toBeCalledWith(sampleQnASessionId, sampleUserAADObjId1, sampleUserName, sampleQuestionContent, sampleConversationId);
 
@@ -296,7 +301,17 @@ test('add upvote', async () => {
         return Promise.resolve(true);
     });
 
-    await controller.updateUpvote(sampleQnASessionId, sampleQuestionId, sampleUserAADObjId1, sampleUserName, sampleConversationId, 'default', sampleServiceUrl, sampleMeetingId);
+    await controller.updateUpvote(
+        sampleQnASessionId,
+        sampleQuestionId,
+        sampleUserAADObjId1,
+        sampleUserName,
+        sampleConversationId,
+        'default',
+        sampleServiceUrl,
+        EventInitiator.RestApi,
+        sampleMeetingId
+    );
     expect(questionDataService.updateUpvote).toBeCalledTimes(1);
 
     // Make sure background job is triggered.
@@ -318,7 +333,7 @@ test('add upvote - revert changes if background function is not triggered.', asy
     });
 
     await expect(
-        controller.updateUpvote(sampleQnASessionId, sampleQuestionId, sampleUserAADObjId1, sampleUserName, sampleConversationId, 'default', sampleServiceUrl, sampleMeetingId)
+        controller.updateUpvote(sampleQnASessionId, sampleQuestionId, sampleUserAADObjId1, sampleUserName, sampleConversationId, 'default', sampleServiceUrl, EventInitiator.RestApi, sampleMeetingId)
     ).rejects.toThrow();
 
     // Make sure `updateUpvote` is called twice, once for updating vote and once for reverting change.
@@ -341,7 +356,17 @@ test('remove upvote', async () => {
         return Promise.resolve(true);
     });
 
-    await controller.updateUpvote(sampleQnASessionId, sampleQuestionId, sampleUserAADObjId1, sampleUserName, sampleConversationId, 'default', sampleServiceUrl, sampleMeetingId);
+    await controller.updateUpvote(
+        sampleQnASessionId,
+        sampleQuestionId,
+        sampleUserAADObjId1,
+        sampleUserName,
+        sampleConversationId,
+        'default',
+        sampleServiceUrl,
+        EventInitiator.MainCard,
+        sampleMeetingId
+    );
     expect(questionDataService.updateUpvote).toBeCalledTimes(1);
 
     // Make sure background job is triggered.
@@ -363,7 +388,7 @@ test('remove upvote - revert changes if background function is not triggered.', 
     });
 
     await expect(
-        controller.updateUpvote(sampleQnASessionId, sampleQuestionId, sampleUserAADObjId1, sampleUserName, sampleConversationId, 'default', sampleServiceUrl, sampleMeetingId)
+        controller.updateUpvote(sampleQnASessionId, sampleQuestionId, sampleUserAADObjId1, sampleUserName, sampleConversationId, 'default', sampleServiceUrl, EventInitiator.RestApi, sampleMeetingId)
     ).rejects.toThrow();
 
     // Make sure `updateUpvote` is called twice, once for updating vote and once for reverting change.
@@ -393,6 +418,7 @@ test('end ama session', async () => {
             serviceURL: sampleServiceUrl,
             userName: sampleUserName,
             endedByUserId: sampleHostUserId,
+            caller: EventInitiator.MainCard,
         })
     ).rejects.toThrow();
 
@@ -420,6 +446,7 @@ test('end ama session - meeting', async () => {
         meetingId: sampleMeetingId,
         userName: sampleUserName,
         endedByUserId: sampleHostUserId,
+        caller: EventInitiator.MainCard,
     });
     expect(isPresenterOrOrganizer).toBeCalledTimes(1);
     expect(isPresenterOrOrganizer).toBeCalledWith(sampleMeetingId, sampleUserAADObjId1, sampleTenantId, sampleServiceUrl);
@@ -452,6 +479,7 @@ test('end ama session - revert changes if background function is not triggered.'
             meetingId: sampleMeetingId,
             userName: sampleUserName,
             endedByUserId: sampleHostUserId,
+            caller: EventInitiator.MainCard,
         })
     ).rejects.toThrow();
 
@@ -482,6 +510,7 @@ test('end ama session - meeting for attendee', async () => {
             meetingId: sampleMeetingId,
             userName: sampleUserName,
             endedByUserId: sampleHostUserId,
+            caller: EventInitiator.MainCard,
         })
     ).rejects.toThrow();
 
@@ -541,7 +570,8 @@ test('mark question as answered api - user has sufficient permissions', async ()
         sampleQnASessionId,
         sampleQuestionId,
         sampleUserAADObjId1,
-        sampleServiceUrl
+        sampleServiceUrl,
+        EventInitiator.RestApi
     );
 
     expect(<any>questionDataService.markQuestionAsAnswered).toBeCalledTimes(1);
@@ -570,7 +600,8 @@ test('mark question as answered api - revert changes if background function is n
             sampleQnASessionId,
             sampleQuestionId,
             sampleUserAADObjId1,
-            sampleServiceUrl
+            sampleServiceUrl,
+            EventInitiator.RestApi
         )
     ).rejects.toThrow();
 
@@ -604,7 +635,8 @@ test('mark question as answered api - user does not have sufficient permissions'
             sampleQnASessionId,
             sampleQuestionId,
             sampleUserAADObjId1,
-            sampleServiceUrl
+            sampleServiceUrl,
+            EventInitiator.RestApi
         )
     ).rejects.toThrow();
 

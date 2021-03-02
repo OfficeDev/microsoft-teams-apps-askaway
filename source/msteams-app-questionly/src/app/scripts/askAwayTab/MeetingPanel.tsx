@@ -1,32 +1,31 @@
-// tslint:disable:no-relative-imports
-import './index.scss';
+import { Button, Flex, FlexItem, Loader } from '@fluentui/react-northstar';
+import { SeverityLevel } from '@microsoft/applicationinsights-web';
+import * as microsoftTeams from '@microsoft/teams-js';
+import { TFunction } from 'i18next';
+import { IDataEvent } from 'msteams-app-questionly.common';
 import * as React from 'react';
-import { Flex, Button, Loader, FlexItem } from '@fluentui/react-northstar';
+import { withTranslation, WithTranslation } from 'react-i18next';
+import { ClientDataContract } from '../../../../src/contracts/clientDataContract';
+import { ParticipantRoles } from '../../../enums/ParticipantRoles';
+import { trackException } from '../telemetryService';
+import { DataEventHandlerFactory } from './dataEventHandling/dataEventHandlerFactory';
+import './index.scss';
+import EmptyTile from './MeetingPanel/EmptyTile';
+import NewQuestion from './MeetingPanel/NewQuestion';
+import QnASessionHeader from './MeetingPanel/QnASessionHeader';
+import QuestionsList from './MeetingPanel/QuestionsList';
+import { Helper } from './shared/Helper';
+import { HttpService } from './shared/HttpService';
+import { getCurrentParticipantInfo, isPresenterOrOrganizer } from './shared/meetingUtility';
+import SignalRLifecycle from './signalR/SignalRLifecycle';
 import {
+    handleEndQnASessionFlow,
     handleTaskModuleErrorForCreateQnASessionFlow,
     handleTaskModuleErrorForEndQnASessionFlow,
     handleTaskModuleResponseForSuccessfulCreateQnASessionFlow,
-    openStartQnASessionTaskModule,
-    handleEndQnASessionFlow,
     invokeTaskModuleForGenericError,
+    openStartQnASessionTaskModule,
 } from './task-modules-utility/taskModuleHelper';
-import * as microsoftTeams from '@microsoft/teams-js';
-import { withTranslation, WithTranslation } from 'react-i18next';
-import { TFunction } from 'i18next';
-import { SeverityLevel } from '@microsoft/applicationinsights-web';
-import { HttpService } from './shared/HttpService';
-import SignalRLifecycle from './signalR/SignalRLifecycle';
-import QuestionsList from './MeetingPanel/QuestionsList';
-import NewQuestion from './MeetingPanel/NewQuestion';
-import QnASessionHeader from './MeetingPanel/QnASessionHeader';
-import { Helper } from './shared/Helper';
-import { ClientDataContract } from '../../../../src/contracts/clientDataContract';
-import { DataEventHandlerFactory } from './dataEventHandling/dataEventHandlerFactory';
-import { IDataEvent } from 'msteams-app-questionly.common';
-import { ParticipantRoles } from '../../../enums/ParticipantRoles';
-import { getCurrentParticipantInfo, isPresenterOrOrganizer } from './shared/meetingUtility';
-import EmptyTile from './MeetingPanel/EmptyTile';
-import { trackException } from '../telemetryService';
 
 const collaborationImage = require('./../../web/assets/collaboration.png');
 const noSessionImageForAttendees = require('./../../web/assets/relax_and_wait.png');
@@ -387,6 +386,7 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                         onEvent={this.updateEvent}
                         httpService={this.props.httpService}
                         envConfig={this.props.envConfig}
+                        teamsTabContext={this.props.teamsTabContext}
                     />
                     {stateVal.activeSessionData.sessionId ? this.showSessionQuestions(stateVal) : this.createNewSessionLayout()}
                 </Flex>

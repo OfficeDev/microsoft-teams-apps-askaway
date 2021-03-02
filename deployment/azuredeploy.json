@@ -229,7 +229,10 @@
             "failoverPriority": 0
           }
         ],
-        "capabilities": []
+        "capabilities": [],
+        "apiProperties": {
+          "serverVersion": "3.6"
+        }
       }
     },
     {
@@ -371,6 +374,10 @@
             {
               "name": "ApplicationInsightsInstrumentationKey",
               "value": "[reference(resourceId('Microsoft.Insights/components/', variables('botAppInsightsName')), '2015-05-01').InstrumentationKey]"
+            },
+            {
+              "name": "OrphanedAmaSessionExpiryInSeconds",
+              "value": "86400"
             }
           ],
           "cors": {
@@ -811,6 +818,10 @@
             {
               "name": "EndSessionOperationLockValidityInMS ",
               "value": "5000"
+            },
+            {
+              "name": "OrphanedAmaSessionExpiryInSeconds",
+              "value": "86400"
             }
           ],
           "cors": {

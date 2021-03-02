@@ -1,11 +1,10 @@
-// tslint:disable:no-relative-imports
-import './../index.scss';
+import { Button, CloseIcon, Flex, FlexItem, Text } from '@fluentui/react-northstar';
+import { TFunction } from 'i18next';
 import * as React from 'react';
 import { useState } from 'react';
-import { Flex, Button, Text, FlexItem, CloseIcon } from '@fluentui/react-northstar';
-import { ThemeProps, withTheme } from '../shared/WithTheme';
-import { TFunction } from 'i18next';
 import { Trans } from 'react-i18next';
+import { ThemeProps, withTheme } from '../shared/WithTheme';
+import './../index.scss';
 
 /**
  * Properties of ConnectionStatusAlert component.
@@ -53,7 +52,11 @@ export const ConnectionStatusAlert: React.FunctionComponent<ConnectionStatusAler
                         <FlexItem>
                             <Text className="alertContent" weight="semibold">
                                 {!props.__disableTransComponent && (
-                                    <Trans t={props.t} i18nKey="meetingPanel.bannerText" components={[<a className="refreshNowLink" href="" onClick={(e) => refreshConnection(e)}></a>]}></Trans>
+                                    <Trans
+                                        t={props.t}
+                                        i18nKey="meetingPanel.bannerText"
+                                        components={[<a className="refreshNowLink" role="refreshButton" href="javascript:;" onClick={(e) => refreshConnection(e)}></a>]}
+                                    ></Trans>
                                 )}
                             </Text>
                         </FlexItem>

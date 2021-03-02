@@ -1,4 +1,3 @@
-// tslint:disable:no-relative-imports
 import { IDataEvent } from 'msteams-app-questionly.common';
 import { IDataEventHandler } from './IDataEventHandler';
 import { ClientDataContract } from '../../../../contracts/clientDataContract';

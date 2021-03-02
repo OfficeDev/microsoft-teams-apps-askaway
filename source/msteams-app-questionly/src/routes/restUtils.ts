@@ -1,13 +1,13 @@
+import { BotFrameworkAdapter, ConversationReference, ConversationAccount, TeamsChannelAccount, TeamsInfo } from 'botbuilder';
+import { Request } from 'express';
+import { verifyUserFromConversationId } from 'msteams-app-questionly.common';
 import { IConversation } from 'msteams-app-questionly.data';
+import { TelemetryExceptions } from 'src/constants/telemetryConstants';
+import { ConversationDoesNotBelongToMeetingChatError } from 'src/errors/conversationDoesNotBelongToMeetingChatError';
+import { ParameterMissingInRequestError } from 'src/errors/parameterMissingInRequestError';
+import { UserIsNotPartOfConversationError } from 'src/errors/userIsNotPartOfConversationError';
 import { exceptionLogger } from 'src/util/exceptionTracking';
 import { getMicrosoftAppPassword } from 'src/util/keyvault';
-import { BotFrameworkAdapter, ConversationAccount, ConversationReference, TeamsChannelAccount, TeamsInfo } from 'botbuilder';
-import { verifyUserFromConversationId } from 'msteams-app-questionly.common';
-import { UserIsNotPartOfConversationError } from 'src/errors/userIsNotPartOfConversationError';
-import { ConversationDoesNotBelongToMeetingChatError } from 'src/errors/conversationDoesNotBelongToMeetingChatError';
-import { Request } from 'express';
-import { ParameterMissingInRequestError } from 'src/errors/parameterMissingInRequestError';
-import { TelemetryExceptions } from 'src/constants/telemetryConstants';
 import { isValidStringParameter } from 'src/util/typeUtility';
 
 /**
@@ -71,13 +71,22 @@ export const ensureUserIsPartOfMeetingConversation = async (conversationData: IC
  */
 export const getTeamsUserId = async (userAadObjectId: string, conversationId: string, serviceUrl: string) => {
     try {
-        const conversationReference = {
+        const conversation: ConversationAccount = {
+            id: conversationId,
+            isGroup: false,
+            tenantId: '',
+            name: '',
+            conversationType: '',
+        };
+        const conversationReference: ConversationReference = {
             serviceUrl: serviceUrl,
             channelId: 'msteams',
-            conversation: {
-                id: conversationId,
-            } as ConversationAccount,
-        } as ConversationReference;
+            conversation,
+            bot: {
+                name: '',
+                id: '',
+            },
+        };
 
         const adapter: BotFrameworkAdapter = new BotFrameworkAdapter({
             appId: process.env.MicrosoftAppId,

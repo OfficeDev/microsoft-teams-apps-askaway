@@ -1,26 +1,25 @@
-import Express from 'express';
-import request from 'supertest';
-import { Express as ExpressType } from 'express-serve-static-core';
-import { conversationRouter, initializeRouter } from 'src/routes/conversationRestApis';
-import { ConversationDataService, IQnASessionDataService, QnASessionDataService, UserDataService, IUserDataService, IQuestionDataService, QuestionDataService } from 'msteams-app-questionly.data';
-import { getTeamsUserId } from 'src/routes/restUtils';
 import { generateUniqueId } from 'adaptivecards';
-import { Controller, IController } from 'src/controller';
+import Express from 'express';
+import { Express as ExpressType } from 'express-serve-static-core';
 import { StatusCodes } from 'http-status-codes';
-import { getParticipantRole, isPresenterOrOrganizer } from 'src/util/meetingsUtility';
 import { verifyUserFromConversationId } from 'msteams-app-questionly.common';
-import { getMicrosoftAppPassword } from 'src/util/keyvault';
-import { restApiErrorMiddleware } from 'src/routes/restApiErrorMiddleware';
+import { ConversationDataService, IQnASessionDataService, IQuestionDataService, IUserDataService, QnASessionDataService, QuestionDataService, UserDataService } from 'msteams-app-questionly.data';
+import { triggerBackgroundJobForQnaSessionCreatedEvent } from 'src/background-job/backgroundJobTrigger';
+import { Controller, IController } from 'src/controller';
 import { errorMessages } from 'src/errors/errorMessages';
 import { UnauthorizedAccessError, UnauthorizedAccessErrorCode } from 'src/errors/unauthorizedAccessError';
-import { triggerBackgroundJobForQnaSessionCreatedEvent } from 'src/background-job/backgroundJobTrigger';
+import { conversationRouter, initializeRouter } from 'src/routes/conversationRestApis';
+import { restApiErrorMiddleware } from 'src/routes/restApiErrorMiddleware';
+import { getTeamsUserId } from 'src/routes/restUtils';
 import { ClientDataContractFormatter, IClientDataContractFormatter } from 'src/util/clientDataContractFormatter';
+import { getMicrosoftAppPassword } from 'src/util/keyvault';
+import { getParticipantRole, isPresenterOrOrganizer } from 'src/util/meetingsUtility';
+import request from 'supertest';
 
 let app: ExpressType;
 
 const testUserId = 'testUserId';
 const testUserName = 'testUserName';
-const conversationDataService = new ConversationDataService();
 const sampleConversationId = 'sampleConversationId';
 const samplTtitle = 'sample title';
 const sampleDescription = 'sample description';
@@ -33,16 +32,16 @@ const sampleUserName = 'sampleUserName';
 const sampleQnASessionId = 'sampleQnASessionId';
 const sampleServiceUrl = 'sampleServiceUrl';
 const sampleTenantId = 'sampleTenantId';
+let conversationDataService;
 let testQnAData1, testQnAData2;
 let mockUserDataService: IUserDataService;
 let mockQuestionDataService: IQuestionDataService;
 let mockClientDataContractFormatter: IClientDataContractFormatter;
 let mockController: IController;
 let mockQnASessionDataService: IQnASessionDataService;
+let testError;
 
 describe('test /conversations/:conversationId/sessions/:sessionId api', () => {
-    const testError = new Error('test error');
-
     beforeAll(() => {
         app = Express();
         mockUserDataService = new UserDataService();
@@ -50,6 +49,8 @@ describe('test /conversations/:conversationId/sessions/:sessionId api', () => {
         mockQuestionDataService = new QuestionDataService(mockUserDataService, mockQnASessionDataService);
         mockClientDataContractFormatter = new ClientDataContractFormatter(mockUserDataService, mockQuestionDataService);
         mockController = new Controller(mockQuestionDataService, mockQnASessionDataService);
+        conversationDataService = new ConversationDataService();
+        testError = new Error('test error');
         initializeRouter(conversationDataService, mockQnASessionDataService, mockClientDataContractFormatter, mockController);
 
         const mockEnsureAuthenticated = (req, res, next) => {

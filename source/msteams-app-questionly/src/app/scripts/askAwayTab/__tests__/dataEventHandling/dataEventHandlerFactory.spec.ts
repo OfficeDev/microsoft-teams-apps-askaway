@@ -1,4 +1,3 @@
-// tslint:disable:no-relative-imports
 import { DataEventHandlerFactory } from '../../dataEventHandling/dataEventHandlerFactory';
 import { NewQuestionAddedEventHandler } from '../../dataEventHandling/newQuestionAddedEventHandler';
 import { QnaSessionCreatedEventHandler } from '../../dataEventHandling/qnaSessionCreatedEventHandler';
@@ -8,8 +7,10 @@ import { QuestionMarkedAsAnsweredEventHandler } from '../../dataEventHandling/qu
 import { QuestionUpvotedEventHandler } from '../../dataEventHandling/questionUpvotedEventHandler';
 
 describe('validates DataEventHandlerFactory createHandler method', () => {
-    const dataEventHandlerFactory = new DataEventHandlerFactory();
-
+    let dataEventHandlerFactory;
+    beforeAll(() => {
+        dataEventHandlerFactory = new DataEventHandlerFactory();
+    });
     it('get handler for qnaSessionCreatedEvent', async () => {
         const result = dataEventHandlerFactory.createHandler('qnaSessionCreatedEvent');
         expect(result?.constructor.name).toEqual(QnaSessionCreatedEventHandler.name);

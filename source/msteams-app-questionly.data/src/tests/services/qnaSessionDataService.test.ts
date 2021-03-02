@@ -359,6 +359,8 @@ describe("tests ama session apis", () => {
   });
 
   it("can create qna session", async () => {
+    (<any>QnASession.collection.createIndex) = jest.fn();
+
     (<any>qnaSessionDataService.getNumberOfActiveSessions) = jest.fn();
     (<any>(
       qnaSessionDataService.getNumberOfActiveSessions
@@ -414,6 +416,7 @@ describe("tests ama session apis", () => {
     };
 
     expect(doc.isActive).toBe(true);
+    expect(doc.ttl).toBe(-1);
     expect(doc.dataEventVersion).toBe(0);
     expect(expectedData).toEqual(data);
 
@@ -424,12 +427,16 @@ describe("tests ama session apis", () => {
 
   it("can update activity id", async () => {
     const activityId = "12345";
-    await qnaSessionDataService.updateActivityId(testSession._id, activityId);
+    await qnaSessionDataService.updateActivityIdAndExpiry(
+      testSession._id,
+      activityId
+    );
 
     const doc: any = await QnASession.findById(testSession._id);
     expect(doc).not.toBeNull();
     expect(doc._id).toEqual(testSession._id);
     expect(doc.toObject().activityId).toEqual(activityId);
+    expect(doc.toObject().ttl).toEqual(-1);
   });
 
   it("get QnA session data", async () => {
@@ -586,6 +593,8 @@ describe("tests ama session apis", () => {
   });
 
   it("checking if inactive QnA is currently active", async () => {
+    (<any>QnASession.collection.createIndex) = jest.fn();
+
     const data = {
       title: sampleTitle,
       description: sampleDescription,

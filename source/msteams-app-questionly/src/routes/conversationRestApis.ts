@@ -9,6 +9,7 @@ import { ClientDataContract } from 'src/contracts/clientDataContract';
 import { IClientDataContractFormatter } from 'src/util/clientDataContractFormatter';
 import { QuestionPatchAction } from 'src/enums/questionPatchAction';
 import { QnaSessionPatchAction } from 'src/enums/qnaSessionPatchAction';
+import { EventInitiator } from 'src/enums/eventInitiator';
 
 export const conversationRouter = Express.Router();
 let conversationDataService: IConversationDataService;
@@ -121,7 +122,16 @@ conversationRouter.post('/:conversationId/sessions/:sessionId/questions', async 
 
         await ensureUserIsPartOfMeetingConversation(conversationData, userId);
 
-        const result = await controller.submitNewQuestion(req.params['sessionId'], user._id, user.userName, questionContent, conversationId, conversationData.serviceUrl, conversationData.meetingId);
+        const result = await controller.submitNewQuestion(
+            req.params['sessionId'],
+            user._id,
+            user.userName,
+            questionContent,
+            conversationId,
+            conversationData.serviceUrl,
+            EventInitiator.RestApi,
+            conversationData.meetingId
+        );
 
         const response: ClientDataContract.Question = {
             id: result._id,
@@ -175,6 +185,7 @@ conversationRouter.patch('/:conversationId/sessions/:sessionId', async (req: Exp
                 meetingId: <string>conversationData.meetingId,
                 userName: user.userName,
                 endedByUserId: endedByUserId,
+                caller: EventInitiator.RestApi,
             });
         }
 
@@ -217,6 +228,7 @@ conversationRouter.post('/:conversationId/sessions', async (req: Express.Request
             hostUserId: hostUserId,
             isChannel: isChannel,
             serviceUrl: serviceUrl,
+            caller: EventInitiator.RestApi,
             // `ensureConversationBelongsToMeetingChat` makes sure meeting id is available
             meetingId: <string>meetingId,
         });
@@ -262,12 +274,21 @@ conversationRouter.patch('/:conversationId/sessions/:sessionId/questions/:questi
         if (action === QuestionPatchAction.Upvote) {
             await ensureUserIsPartOfMeetingConversation(conversationData, user._id);
 
-            question = await controller.upvoteQuestion(conversationId, sessionId, questionId, user._id, user.userName, conversationData.serviceUrl, conversationData.meetingId);
+            question = await controller.upvoteQuestion(conversationId, sessionId, questionId, user._id, user.userName, conversationData.serviceUrl, EventInitiator.RestApi, conversationData.meetingId);
 
             res.status(StatusCodes.OK).send(clientDataContractFormatter.formatQuestionDataAsPerClientDataContract(question));
         } else if (action === QuestionPatchAction.Downvote) {
             await ensureUserIsPartOfMeetingConversation(conversationData, user._id);
-            question = await controller.downvoteQuestion(conversationId, sessionId, questionId, user._id, user.userName, conversationData.serviceUrl, conversationData.meetingId);
+            question = await controller.downvoteQuestion(
+                conversationId,
+                sessionId,
+                questionId,
+                user._id,
+                user.userName,
+                conversationData.serviceUrl,
+                EventInitiator.RestApi,
+                conversationData.meetingId
+            );
 
             res.status(StatusCodes.OK).send(clientDataContractFormatter.formatQuestionDataAsPerClientDataContract(question));
         } else if (action === QuestionPatchAction.MarkAnswered) {
@@ -280,7 +301,8 @@ conversationRouter.patch('/:conversationId/sessions/:sessionId/questions/:questi
                 sessionId,
                 questionId,
                 user._id,
-                conversationData.serviceUrl
+                conversationData.serviceUrl,
+                EventInitiator.RestApi
             );
 
             res.status(StatusCodes.OK).send(clientDataContractFormatter.formatQuestionDataAsPerClientDataContract(question));

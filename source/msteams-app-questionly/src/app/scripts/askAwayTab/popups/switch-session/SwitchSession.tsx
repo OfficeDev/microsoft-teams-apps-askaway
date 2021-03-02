@@ -1,13 +1,13 @@
+import { Provider } from '@fluentui/react-northstar';
+import * as microsoftTeams from '@microsoft/teams-js';
 import msteamsReactBaseComponent, { ITeamsBaseComponentState } from 'msteams-react-base-component';
 import * as React from 'react';
-import './../../index.scss';
-import * as microsoftTeams from '@microsoft/teams-js';
-import { Provider } from '@fluentui/react-northstar';
 import { ClientDataContract } from '../../../../../contracts/clientDataContract';
-import { HttpService } from '../../shared/HttpService';
-import { SwitchSessionInternal } from './SwitchSessionInternal';
 import Helper from '../../shared/Helper';
+import { HttpService } from '../../shared/HttpService';
 import { i18next } from '../../shared/i18next';
+import './../../index.scss';
+import { SwitchSessionInternal } from './SwitchSessionInternal';
 
 export interface SwitchSessionProps {}
 

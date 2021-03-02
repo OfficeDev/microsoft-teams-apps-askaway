@@ -1,9 +1,8 @@
-// tslint:disable:no-relative-imports
-import './../index.scss';
+import { Button, Flex, Image, Text } from '@fluentui/react-northstar';
 import * as React from 'react';
-import { Flex, Text, Button, Image } from '@fluentui/react-northstar';
 import { ParticipantRoles } from '../../../../enums/ParticipantRoles';
 import { isPresenterOrOrganizer } from '.././shared/meetingUtility';
+import './../index.scss';
 
 const createSessionImage = require('./../../../web/assets/collaboration.png');
 const noSessionImageForAttendees = require('./../../../web/assets/relax_and_wait.png');

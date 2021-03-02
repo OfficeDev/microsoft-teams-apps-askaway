@@ -11,7 +11,7 @@ import {
     InputHints,
     Activity,
     ChannelAccount,
-    BotMessagePreviewActionType,
+    BotMessagePreviewType,
 } from 'botbuilder';
 import { IController } from 'src/controller';
 import { AdaptiveCard } from 'adaptivecards';
@@ -23,6 +23,7 @@ import { getMeetingIdFromContext, isConverationTypeChannel, isPresenterOrOrganiz
 import { TelemetryExceptions } from 'src/constants/telemetryConstants';
 import * as maincardBuilder from 'msteams-app-questionly.common';
 import * as adaptiveCardBuilder from 'src/adaptive-cards/adaptiveCardBuilder';
+import { EventInitiator } from 'src/enums/eventInitiator';
 
 const getMainCard = maincardBuilder.getMainCard;
 const getStartQnACard = adaptiveCardBuilder.getStartQnACard;
@@ -95,7 +96,7 @@ export class AskAway extends TeamsActivityHandler {
         return <TaskModuleResponse>{
             task: {
                 // `type` should actually be of type `BotMessagePreviewType`, it's a bug on the Sdk's end
-                type: <BotMessagePreviewActionType>(<unknown>'continue'),
+                type: 'continue',
                 value: {
                     card: {
                         contentType: 'application/vnd.microsoft.card.adaptive',
@@ -245,7 +246,16 @@ export class AskAway extends TeamsActivityHandler {
         }
 
         try {
-            await this.controller.submitNewQuestion(qnaSessionId, userAadObjectId, userName, questionContent, conversationId, context.activity.serviceUrl, getMeetingIdFromContext(context));
+            await this.controller.submitNewQuestion(
+                qnaSessionId,
+                userAadObjectId,
+                userName,
+                questionContent,
+                conversationId,
+                context.activity.serviceUrl,
+                EventInitiator.MainCard,
+                getMeetingIdFromContext(context)
+            );
         } catch (error) {
             exceptionLogger(error, {
                 conversationId: conversationId,
@@ -277,6 +287,7 @@ export class AskAway extends TeamsActivityHandler {
                 context.activity.conversation.id,
                 taskModuleRequest.context ? <string>taskModuleRequest.context.theme : 'default',
                 context.activity.serviceUrl,
+                EventInitiator.MainCard,
                 getMeetingIdFromContext(context)
             );
 
@@ -327,6 +338,7 @@ export class AskAway extends TeamsActivityHandler {
                     userName: context.activity.from.name,
                     endedByUserId: context.activity.from.id,
                     meetingId: meetingId,
+                    caller: EventInitiator.MainCard,
                 });
             } catch (error) {
                 exceptionLogger(error, {
@@ -444,11 +456,12 @@ export class AskAway extends TeamsActivityHandler {
                 activityId: activityId,
                 conversationId: context.activity.conversation.id,
                 tenantId: tenantId,
-                scopeId: scopeId,
+                scopeId: scopeId!,
                 hostUserId: hostUserId,
                 isChannel: isChannel,
                 serviceUrl: serviceURL,
                 meetingId: meetingId,
+                caller: EventInitiator.MainCard,
             });
         } catch (error) {
             exceptionLogger(error, {

@@ -1,6 +1,6 @@
 import { IBackgroundJobPayload, IDataEvent } from 'msteams-app-questionly.common';
 import axios, { AxiosRequestConfig } from 'axios';
-import { exceptionLogger, getOperationIdForCurrentRequest } from 'src/util/exceptionTracking';
+import { exceptionLogger, getOperationIdForCurrentRequest, trackBackgroundFunctionTriggerEvent } from 'src/util/exceptionTracking';
 import { IQnASession_populated, IQuestion } from 'msteams-app-questionly.data';
 import {
     createQnaSessionCreatedEvent,
@@ -14,6 +14,7 @@ import { StatusCodes } from 'http-status-codes';
 import { TelemetryExceptions } from 'src/constants/telemetryConstants';
 import { getFromMemoryCache, putIntoMemoryCache } from 'src/util/memoryCache';
 import { getAccessToken } from 'src/util/azureCredentialUtility';
+import { EventInitiator } from 'src/enums/eventInitiator';
 
 const axiosConfig: AxiosRequestConfig = axios.defaults;
 let backgroundJobUri: string;
@@ -36,12 +37,13 @@ export const initBackgroundJobSetup = async () => {
  * Triggers background job for new qnaSession created event.
  * @param session - Newly created qnaSession document.
  * @param serviceUrl - bot service url.
+ * @param caller - event initiator (main card/ rest api)
  * @param meetingId - meeting id.
  * @returns - true if background job is successfully triggered/ false otherwise.
  */
-export const triggerBackgroundJobForQnaSessionCreatedEvent = async (session: IQnASession_populated, serviceUrl: string, meetingId?: string): Promise<boolean> => {
+export const triggerBackgroundJobForQnaSessionCreatedEvent = async (session: IQnASession_populated, serviceUrl: string, caller: EventInitiator, meetingId?: string): Promise<boolean> => {
     const eventData = createQnaSessionCreatedEvent(session);
-    return await triggerBackgroundJob(session.conversationId, session._id, eventData, serviceUrl, meetingId);
+    return await triggerBackgroundJob(session.conversationId, session._id, eventData, serviceUrl, caller, meetingId);
 };
 
 /**
@@ -49,12 +51,13 @@ export const triggerBackgroundJobForQnaSessionCreatedEvent = async (session: IQn
  * @param conversationId - conversation id.
  * @param qnaSessionId - qnaSession id.
  * @param serviceUrl - bot service url.
+ * @param caller - event initiator (main card/ rest api)
  * @param meetingId - meeting id.
  * @returns - true if background job is successfully triggered/ false otherwise.
  */
-export const triggerBackgroundJobForQnaSessionEndedEvent = async (conversationId: string, qnaSessionId: string, serviceUrl: string, meetingId?: string): Promise<boolean> => {
+export const triggerBackgroundJobForQnaSessionEndedEvent = async (conversationId: string, qnaSessionId: string, serviceUrl: string, caller: EventInitiator, meetingId?: string): Promise<boolean> => {
     const eventData = createQnaSessionEndedEvent(qnaSessionId);
-    return await triggerBackgroundJob(conversationId, qnaSessionId, eventData, serviceUrl, meetingId);
+    return await triggerBackgroundJob(conversationId, qnaSessionId, eventData, serviceUrl, caller, meetingId);
 };
 
 /**
@@ -64,6 +67,7 @@ export const triggerBackgroundJobForQnaSessionEndedEvent = async (conversationId
  * @param qnaSessionId - qnaSession id.
  * @param upvotedByUserId - AadObject id of user who upvoted the question.
  * @param serviceUrl - bot service url.
+ * @param caller - event initiator (main card/ rest api)
  * @param meetingId - meeting id.
  * @returns - true if background job is successfully triggered/ false otherwise.
  */
@@ -73,10 +77,11 @@ export const triggerBackgroundJobForQuestionUpvotedEvent = async (
     qnaSessionId: string,
     upvotedByUserId: string,
     serviceUrl: string,
+    caller: EventInitiator,
     meetingId?: string
 ): Promise<boolean> => {
     const eventData = createQuestionUpvotedEvent(qnaSessionId, questionId, upvotedByUserId);
-    return await triggerBackgroundJob(conversationId, qnaSessionId, eventData, serviceUrl, meetingId);
+    return await triggerBackgroundJob(conversationId, qnaSessionId, eventData, serviceUrl, caller, meetingId);
 };
 
 /**
@@ -86,6 +91,7 @@ export const triggerBackgroundJobForQuestionUpvotedEvent = async (
  * @param qnaSessionId - qnaSession id.
  * @param downvotedByUserId - AadObject id of user who downvoted the question.
  * @param serviceUrl - bot service url.
+ * @param caller - event initiator (main card/ rest api)
  * @param meetingId - meeting id.
  * @returns - true if background job is successfully triggered/ false otherwise.
  */
@@ -95,10 +101,11 @@ export const triggerBackgroundJobForQuestionDownvotedEvent = async (
     qnaSessionId: string,
     downvotedByUserId: string,
     serviceUrl: string,
+    caller: EventInitiator,
     meetingId?: string
 ): Promise<boolean> => {
     const eventData = createQuestionDownvotedEvent(qnaSessionId, questionId, downvotedByUserId);
-    return await triggerBackgroundJob(conversationId, qnaSessionId, eventData, serviceUrl, meetingId);
+    return await triggerBackgroundJob(conversationId, qnaSessionId, eventData, serviceUrl, caller, meetingId);
 };
 
 /**
@@ -108,6 +115,7 @@ export const triggerBackgroundJobForQuestionDownvotedEvent = async (
  * @param qnaSessionId - qnaSession id.
  * @param postedByUserId - AadObject id of user who posted the question.
  * @param serviceUrl - bot service url.
+ * @param caller - event initiator (main card/ rest api)
  * @param meetingId - meeting id.
  * @returns - true if background job is successfully triggered/ false otherwise.
  */
@@ -117,10 +125,11 @@ export const triggerBackgroundJobForQuestionPostedEvent = async (
     qnaSessionId: string,
     postedByUserId: string,
     serviceUrl: string,
+    caller: EventInitiator,
     meetingId?: string
 ): Promise<boolean> => {
     const eventData = createQuestionAddedEvent(qnaSessionId, question, postedByUserId);
-    return await triggerBackgroundJob(conversationId, qnaSessionId, eventData, serviceUrl, meetingId);
+    return await triggerBackgroundJob(conversationId, qnaSessionId, eventData, serviceUrl, caller, meetingId);
 };
 
 /**
@@ -130,6 +139,7 @@ export const triggerBackgroundJobForQuestionPostedEvent = async (
  * @param qnaSessionId - qnaSession id.
  * @param markedAnsweredByUserAadObjectId - AadObject id of user who marked the question as answered.
  * @param serviceUrl - bot service url.
+ * @param caller - event initiator (main card/ rest api)
  * @param meetingId - meeting id.
  * @returns - true if background job is successfully triggered/ false otherwise.
  */
@@ -139,10 +149,11 @@ export const triggerBackgroundJobForQuestionMarkedAsAnsweredEvent = async (
     qnaSessionId: string,
     markedAnsweredByUserAadObjectId: string,
     serviceUrl: string,
+    caller: EventInitiator,
     meetingId?: string
 ): Promise<boolean> => {
     const eventData = createQuestionMarkedAsAnsweredEvent(qnaSessionId, questionId, markedAnsweredByUserAadObjectId);
-    return await triggerBackgroundJob(conversationId, qnaSessionId, eventData, serviceUrl, meetingId);
+    return await triggerBackgroundJob(conversationId, qnaSessionId, eventData, serviceUrl, caller, meetingId);
 };
 
 /**
@@ -151,10 +162,11 @@ export const triggerBackgroundJobForQuestionMarkedAsAnsweredEvent = async (
  * @param qnaSessionId - qnaSession id.
  * @param dataEvent - data event for clients to update UX real time.
  * @param serviceUrl - bot service url.
+ * @param caller - event initiator (main card/ rest api)
  * @param meetingId - meeting id.
  * @returns - true if background job is successfully triggered/ false otherwise.
  */
-const triggerBackgroundJob = async (conversationId: string, qnaSessionId: string, dataEvent: IDataEvent, serviceUrl: string, meetingId?: string): Promise<boolean> => {
+const triggerBackgroundJob = async (conversationId: string, qnaSessionId: string, dataEvent: IDataEvent, serviceUrl: string, caller: EventInitiator, meetingId?: string): Promise<boolean> => {
     const backgroundJobPayload: IBackgroundJobPayload = {
         conversationId: conversationId,
         qnaSessionId: qnaSessionId,
@@ -172,6 +184,17 @@ const triggerBackgroundJob = async (conversationId: string, qnaSessionId: string
         if (res.status != StatusCodes.ACCEPTED) {
             throw new Error(`Error in scheduling background job for conversation id ${conversationId}. returned status: ${res.status}, data: ${res.data}`);
         }
+
+        // Track background function triggers.
+        trackBackgroundFunctionTriggerEvent({
+            qnaSessionId: qnaSessionId,
+            meetingId: meetingId,
+            conversationId: conversationId,
+            properties: {
+                event: dataEvent,
+                caller: caller,
+            },
+        });
 
         return true;
     } catch (error) {

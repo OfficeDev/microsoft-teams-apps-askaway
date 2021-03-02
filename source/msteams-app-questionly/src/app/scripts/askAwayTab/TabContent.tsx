@@ -1,37 +1,35 @@
-// tslint:disable:no-relative-imports
-import './index.scss';
+import { Button, Flex, Loader } from '@fluentui/react-northstar';
+import { SeverityLevel } from '@microsoft/applicationinsights-web';
+import * as microsoftTeams from '@microsoft/teams-js';
+import { TFunction } from 'i18next';
+import { IDataEvent } from 'msteams-app-questionly.common';
 import * as React from 'react';
 import { withTranslation, WithTranslation } from 'react-i18next';
-import * as microsoftTeams from '@microsoft/teams-js';
-import { SeverityLevel } from '@microsoft/applicationinsights-web';
-import { Flex, Loader } from '@fluentui/react-northstar';
-import { HttpService } from './shared/HttpService';
-import { Helper } from './shared/Helper';
-import { TFunction } from 'i18next';
-import TabHeader from './TabContent/TabHeader';
-import PostNewQuestions from './TabContent/PostNewQuestions';
-import NoQuestionDesign from './TabContent/NoQuestionDesign';
-import TabQuestions from './TabContent/TabQuestions';
-import TabCreateSession from './TabContent/TabCreateSession';
 import { ClientDataContract } from '../../../../src/contracts/clientDataContract';
-import {
-    handleTaskModuleErrorForCreateQnASessionFlow,
-    handleTaskModuleErrorForEndQnASessionFlow,
-    handleTaskModuleResponseForSuccessfulCreateQnASessionFlow,
-    handleTaskModuleResponseForEndQnASessionFlow,
-    openStartQnASessionTaskModule,
-    handleEndQnASessionFlow,
-    openSwitchSessionsTaskModule,
-    invokeTaskModuleForQuestionPostFailure,
-    invokeTaskModuleForQuestionUpdateFailure,
-    invokeTaskModuleForGenericError,
-} from './task-modules-utility/taskModuleHelper';
 import { ParticipantRoles } from '../../../enums/ParticipantRoles';
+import { DataEventHandlerFactory } from './dataEventHandling/dataEventHandlerFactory';
+import './index.scss';
+import { Helper } from './shared/Helper';
+import { HttpService } from './shared/HttpService';
 import { getCurrentParticipantInfo } from './shared/meetingUtility';
 import SignalRLifecycle from './signalR/SignalRLifecycle';
-import { DataEventHandlerFactory } from './dataEventHandling/dataEventHandlerFactory';
-import { IDataEvent } from 'msteams-app-questionly.common';
-import { Button } from '@fluentui/react-northstar';
+import NoQuestionDesign from './TabContent/NoQuestionDesign';
+import PostNewQuestions from './TabContent/PostNewQuestions';
+import TabCreateSession from './TabContent/TabCreateSession';
+import TabHeader from './TabContent/TabHeader';
+import TabQuestions from './TabContent/TabQuestions';
+import {
+    handleEndQnASessionFlow,
+    handleTaskModuleErrorForCreateQnASessionFlow,
+    handleTaskModuleErrorForEndQnASessionFlow,
+    handleTaskModuleResponseForEndQnASessionFlow,
+    handleTaskModuleResponseForSuccessfulCreateQnASessionFlow,
+    invokeTaskModuleForGenericError,
+    invokeTaskModuleForQuestionPostFailure,
+    invokeTaskModuleForQuestionUpdateFailure,
+    openStartQnASessionTaskModule,
+    openSwitchSessionsTaskModule,
+} from './task-modules-utility/taskModuleHelper';
 import { CONST } from './shared/Constants';
 import { trackException } from '../telemetryService';
 
@@ -293,17 +291,13 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
                 if (userObjectId) {
                     if (!revert) {
                         if (event.actionValue === CONST.TAB_QUESTIONS.DOWN_VOTE) {
-                            question.voterAadObjectIds = question.voterAadObjectIds.filter(function (userId) {
-                                return userId != userObjectId;
-                            });
+                            question.voterAadObjectIds = question.voterAadObjectIds.filter((userId) => userId != userObjectId);
                         } else if (event.actionValue === CONST.TAB_QUESTIONS.UP_VOTE && !question.voterAadObjectIds.includes(userObjectId)) {
                             question.voterAadObjectIds.push(userObjectId);
                         }
                     } else {
                         if (event.actionValue === CONST.TAB_QUESTIONS.UP_VOTE) {
-                            question.voterAadObjectIds = question.voterAadObjectIds.filter(function (userId) {
-                                return userId != userObjectId;
-                            });
+                            question.voterAadObjectIds = question.voterAadObjectIds.filter((userId) => userId != userObjectId);
                         } else if (event.actionValue === CONST.TAB_QUESTIONS.DOWN_VOTE && !question.voterAadObjectIds.includes(userObjectId)) {
                             question.voterAadObjectIds.push(userObjectId);
                         }
@@ -399,6 +393,7 @@ export class TabContent extends React.Component<TabContentProps, TabContentState
                     onEvent={this.updateEvent}
                     httpService={this.props.httpService}
                     envConfig={this.props.envConfig}
+                    teamsTabContext={this.props.teamsTabContext}
                 />
                 {selectedAmaSessionData.sessionId ? (
                     <Flex column>

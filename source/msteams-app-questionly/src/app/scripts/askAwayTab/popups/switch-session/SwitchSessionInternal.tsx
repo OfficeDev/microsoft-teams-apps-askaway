@@ -1,9 +1,9 @@
-import './../../index.scss';
-import * as React from 'react';
-import { ClientDataContract } from '../../../../../contracts/clientDataContract';
-import { useTranslation } from 'react-i18next';
-import SessionList from './SessionList';
 import { Loader } from '@fluentui/react-northstar';
+import * as React from 'react';
+import { useTranslation } from 'react-i18next';
+import { ClientDataContract } from '../../../../../contracts/clientDataContract';
+import './../../index.scss';
+import SessionList from './SessionList';
 /**
  * Properties for the SwitchSessionInternal React component
  */

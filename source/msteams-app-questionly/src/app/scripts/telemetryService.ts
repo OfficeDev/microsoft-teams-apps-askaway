@@ -63,3 +63,14 @@ export const trackException = (exception: Error, severityLevel: SeverityLevel, p
         });
     }
 };
+
+/**
+ * Log events to telemetry.
+ * @param eventName - event name
+ * @param properties - optional properties
+ */
+export const trackEvent = (eventName: string, properties?: { [key: string]: any }) => {
+    if (appInsights) {
+        appInsights.trackEvent({ name: eventName }, properties);
+    }
+};

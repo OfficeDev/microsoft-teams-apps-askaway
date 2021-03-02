@@ -1,26 +1,25 @@
 /**
  * @jest-environment jsdom
  */
-
-import * as React from 'react';
-import SignalRLifecycle from '../../signalR/SignalRLifecycle';
-import Adapter from 'enzyme-adapter-react-16';
-import { configure, mount } from 'enzyme';
-import axios from 'axios';
-import { StatusCodes } from 'http-status-codes';
 import { HubConnection } from '@microsoft/signalr';
-import { HttpService } from './../../shared/HttpService';
-import ConnectionStatusAlert from '../../signalR/ConnectionStatusAlert';
+import axios from 'axios';
+import { configure, mount } from 'enzyme';
+import enzymeAdapterReact16 from 'enzyme-adapter-react-16';
+import { StatusCodes } from 'http-status-codes';
+import * as React from 'react';
 import { act } from 'react-dom/test-utils';
+import ConnectionStatusAlert from '../../signalR/ConnectionStatusAlert';
+import SignalRLifecycle from '../../signalR/SignalRLifecycle';
+import { HttpService } from './../../shared/HttpService';
 
 jest.mock('@microsoft/signalr');
 jest.mock('axios');
 
-configure({ adapter: new Adapter() });
+configure({ adapter: new enzymeAdapterReact16() });
 
 describe('SignalRLifecycle Component', () => {
     const testConversationId = '1234';
-    const updateEventCallback = jest.fn();
+    let updateEventCallback;
     let hubConnection: HubConnection;
     let sampleHttpService: HttpService;
     let envConfig: { [key: string]: any };
@@ -28,6 +27,7 @@ describe('SignalRLifecycle Component', () => {
 
     beforeAll(() => {
         t = jest.fn();
+        updateEventCallback = jest.fn();
         t.mockImplementation((key: string) => {
             return key;
         });
@@ -75,6 +75,7 @@ describe('SignalRLifecycle Component', () => {
                 connection={hubConnection}
                 __disableTransComponent={true}
                 envConfig={envConfig}
+                teamsTabContext={{ entityId: '', locale: '' }}
             />
         );
         await act(async () => {
@@ -104,6 +105,7 @@ describe('SignalRLifecycle Component', () => {
                 connection={hubConnection}
                 __disableTransComponent={true}
                 envConfig={envConfig}
+                teamsTabContext={{ entityId: '', locale: '' }}
             />
         );
         await act(async () => {
@@ -141,6 +143,7 @@ describe('SignalRLifecycle Component', () => {
                 connection={hubConnection}
                 __disableTransComponent={true}
                 envConfig={envConfig}
+                teamsTabContext={{ entityId: '', locale: '' }}
             />
         );
         await act(async () => {
@@ -170,6 +173,7 @@ describe('SignalRLifecycle Component', () => {
                 connection={hubConnection}
                 __disableTransComponent={true}
                 envConfig={envConfig}
+                teamsTabContext={{ entityId: '', locale: '' }}
             />
         );
         await act(async () => {
@@ -200,6 +204,7 @@ describe('SignalRLifecycle Component', () => {
                 connection={hubConnection}
                 __disableTransComponent={true}
                 envConfig={envConfig}
+                teamsTabContext={{ entityId: '', locale: '' }}
             />
         );
         await act(async () => {
@@ -231,6 +236,7 @@ describe('SignalRLifecycle Component', () => {
                 connection={hubConnection}
                 __disableTransComponent={true}
                 envConfig={envConfig}
+                teamsTabContext={{ entityId: '', locale: '' }}
             />
         );
         await act(async () => {
@@ -284,6 +290,7 @@ describe('SignalRLifecycle Component', () => {
                 connection={hubConnection}
                 __disableTransComponent={true}
                 envConfig={envConfig}
+                teamsTabContext={{ entityId: '', locale: '' }}
             />
         );
         await act(async () => {
@@ -326,6 +333,7 @@ describe('SignalRLifecycle Component', () => {
                 connection={hubConnection}
                 __disableTransComponent={true}
                 envConfig={envConfig}
+                teamsTabContext={{ entityId: '', locale: '' }}
             />
         );
         await act(async () => {

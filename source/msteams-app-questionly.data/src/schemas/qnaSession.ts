@@ -90,6 +90,12 @@ const QnASessionSchema = new mongoose.Schema(
       type: Date,
       required: false,
     },
+    // Time to live in seconds.
+    // Used to expire non meeting chat (orphaned) ama sessions for which adaptive card did not get posted.
+    ttl: {
+      type: Number,
+      required: false,
+    },
   },
   { optimisticConcurrency: true }
 );
@@ -113,6 +119,7 @@ interface IQnASessionBase extends mongoose.Document {
   dateTimeNextCardUpdateScheduled?: Date;
   endedByUserId?: string;
   dateTimeEndOperationLockAcquired?: Date;
+  ttl?: Number;
 }
 
 /**
