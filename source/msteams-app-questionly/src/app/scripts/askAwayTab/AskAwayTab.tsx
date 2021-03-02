@@ -73,10 +73,17 @@ export class AskAwayTab extends msteamsReactBaseComponent<IAskAwayTabProps, IAsk
                 }));
             });
             microsoftTeams.getContext((context) => {
-                Helper.setI18nextLocale(i18next, context.locale, () => {
-                    this.setState({
-                        direction: i18next.dir(),
-                    });
+                Helper.setI18nextLocale(i18next, context.locale, (err) => {
+                    if (err) {
+                        telemetryService.appInsights.trackTrace({
+                            message: `Error occurred while setting the language and the error is: ${err.message}`,
+                            severityLevel: SeverityLevel.Error,
+                        });
+                    } else {
+                        this.setState({
+                            direction: i18next.dir(),
+                        });
+                    }
                 });
                 microsoftTeams.authentication.getAuthToken({
                     successCallback: (token: string) => {

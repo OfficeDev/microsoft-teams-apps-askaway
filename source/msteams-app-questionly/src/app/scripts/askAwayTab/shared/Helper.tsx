@@ -13,7 +13,7 @@ export class Helper {
             i18next.changeLanguage(locale[0].toLowerCase(), (err) => {
                 // Callback function will be called once i18next sets the current language.
                 if (err) {
-                    console.log('Error occurred while setting the language', err.message);
+                    callback(err);
                 }
                 if (callback) {
                     callback();

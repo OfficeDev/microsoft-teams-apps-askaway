@@ -133,7 +133,7 @@ const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (p
 
     const showTitle = (questionType) => {
         return (
-            <Flex className="padding-none" gap="gap.small" padding="padding.medium" vAlign="center">
+            <Flex className="padding-none" gap="gap.small" vAlign="center">
                 <Button
                     className={`padding-none ${toggleClass(questionType)}`}
                     icon={setIcons(questionType)}

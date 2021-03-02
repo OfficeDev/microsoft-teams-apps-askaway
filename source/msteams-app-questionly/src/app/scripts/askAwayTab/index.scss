@@ -4,28 +4,14 @@
     .form-grid {
         margin-top: 0.5rem;
         margin-bottom: 0rem;
-        span {
-            font-size: 12px;
-            line-height: 16px;
-        }
         .btn-create-session {
-            text-align: center;
             height: 32px;
             position: absolute;
             right: 2rem;
             bottom: 2rem;
             width: 96px;
             border-radius: 2px;
-            .ui-button__content {
-                font-size: 14px;
-                line-height: 20px;
-            }
         }
-    }
-    .ui-input,
-    .ui-textarea {
-        margin-top: 0.25rem;
-        font-size: 14px;
     }
 }
 .meeting-panel {
@@ -82,7 +68,7 @@
                 .card-body-question {
                     padding-inline-start: 0.4rem;
                     overflow: auto;
-                    white-space: pre-wrap;
+                    white-space: pre-line;
                 }
             }
         }
@@ -134,28 +120,7 @@
         margin-inline-start: -100px;
         position: absolute;
         top: 50%;
-        display: block;
-        img {
-            display: block;
-            margin-inline-start: auto;
-            margin-inline-end: auto;
-        }
-        .text-caption {
-            text-align: center;
-            display: block;
-            margin-top: 10%;
-        }
-        .text-subcaption {
-            text-align: center;
-            margin-top: 3%;
-            display: flex;
-        }
-        .button {
-            margin-inline-start: auto;
-            margin-inline-end: auto;
-            display: block;
-            margin-top: 7%;
-        }
+        height: 21rem;
         .askaway-tab-added {
             top: 30%;
             left: 50%;
@@ -333,8 +298,6 @@
         padding-inline-start: 1rem;
         border-radius: 0.75rem;
         padding-inline-end: 1rem;
-        line-height: 14px;
-        font-size: 12px;
         padding-bottom: 3px;
         padding-top: 3px;
     }
