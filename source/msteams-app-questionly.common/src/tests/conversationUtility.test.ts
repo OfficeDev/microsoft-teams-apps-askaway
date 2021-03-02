@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { BotFrameworkAdapter, ConversationAccount } from "botbuilder";
 import { verifyUserFromConversationId } from "../conversationUtility";
 

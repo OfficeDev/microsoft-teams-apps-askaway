@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import i18next, { i18n } from "i18next";
 import * as enStrings from "./resources/en.json";
 

@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 // Data event types.
 export const DataEventType = {
   qnaSessionCreatedEvent: "qnaSessionCreatedEvent",
