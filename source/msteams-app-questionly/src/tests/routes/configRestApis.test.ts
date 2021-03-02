@@ -14,7 +14,7 @@ describe('test get /config api', () => {
         app = Express();
 
         // Rest endpoints
-        app.use('/api', configRouter);
+        app.use('/api/config', configRouter);
         app.use(restApiErrorMiddleware);
     });
 
