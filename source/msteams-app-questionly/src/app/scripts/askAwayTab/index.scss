@@ -97,7 +97,7 @@
     font-family: Segoe UI;
     font-weight: 600;
     font-size: 10px;
-    padding: 0.35em 0.5em;
+    padding: 0.25rem 0.2rem;
     line-height: 12px;
     white-space: nowrap;
     vertical-align: baseline;
@@ -147,7 +147,7 @@
             width: 0;
             height: 0;
             margin: 0 auto;
-            left: -4em;
+            left: -4rem;
         }
         .new-updates-button {
             top: 1.2rem;
@@ -327,6 +327,11 @@
     .tab-container {
         .new-update-btn-wrapper {
             right: -4rem;
+        }
+    }
+    .tab-content {
+        .screen {
+            left: 42%;
         }
     }
 }
