@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 /**
  * Error when there is a failure reverting DB changes after background job trigger is unsuccessful.
  */

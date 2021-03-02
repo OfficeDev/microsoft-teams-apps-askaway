@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { Express as ExpressType } from 'express-serve-static-core';
 import { IConversationDataService, IQnASessionDataService } from 'msteams-app-questionly.data';
 import { IController } from 'src/controller';

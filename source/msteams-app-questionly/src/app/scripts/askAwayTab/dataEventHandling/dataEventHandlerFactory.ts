@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { IDataEventHandler } from './IDataEventHandler';
 import { NewQuestionAddedEventHandler } from './newQuestionAddedEventHandler';
 import { QnaSessionCreatedEventHandler } from './qnaSessionCreatedEventHandler';

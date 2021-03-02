@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { generateUniqueId } from 'adaptivecards';
 import { BotFrameworkAdapter } from 'botbuilder';
 import { IQuestionDataService, QuestionDataService, UserDataService, IUserDataService, IConversation, IQnASessionDataService } from 'msteams-app-questionly.data';

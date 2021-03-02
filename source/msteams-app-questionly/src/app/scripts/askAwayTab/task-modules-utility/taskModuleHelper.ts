@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { TaskInfo, tasks } from '@microsoft/teams-js';
 import { AdaptiveCard } from 'adaptivecards';
 import { StatusCodes } from 'http-status-codes';

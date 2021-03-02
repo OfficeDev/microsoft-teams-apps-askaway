@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import debug from 'debug';
 import { config as dotenvConfig } from 'dotenv';
 import Express from 'express';

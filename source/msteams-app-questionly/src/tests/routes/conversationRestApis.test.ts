@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { generateUniqueId } from 'adaptivecards';
 import Express from 'express';
 import { Express as ExpressType } from 'express-serve-static-core';

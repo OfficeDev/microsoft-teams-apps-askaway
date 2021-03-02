@@ -1,6 +1,5 @@
-// Copyright (c) Wictor Wilén. All rights reserved.
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT license.
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
 var webpack = require('webpack');
 const Dotenv = require('dotenv-webpack');

@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { Container, Image, TextBlock, SubmitAction, ActionSet } from 'adaptivecards';
 import {
     createCardForInsufficientPermissionsToCreateQnASessionError,

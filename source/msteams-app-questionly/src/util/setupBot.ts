@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import * as jimp from 'jimp';
 import * as jwt from 'jsonwebtoken';
 import { ActivityHandler, BotFrameworkAdapter } from 'botbuilder';

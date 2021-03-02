@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 /* eslint-disable @typescript-eslint/tslint/config */
 import { AskAway } from 'src/askAway';
 import { TaskModuleRequest } from 'botframework-connector/lib/connectorApi/models';

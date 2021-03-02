@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import * as strings from 'src/localization/resources/testLocale.json';
 
 import {

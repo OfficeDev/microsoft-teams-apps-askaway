@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { BotFrameworkAdapter, ConversationReference, ConversationAccount, TeamsChannelAccount, TeamsInfo } from 'botbuilder';
 import { Request } from 'express';
 import { verifyUserFromConversationId } from 'msteams-app-questionly.common';

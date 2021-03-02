@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import Express from 'express';
 import { join } from 'path';
 import morgan from 'morgan';

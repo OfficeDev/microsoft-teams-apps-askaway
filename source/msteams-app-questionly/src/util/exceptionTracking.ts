@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { TelemetryEvents } from 'src/constants/telemetryConstants';
 import { getApplicationInsightsInstrumentationKeyURI } from 'src/util/keyvault';
 import { initiateAndGetAppInsights, TraceData } from 'msteams-app-questionly.common';

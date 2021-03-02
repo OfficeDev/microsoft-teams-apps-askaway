@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { SecretClient } from '@azure/keyvault-secrets';
 import { getCredential } from 'src/util/azureCredentialUtility';
 import { exceptionLogger } from 'src/util/exceptionTracking';

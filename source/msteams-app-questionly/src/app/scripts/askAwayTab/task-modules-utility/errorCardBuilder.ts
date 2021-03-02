@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { ActionSet, AdaptiveCard, Container, HorizontalAlignment, IAdaptiveCard, TextBlock, TextSize, TextWeight, VerticalAlignment } from 'adaptivecards';
 import * as ACData from 'adaptivecards-templating';
 import { TFunction } from 'i18next';

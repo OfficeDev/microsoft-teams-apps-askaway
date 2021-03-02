@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { SubmitAction, TextBlock } from 'adaptivecards';
 import { confirmationCardBuilder } from '../../task-modules-utility/confirmationCardBuilder';
 
