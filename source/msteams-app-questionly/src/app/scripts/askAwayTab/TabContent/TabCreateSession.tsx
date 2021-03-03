@@ -24,26 +24,19 @@ const TabCreateSession: React.FunctionComponent<TabCreateSessionProps> = (props)
     const subText = isUserPresenterOrOrganizer ? props.t('tab.welcomeSubTextPresenter') : props.t('tab.welcomeSubTextAttendee');
 
     return (
-        <Flex hAlign="center" vAlign="center" className="screen">
+        <Flex column hAlign="center" vAlign="center" className="screen" gap="gap.medium">
             <Image alt="image" src={imageSrc} />
-            <Flex.Item align="center">
-                <Text size="large" weight="bold" className="text-caption" content={props.t('tab.welcomeText')} />
-            </Flex.Item>
-            <Flex.Item align="center">
-                <Text className="text-subcaption" size="medium" content={subText} />
-            </Flex.Item>
+            <Text size="large" weight="bold" className="text-caption" content={props.t('tab.welcomeText')} />
+            <Text size="medium" content={subText} />
             {isUserPresenterOrOrganizer && (
-                <Flex.Item align="center">
-                    <Button
-                        primary
-                        className="button"
-                        onClick={() => {
-                            props.showTaskModule();
-                        }}
-                    >
-                        <Button.Content>{props.t('tab.createButton')}</Button.Content>
-                    </Button>
-                </Flex.Item>
+                <Button
+                    primary
+                    className="button"
+                    content={props.t('tab.createButton')}
+                    onClick={() => {
+                        props.showTaskModule();
+                    }}
+                />
             )}
         </Flex>
     );

@@ -96,7 +96,7 @@ const CreateSessionInternal: React.FunctionComponent<CreateSessionInternalProps>
                     <div className="form-grid">
                         <Flex>
                             <FlexItem push>
-                                <Button primary type="submit" className="btn-create-session" size="small">
+                                <Button primary type="submit" className="btn-create-session" size="medium">
                                     <Button.Content>{t('popups.createQnaSessionButton')}</Button.Content>
                                 </Button>
                             </FlexItem>

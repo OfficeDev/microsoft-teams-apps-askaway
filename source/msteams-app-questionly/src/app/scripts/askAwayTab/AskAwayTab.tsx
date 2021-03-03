@@ -32,6 +32,7 @@ export interface IAskAwayTabState extends ITeamsBaseComponentState {
     theme: any;
     teamContext: microsoftTeams.Context;
     frameContext?: string;
+    direction?: string;
     envConfig: { [key: string]: any };
 }
 /**
@@ -86,8 +87,15 @@ export class AskAwayTab extends msteamsReactBaseComponent<IAskAwayTabProps, IAsk
                 }));
             });
             microsoftTeams.getContext((context) => {
-                // Set Language for Localization
-                Helper.setI18nextLocale(i18next, context.locale);
+                Helper.setI18nextLocale(i18next, context.locale, (err) => {
+                    if (err) {
+                        trackTrace(`Error occurred while setting the language and the error is: ${err.message}`, SeverityLevel.Error);
+                    } else {
+                        this.setState({
+                            direction: i18next.dir(),
+                        });
+                    }
+                });
                 microsoftTeams.authentication.getAuthToken({
                     successCallback: (token: string) => {
                         microsoftTeams.appInitialization.notifySuccess();
@@ -124,7 +132,7 @@ export class AskAwayTab extends msteamsReactBaseComponent<IAskAwayTabProps, IAsk
      */
     public render() {
         return (
-            <Provider style={{ background: 'unset' }} theme={this.state.theme}>
+            <Provider rtl={this.state.direction == 'rtl'} style={{ background: 'unset' }} theme={this.state.theme}>
                 <div>
                     {this.state.dataEvent && <h1>{this.state.dataEvent.type}</h1>}
                     {this.state.frameContext === microsoftTeams.FrameContexts.sidePanel && (

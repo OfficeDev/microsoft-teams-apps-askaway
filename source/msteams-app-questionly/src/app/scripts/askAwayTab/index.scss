@@ -3,29 +3,14 @@
     flex-direction: column;
     .form-grid {
         margin-top: 0.5rem;
-        margin-bottom: 0rem;
-        span {
-            font-size: 12px;
-            line-height: 16px;
-        }
         .btn-create-session {
-            text-align: center;
-            height: 32px;
+            height: 2rem;
             position: absolute;
             right: 2rem;
             bottom: 2rem;
-            width: 96px;
-            border-radius: 2px;
-            .ui-button__content {
-                font-size: 14px;
-                line-height: 20px;
-            }
+            width: 6rem;
+            border-radius: 0.125rem;
         }
-    }
-    .ui-input,
-    .ui-textarea {
-        margin-top: 0.25rem;
-        font-size: 14px;
     }
 }
 .meeting-panel {
@@ -50,8 +35,8 @@
     }
     .new-updates-button {
         top: -1.4rem;
-        padding-left: 1rem;
-        padding-right: 1rem;
+        padding-inline-start: 1rem;
+        padding-inline-end: 1rem;
         height: 1.85rem;
     }
     .menuHeader {
@@ -65,24 +50,24 @@
         .card-divider {
             border-bottom: 1px solid #3b3a39;
             min-height: 4.5rem;
-            border-top-left-radius: 3px;
-            border-top-right-radius: 3px;
+            border-top-left-radius: 0.2rem;
+            border-top-right-radius: 0.2rem;
             .card-layout {
                 width: 100%;
-                padding: 10px 14px 0px 14px;
+                padding: 0.625rem 0.875rem 0 0.875rem;
                 .action-buttons {
                     button {
-                        margin-right: -5px;
+                        margin-inline-end: -0.3rem;
                     }
                 }
             }
             .question-padding {
                 padding-top: 0.2rem;
-                padding-right: 1rem;
+                padding-inline-end: 1rem;
                 .card-body-question {
-                    padding-left: 0.4rem;
+                    padding-inline-start: 0.4rem;
                     overflow: auto;
-                    white-space: pre-wrap;
+                    white-space: pre-line;
                 }
             }
         }
@@ -106,21 +91,13 @@
     }
 }
 
-.loader {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    margin-top: -50px;
-    margin-left: -100px;
-}
-
 .badge {
     width: 3.75rem;
     font-family: Segoe UI;
     font-weight: 600;
-    font-size: 10px;
-    padding: 0.35em 0.5em;
-    line-height: 12px;
+    font-size: 0.625rem;
+    padding: 0.25rem 0.2rem;
+    line-height: 0.75rem;
     white-space: nowrap;
     vertical-align: baseline;
     border-radius: 0.75rem;
@@ -138,52 +115,21 @@
     width: 100%;
     .screen {
         left: 50%;
-        margin-top: -172px;
-        margin-left: -100px;
+        margin-top: -10.5rem;
+        margin-inline-start: -6.25rem;
         position: absolute;
         top: 50%;
-        display: block;
-        img {
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .text-caption {
-            text-align: center;
-            display: block;
-            margin-top: 10%;
-        }
-        .text-subcaption {
-            text-align: center;
-            margin-top: 3%;
-            display: flex;
-        }
-        .button {
-            margin-left: auto;
-            margin-right: auto;
-            display: block;
-            margin-top: 7%;
-        }
-        .askaway-tab-added {
-            top: 30%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            position: absolute;
-        }
+        height: 21rem;
     }
     .tab-nav-header {
-        padding: 10px 14px 0px 17px;
+        padding: 0.625rem 0.875rem 0 1rem;
         .btn-end-session {
-            margin-right: 1rem;
-            height: 2rem;
-            width: 7rem;
-            margin-top: 0rem;
+            height: auto;
+            margin-inline-end: 1rem;
         }
 
         span {
             font-weight: 500;
-            font-size: 14px;
-            line-height: 20px;
         }
     }
     .tab-container {
@@ -194,12 +140,12 @@
             width: 0;
             height: 0;
             margin: 0 auto;
-            left: -4em;
+            left: -4rem;
         }
         .new-updates-button {
             top: 1.2rem;
-            padding-left: 1rem;
-            padding-right: 1rem;
+            padding-inline-start: 1rem;
+            padding-inline-end: 1rem;
         }
         .post-new-question {
             margin-top: 2rem;
@@ -215,9 +161,9 @@
             .card-layout {
                 width: 100%;
                 box-shadow: 0px 0.15px 0.45px rgba(0, 0, 0, 0.11), 0px 0.8px 1.8px rgba(0, 0, 0, 0.13);
-                border-radius: 4px;
+                border-radius: 0.25rem;
                 .badge {
-                    font-size: 12px;
+                    font-size: 0.75;
                     font-weight: bold;
                 }
                 .ui-card__body {
@@ -234,23 +180,23 @@
         .question-container {
             .svg-position {
                 position: relative;
-                top: 2px;
-                left: -5px;
+                top: 0.125rem;
+                left: -0.3rem;
             }
             .question-layout {
                 box-shadow: 0px 0.15px 0.45px rgba(0, 0, 0, 0.11), 0px 0.8px 1.8px rgba(0, 0, 0, 0.13);
-                border-radius: 4px;
+                border-radius: 0.25rem;
                 margin-top: 0.5rem;
                 margin-bottom: 0.5rem;
-                padding-left: 0.4rem;
-                padding-right: 0.2rem;
+                padding-inline-start: 0.4rem;
+                padding-inline-end: 0.2rem;
                 .ui-reaction {
                     position: relative;
                     right: 1rem;
                 }
                 .text-format {
-                    padding-top: 0rem;
-                    padding-right: 1rem;
+                    padding-top: 0;
+                    padding-inline-end: 1rem;
                     overflow: auto;
                     white-space: pre-wrap;
                 }
@@ -258,8 +204,8 @@
             .padding-none {
                 padding: 0;
                 span {
-                    font-size: 12px;
-                    line-height: 16px;
+                    font-size: 0.75rem;
+                    line-height: 1rem;
                 }
             }
             .btn-text-font-bold {
@@ -276,8 +222,8 @@
     width: 100%;
     text-align: center;
     img {
-        margin-left: auto;
-        margin-right: auto;
+        margin-inline-start: auto;
+        margin-inline-end: auto;
     }
     .sub-text {
         width: 62%;
@@ -295,60 +241,58 @@
     font-family: Segoe UI;
 }
 .switchSessionListHolder {
-    padding-left: 30px;
-    padding-right: 30px;
-    margin-bottom: 12px;
+    padding-inline-start: 1.875rem;
+    padding-inline-end: 1.875rem;
+    margin-bottom: 0.75rem;
     overflow: scroll;
-    max-height: 450px;
-    padding-top: 2%;
+    max-height: 28.125rem;
+    padding-top: 0.625rem;
     font-family: Segoe UI;
 
     .title {
-        margin-bottom: 12px;
+        margin-bottom: 0.75rem;
     }
 
     .switchSessionList {
         li {
-            margin-bottom: 12px;
-            padding-left: 0px;
-            padding-right: 0px;
+            margin-bottom: 0.75rem;
+            padding-inline-start: 0;
+            padding-inline-end: 0;
         }
 
         .fn {
-            margin-right: 0rem;
+            margin-inline-end: 0;
         }
     }
 }
 .switchButton {
     position: absolute;
-    right: 5%;
-    bottom: 5%;
+    right: 1.875rem;
+    bottom: 1.5rem;
 
     button {
         font-family: Segoe UI;
     }
 }
 .switchSessionListCard {
-    padding-right: 12px;
-    padding-left: 12px;
-    padding-top: 11px;
-    padding-bottom: 11px;
+    padding-inline-end: 0.75rem;
+    padding-inline-start: 0.75rem;
+    padding-top: 0.68rem;
+    padding-bottom: 0.68rem;
     border: solid;
-    border-radius: 3px;
+    border-radius: 0.2rem;
     font-family: Segoe UI;
 
     .sessionMetadata {
-        line-height: 20px;
+        line-height: 1.25rem;
     }
     .liveTag {
         font-weight: bold;
-        padding-left: 1rem;
+        padding-inline-start: 1rem;
         border-radius: 0.75rem;
-        padding-right: 1rem;
-        line-height: 14px;
-        font-size: 12px;
-        padding-bottom: 3px;
-        padding-top: 3px;
+        padding-inline-end: 1rem;
+        padding-bottom: 0.2rem;
+        padding-top: 0.2rem;
     }
 }
 
@@ -357,12 +301,30 @@
     margin-bottom: 0.25rem;
 
     .alertContent {
-        margin-left: 0.5rem;
+        margin-inline-start: 0.5rem;
         margin-bottom: 0.25rem;
         margin-top: 0.25rem;
     }
 
     .refreshNowLink {
         color: inherit;
+    }
+}
+
+.ui-provider[dir='rtl'] {
+    .meeting-panel {
+        .new-update-btn-wrapper {
+            left: -1.4rem;
+        }
+    }
+    .tab-container {
+        .new-update-btn-wrapper {
+            right: -4rem;
+        }
+    }
+    .tab-content {
+        .screen {
+            left: 42%;
+        }
     }
 }
