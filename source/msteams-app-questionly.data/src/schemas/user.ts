@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import * as mongoose from "mongoose";
 
 const UserSchema = new mongoose.Schema({

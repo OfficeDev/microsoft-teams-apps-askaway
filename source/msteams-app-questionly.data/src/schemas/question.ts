@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import * as mongoose from "mongoose";
 import { IQnASession } from "./qnASession";
 import { IUser } from "./user";
