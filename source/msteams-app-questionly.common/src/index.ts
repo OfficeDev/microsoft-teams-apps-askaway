@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 export * from "./conversationUtility";
 export * from "./dataEvents/backgroundJobPayload";
 export * from "./dataEvents/dataEvent";

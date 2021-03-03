@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { getMainCard } from "src/adaptive-card/mainCardBuilder";
 import { initLocalization, mainCardStrings } from "src/localization/locale";
 import { IQuestionPopulatedUser, IUser } from "msteams-app-questionly.data";

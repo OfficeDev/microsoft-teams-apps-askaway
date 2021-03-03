@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import * as appInsights from "applicationinsights";
 import { Contracts } from "applicationinsights";
 
