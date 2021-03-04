@@ -1,5 +1,6 @@
 import { Provider } from '@fluentui/react-northstar';
 import * as microsoftTeams from '@microsoft/teams-js';
+import { SeverityLevel } from '@microsoft/applicationinsights-web';
 import msteamsReactBaseComponent, { ITeamsBaseComponentState } from 'msteams-react-base-component';
 import * as React from 'react';
 import { ClientDataContract } from '../../../../../contracts/clientDataContract';
@@ -8,6 +9,7 @@ import { HttpService } from '../../shared/HttpService';
 import { i18next } from '../../shared/i18next';
 import './../../index.scss';
 import { SwitchSessionInternal } from './SwitchSessionInternal';
+import { trackTrace } from '../../../telemetryService';
 
 export interface SwitchSessionProps {}
 
@@ -21,6 +23,7 @@ export interface SwitchSessionState extends ITeamsBaseComponentState {
      * Boolean representing if error should be shown.
      */
     showError: boolean;
+    direction?: string;
 }
 
 /**
@@ -37,12 +40,23 @@ export class SwitchSession extends msteamsReactBaseComponent<SwitchSessionProps,
         microsoftTeams.initialize();
     }
 
+    componentWillMount() {
+        microsoftTeams.getContext((context: microsoftTeams.Context) => {
+            // Set Language for Localization
+            Helper.setI18nextLocale(i18next, context.locale, (err) => {
+                if (err) {
+                    trackTrace(`Error occurred while setting the language and the error is: ${err.message}`, SeverityLevel.Error);
+                } else {
+                    this.setState({
+                        direction: i18next.dir(),
+                    });
+                }
+            });
+        });
+    }
+
     componentDidMount() {
         this.updateTheme(this.getQueryVariable('theme'));
-        // Set Language for Localization
-        if (this.getQueryVariable('locale')) {
-            Helper.setI18nextLocale(i18next, this.getQueryVariable('locale'));
-        }
         this.fetchSessions();
     }
 
@@ -67,7 +81,7 @@ export class SwitchSession extends msteamsReactBaseComponent<SwitchSessionProps,
         const selectedSessionId = searchParams.get('selectedSessionId');
 
         return (
-            <Provider theme={this.state?.theme}>
+            <Provider rtl={this.state.direction == 'rtl'} theme={this.state?.theme}>
                 <SwitchSessionInternal qnaSessions={this.state.qnaSessions} showError={this.state.showError} selectedSessionId={selectedSessionId}></SwitchSessionInternal>
             </Provider>
         );

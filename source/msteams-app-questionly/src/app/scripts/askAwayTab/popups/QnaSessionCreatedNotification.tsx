@@ -1,7 +1,9 @@
 import { Provider } from '@fluentui/react-northstar';
 import * as microsoftTeams from '@microsoft/teams-js';
+import { SeverityLevel } from '@microsoft/applicationinsights-web';
 import msteamsReactBaseComponent, { ITeamsBaseComponentState } from 'msteams-react-base-component';
 import * as React from 'react';
+import { trackTrace } from '../../telemetryService';
 import Helper from '../shared/Helper';
 import { i18next } from '../shared/i18next';
 import './../index.scss';
@@ -11,6 +13,7 @@ export interface QnaSessionCreatedNotificationProps {}
 
 export interface QnaSessionCreatedNotificationState extends ITeamsBaseComponentState {
     theme: any;
+    direction?: string;
 }
 
 /**
@@ -28,7 +31,15 @@ export class QnaSessionCreatedNotification extends msteamsReactBaseComponent<Qna
         this.updateTheme(theme);
         microsoftTeams.getContext((context: microsoftTeams.Context) => {
             // Set Language for Localization
-            Helper.setI18nextLocale(i18next, context.locale);
+            Helper.setI18nextLocale(i18next, context.locale, (err) => {
+                if (err) {
+                    trackTrace(`Error occurred while setting the language and the error is: ${err.message}`, SeverityLevel.Error);
+                } else {
+                    this.setState({
+                        direction: i18next.dir(),
+                    });
+                }
+            });
         });
     }
 
@@ -43,7 +54,7 @@ export class QnaSessionCreatedNotification extends msteamsReactBaseComponent<Qna
         const searchParams = new URL(decodeURIComponent(window.location.href)).searchParams;
 
         return (
-            <Provider style={{ background: 'unset' }} theme={this.state.theme}>
+            <Provider rtl={this.state.direction == 'rtl'} style={{ background: 'unset' }} theme={this.state.theme}>
                 <QnaSessionNotificationInternal onSubmitSession={this.handleOnSubmit} searchParams={searchParams} />
             </Provider>
         );
