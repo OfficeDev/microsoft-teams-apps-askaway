@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import httpFunction from "./../../../broadcast-message/index";
 import { activityMockContext } from "../mocks/testContext";
 

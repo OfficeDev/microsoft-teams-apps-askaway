@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import * as mongoose from "mongoose";
 import { IUser } from "./user";
 
@@ -85,6 +88,17 @@ const QnASessionSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
+    // Time stamp when `end` operation is locked. If this field is not set, it means document is not locked.
+    dateTimeEndOperationLockAcquired: {
+      type: Date,
+      required: false,
+    },
+    // Time to live in seconds.
+    // Used to expire non meeting chat (orphaned) ama sessions for which adaptive card did not get posted.
+    ttl: {
+      type: Number,
+      required: false,
+    },
   },
   { optimisticConcurrency: true }
 );
@@ -107,6 +121,8 @@ interface IQnASessionBase extends mongoose.Document {
   dateTimeCardLastUpdated?: Date;
   dateTimeNextCardUpdateScheduled?: Date;
   endedByUserId?: string;
+  dateTimeEndOperationLockAcquired?: Date;
+  ttl?: Number;
 }
 
 /**

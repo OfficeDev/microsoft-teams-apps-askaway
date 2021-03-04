@@ -1,12 +1,22 @@
-// tslint:disable:no-relative-imports
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { Container, Image, TextBlock } from 'adaptivecards';
-import { createSuccessAdaptiveCard } from '../../task-modules-utility/successCardBuilder';
+import { successCardBuilder } from '../../task-modules-utility/successCardBuilder';
 
 describe('test errorCardBuilder', () => {
+    beforeAll(() => {
+        Object.defineProperty(window, 'location', {
+            value: {
+                host: `${process.env.HostName}`,
+            },
+            writable: true,
+        });
+    });
+
     it('test success card', () => {
         const testSuccessMessage = 'testSuccessMessage';
-        const card = createSuccessAdaptiveCard(testSuccessMessage);
-
+        const card = successCardBuilder(testSuccessMessage);
         expect(card.getItemAt(0) instanceof Container).toBeTruthy();
         const container = <Container>card.getItemAt(0);
         expect(container.getItemAt(0) instanceof Image).toBeTruthy();

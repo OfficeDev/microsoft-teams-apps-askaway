@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { NextFunction, Request, Response } from 'express';
 import { UnauthorizedAccessError } from 'src/errors/unauthorizedAccessError';
 import { ConversationDoesNotBelongToMeetingChatError } from 'src/errors/conversationDoesNotBelongToMeetingChatError';

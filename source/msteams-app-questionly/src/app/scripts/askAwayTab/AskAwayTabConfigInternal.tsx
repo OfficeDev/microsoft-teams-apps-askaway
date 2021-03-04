@@ -1,7 +1,7 @@
-import './index.scss';
+import { Flex, Image, Text } from '@fluentui/react-northstar';
 import * as React from 'react';
-import { Flex, Text, Image } from '@fluentui/react-northstar';
 import { useTranslation } from 'react-i18next';
+import './index.scss';
 
 /**
  * Properties for the Badge React component
@@ -11,10 +11,10 @@ const AskAwayTabConfigInternal: React.FunctionComponent<AskAwayTabConfigInternal
     const { t } = useTranslation();
 
     return (
-        <Flex hAlign="center" vAlign="center" className="screen">
-            <Image className="askaway-tab-added" alt="image" src={require('./../../web/assets/askaway_tab_added.png')} />
+        <Flex column className="tab-config-container" gap="gap.large" hAlign="center" vAlign="center">
+            <Image alt="image" src={require('./../../web/assets/askaway_tab_added.png')} />
             <Flex.Item align="center">
-                <Text className="text-configtab-caption" content={t('tab.configTabText')} />
+                <Text size="large" weight="bold" content={t('tab.configTabText')} />
             </Flex.Item>
         </Flex>
     );

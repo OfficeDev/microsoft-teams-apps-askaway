@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 /**
  * Returns `value` if it's a Number, otherwise `otherwise` will be returned
  * @param value - expression that will be returned truthy

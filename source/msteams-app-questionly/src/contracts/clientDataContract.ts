@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace ClientDataContract {
     /**
@@ -13,6 +16,11 @@ export namespace ClientDataContract {
          * Session title.
          */
         title: string;
+
+        /**
+         * Session description.
+         */
+        description: string;
 
         /**
          * Boolean denoting if session is active.
@@ -103,5 +111,25 @@ export namespace ClientDataContract {
          * Error code.
          */
         code?: string;
+    }
+
+    /**
+     * Contract for user data for rest api response (/me)
+     */
+    export interface User {
+        /**
+         * User role in the meeting
+         */
+        userRole: string;
+
+        /**
+         * User name
+         */
+        userName: string;
+
+        /**
+         * User Id
+         */
+        userId: string;
     }
 }

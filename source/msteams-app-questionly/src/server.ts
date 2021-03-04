@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import debug from 'debug';
 import { config as dotenvConfig } from 'dotenv';
 import Express from 'express';
@@ -13,7 +16,7 @@ dotenvConfig();
 
 // The import of components has to be done AFTER the dotenv config.
 import { exceptionLogger, initiateAIClient } from 'src/util/exceptionTracking';
-import { ConversationDataService, IConversationDataService, initiateConnection } from 'msteams-app-questionly.data';
+import { ConversationDataService, initiateConnection, UserDataService, QuestionDataService, QnASessionDataService } from 'msteams-app-questionly.data';
 import { getMongoURI, initKeyVault } from 'src/util/keyvault';
 import { setupBot } from 'src/util/setupBot';
 import { setupClientApp } from 'src/util/setupClientApp';
@@ -21,7 +24,10 @@ import { setupRestApis } from 'src/util/setupRestApis';
 import { initBackgroundJobSetup } from 'src/background-job/backgroundJobTrigger';
 import { initLocalization } from 'src/localization/locale';
 import { setupWebServerApp, startWebServer } from 'src/util/webServerUtility';
-import { TelemetryExceptions } from './constants/telemetryConstants';
+import { TelemetryExceptions } from 'src/constants/telemetryConstants';
+import { ClientDataContractFormatter } from 'src/util/clientDataContractFormatter';
+import { Controller } from 'src/controller';
+import { initializeCacheInstance } from './util/memoryCache';
 
 /**
  * Establishes DB connection.
@@ -50,6 +56,9 @@ async function initializeSupportingModules() {
 
     // Establish db connection.
     await setupDBConection();
+
+    // Initialize memory cache instance.
+    initializeCacheInstance();
 }
 
 /**
@@ -57,15 +66,20 @@ async function initializeSupportingModules() {
  * @param express - express app.
  */
 async function setupRoutes(express: ExpressType) {
-    const conversationDataService: IConversationDataService = new ConversationDataService();
+    const conversationDataService = new ConversationDataService();
+    const userDataService = new UserDataService();
+    const qnaSessionDataService = new QnASessionDataService(userDataService);
+    const questionDataService = new QuestionDataService(userDataService, qnaSessionDataService);
+    const clientDataContractFormatter = new ClientDataContractFormatter(userDataService, questionDataService);
+    const controller = new Controller(questionDataService, qnaSessionDataService);
     // Setup bot.
-    await setupBot(express, conversationDataService);
+    await setupBot(express, conversationDataService, controller);
 
     // Setup client app.
     setupClientApp(express);
 
     // Setup rest apis.
-    setupRestApis(express, conversationDataService);
+    setupRestApis(express, conversationDataService, qnaSessionDataService, clientDataContractFormatter, controller);
 }
 
 /**

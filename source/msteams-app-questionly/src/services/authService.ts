@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import * as passport from 'passport';
 import * as passportAzureAd from 'passport-azure-ad';
 import { Express as ExpressType } from 'express-serve-static-core';

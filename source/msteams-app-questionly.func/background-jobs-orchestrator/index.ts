@@ -1,4 +1,7 @@
-﻿/*
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+/*
  * This function is not intended to be invoked directly. Instead it will be
  * triggered by an HTTP starter function.
  */
@@ -48,6 +51,9 @@ const orchestrator = df.orchestrator(function* (context) {
     const broadcastActivityInput = {
       conversationId: conversationId,
       eventData: payload.eventData,
+      meetingId: meetingId,
+      operationId: operationId,
+      qnaSessionId: payload.qnaSessionId,
     };
 
     const updateAdaptivecardActivityInput = {
@@ -56,6 +62,7 @@ const orchestrator = df.orchestrator(function* (context) {
       serviceUrl: serviceUrl,
       qnaSessionId: payload.qnaSessionId,
       meetingId: meetingId,
+      operationId: operationId,
     };
 
     const parallelTasks = [];

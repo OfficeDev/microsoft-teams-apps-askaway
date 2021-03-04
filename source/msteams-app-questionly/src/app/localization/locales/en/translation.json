@@ -12,18 +12,22 @@
         "closedStatus": "Closed",
         "questionPlaceholder": "Type a question here",
         "postQuestionButton": "Post",
-        "welcomeSubText": "Create, manage, and participate in Q&A sessions.",
+        "welcomeSubTextPresenter": "Create, manage, and participate in Q&A sessions.",
+        "welcomeSubTextAttendee": "Once the Q&A starts, you'll be able to ask and upvote questions here.",
         "createButton": "Start a Q&A session",
         "startNewSession": "Start a Q&A session",
         "switchSession": "Switch to another session",
         "endSessionButton": "End session",
-        "configTabText": "Select save to finish adding ask away to the meeting",
+        "configTabText": "Select save to finish adding Ask Away to the meeting",
         "removeTextNotification": "You can just add stuff here if you want to clean up when removing the tab. For instance, if you have stored data in an external repository, you can delete or archive it here. If you don't need this remove page you can remove it.",
         "removeHeaderText": "You're about to remove your tab...",
         "showPendingQuestions": "Pending questions",
         "showAnsweredQuestions": "Answered questions",
         "pendingStatus": "Pending",
-        "answeredStatus": "Answered"
+        "answeredStatus": "Answered",
+        "whenSessionClosed": "Surprising, but true. No questions were posted.",
+        "loaderText": "Loading information",
+        "updatemessage": "New updates"
     },
     "meetingPanel": {
         "successText": "Q&A session started",
@@ -35,7 +39,7 @@
         "noQuestionsPosted": "Q & A session is live...",
         "askAway": "Ask away!",
         "updatemessage": "New updates",
-        "bannerText": "Connection lost. Refresh to view content. if that doesn't do the trick, try again later.",
+        "bannerText": "Connection lost. <0>Refresh</0> to view content. If that doesn’t do the trick, try again later.",
         "inputPlaceholder": "Type a question here",
         "refreshSessionButton": "Refresh session",
         "endSessionButton": "End session",
@@ -56,7 +60,17 @@
         "createQnaSessionButton": "Create",
         "notificationTitle": "{{userName}} started a Q&A session",
         "notificationMessage": "Select the Ask Away icon at the top of the meeting view to participate",
-        "notificationButton": "Ok"
+        "notificationButton": "Ok",
+        "switchNow": "Switch now",
+        "cancel": "Cancel",
+        "noSessionsToSelect": "There are no sessions to select.",
+        "live": "Live",
+        "sessionCreatedDate": "Date created: {{date}}",
+        "loaderText": "Loading information",
+        "selectSession": "Select a session:",
+        "updateQuestionFailedTitle": "Update a question",
+        "postQuestionFailedTitle": "Post a question",
+        "genericFailureTitle": "Something went wrong"
     },
     "TaskModuleMessages": {
         "EndSession": "End session",
@@ -74,6 +88,7 @@
         "QnASessionEndPrompt": "Are you sure you want to stop gathering questions?",
         "Cancel": "Cancel",
         "StartQnATitle": "Start a Q&A session",
-        "EndQnATitle": "End a Q&A session"
+        "EndQnATitle": "End a Q&A session",
+        "SwitchSessionTitle": "Switch to another session"
     }
 }

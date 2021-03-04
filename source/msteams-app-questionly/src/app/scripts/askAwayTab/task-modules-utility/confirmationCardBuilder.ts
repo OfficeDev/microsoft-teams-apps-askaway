@@ -1,18 +1,20 @@
-// tslint:disable:no-relative-imports
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { AdaptiveCard, IAdaptiveCard } from 'adaptivecards';
+import * as ACData from 'adaptivecards-templating';
+import { TFunction } from 'i18next';
 import { _adaptiveCard } from './cardHelper';
 import { ISubmitButtonData, SubmitButtonId } from './ISubmitButtonData';
-import { TaskModuleMessages } from './taskModuleMessages';
-import * as ACData from 'adaptivecards-templating';
 
 /**
  * Creates a card for end Q&A session end confirmation.
  */
-export const createEndQnAConfirmationAdaptiveCard = (): AdaptiveCard => {
+export const confirmationCardBuilder = (t: TFunction): AdaptiveCard => {
     return createConfirmationAdaptiveCard(
-        TaskModuleMessages.QnASessionEndPrompt,
-        { title: TaskModuleMessages.Cancel, id: SubmitButtonId.Cancel },
-        { title: TaskModuleMessages.EndSession, id: SubmitButtonId.SubmitEndQnA }
+        t('TaskModuleMessages.QnASessionEndPrompt'),
+        { title: t('TaskModuleMessages.Cancel'), id: SubmitButtonId.Cancel },
+        { title: t('TaskModuleMessages.EndSession'), id: SubmitButtonId.SubmitEndQnA }
     );
 };
 

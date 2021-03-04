@@ -1,6 +1,8 @@
-// tslint:disable:no-relative-imports
-import { ClientDataContract } from '../../../../../contracts/clientDataContract';
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { IDataEvent } from 'msteams-app-questionly.common';
+import { ClientDataContract } from '../../../../../contracts/clientDataContract';
 import { QnaSessionCreatedEventHandler } from '../../dataEventHandling/qnaSessionCreatedEventHandler';
 
 describe('validates QnaSessionCreatedEventHandler', () => {
@@ -24,12 +26,12 @@ describe('validates QnaSessionCreatedEventHandler', () => {
             qnaSessionId: testsessionId,
             type: 'qnaSessionCreatedEvent',
             data: {},
-            version: 0,
         };
 
         activeSessionData = {
             sessionId: testsessionId,
             isActive: true,
+            description: 'testDescription1',
             title: '',
             answeredQuestions: [],
             unansweredQuestions: [],

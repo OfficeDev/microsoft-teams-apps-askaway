@@ -1,21 +1,17 @@
-import './../index.scss';
+import { ChevronDownMediumIcon, ChevronEndMediumIcon, LikeIcon } from '@fluentui/react-icons-northstar';
+import { Avatar, Button, Flex, Text } from '@fluentui/react-northstar';
 import * as React from 'react';
-import { Flex, Avatar, ThemePrepared, Text, Button } from '@fluentui/react-northstar';
-import Badge from '../shared/Badge';
-import { LikeIcon, ChevronDownMediumIcon, ChevronEndMediumIcon } from '@fluentui/react-icons-northstar';
-import { LikeIconFilled } from '../shared/Icons/LikeIconFilled';
-import { CONST } from '../shared/Constants';
 import { useState } from 'react';
 import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
-import { withTheme } from '../shared/WithTheme';
+import Badge from '../shared/Badge';
+import { CONST } from '../shared/Constants';
+import { LikeIconFilled } from '../shared/Icons/LikeIconFilled';
+import { ThemeProps, withTheme } from '../shared/WithTheme';
+import './../index.scss';
 
 /**
  * Properties for the TabQuestions React component
  */
-
-interface ThemeProps {
-    theme: ThemePrepared;
-}
 export interface TabQuestionsProps {
     activeSessionData: ClientDataContract.QnaSession;
     teamsTabContext: microsoftTeams.Context;
@@ -27,7 +23,7 @@ export const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProp
 
     const [isAnsweredTabOpen, setAnsweredTabOpen] = useState(true);
 
-    const isUserLikedQuestion = (votes: Array<string>) => {
+    const isUserLikedQuestion = (votes: string[]) => {
         if (props.teamsTabContext.userObjectId) {
             return votes.includes(props.teamsTabContext.userObjectId);
         }
@@ -37,11 +33,10 @@ export const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProp
 
     /**
      * Identifies user own questions
-     * @param isActiveSession - 'true' or 'false' identifies session is active
      * @param authorId - user id as 'string'
      */
-    const isUserOwnQuestion = (isActiveSession: boolean, authorId: string) => {
-        return isActiveSession && props.teamsTabContext.userObjectId === authorId ? false : true;
+    const isUserOwnQuestion = (authorId: string) => {
+        return props.teamsTabContext.userObjectId === authorId;
     };
 
     /**
@@ -50,7 +45,7 @@ export const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProp
      * @param questionType - 'answered' or 'unanswered' will be the value
      * @param isQuestionsTabExpanded - 'true' or 'false' will be the value
      */
-    const showQuestions = (questions, questionType, isQuestionsTabExpanded) => {
+    const showQuestions = (questions, questionType, isQuestionsTabExpanded, isActive) => {
         if (questions.length > 0) {
             return (
                 <React.Fragment>
@@ -60,26 +55,22 @@ export const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProp
                             return (
                                 <div key={question.id} style={{ backgroundColor: colorScheme?.default?.background, border: `1px solid ${colorScheme?.onyx?.border1}` }} className="question-layout">
                                     <Flex gap="gap.small">
-                                        <Flex.Item size="size.large">
-                                            <div>
-                                                <Flex vAlign="center" gap="gap.small" padding="padding.medium">
-                                                    <Avatar size="small" name={question.author.name} />
-                                                    <Text className="author-name" content={question.author.name} />
-                                                    <Badge
-                                                        styles={
-                                                            CONST.TAB_QUESTIONS.UNANSWERED_Q === questionType
-                                                                ? { backgroundColor: colorScheme?.brand?.background, color: colorScheme?.brand?.foreground4 }
-                                                                : { backgroundColor: colorScheme?.green?.background, color: colorScheme?.green?.foreground1 }
-                                                        }
-                                                        text={CONST.TAB_QUESTIONS.UNANSWERED_Q === questionType ? props.t('tab.pendingStatus') : props.t('tab.answeredStatus')}
-                                                    />
-                                                </Flex>
-                                            </div>
-                                        </Flex.Item>
+                                        <Flex vAlign="center" gap="gap.small" padding="padding.medium">
+                                            <Avatar size="small" name={question.author.name} />
+                                            <Text size="small" content={question.author.name} />
+                                            <Badge
+                                                styles={
+                                                    CONST.TAB_QUESTIONS.UNANSWERED_Q === questionType
+                                                        ? { backgroundColor: colorScheme?.brand?.background, color: colorScheme?.brand?.foreground4, paddingBottom: '0.3rem' }
+                                                        : { backgroundColor: colorScheme?.green?.background, color: colorScheme?.green?.foreground1, paddingBottom: '0.3rem' }
+                                                }
+                                                text={CONST.TAB_QUESTIONS.UNANSWERED_Q === questionType ? props.t('tab.pendingStatus') : props.t('tab.answeredStatus')}
+                                            />
+                                        </Flex>
                                         <Flex.Item push>
                                             <Flex gap="gap.small" vAlign="center" styles={{ position: 'relative', right: '1.5rem' }}>
                                                 <Button
-                                                    disabled={isUserOwnQuestion(questions.isActive, question.author.id)}
+                                                    disabled={isUserOwnQuestion(question.author.id) || !isActive}
                                                     onClick={() =>
                                                         props.onClickAction({
                                                             question,
@@ -92,12 +83,12 @@ export const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProp
                                                     iconOnly
                                                     text
                                                 />
-                                                <Text content={question.votesCount} />
+                                                <Text content={question.voterAadObjectIds.length} />
                                             </Flex>
                                         </Flex.Item>
                                     </Flex>
-                                    <Flex gap="gap.small" padding="padding.medium">
-                                        <Text className="text-format" content={question.content} />
+                                    <Flex gap="gap.small" padding="padding.medium" className="text-format">
+                                        <Text size="medium" content={question.content} />
                                     </Flex>
                                 </div>
                             );
@@ -141,7 +132,7 @@ export const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProp
 
     const showTitle = (questionType) => {
         return (
-            <Flex className="padding-none" gap="gap.small" padding="padding.medium" vAlign="center">
+            <Flex className="padding-none" gap="gap.small" vAlign="center">
                 <Button
                     className={`padding-none ${toggleClass(questionType)}`}
                     icon={setIcons(questionType)}
@@ -158,8 +149,8 @@ export const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProp
 
     return (
         <div className="question-container">
-            {showQuestions(props.activeSessionData.answeredQuestions, CONST.TAB_QUESTIONS.ANSWERED_Q, isAnsweredTabOpen)}
-            {showQuestions(props.activeSessionData.unansweredQuestions, CONST.TAB_QUESTIONS.UNANSWERED_Q, isPendingTabOpen)}
+            {showQuestions(props.activeSessionData.answeredQuestions, CONST.TAB_QUESTIONS.ANSWERED_Q, isAnsweredTabOpen, props.activeSessionData.isActive)}
+            {showQuestions(props.activeSessionData.unansweredQuestions, CONST.TAB_QUESTIONS.UNANSWERED_Q, isPendingTabOpen, props.activeSessionData.isActive)}
         </div>
     );
 };

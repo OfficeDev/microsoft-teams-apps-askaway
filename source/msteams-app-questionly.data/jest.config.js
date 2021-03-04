@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 const { pathsToModuleNameMapper } = require('ts-jest/utils');
 const tsconfig = require('./tsconfig.json');
 const path = require('path');

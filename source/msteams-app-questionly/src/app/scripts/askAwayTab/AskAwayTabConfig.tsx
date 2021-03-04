@@ -1,10 +1,10 @@
-import './index.scss';
-import * as React from 'react';
 import { Provider } from '@fluentui/react-northstar';
-import msteamsReactBaseComponent, { ITeamsBaseComponentState } from 'msteams-react-base-component';
 import * as microsoftTeams from '@microsoft/teams-js';
-import AskAwayTabConfigInternal from './AskAwayTabConfigInternal';
+import msteamsReactBaseComponent, { ITeamsBaseComponentState } from 'msteams-react-base-component';
+import * as React from 'react';
 import { i18next } from './../askAwayTab/shared/i18next';
+import AskAwayTabConfigInternal from './AskAwayTabConfigInternal';
+import './index.scss';
 import Helper from './shared/Helper';
 
 export interface IAskAwayTabConfigState extends ITeamsBaseComponentState {
@@ -41,9 +41,7 @@ export class AskAwayTabConfig extends msteamsReactBaseComponent<IAskAwayTabConfi
                 const host = 'https://' + window.location.host;
                 microsoftTeams.settings.setSettings({
                     contentUrl: host + '/askAwayTab/?name={loginHint}&tenant={tid}&group={groupId}&theme={theme}',
-                    websiteUrl: host + '/askAwayTab/?name={loginHint}&tenant={tid}&group={groupId}&theme={theme}',
                     suggestedDisplayName: 'AskAway',
-                    removeUrl: host + `/askAwayTab/remove.html?theme={theme}&locale=${this.state.locale}`,
                     entityId: this.state.value,
                 });
                 saveEvent.notifySuccess();

@@ -31,7 +31,7 @@ AvatarKey="{{Avatar key}}"
 debugMode="true"
 HostName="{{Host name}}"
 MicrosoftAppId="{{ Bot client id}}"
-ASKAWAYTAB_APP_URI=api://{{HostName}}/{{MicrosoftAppId}}
+AzureAd_ApplicationIdUri=api://{{HostName}}/{{MicrosoftAppId}}
 ```
 
 ## Building the app

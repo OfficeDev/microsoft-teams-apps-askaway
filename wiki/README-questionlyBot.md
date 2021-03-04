@@ -60,7 +60,6 @@ ApplicationInsightsInstrumentationKey="{{ApplicationInsightsInstrumentationKey}}
 MicrosoftAppPassword="{{MicrosoftAppPassword}}"
 AvatarKey="{{AvatarKey}}"
 debugMode="true"
-ASKAWAYTAB_APP_URI="{{ASKAWAYTAB_APP_URI}}"
 NumberOfActiveAMASessions=1
 BackgroundJobUri="http://localhost:7071/api/background-Job"
 BackgroundFunctionKey=""
@@ -73,6 +72,7 @@ local.settings.json for azure function layer:
 {
   "IsEncrypted": false,
   "Values": {
+    "debugMode": true,
     "WEBSITE_NODE_DEFAULT_VERSION": "~12",
     "AzureWebJobsStorage": "{{AzureWebJobsStorage}}",
     "FUNCTIONS_WORKER_RUNTIME": "node",
@@ -92,7 +92,11 @@ local.settings.json for azure function layer:
     "BroadcastActivityRetryAttemptCount": 2,
     "MaxWaitTimeForAdaptiveCardRefreshInMs": 5000,
     "AvatarKey": "{{AvatarKey}}",
-    "HostName": "{{HostName}}"
+    "HostName": "{{HostName}}",
+    "ExpireInMemorySecretsAfterMs": "{{ExpireInMemorySecretsAfterMs}}",
+    "MarkQuestionAsAnsweredOperationLockValidityInMS": 5000,
+    "EndSessionOperationLockValidityInMS": 5000,
+	  "IdentityObjectId_AppService": "{{IdentityObjectId_AppService}}"
   },
   "Host": {
     "LocalHttpPort": 7071,

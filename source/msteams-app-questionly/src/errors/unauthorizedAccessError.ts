@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { errorMessages } from './errorMessages';
 
 export enum UnauthorizedAccessErrorCode {

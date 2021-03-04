@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 // All the functions to populate the adaptive cards should go in here
 
 import { AdaptiveCard, IAdaptiveCard } from 'adaptivecards';

@@ -1,17 +1,19 @@
-// tslint:disable:no-relative-imports
-import { ActionSet, AdaptiveCard, TextBlock, TextWeight, TextSize, Container, VerticalAlignment, HorizontalAlignment, IAdaptiveCard } from 'adaptivecards';
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+import { ActionSet, AdaptiveCard, Container, HorizontalAlignment, IAdaptiveCard, TextBlock, TextSize, TextWeight, VerticalAlignment } from 'adaptivecards';
+import * as ACData from 'adaptivecards-templating';
+import { TFunction } from 'i18next';
 import { createSubmitButton, _adaptiveCard } from './cardHelper';
 import { SubmitButtonId } from './ISubmitButtonData';
-import { TaskModuleMessages } from './taskModuleMessages';
-import * as ACData from 'adaptivecards-templating';
 
 /**
  * Creates adaptive card for generic errors.
  * @returns - adaptive card.
  */
-export const createGenericErrorCard = (): AdaptiveCard => {
-    const card = createBaseErrorAdaptiveCard([TaskModuleMessages.GenericErrorMessage]);
-    card.addAction(createSubmitButton({ title: TaskModuleMessages.Ok, id: SubmitButtonId.Ok }));
+export const createGenericErrorCard = (t: TFunction): AdaptiveCard => {
+    const card = createBaseErrorAdaptiveCard([t('TaskModuleMessages.GenericErrorMessage')]);
+    card.addAction(createSubmitButton({ title: t('TaskModuleMessages.Ok'), id: SubmitButtonId.Ok }));
 
     return card;
 };
@@ -20,9 +22,9 @@ export const createGenericErrorCard = (): AdaptiveCard => {
  * Creates card for the scenario where QnA session creation fails as user is not a presenter/organizer.
  * @returns - adaptive card.
  */
-export const createCardForInsufficientPermissionsToCreateQnASessionError = (): AdaptiveCard => {
-    const card = createBaseErrorAdaptiveCard([TaskModuleMessages.PermissionsToCreateQnASessionError, TaskModuleMessages.AskQuestions, TaskModuleMessages.PleaseDo]);
-    card.addAction(createSubmitButton({ title: TaskModuleMessages.Ok, id: SubmitButtonId.Ok }));
+export const createCardForInsufficientPermissionsToCreateQnASessionError = (t: TFunction): AdaptiveCard => {
+    const card = createBaseErrorAdaptiveCard([t('TaskModuleMessages.PermissionsToCreateQnASessionError'), t('TaskModuleMessages.AskQuestions'), t('TaskModuleMessages.PleaseDo')]);
+    card.addAction(createSubmitButton({ title: t('TaskModuleMessages.Ok'), id: SubmitButtonId.Ok }));
 
     return card;
 };
@@ -31,9 +33,9 @@ export const createCardForInsufficientPermissionsToCreateQnASessionError = (): A
  * Creates card for the scenario where end QnA session action fails as user is not a presenter/organizer.
  * @returns - adaptive card.
  */
-export const createCardForInsufficientPermissionsToEndQnASessionError = (): AdaptiveCard => {
-    const card = createBaseErrorAdaptiveCard([TaskModuleMessages.PermissionsToEndQnASessionError]);
-    card.addAction(createSubmitButton({ title: TaskModuleMessages.Ok, id: SubmitButtonId.Ok }));
+export const createCardForInsufficientPermissionsToEndQnASessionError = (t: TFunction): AdaptiveCard => {
+    const card = createBaseErrorAdaptiveCard([t('TaskModuleMessages.PermissionsToEndQnASessionError')]);
+    card.addAction(createSubmitButton({ title: t('TaskModuleMessages.Ok'), id: SubmitButtonId.Ok }));
 
     return card;
 };
@@ -42,8 +44,8 @@ export const createCardForInsufficientPermissionsToEndQnASessionError = (): Adap
  * Creates card for the scenario where QnA session creation fails as there is an active session already exists.
  * @returns - adaptive card.
  */
-export const createCardForQnASessionLimitExhaustedError = (): AdaptiveCard => {
-    const card = createBaseErrorAdaptiveCard([TaskModuleMessages.QnASesssionAlreadyActive, TaskModuleMessages.EndQnASessionQuestion]);
+export const createCardForQnASessionLimitExhaustedError = (t: TFunction): AdaptiveCard => {
+    const card = createBaseErrorAdaptiveCard([t('TaskModuleMessages.QnASesssionAlreadyActive'), t('TaskModuleMessages.EndQnASessionQuestion')]);
 
     // Center aligned CTAs.
     const container = new Container();
@@ -52,8 +54,8 @@ export const createCardForQnASessionLimitExhaustedError = (): AdaptiveCard => {
     container.verticalContentAlignment = VerticalAlignment.Center;
     const actionSet = new ActionSet();
     actionSet.horizontalAlignment = HorizontalAlignment.Center;
-    actionSet.addAction(createSubmitButton({ title: TaskModuleMessages.Cancel, id: SubmitButtonId.Cancel }));
-    actionSet.addAction(createSubmitButton({ title: TaskModuleMessages.EndSession, id: SubmitButtonId.SubmitEndQnA }));
+    actionSet.addAction(createSubmitButton({ title: t('TaskModuleMessages.Cancel'), id: SubmitButtonId.Cancel }));
+    actionSet.addAction(createSubmitButton({ title: t('TaskModuleMessages.EndSession'), id: SubmitButtonId.SubmitEndQnA }));
 
     container.addItem(actionSet);
     card.addItem(container);
@@ -65,9 +67,9 @@ export const createCardForQnASessionLimitExhaustedError = (): AdaptiveCard => {
  * Creates card for the scenario where QnA session creation/end fails due to authorization error.
  * @returns - adaptive card.
  */
-export const createCardForUnauthorizedAccessError = (): AdaptiveCard => {
-    const card = createBaseErrorAdaptiveCard([TaskModuleMessages.GenericUnauthorizedError]);
-    card.addAction(createSubmitButton({ title: TaskModuleMessages.Ok, id: SubmitButtonId.Ok }));
+export const createCardForUnauthorizedAccessError = (t: TFunction): AdaptiveCard => {
+    const card = createBaseErrorAdaptiveCard([t('TaskModuleMessages.GenericUnauthorizedError')]);
+    card.addAction(createSubmitButton({ title: t('TaskModuleMessages.Ok'), id: SubmitButtonId.Ok }));
 
     return card;
 };
@@ -119,7 +121,7 @@ const baseErrorCard = () =>
  * @returns - adaptive card.
  */
 const createBaseErrorAdaptiveCard = (errorMessages: string[]): AdaptiveCard => {
-    const errorImageUrl = `https://${process.env.HostName}/images/failure_image.png`;
+    const errorImageUrl = `https://${window.location.host}/images/failure_image.png`;
     const template = new ACData.Template(baseErrorCard()).expand({
         $root: {
             errorImageUrl,

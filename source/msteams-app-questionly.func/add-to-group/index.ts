@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 import { userIdParameterConstant } from "../src/constants/requestConstants";
 import { verifyUserFromConversationId } from "msteams-app-questionly.common";
@@ -17,6 +20,7 @@ import { isValidParam } from "../src/utils/requestUtility";
 import { errorStrings } from "../src/constants/errorStrings";
 import { StatusCodes } from "http-status-codes";
 import { exceptionLogger } from "../src/utils/exceptionTracking";
+import { getMicrosoftAppPassword } from "../src/utils/keyvaultUtility";
 
 const httpTrigger: AzureFunction = async function (
   context: Context,
@@ -68,7 +72,7 @@ const httpTrigger: AzureFunction = async function (
     // Check if user is part of conversation.
     const isValidUser = await verifyUserFromConversationId(
       process.env.MicrosoftAppId,
-      process.env.MicrosoftAppPassword,
+      getMicrosoftAppPassword(),
       conversationId,
       conversation.serviceUrl,
       conversation.tenantId,

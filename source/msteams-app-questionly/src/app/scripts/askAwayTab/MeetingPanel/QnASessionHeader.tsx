@@ -1,10 +1,10 @@
-// tslint:disable:no-relative-imports
-import './../index.scss';
+import { LeaveIcon, MoreIcon, RetryIcon } from '@fluentui/react-icons-northstar';
+import { Flex, FlexItem, Menu, menuAsToolbarBehavior, MenuItemProps, ShorthandCollection, Text } from '@fluentui/react-northstar';
 import * as React from 'react';
-import { Flex, Text, FlexItem, Menu, menuAsToolbarBehavior, ShorthandCollection, MenuItemProps } from '@fluentui/react-northstar';
-import { MoreIcon, LeaveIcon, RetryIcon } from '@fluentui/react-icons-northstar';
 import { ParticipantRoles } from '../../../../enums/ParticipantRoles';
 import { isPresenterOrOrganizer } from '../shared/meetingUtility';
+import { ThemeProps, withTheme } from '../shared/WithTheme';
+import './../index.scss';
 
 /**
  * Properties for the QnASessionHeader React component
@@ -17,7 +17,10 @@ export interface QnASessionHeaderProps {
     t: Function;
     userRole: ParticipantRoles;
 }
-const QnASessionHeader: React.FunctionComponent<QnASessionHeaderProps> = (props) => {
+
+const QnASessionHeader: React.FunctionComponent<QnASessionHeaderProps & ThemeProps> = (props) => {
+    const colorScheme = props.theme.siteVariables.colorScheme;
+
     const items = [
         {
             key: 'Refresh session',
@@ -45,6 +48,7 @@ const QnASessionHeader: React.FunctionComponent<QnASessionHeaderProps> = (props)
         {
             icon: (
                 <MoreIcon
+                    styles={{ color: colorScheme.default.foregroundHover }}
                     {...{
                         outline: false,
                     }}
@@ -59,7 +63,7 @@ const QnASessionHeader: React.FunctionComponent<QnASessionHeaderProps> = (props)
 
     return (
         <Flex gap="gap.large" vAlign="center">
-            <Text className="session-title" content={props.title} size="medium" />
+            <Text content={props.title} size="large" />
             {props.showToolBar && (
                 <FlexItem push>
                     <div className="menuHeader">
@@ -70,4 +74,4 @@ const QnASessionHeader: React.FunctionComponent<QnASessionHeaderProps> = (props)
         </Flex>
     );
 };
-export default QnASessionHeader;
+export default withTheme(QnASessionHeader);

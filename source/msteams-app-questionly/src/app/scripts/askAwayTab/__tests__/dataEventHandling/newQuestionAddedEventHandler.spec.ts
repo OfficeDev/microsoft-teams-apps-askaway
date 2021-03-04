@@ -1,4 +1,6 @@
-// tslint:disable:no-relative-imports
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { NewQuestionAddedEventHandler } from '../../dataEventHandling/newQuestionAddedEventHandler';
 import { ClientDataContract } from '../../../../../contracts/clientDataContract';
 import { IDataEvent } from 'msteams-app-questionly.common';
@@ -24,11 +26,11 @@ describe('validates NewQuestionAddedEventHandler', () => {
             qnaSessionId: testsessionId,
             type: 'newQuestionAddedEvent',
             data: {},
-            version: 0,
         };
 
         activeSessionData = {
             sessionId: testsessionId,
+            description: 'testDescription1',
             isActive: true,
             title: '',
             answeredQuestions: [],

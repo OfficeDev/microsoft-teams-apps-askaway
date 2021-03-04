@@ -1,3 +1,6 @@
+:: Copyright (c) Microsoft Corporation.
+:: Licensed under the MIT License.
+
 cd source\msteams-app-questionly.data 
 call npm.cmd install 
 call npm.cmd run build 

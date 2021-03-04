@@ -1,6 +1,8 @@
-// tslint:disable:no-relative-imports
-import { ClientDataContract } from '../../../../../contracts/clientDataContract';
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { IDataEvent } from 'msteams-app-questionly.common';
+import { ClientDataContract } from '../../../../../contracts/clientDataContract';
 import { QuestionMarkedAsAnsweredEventHandler } from '../../dataEventHandling/questionMarkedAsAnsweredEventHandler';
 
 describe('validates QuestionMarkedAsAnsweredEventHandler', () => {
@@ -24,13 +26,13 @@ describe('validates QuestionMarkedAsAnsweredEventHandler', () => {
             qnaSessionId: testsessionId,
             type: 'newQuestionAddedEvent',
             data: {},
-            version: 0,
         };
 
         activeSessionData = {
             sessionId: testsessionId,
             isActive: true,
             title: '',
+            description: 'testDescription1',
             answeredQuestions: [],
             unansweredQuestions: [],
             hostUser: { id: '', name: '' },

@@ -1,5 +1,8 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import i18next from 'i18next';
-import enJson from 'src/localization/resources/en.json';
+import enJson from './resources/en.json';
 import { exceptionLogger } from 'src/util/exceptionTracking';
 
 export interface Strings {
@@ -26,6 +29,7 @@ export interface EndQnA {
 export interface Errors {
     upvoting: string;
     submittingQuestions: string;
+    submittingEmptyQuestion: string;
     missingFields: string;
     taskFetch: string;
     taskSubmit: string;
@@ -34,6 +38,8 @@ export interface Errors {
     qnasessionlimitexhaustedError: string;
     qnasessionCreationError: string;
     insufficientPermissionsToCreateOrEndQnASessionError: string;
+    unableToPostCardForSessionStartedEvent: string;
+    unableToPerformActivityOnEndedSession: string;
 }
 
 export interface Generic {

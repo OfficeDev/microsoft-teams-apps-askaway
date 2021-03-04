@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { IAdaptiveCard } from 'adaptivecards';
 import { askQuestionStrings, genericStrings, errorStrings } from 'src/localization/locale';
 import { CardConstants } from 'src/adaptive-cards/constants/cardConstants';
@@ -15,7 +18,13 @@ export const newQuestionCard = () =>
                 type: 'TextBlock',
                 text: errorStrings('submittingQuestions'),
                 color: 'attention',
-                $when: '${question != null}',
+                $when: '${question != null && question != ""}',
+            },
+            {
+                type: 'TextBlock',
+                text: errorStrings('submittingEmptyQuestion'),
+                color: 'attention',
+                $when: '${question == ""}',
             },
             {
                 type: 'TextBlock',

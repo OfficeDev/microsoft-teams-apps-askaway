@@ -1,20 +1,18 @@
-import './../index.scss';
+import { Avatar, Button, Card, Divider, Flex, FlexItem, Text, TextArea } from '@fluentui/react-northstar';
 import * as React from 'react';
-import { Flex, Text, Button, FlexItem, Card, Divider, Avatar, TextArea, ThemePrepared } from '@fluentui/react-northstar';
-import Badge from '../shared/Badge';
 import { useState } from 'react';
 import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
-import { withTheme } from '../shared/WithTheme';
+import Badge from '../shared/Badge';
+import Helper from '../shared/Helper';
+import { ThemeProps, withTheme } from '../shared/WithTheme';
+import './../index.scss';
 
-let moment = require('moment');
-interface ThemeProps {
-    theme: ThemePrepared;
-}
 /**
  * Properties for the PostNewQuestions React component
  */
 export interface PostNewQuestionsProps {
     activeSessionData: ClientDataContract.QnaSession;
+    userName: string;
     t: Function;
     onPostNewQuestion: Function;
 }
@@ -38,6 +36,7 @@ export const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps & T
                     <Flex gap="gap.small">
                         <Flex column>
                             <Badge
+                                className="badge"
                                 styles={
                                     props.activeSessionData.isActive
                                         ? { backgroundColor: colorScheme?.green?.background, color: colorScheme?.green?.foreground1 }
@@ -48,7 +47,7 @@ export const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps & T
                             <Text
                                 className="date-content-format"
                                 content={props.t('tab.createdBy', {
-                                    date: moment(props.activeSessionData.dateTimeCreated).format('L'),
+                                    date: Helper.createDateString(props.activeSessionData.dateTimeCreated),
                                     name: props.activeSessionData.hostUser.name,
                                 })}
                                 size="small"
@@ -58,14 +57,14 @@ export const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps & T
                 </Card.Header>
                 <Card.Body>
                     <Flex column gap="gap.small">
-                        <Text className="session-title" weight="bold" content={props.activeSessionData.title} />
+                        <Text className="session-title" size="large" weight="bold" content={props.activeSessionData.title} />
                     </Flex>
                 </Card.Body>
                 {props.activeSessionData.isActive && (
                     <Card.Footer>
                         <Divider />
                         <Flex className="question-input-flex" gap="gap.small" vAlign="center">
-                            <Avatar size="medium" name={props.activeSessionData.hostUser.name} />
+                            <Avatar size="medium" name={props.userName} />
                             <TextArea
                                 className="question-input"
                                 fluid
@@ -83,6 +82,11 @@ export const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps & T
                                 </Button>
                             </FlexItem>
                         </Flex>
+                    </Card.Footer>
+                )}
+                {!props.activeSessionData.isActive && (
+                    <Card.Footer styles={{ marginBottom: '0' }}>
+                        <Text content={props.activeSessionData.description} />
                     </Card.Footer>
                 )}
             </Card>

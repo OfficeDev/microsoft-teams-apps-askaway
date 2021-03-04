@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { signalRUtility } from "../../utils/signalRUtility";
 import * as jsonwebtoken from "jsonwebtoken";
 import axios from "axios";

@@ -1,4 +1,10 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+import { Context, HttpRequest } from "@azure/functions";
 import { DataEventType, IDataEvent } from "msteams-app-questionly.common";
+import { userIdParameterConstant } from "../constants/requestConstants";
+import { authenticateRequest } from "../services/authService";
 
 /**
  * Checks if parameter is defined.
@@ -36,5 +42,24 @@ export const isCardRefreshNeededForQuestionEvent = (
     (dataEvent.type === DataEventType.questionDownvotedEvent ||
       dataEvent.type === DataEventType.questionUpvotedEvent ||
       dataEvent.type === DataEventType.newQuestionAddedEvent)
+  );
+};
+
+/**
+ * Checks if the token is valid, and oid received in token payload is equal to object id for managed identity in app service.
+ * @param context - context
+ * @param req - http request
+ */
+export const validateTokenFromAppService = async (
+  context: Context,
+  req: HttpRequest
+): Promise<Boolean> => {
+  if (process.env.debugMode) {
+    return true;
+  }
+  const isAuthenticRequest = await authenticateRequest(context, req);
+  return (
+    isAuthenticRequest &&
+    req[userIdParameterConstant] === process.env.IdentityObjectId_AppService
   );
 };

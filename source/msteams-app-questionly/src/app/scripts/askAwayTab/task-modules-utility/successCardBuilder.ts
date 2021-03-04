@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { AdaptiveCard, IAdaptiveCard } from 'adaptivecards';
 import * as ACData from 'adaptivecards-templating';
 import { _adaptiveCard } from './cardHelper';
@@ -35,8 +38,8 @@ const baseSuccessCard = () =>
  * Creates adaptive card for success scenarios.
  * @param successMessage - success message to be shown in card.
  */
-export const createSuccessAdaptiveCard = (successMessage: string): AdaptiveCard => {
-    const successImageUrl = `https://${process.env.HostName}/images/success_image.png`;
+export const successCardBuilder = (successMessage: string): AdaptiveCard => {
+    const successImageUrl = `https://${window.location.host}/images/success_image.png`;
     const template = new ACData.Template(baseSuccessCard()).expand({
         $root: {
             successImageUrl,

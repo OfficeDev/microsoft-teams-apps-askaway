@@ -1,160 +1,80 @@
-.screen {
-    .askaway-tab-added {
-        top: 30%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        position: absolute;
-    }
-    .create-session {
-        top: 35%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        position: absolute;
-    }
-    .text-configtab-caption {
-        font-size: 18px;
-        line-height: 24px;
-        font-weight: bold;
-        top: 55%;
-        position: absolute;
-    }
-    .text-caption {
-        font-size: 18px;
-        line-height: 24px;
-        font-weight: bold;
-        top: 56%;
-        position: absolute;
-        text-align: center;
-    }
-    .text-subcaption {
-        font-size: 14px;
-        line-height: 20px;
-        top: 63%;
-        position: absolute;
-        text-align: center;
-    }
-    .button {
-        top: 70%;
-        position: absolute;
-    }
-}
 .sidepanel-form {
     display: flex;
     flex-direction: column;
     .form-grid {
         margin-top: 0.5rem;
-        margin-bottom: 0rem;
-        span {
-            font-size: 12px;
-            line-height: 16px;
-        }
         .btn-create-session {
-            text-align: center;
-            height: 32px;
+            height: 2rem;
             position: absolute;
             right: 2rem;
             bottom: 2rem;
-            width: 96px;
-            border-radius: 2px;
-            .ui-button__content {
-                font-size: 14px;
-                line-height: 20px;
-            }
+            width: 6rem;
+            border-radius: 0.125rem;
         }
-    }
-    .ui-input,
-    .ui-textarea {
-        margin-top: 0.25rem;
-        font-size: 14px;
     }
 }
 .meeting-panel {
-    .button {
-        top: 67%;
-        position: absolute;
-    }
-    .newUpdatesButton {
-        top: 12%;
-        display: block;
-        position: absolute;
-        background-color: #6366a5;
-        text-align: center;
-        z-index: 99;
-        transform: translateX(40%);
-    }
-    .newUpdatesButtonContent {
-        font-size: medium;
-        font-weight: normal;
-    }
-    .no-question {
+    height: 100vh;
+    .margin-top-bottom {
+        margin-top: auto;
+        margin-bottom: auto !important;
         .text-caption-panel {
-            font-size: 12px;
-            line-height: 16px;
-            top: 55%;
-            position: absolute;
-            text-align: center;
-            left: 50%;
-            width: 200px;
-            transform: translate(-50%, -50%);
-
-            .text-section {
-                display: block;
-            }
-        }
-        .create-session {
-            top: 35%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            position: absolute;
-            width: 17rem;
-            width: 200px;
-            height: 200px;
+            display: contents;
         }
     }
-    .session-title {
-        font-size: 18px;
-        line-height: 21px;
+    .welcome-text {
+        margin-top: auto;
+        margin-bottom: auto;
+    }
+    .new-update-btn-wrapper {
+        position: relative;
+        width: 0;
+        height: 0;
+        margin: 0 auto;
+        left: 1.4rem;
+    }
+    .new-updates-button {
+        top: -1.4rem;
+        padding-inline-start: 1rem;
+        padding-inline-end: 1rem;
+        height: 1.85rem;
     }
     .menuHeader {
-        svg {
-            fill: #ffffff;
-        }
         .ui-menu__item__submenu {
             border: none;
         }
     }
     .question-card {
-        margin-top: 1rem;
-        height: 20rem;
-        overflow-x: hidden;
+        overflow-y: scroll;
+        flex: 1;
         .card-divider {
             border-bottom: 1px solid #3b3a39;
-            height: 4.5rem;
+            min-height: 4.5rem;
+            border-top-left-radius: 0.2rem;
+            border-top-right-radius: 0.2rem;
             .card-layout {
                 width: 100%;
-                padding: 0.5rem;
-                border-radius: 0rem;
-                .author-name {
-                    font-size: 12px;
-                    line-height: 20px;
-                }
-                .like-icon {
-                    position: absolute;
-                    top: 0.3rem;
-                    right: 1rem;
-                    .like-icon-size {
-                        min-width: 1rem;
+                padding: 0.625rem 0.875rem 0 0.875rem;
+                .action-buttons {
+                    button {
+                        margin-inline-end: -0.3rem;
                     }
                 }
+            }
+            .question-padding {
+                padding-top: 0.2rem;
+                padding-inline-end: 1rem;
                 .card-body-question {
-                    font-size: 14px;
-                    line-height: 20px;
-                    margin-top: 0.4rem;
+                    padding-inline-start: 0.4rem;
+                    overflow: auto;
+                    white-space: pre-line;
                 }
             }
         }
     }
     .menu-bar {
+        padding-top: 0.2rem;
+        padding-bottom: 0.7rem;
         border-bottom: none;
         a {
             border-bottom-width: medium;
@@ -164,40 +84,28 @@
         }
     }
     .input-text-field {
-        position: absolute;
-        bottom: 0.75rem;
-        width: 94%;
+        margin-bottom: 0.625rem;
         .text-question {
             height: 2.2rem;
-            margin-right: -0.5rem;
-            word-break: break-word;
-        }
-        .send-button {
-            position: relative;
-            left: 1rem;
         }
     }
 }
 
-.loader {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    margin-top: -50px;
-    margin-left: -100px;
-}
-
 .badge {
     width: 3.75rem;
-    font-family: Segoe UI semibold;
-    font-size: 10px;
-    padding: 0.43em 0.5em;
-    line-height: 12px;
+    font-family: Segoe UI;
+    font-weight: 600;
+    font-size: 0.625rem;
+    padding: 0.25rem 0.2rem;
+    line-height: 0.75rem;
     white-space: nowrap;
     vertical-align: baseline;
     border-radius: 0.75rem;
     text-align: center;
-    margin-bottom: 0.25rem;
+}
+
+.tab-config-container {
+    margin-top: 6rem;
 }
 
 .tab-content {
@@ -205,10 +113,19 @@
     height: 100%;
     overflow-x: hidden;
     width: 100%;
+    .screen {
+        left: 50%;
+        margin-top: -10.5rem;
+        margin-inline-start: -6.25rem;
+        position: absolute;
+        top: 50%;
+        height: 21rem;
+    }
     .tab-nav-header {
+        padding: 0.625rem 0.875rem 0 1rem;
         .btn-end-session {
-            margin-top: 0.3rem;
-            margin-right: 1rem;
+            height: auto;
+            margin-inline-end: 1rem;
         }
 
         span {
@@ -217,7 +134,19 @@
     }
     .tab-container {
         margin: 0 auto;
-        width: 86.5%;
+        width: 54.2%;
+        .new-update-btn-wrapper {
+            position: relative;
+            width: 0;
+            height: 0;
+            margin: 0 auto;
+            left: -4rem;
+        }
+        .new-updates-button {
+            top: 1.2rem;
+            padding-inline-start: 1rem;
+            padding-inline-end: 1rem;
+        }
         .post-new-question {
             margin-top: 2rem;
             padding: 0.1rem;
@@ -232,54 +161,51 @@
             .card-layout {
                 width: 100%;
                 box-shadow: 0px 0.15px 0.45px rgba(0, 0, 0, 0.11), 0px 0.8px 1.8px rgba(0, 0, 0, 0.13);
-                border-radius: 4px;
+                border-radius: 0.25rem;
+                .badge {
+                    font-size: 0.75;
+                    font-weight: bold;
+                }
+                .ui-card__body {
+                    margin-bottom: 0.3rem;
+                }
                 .date-content-format {
-                    font-size: 12px;
-                    line-height: 16px;
-                    padding-top: 0.15rem;
+                    padding-top: 0.25rem;
                 }
                 .session-title {
-                    padding-top: 0.5rem;
-                    font-size: 18px;
-                    line-height: 24px;
+                    padding-top: 0.3rem;
                 }
             }
         }
         .question-container {
             .svg-position {
                 position: relative;
-                top: 2px;
-                left: -5px;
+                top: 0.125rem;
+                left: -0.3rem;
             }
             .question-layout {
                 box-shadow: 0px 0.15px 0.45px rgba(0, 0, 0, 0.11), 0px 0.8px 1.8px rgba(0, 0, 0, 0.13);
-                border-radius: 4px;
+                border-radius: 0.25rem;
                 margin-top: 0.5rem;
                 margin-bottom: 0.5rem;
+                padding-inline-start: 0.4rem;
+                padding-inline-end: 0.2rem;
                 .ui-reaction {
                     position: relative;
                     right: 1rem;
                 }
-                .badge {
-                    position: relative;
-                    top: 0.2rem;
-                }
                 .text-format {
-                    position: relative;
-                    top: -0.5rem;
-                    font-size: 14px;
-                    line-height: 20px;
-                }
-                .author-name {
-                    font-size: 12px;
-                    line-height: 20px;
+                    padding-top: 0;
+                    padding-inline-end: 1rem;
+                    overflow: auto;
+                    white-space: pre-wrap;
                 }
             }
             .padding-none {
                 padding: 0;
                 span {
-                    font-size: 12px;
-                    line-height: 16px;
+                    font-size: 0.75rem;
+                    line-height: 1rem;
                 }
             }
             .btn-text-font-bold {
@@ -293,16 +219,112 @@
 
 .no-question-layout {
     margin: 0 auto;
-    width: 25%;
+    width: 100%;
     text-align: center;
+    img {
+        margin-inline-start: auto;
+        margin-inline-end: auto;
+    }
     .sub-text {
         width: 62%;
         margin: 0 auto;
     }
 }
-.notification-title {
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-    font-size: 14px;
-    line-height: 20px;
+.text-center {
+    text-align: center;
+}
+.centerContent {
+    top: 50%;
+    left: 50%;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    font-family: Segoe UI;
+}
+.switchSessionListHolder {
+    padding-inline-start: 1.875rem;
+    padding-inline-end: 1.875rem;
+    margin-bottom: 0.75rem;
+    overflow: scroll;
+    max-height: 28.125rem;
+    padding-top: 0.625rem;
+    font-family: Segoe UI;
+
+    .title {
+        margin-bottom: 0.75rem;
+    }
+
+    .switchSessionList {
+        li {
+            margin-bottom: 0.75rem;
+            padding-inline-start: 0;
+            padding-inline-end: 0;
+        }
+
+        .fn {
+            margin-inline-end: 0;
+        }
+    }
+}
+.switchButton {
+    position: absolute;
+    right: 1.875rem;
+    bottom: 1.5rem;
+
+    button {
+        font-family: Segoe UI;
+    }
+}
+.switchSessionListCard {
+    padding-inline-end: 0.75rem;
+    padding-inline-start: 0.75rem;
+    padding-top: 0.68rem;
+    padding-bottom: 0.68rem;
+    border: solid;
+    border-radius: 0.2rem;
+    font-family: Segoe UI;
+
+    .sessionMetadata {
+        line-height: 1.25rem;
+    }
+    .liveTag {
+        font-weight: bold;
+        padding-inline-start: 1rem;
+        border-radius: 0.75rem;
+        padding-inline-end: 1rem;
+        padding-bottom: 0.2rem;
+        padding-top: 0.2rem;
+    }
+}
+
+.connectionStatusAlert {
+    border: solid;
+    margin-bottom: 0.25rem;
+
+    .alertContent {
+        margin-inline-start: 0.5rem;
+        margin-bottom: 0.25rem;
+        margin-top: 0.25rem;
+    }
+
+    .refreshNowLink {
+        color: inherit;
+    }
+}
+
+.ui-provider[dir='rtl'] {
+    .meeting-panel {
+        .new-update-btn-wrapper {
+            left: -1.4rem;
+        }
+    }
+    .tab-container {
+        .new-update-btn-wrapper {
+            right: -4rem;
+        }
+    }
+    .tab-content {
+        .screen {
+            left: 42%;
+        }
+    }
 }

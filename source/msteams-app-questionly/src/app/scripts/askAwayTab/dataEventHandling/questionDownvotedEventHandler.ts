@@ -1,4 +1,6 @@
-// tslint:disable:no-relative-imports
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { IDataEvent } from 'msteams-app-questionly.common';
 import { IDataEventHandler } from './IDataEventHandler';
 import { ClientDataContract } from '../../../../contracts/clientDataContract';

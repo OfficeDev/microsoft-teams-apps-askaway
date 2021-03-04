@@ -1,7 +1,7 @@
-// tslint:disable:no-relative-imports
-import './../index.scss';
-import * as React from 'react';
 import { Menu, tabListBehavior } from '@fluentui/react-northstar';
+import { TFunction } from 'i18next';
+import * as React from 'react';
+import './../index.scss';
 import { CONST } from './../shared/Constants';
 
 /**
@@ -10,7 +10,7 @@ import { CONST } from './../shared/Constants';
 export interface TabHeaderProps {
     onSelectActiveTab: Function;
     tabActiveIndex: number;
-    t: Function;
+    t: TFunction;
 }
 const TabHeader: React.FunctionComponent<TabHeaderProps> = (props) => {
     const items = [

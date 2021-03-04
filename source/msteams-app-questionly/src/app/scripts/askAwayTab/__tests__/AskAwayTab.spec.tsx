@@ -1,16 +1,16 @@
 /**
  * @jest-environment jsdom
  */
-
+// tslint:disable:no-relative-imports
 import * as React from 'react';
 import { shallow, configure } from 'enzyme';
 import enzymeToJson from 'enzyme-to-json';
 import { AskAwayTab } from '../AskAwayTab';
-import Adapter from 'enzyme-adapter-react-16';
+import enzymeAdapterReact16 from 'enzyme-adapter-react-16';
 import TabContent from '../TabContent';
 import MeetingPanel from '../MeetingPanel';
 
-configure({ adapter: new Adapter() });
+configure({ adapter: new enzymeAdapterReact16() });
 
 describe('AskAwayTab Component', () => {
     it('should match the snapshot', () => {

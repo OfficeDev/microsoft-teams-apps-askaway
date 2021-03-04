@@ -1,8 +1,14 @@
 {
     "extends": "tslint-microsoft-contrib/recommended",
     "defaultSeverity": "warning",
+    "rulesDirectory": ["node_modules/tslint-microsoft-contrib"],
     "rules": {
+        "react-this-binding-issue": false,
+        "use-simple-attributes": false,
         "no-backbone-get-set-outside-model": false,
-        "no-inferrable-types": true
+        "no-inferrable-types": true,
+        "export-name": false,
+        "max-func-body-length": false,
+        "no-relative-imports": false
     }
 }

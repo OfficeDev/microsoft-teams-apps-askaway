@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { IAdaptiveCard } from 'adaptivecards';
 import { startQnAStrings, genericStrings } from 'src/localization/locale';
 import { CardConstants } from 'src/adaptive-cards/constants/cardConstants';

@@ -1,9 +1,12 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import Backend from 'i18next-http-backend';
+import i18nextHttpBackend from 'i18next-http-backend';
 
 i18next
-    .use(Backend)
+    .use(i18nextHttpBackend)
     .use(initReactI18next)
     .init({
         // resources: { en: enUsJson },

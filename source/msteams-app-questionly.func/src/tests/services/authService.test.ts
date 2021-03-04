@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { authenticateRequest } from "../../services/authService";
 import { triggerMockContext } from "./../mocks/testContext";
 import { HttpRequest } from "@azure/functions";
@@ -26,7 +29,8 @@ beforeEach(() => {
   process.env.AzureAd_ValidIssuers =
     "https://login.microsoftonline.com/TENANT_ID/v2.0,https://sts.windows.net/TENANT_ID/";
   process.env.TenantId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
-  mockRequest.query[authorizationHeaderConstant] = "test";
+  mockRequest.headers = {};
+  mockRequest.headers[authorizationHeaderConstant] = "test";
 });
 
 test("tests authenticateRequest", async () => {

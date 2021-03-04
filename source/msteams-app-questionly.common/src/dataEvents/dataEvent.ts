@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 // Data event types.
 export const DataEventType = {
   qnaSessionCreatedEvent: "qnaSessionCreatedEvent",
@@ -13,5 +16,4 @@ export interface IDataEvent {
   qnaSessionId: string;
   type: string;
   data: any;
-  version: Number;
 }

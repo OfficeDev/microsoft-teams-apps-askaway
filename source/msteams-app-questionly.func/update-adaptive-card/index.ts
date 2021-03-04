@@ -1,4 +1,7 @@
-﻿/*
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+/*
  * This function is not intended to be invoked directly. Instead it will be
  * triggered by an orchestrator function.
  * Sends/Updates adaptive card.
@@ -7,7 +10,6 @@
 import { AzureFunction, Context } from "@azure/functions";
 import { IAdaptiveCard } from "adaptivecards";
 import {
-  Activity,
   ActivityTypes,
   BotFrameworkAdapter,
   CardFactory,
@@ -20,20 +22,106 @@ import {
   IDataEvent,
 } from "msteams-app-questionly.common";
 import {
-  qnaSessionDataService,
-  questionDataService,
-} from "msteams-app-questionly.data";
-import {
   height,
   width,
   title,
 } from "../src/constants/notificationBubbleConstants";
+import {
+  questionDataService,
+  qnaSessionDataService,
+} from "../src/utils/dbUtility";
 import { exceptionLogger } from "../src/utils/exceptionTracking";
+import {
+  getAvatarKey,
+  getMicrosoftAppPassword,
+} from "../src/utils/keyvaultUtility";
 
 let adapter = new BotFrameworkAdapter({
   appId: process.env.MicrosoftAppId.toString(),
-  appPassword: process.env.MicrosoftAppPassword.toString(),
+  appPassword: getMicrosoftAppPassword(),
 });
+
+/**
+ * Creates channel data object for notification bubble.
+ * @param eventData - event Data.
+ */
+const createChannelDataInfoForNotificationBubble = (
+  eventData: IDataEvent
+): any => {
+  const appId = process.env.AppId.toString();
+  const hostUserName: string = eventData.data.hostUser.name;
+  const sessionTitle: string = eventData.data.title;
+
+  const notificationBubblePageUrlWithParams = new URL(
+    process.env.NotificationBubblePageUrl
+  );
+
+  notificationBubblePageUrlWithParams.searchParams.append(
+    "username",
+    hostUserName
+  );
+
+  notificationBubblePageUrlWithParams.searchParams.append(
+    "title",
+    sessionTitle
+  );
+
+  const encodedNotificationBubblePageUrlWithParam = encodeURIComponent(
+    notificationBubblePageUrlWithParams.href
+  );
+
+  return {
+    notification: {
+      alertInMeeting: true,
+      externalResourceUrl: `https://teams.microsoft.com/l/bubble/${appId}?url=${encodedNotificationBubblePageUrlWithParam}&height=${height}&width=${width}&title=${title}`,
+    },
+  };
+};
+
+/**
+ * Send/update adaptive card.
+ * @param adapter - bot framework adapter.
+ * @param conversationReference - conversation reference.
+ * @param qnaSessionId - qna session id.
+ * @param card - latest adaptive card.
+ * @param activityId - activity id of posted card if it is posted already.
+ * @param channelData - channel data to post notification bubble.
+ */
+const sendOrUpdateCard = async (
+  adapter: BotFrameworkAdapter,
+  conversationReference: ConversationReference,
+  qnaSessionId: string,
+  card: IAdaptiveCard,
+  activityId: string,
+  channelData?: any
+) => {
+  await adapter.continueConversation(conversationReference, async (context) => {
+    // If activity id is present, that means card is posted already and it has to be updated.
+    if (activityId) {
+      await context.updateActivity({
+        id: activityId,
+        attachments: [CardFactory.adaptiveCard(card)],
+        type: ActivityTypes.Message,
+      });
+    } else {
+      // For any reason, if the card was not posted earlier, post the card now,
+      // this is only possible from tab interaction i.e. only for meeting chat ama sessions.
+      const resource = await context.sendActivity({
+        attachments: [CardFactory.adaptiveCard(card)],
+        type: ActivityTypes.Message,
+        channelData: channelData,
+      });
+
+      // Update activity id in DB. Also this will make sure that non meeting chat ama sessions won't expire.
+      if (resource !== undefined) {
+        await qnaSessionDataService.updateActivityIdAndExpiry(
+          qnaSessionId,
+          resource.id
+        );
+      }
+    }
+  });
+};
 
 const activityFunction: AzureFunction = async function (
   context: Context
@@ -54,9 +142,8 @@ const activityFunction: AzureFunction = async function (
     questionDataService,
     qnaSessionId,
     isSessionEnded,
-    process.env.AvatarKey
+    getAvatarKey()
   );
-  const card: IAdaptiveCard = result.card;
 
   try {
     const conversationReference = {
@@ -68,66 +155,29 @@ const activityFunction: AzureFunction = async function (
     } as ConversationReference;
 
     if (eventData.type === DataEventType.qnaSessionCreatedEvent) {
-      let resource;
-
-      const activity = {
-        type: ActivityTypes.Message,
-        attachments: [CardFactory.adaptiveCard(card)],
-      } as Activity;
+      let channelData: any;
 
       // If it's a meeting chat, send notification bubble as well.
       if (meetingId) {
-        const appId = process.env.AppId.toString();
-        const hostUserName: string = eventData.data.hostUser.name;
-        const sessionTitle: string = eventData.data.title;
-
-        const notificationBubblePageUrlWithParams = new URL(
-          process.env.NotificationBubblePageUrl
-        );
-
-        notificationBubblePageUrlWithParams.searchParams.append(
-          "username",
-          hostUserName
-        );
-
-        notificationBubblePageUrlWithParams.searchParams.append(
-          "title",
-          sessionTitle
-        );
-
-        const encodedNotificationBubblePageUrlWithParam = encodeURIComponent(
-          notificationBubblePageUrlWithParams.href
-        );
-        activity.channelData = {
-          notification: {
-            alertInMeeting: true,
-            externalResourceUrl: `https://teams.microsoft.com/l/bubble/${appId}?url=${encodedNotificationBubblePageUrlWithParam}&height=${height}&width=${width}&title=${title}`,
-          },
-        };
+        channelData = createChannelDataInfoForNotificationBubble(eventData);
       }
 
-      await adapter.continueConversation(
+      sendOrUpdateCard(
+        adapter,
         conversationReference,
-        async (context) => {
-          resource = await context.sendActivity(activity);
-        }
+        qnaSessionId,
+        result.card,
+        result.activityId,
+        channelData
       );
-      if (resource !== undefined) {
-        // Save activity id as card is getting posted for the first time.
-        await qnaSessionDataService.updateActivityId(qnaSessionId, resource.id);
-      }
     } else {
-      await adapter.continueConversation(
+      sendOrUpdateCard(
+        adapter,
         conversationReference,
-        async (context) => {
-          await context.updateActivity({
-            id: result.activityId,
-            attachments: [CardFactory.adaptiveCard(card)],
-            type: "message",
-          });
-        }
+        qnaSessionId,
+        result.card,
+        result.activityId
       );
-
       // Update card last updated time in qnasession document.
       await qnaSessionDataService.updateDateTimeCardLastUpdated(
         qnaSessionId,

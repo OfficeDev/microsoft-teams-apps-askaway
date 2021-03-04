@@ -1,3 +1,5 @@
+let moment = require('moment');
+
 export class Helper {
     constructor() {}
 
@@ -5,10 +7,18 @@ export class Helper {
      * Get Locale Language Code
      * @param locale - Get teams locale and set it i18next
      */
-    public setI18nextLocale(i18next, locale) {
+    public setI18nextLocale(i18next, locale, callback?) {
         if (locale) {
             locale = locale.split('-');
-            i18next.changeLanguage(locale[0].toLowerCase());
+            i18next.changeLanguage(locale[0].toLowerCase(), (err) => {
+                // Callback function will be called once i18next sets the current language.
+                if (err) {
+                    callback(err);
+                }
+                if (callback) {
+                    callback();
+                }
+            });
         }
     }
 
@@ -16,6 +26,7 @@ export class Helper {
         return {
             sessionId: '',
             title: '',
+            description: '',
             isActive: false,
             dateTimeCreated: new Date(),
             hostUser: {
@@ -25,6 +36,10 @@ export class Helper {
             answeredQuestions: [],
             unansweredQuestions: [],
         };
+    }
+
+    public createDateString(date: Date): string {
+        return moment(date).format('L');
     }
 }
 // tslint:disable-next-line:export-name

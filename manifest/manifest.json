@@ -51,7 +51,7 @@
           "title": "Start session",
           "description": "Start gathering questions",
           "fetchTask": true,
-          "context": ["compose", "message"]
+          "context": ["compose"]
         }
       ]
     }

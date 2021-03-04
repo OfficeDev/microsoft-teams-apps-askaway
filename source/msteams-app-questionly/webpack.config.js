@@ -1,6 +1,5 @@
-// Copyright (c) Wictor Wilén. All rights reserved.
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT license.
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
 var webpack = require('webpack');
 const Dotenv = require('dotenv-webpack');
@@ -67,8 +66,8 @@ var config = [
                         to: path.join(__dirname, 'dist/public'),
                     },
                     {
-                        from: path.join(__dirname, 'src/app/localization/locales/en'),
-                        to: path.join(__dirname, 'dist/web/locales/en'),
+                        from: path.join(__dirname, 'src/app/localization/locales'),
+                        to: path.join(__dirname, 'dist/web/locales'),
                     },
                 ],
             }),

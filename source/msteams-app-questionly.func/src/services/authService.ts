@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { Context, HttpRequest } from "@azure/functions";
 import { verifyAzureToken } from "azure-ad-jwt-lite";
 import { VerifyOptions } from "jsonwebtoken";
@@ -78,12 +81,13 @@ export const authenticateRequest = async (
   context: Context,
   req: HttpRequest
 ): Promise<Boolean> => {
-  const token = req.query[authorizationHeaderConstant];
+  let token = req.headers[authorizationHeaderConstant];
 
   if (!token) {
     return false;
   }
 
+  token = token.replace("Bearer", "").trim();
   const options = getVerifyOptions();
 
   try {

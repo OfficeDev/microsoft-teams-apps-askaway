@@ -1,4 +1,8 @@
-﻿import { AzureFunction, Context } from "@azure/functions";
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+import { AzureFunction, Context } from "@azure/functions";
+import { trackBroadcastMessageEvent } from "../src/utils/exceptionTracking";
 
 /*
  * This function is not intended to be invoked directly. Instead it will be
@@ -21,6 +25,19 @@ const activityFunction: AzureFunction = async function (
       arguments: [eventData],
     },
   ];
+
+  const qnaSessionId: string = context.bindings.name.qnaSessionId;
+  const meetingId = context.bindings.name.meetingId;
+  const operationId: string = context.bindings.name.operationId;
+
+  trackBroadcastMessageEvent(operationId, {
+    qnaSessionId: qnaSessionId,
+    meetingId: meetingId,
+    conversationId: conversationId,
+    properties: {
+      event: eventData,
+    },
+  });
 };
 
 export default activityFunction;

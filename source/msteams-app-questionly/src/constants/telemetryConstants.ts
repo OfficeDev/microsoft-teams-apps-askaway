@@ -1,9 +1,14 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 /**
  * List of events that are logged at server-side.
  */
 export const TelemetryEvents = {
     CreateQnASessionEvent: 'QnASessionCreated',
     CreateQuestionEvent: 'QuestionCreated',
+    BackgroundFunctionTriggerEvent: 'BackgroundFunctionTriggerEvent',
+    SignalREventReceived: 'SignalREventReceived',
 };
 
 /**
@@ -22,4 +27,5 @@ export const TelemetryExceptions = {
     GetTeamsMemberIdFailed: 'GetTeamsMemberIdFailed',
     ApplicationStartUpFailed: 'ApplicationStartUpFailed',
     SetUpBotFailed: 'SetUpBotFailed',
+    RevertOperationFailedAfterBackgroundJobFailure: 'RevertOperationFailedAfterBackgroundJobFailure',
 };

@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { Context } from "@azure/functions";
 import { StatusCodes } from "http-status-codes";
 
