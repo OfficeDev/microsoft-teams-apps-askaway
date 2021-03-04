@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { getBearerStrategy, getIdentityMetadata, getValidIssuers, getValidAudiance } from 'src/services/authService';
 
 describe('authentication options tests', () => {

@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { IDataEvent } from 'msteams-app-questionly.common';
 import { ClientDataContract } from '../../../../../contracts/clientDataContract';
 import { QuestionMarkedAsAnsweredEventHandler } from '../../dataEventHandling/questionMarkedAsAnsweredEventHandler';

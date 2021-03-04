@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { Controller, IController } from 'src/controller';
 import * as acb from 'src/adaptive-cards/adaptiveCardBuilder';
 import * as maincardBuilder from 'msteams-app-questionly.common';

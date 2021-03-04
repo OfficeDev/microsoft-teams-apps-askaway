@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import i18next from 'i18next';
 import enJson from './resources/en.json';
 import { exceptionLogger } from 'src/util/exceptionTracking';

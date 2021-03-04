@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { AdaptiveCard, IAdaptiveCard, SubmitAction } from 'adaptivecards';
 import { ISubmitButtonData } from './ISubmitButtonData';
 

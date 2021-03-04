@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { ReactPlugin } from '@microsoft/applicationinsights-react-js';
 import { ApplicationInsights, SeverityLevel } from '@microsoft/applicationinsights-web';
 import { createBrowserHistory } from 'history';

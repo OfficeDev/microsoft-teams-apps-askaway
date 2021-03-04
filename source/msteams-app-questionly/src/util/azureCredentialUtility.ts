@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { DefaultAzureCredential } from '@azure/identity';
 import { exceptionLogger } from 'src/util/exceptionTracking';
 

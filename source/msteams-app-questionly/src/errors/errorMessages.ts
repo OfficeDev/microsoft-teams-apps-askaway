@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 export const errorMessages = {
     ConversationDoesNotBelongToMeetingChatErrorMessage: 'Conversation id does not belong to any meeting.',
     UserIsNotPartOfConversationErrorMessage: 'User is not part of the conversation',

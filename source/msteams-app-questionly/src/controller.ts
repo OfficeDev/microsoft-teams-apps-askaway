@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 // Middleman file to allow for communication between the bot, database, and adaptive card builder.
 import { AdaptiveCard } from 'adaptivecards';
 import jimp from 'jimp';

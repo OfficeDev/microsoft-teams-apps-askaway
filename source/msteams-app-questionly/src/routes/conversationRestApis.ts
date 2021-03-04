@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import Express from 'express';
 import { IConversationDataService, IQnASessionDataService, IUser, IQnASession_populated, IQuestionPopulatedUser } from 'msteams-app-questionly.data';
 import { getTeamsUserId, ensureUserIsPartOfMeetingConversation, ensureConversationBelongsToMeetingChat, getAndEnsureRequestBodyContainsParameter } from 'src/routes/restUtils';

@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { IQnASession_populated, IQuestion } from 'msteams-app-questionly.data';
 import { DataEventType, IDataEvent } from 'msteams-app-questionly.common';
 import { ClientDataContract } from 'src/contracts/clientDataContract';

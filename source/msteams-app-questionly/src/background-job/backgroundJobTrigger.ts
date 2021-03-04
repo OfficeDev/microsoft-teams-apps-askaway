@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { IBackgroundJobPayload, IDataEvent } from 'msteams-app-questionly.common';
 import axios, { AxiosRequestConfig } from 'axios';
 import { exceptionLogger, getOperationIdForCurrentRequest, trackBackgroundFunctionTriggerEvent } from 'src/util/exceptionTracking';

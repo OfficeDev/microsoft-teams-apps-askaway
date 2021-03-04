@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { IAdaptiveCard } from 'adaptivecards';
 import { ISubmitAction } from 'adaptivecards/lib/schema';
 import { genericStrings, leaderboardStrings } from 'src/localization/locale';

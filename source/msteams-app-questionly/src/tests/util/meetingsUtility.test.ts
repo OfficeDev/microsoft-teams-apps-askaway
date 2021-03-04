@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { getParticipantRole, isPresenterOrOrganizer } from 'src/util/meetingsUtility';
 
 const sampleMeetingId = 'sampleMeetingId';
