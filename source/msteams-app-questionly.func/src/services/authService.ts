@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { Context, HttpRequest } from "@azure/functions";
 import { verifyAzureToken } from "azure-ad-jwt-lite";
 import { VerifyOptions } from "jsonwebtoken";

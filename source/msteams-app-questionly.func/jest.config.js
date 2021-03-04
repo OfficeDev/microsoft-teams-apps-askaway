@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 process.env.debugMode = "true";
 process.env.MicrosoftAppId = "random";
 process.env.MicrosoftAppPassword = "placeholderPwd";

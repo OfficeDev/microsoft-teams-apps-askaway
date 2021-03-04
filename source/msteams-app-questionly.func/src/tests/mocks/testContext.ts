@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { Context, Logger } from "@azure/functions";
 import { DataEventType } from "msteams-app-questionly.common";
 import { StatusCodes } from "http-status-codes";

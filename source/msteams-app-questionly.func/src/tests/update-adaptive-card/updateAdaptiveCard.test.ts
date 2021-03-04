@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { BotFrameworkAdapter, ConversationAccount } from "botbuilder";
 import { activityMockContext } from "../mocks/testContext";
 import httpFunction from "./../../../update-adaptive-card/index";

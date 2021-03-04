@@ -1,4 +1,7 @@
-﻿/*
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+/*
  * This activity returns scheduling insights for adaptive card refresh.
  */
 

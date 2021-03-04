@@ -1,4 +1,7 @@
-﻿/*
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+/*
  * This function is not intended to be invoked directly. Instead it will be
  * triggered by an orchestrator function.
  * Sends/Updates adaptive card.

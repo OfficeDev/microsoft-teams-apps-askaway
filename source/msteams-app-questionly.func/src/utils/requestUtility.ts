@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { Context, HttpRequest } from "@azure/functions";
 import { DataEventType, IDataEvent } from "msteams-app-questionly.common";
 import { userIdParameterConstant } from "../constants/requestConstants";

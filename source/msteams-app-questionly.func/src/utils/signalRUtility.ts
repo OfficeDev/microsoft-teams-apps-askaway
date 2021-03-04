@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import moment = require("moment");
 import * as jsonwebtoken from "jsonwebtoken";
 import axios, { AxiosRequestConfig } from "axios";

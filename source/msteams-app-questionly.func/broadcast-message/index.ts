@@ -1,4 +1,7 @@
-﻿import { AzureFunction, Context } from "@azure/functions";
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+import { AzureFunction, Context } from "@azure/functions";
 import { trackBroadcastMessageEvent } from "../src/utils/exceptionTracking";
 
 /*

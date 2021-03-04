@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import httpTrigger from "../../../add-to-group/index";
 import { triggerMockContext } from "./../mocks/testContext";
 import { authenticateRequest } from "../../services/authService";
