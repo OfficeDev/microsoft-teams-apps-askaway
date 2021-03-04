@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { IQuestion, Question } from "src/schemas/question";
 import mongoose from "mongoose";
 import { IQnASession, QnASession } from "src/schemas/qnaSession";
