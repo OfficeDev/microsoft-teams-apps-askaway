@@ -11,8 +11,12 @@ exports[`QnaSessionCreatedNotification should match the snapshot 1`] = `
 >
   <QnaSessionNotificationInternal
     onSubmitSession={[Function]}
-    searchParams={Object {}}
-    t={[MockFunction]}
+    searchParams={
+      URLSearchParams {
+        Symbol(query): Array [],
+        Symbol(context): "http://dummy.com/",
+      }
+    }
   />
 </Provider>
 `;

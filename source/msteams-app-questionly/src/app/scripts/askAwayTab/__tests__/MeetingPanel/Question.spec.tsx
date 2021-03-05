@@ -5,9 +5,9 @@
 import * as React from 'react';
 import { shallow, configure } from 'enzyme';
 import enzymeToJson from 'enzyme-to-json';
-import { Flex, Button, Text, Avatar } from '@fluentui/react-northstar';
+import { Flex, Button, Text, Avatar, ThemePrepared } from '@fluentui/react-northstar';
 import enzymeAdapterReact16 from 'enzyme-adapter-react-16';
-import Question from '../../MeetingPanel/Question';
+import { Question } from '../../MeetingPanel/Question';
 import { ParticipantRoles } from '../../../../../enums/ParticipantRoles';
 
 configure({ adapter: new enzymeAdapterReact16() });
@@ -29,6 +29,7 @@ describe('Question Component', () => {
     const questionTab = '';
     const userId = '';
     const userRole = ParticipantRoles.Presenter;
+    const theme = {} as ThemePrepared;
     let onClickAction;
 
     beforeAll(() => {
@@ -47,6 +48,7 @@ describe('Question Component', () => {
                 userRole={userRole}
                 onClickAction={onClickAction}
                 isSessionActive={true}
+                theme={theme}
             />
         );
         expect(enzymeToJson(wrapper)).toMatchSnapshot();
@@ -64,12 +66,13 @@ describe('Question Component', () => {
                 userRole={userRole}
                 onClickAction={onClickAction}
                 isSessionActive={true}
+                theme={theme}
             />
         );
 
         expect(component.find(Text)).toHaveLength(3);
         expect(component.find(Flex)).toHaveLength(3);
         expect(component.find(Avatar)).toHaveLength(1);
-        expect(component.find(Button)).toHaveLength(1);
+        expect(component.find(Button)).toHaveLength(2);
     });
 });

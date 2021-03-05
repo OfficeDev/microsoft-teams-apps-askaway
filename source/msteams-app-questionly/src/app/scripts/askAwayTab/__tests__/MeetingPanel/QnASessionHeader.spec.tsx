@@ -5,24 +5,32 @@
 import * as React from 'react';
 import { shallow, configure } from 'enzyme';
 import enzymeToJson from 'enzyme-to-json';
-import { Flex, Text, FlexItem, Menu } from '@fluentui/react-northstar';
+import { Flex, Text, FlexItem, Menu, ThemePrepared } from '@fluentui/react-northstar';
 import enzymeAdapterReact16 from 'enzyme-adapter-react-16';
-import QnASessionHeader from '../../MeetingPanel/QnASessionHeader';
+import { QnASessionHeader } from '../../MeetingPanel/QnASessionHeader';
 import { ParticipantRoles } from '../../../../../enums/ParticipantRoles';
 
 configure({ adapter: new enzymeAdapterReact16() });
 
 describe('QnASessionHeader Component', () => {
     const title = 'some-title';
-    const t = jest.fn();
-    const onClickRefreshSession = jest.fn();
-    const onClickEndSession = jest.fn();
+    let t;
+    let onClickRefreshSession;
+    let onClickEndSession;
+    let theme;
+
+    beforeAll(() => {
+        t = jest.fn();
+        onClickRefreshSession = jest.fn();
+        onClickEndSession = jest.fn();
+        theme = {} as ThemePrepared;
+    });
 
     it('should match the snapshot', () => {
         const userRole = ParticipantRoles.Presenter;
         const showToolBar = true;
         const wrapper = shallow(
-            <QnASessionHeader t={t} title={title} onClickRefreshSession={onClickRefreshSession} onClickEndSession={onClickEndSession} userRole={userRole} showToolBar={showToolBar} />
+            <QnASessionHeader t={t} title={title} theme={theme} onClickRefreshSession={onClickRefreshSession} onClickEndSession={onClickEndSession} userRole={userRole} showToolBar={showToolBar} />
         );
         expect(enzymeToJson(wrapper)).toMatchSnapshot();
     });
@@ -31,7 +39,7 @@ describe('QnASessionHeader Component', () => {
         const userRole = ParticipantRoles.Presenter;
         const showToolBar = false;
         const component = shallow(
-            <QnASessionHeader t={t} title={title} onClickRefreshSession={onClickRefreshSession} onClickEndSession={onClickEndSession} userRole={userRole} showToolBar={showToolBar} />
+            <QnASessionHeader t={t} title={title} theme={theme} onClickRefreshSession={onClickRefreshSession} onClickEndSession={onClickEndSession} userRole={userRole} showToolBar={showToolBar} />
         );
 
         expect(component.find(Flex)).toHaveLength(1);
@@ -43,7 +51,7 @@ describe('QnASessionHeader Component', () => {
         const userRole = ParticipantRoles.Presenter;
         const showToolBar = true;
         const component = shallow(
-            <QnASessionHeader t={t} title={title} onClickRefreshSession={onClickRefreshSession} onClickEndSession={onClickEndSession} userRole={userRole} showToolBar={showToolBar} />
+            <QnASessionHeader t={t} title={title} theme={theme} onClickRefreshSession={onClickRefreshSession} onClickEndSession={onClickEndSession} userRole={userRole} showToolBar={showToolBar} />
         );
 
         expect(component.find(Flex)).toHaveLength(1);

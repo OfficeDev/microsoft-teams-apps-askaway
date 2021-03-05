@@ -43,7 +43,7 @@ export class QnaSessionCreatedNotification extends msteamsReactBaseComponent<Qna
         const searchParams = new URL(decodeURIComponent(window.location.href)).searchParams;
 
         return (
-            <Provider style={{ background: 'unset' }} theme={this.state.theme}>
+            <Provider style={{ background: 'unset' }} theme={this.state?.theme}>
                 <QnaSessionNotificationInternal onSubmitSession={this.handleOnSubmit} searchParams={searchParams} />
             </Provider>
         );

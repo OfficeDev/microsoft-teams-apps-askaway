@@ -18,8 +18,8 @@ export interface QnASessionHeaderProps {
     userRole: ParticipantRoles;
 }
 
-const QnASessionHeader: React.FunctionComponent<QnASessionHeaderProps & ThemeProps> = (props) => {
-    const colorScheme = props.theme.siteVariables.colorScheme;
+export const QnASessionHeader: React.FunctionComponent<QnASessionHeaderProps & ThemeProps> = (props) => {
+    const colorScheme = props.theme?.siteVariables?.colorScheme;
 
     const items = [
         {
@@ -48,7 +48,7 @@ const QnASessionHeader: React.FunctionComponent<QnASessionHeaderProps & ThemePro
         {
             icon: (
                 <MoreIcon
-                    styles={{ color: colorScheme.default.foregroundHover }}
+                    styles={{ color: colorScheme?.default?.foregroundHover }}
                     {...{
                         outline: false,
                     }}

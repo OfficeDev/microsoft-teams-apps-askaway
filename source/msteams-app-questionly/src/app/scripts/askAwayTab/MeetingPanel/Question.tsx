@@ -26,26 +26,26 @@ type QuestionCompProps = {
  * Properties for the UnansweredQuestions React component
  */
 
-const Question: React.FunctionComponent<QuestionCompProps & ThemeProps> = (props) => {
+export const Question: React.FunctionComponent<QuestionCompProps & ThemeProps> = (props) => {
     const { question, isUserLikedQuestion, renderHoverElement, questionId, questionTab, onClickAction, userId } = props;
-    const colorScheme = props.theme.siteVariables.colorScheme;
+    const colorScheme = props.theme?.siteVariables?.colorScheme;
     const [isMouseHovered, setMouseHover] = useState(false);
-    const [hoverColor, setHoverColor] = useState(colorScheme.default.foreground3);
-    const [hoverBackgroundColor, setHoverBackgroundColor] = useState(colorScheme.default.background);
-    const [disabledLikeButtonHoverColor, setDisabledLikeButtonHoverColor] = useState(colorScheme.default.foregroundDisabled1);
+    const [hoverColor, setHoverColor] = useState(colorScheme?.default?.foreground3);
+    const [hoverBackgroundColor, setHoverBackgroundColor] = useState(colorScheme?.default?.background);
+    const [disabledLikeButtonHoverColor, setDisabledLikeButtonHoverColor] = useState(colorScheme?.default?.foregroundDisabled1);
 
     const onMouseEnterChangeColor = () => {
         setMouseHover(true);
-        setHoverColor(colorScheme.default.foreground4);
-        setHoverBackgroundColor(colorScheme.default.backgroundHover);
-        setDisabledLikeButtonHoverColor(colorScheme.default.foregroundDisabled);
+        setHoverColor(colorScheme?.default.foreground4);
+        setHoverBackgroundColor(colorScheme?.default?.backgroundHover);
+        setDisabledLikeButtonHoverColor(colorScheme?.default?.foregroundDisabled);
     };
 
     const onMouseLeaveChangeColor = () => {
         setMouseHover(false);
-        setHoverColor(colorScheme.default.foreground3);
-        setHoverBackgroundColor(colorScheme.default.background);
-        setDisabledLikeButtonHoverColor(colorScheme.default.foregroundDisabled1);
+        setHoverColor(colorScheme?.default?.foreground3);
+        setHoverBackgroundColor(colorScheme?.default?.background);
+        setDisabledLikeButtonHoverColor(colorScheme?.default?.foregroundDisabled1);
     };
 
     return (
