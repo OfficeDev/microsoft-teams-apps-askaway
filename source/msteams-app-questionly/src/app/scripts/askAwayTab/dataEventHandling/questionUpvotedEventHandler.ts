@@ -22,6 +22,7 @@ export class QuestionUpvotedEventHandler implements IDataEventHandler {
         activeSessionData: ClientDataContract.QnaSession | null,
         updateQnASessionContent: () => void,
         showNewUpdatesButton: () => void,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         updateActiveSessionData: (sessionData: ClientDataContract.QnaSession | null) => void
     ) => {
         const upvotedByUserAadObjectId: string = dataEvent.data.upvotedByUserAadObjectId;

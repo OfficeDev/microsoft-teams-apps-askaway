@@ -14,7 +14,6 @@ import {
     InputHints,
     Activity,
     ChannelAccount,
-    BotMessagePreviewType,
 } from 'botbuilder';
 import { IController } from 'src/controller';
 import { AdaptiveCard } from 'adaptivecards';
@@ -385,7 +384,7 @@ export class AskAway extends TeamsActivityHandler {
     // -------------------------------------------------------------------------- //
     //          ANCHOR Bot Framework messaging extension method overrides         //
     // -------------------------------------------------------------------------- //
-
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async handleTeamsMessagingExtensionFetchTask(context: TurnContext, action: MessagingExtensionAction): Promise<MessagingExtensionActionResponse> {
         // commandId: 'startQnA'
         const meetingId = getMeetingIdFromContext(context);
