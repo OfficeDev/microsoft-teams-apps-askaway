@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { Flex, Image, Text } from '@fluentui/react-northstar';
 import * as React from 'react';
 import './../index.scss';

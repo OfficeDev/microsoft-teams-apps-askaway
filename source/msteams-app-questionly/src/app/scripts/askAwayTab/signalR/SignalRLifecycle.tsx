@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import * as signalR from '@microsoft/signalr';

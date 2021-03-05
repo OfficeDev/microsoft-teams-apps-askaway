@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { Button, Flex, Loader } from '@fluentui/react-northstar';
 import { SeverityLevel } from '@microsoft/applicationinsights-web';
 import * as microsoftTeams from '@microsoft/teams-js';

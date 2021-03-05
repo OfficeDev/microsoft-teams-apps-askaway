@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { SendIcon } from '@fluentui/react-icons-northstar';
 import { Button, Flex, FlexItem, TextArea } from '@fluentui/react-northstar';
 import { SeverityLevel } from '@microsoft/applicationinsights-web';

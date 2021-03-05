@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import * as React from 'react';
 import { createSvgIcon } from '@fluentui/react-icons-northstar/dist/dts/src/utils/createSvgIcon';
 const svgContent = (classes, props) => {

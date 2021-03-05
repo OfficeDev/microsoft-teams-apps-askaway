@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { Avatar, Button, Card, Divider, Flex, FlexItem, Text, TextArea } from '@fluentui/react-northstar';
 import * as React from 'react';
 import { useState } from 'react';

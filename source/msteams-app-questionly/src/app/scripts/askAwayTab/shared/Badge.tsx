@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { Properties } from 'csstype';
 import * as React from 'react';
 import './../index.scss';

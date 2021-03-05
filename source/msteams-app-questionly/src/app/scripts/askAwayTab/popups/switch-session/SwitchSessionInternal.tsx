@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { Loader } from '@fluentui/react-northstar';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';

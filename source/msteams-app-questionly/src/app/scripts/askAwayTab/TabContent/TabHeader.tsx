@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { AddIcon, RetryIcon } from '@fluentui/react-icons-northstar';
 import { Button, Divider, Flex, FlexItem } from '@fluentui/react-northstar';
 import * as React from 'react';
