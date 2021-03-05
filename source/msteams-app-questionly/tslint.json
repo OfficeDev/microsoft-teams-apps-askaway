@@ -6,6 +6,7 @@
         "react-this-binding-issue": false,
         "use-simple-attributes": false,
         "no-backbone-get-set-outside-model": false,
+        "no-http-string": false,
         "no-inferrable-types": true,
         "export-name": false,
         "max-func-body-length": false,

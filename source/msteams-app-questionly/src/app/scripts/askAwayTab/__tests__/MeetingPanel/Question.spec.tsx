@@ -29,11 +29,12 @@ describe('Question Component', () => {
     const questionTab = '';
     const userId = '';
     const userRole = ParticipantRoles.Presenter;
-    const theme = {} as ThemePrepared;
+    let theme;
     let onClickAction;
 
     beforeAll(() => {
         onClickAction = jest.fn();
+        theme = {} as ThemePrepared;
     });
 
     it('should match the snapshot', () => {

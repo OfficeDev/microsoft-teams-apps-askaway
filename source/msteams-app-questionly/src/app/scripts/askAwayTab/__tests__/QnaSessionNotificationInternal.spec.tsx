@@ -19,14 +19,19 @@ jest.mock('react-i18next', () => ({
 }));
 
 describe('QnaSessionNotificationInternal Component', () => {
-    const onSubmitSession = jest.fn();
-    const searchParams = {} as URLSearchParams;
+    let onSubmitSession;
+    let searchParams;
+
+    beforeAll(() => {
+        onSubmitSession = jest.fn();
+        searchParams = {} as URLSearchParams;
+        searchParams.get = jest.fn(() => 'some-value');
+    });
 
     afterAll(() => {
         jest.resetAllMocks();
     });
 
-    searchParams.get = jest.fn(() => 'some-value');
     it('should match the snapshot', () => {
         const wrapper = shallow(<QnaSessionNotificationInternal onSubmitSession={onSubmitSession} searchParams={searchParams} />);
 
