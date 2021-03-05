@@ -2,14 +2,14 @@
  * @jest-environment jsdom
  */
 
-import * as React from 'react';
-import { shallow, configure } from 'enzyme';
+import { Button, Flex, Text } from '@fluentui/react-northstar';
+import { configure, shallow } from 'enzyme';
+import enzymeAdapterReact16 from 'enzyme-adapter-react-16';
 import enzymeToJson from 'enzyme-to-json';
-import { Flex, Text, Button } from '@fluentui/react-northstar';
-import Adapter from 'enzyme-adapter-react-16';
+import * as React from 'react';
 import QnaSessionNotificationInternal from '../popups/QnaSessionNotificationInternal';
 
-configure({ adapter: new Adapter() });
+configure({ adapter: new enzymeAdapterReact16() });
 jest.mock('react-i18next', () => ({
     useTranslation: () => {
         return {
@@ -36,7 +36,7 @@ describe('QnaSessionNotificationInternal Component', () => {
     it('should render the tab', () => {
         const component = shallow(<QnaSessionNotificationInternal onSubmitSession={onSubmitSession} searchParams={searchParams} />);
 
-        expect(component.find(Flex)).toHaveLength(2);
+        expect(component.find(Flex)).toHaveLength(1);
         expect(component.find(Text)).toHaveLength(3);
         expect(component.find(Button)).toHaveLength(1);
     });

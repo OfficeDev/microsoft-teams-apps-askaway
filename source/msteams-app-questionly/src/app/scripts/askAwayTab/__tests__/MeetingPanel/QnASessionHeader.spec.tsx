@@ -6,13 +6,13 @@ import * as React from 'react';
 import { shallow, configure } from 'enzyme';
 import enzymeToJson from 'enzyme-to-json';
 import { Flex, Text, FlexItem, Menu } from '@fluentui/react-northstar';
-import Adapter from 'enzyme-adapter-react-16';
+import enzymeAdapterReact16 from 'enzyme-adapter-react-16';
 import QnASessionHeader from '../../MeetingPanel/QnASessionHeader';
 import { ParticipantRoles } from '../../../../../enums/ParticipantRoles';
 
-configure({ adapter: new Adapter() });
+configure({ adapter: new enzymeAdapterReact16() });
 
-describe('AskAwayTabRemove Component', () => {
+describe('QnASessionHeader Component', () => {
     const title = 'some-title';
     const t = jest.fn();
     const onClickRefreshSession = jest.fn();

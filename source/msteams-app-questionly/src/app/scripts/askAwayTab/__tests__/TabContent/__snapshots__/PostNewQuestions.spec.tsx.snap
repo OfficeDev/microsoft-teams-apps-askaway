@@ -26,6 +26,7 @@ exports[`PostNewQuestions Component should match the snapshot 1`] = `
           column={true}
         >
           <Badge
+            className="badge"
             styles={
               Object {
                 "backgroundColor": undefined,
@@ -36,7 +37,6 @@ exports[`PostNewQuestions Component should match the snapshot 1`] = `
           <Text
             as="span"
             className="date-content-format"
-            content="tab.createdBy"
             size="small"
           />
         </Flex>
@@ -51,10 +51,23 @@ exports[`PostNewQuestions Component should match the snapshot 1`] = `
           as="span"
           className="session-title"
           content=""
+          size="large"
           weight="bold"
         />
       </Flex>
     </CardBody>
+    <CardFooter
+      styles={
+        Object {
+          "marginBottom": "0",
+        }
+      }
+    >
+      <Text
+        as="span"
+        content=""
+      />
+    </CardFooter>
   </Card>
 </div>
 `;

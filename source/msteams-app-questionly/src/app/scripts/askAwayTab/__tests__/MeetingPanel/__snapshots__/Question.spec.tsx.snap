@@ -68,3 +68,9 @@ exports[`AskAwayTabRemove Component should match the snapshot 1`] = `
   </Card>
 </div>
 `;
+
+exports[`Question Component should match the snapshot 1`] = `
+<ProviderConsumer
+  render={[Function]}
+/>
+`;

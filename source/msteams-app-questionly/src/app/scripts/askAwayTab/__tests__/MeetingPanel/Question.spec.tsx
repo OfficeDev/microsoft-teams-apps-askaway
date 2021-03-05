@@ -5,14 +5,14 @@
 import * as React from 'react';
 import { shallow, configure } from 'enzyme';
 import enzymeToJson from 'enzyme-to-json';
-import { Card, Flex, Button, Text, Avatar } from '@fluentui/react-northstar';
-import Adapter from 'enzyme-adapter-react-16';
+import { Flex, Button, Text, Avatar } from '@fluentui/react-northstar';
+import enzymeAdapterReact16 from 'enzyme-adapter-react-16';
 import Question from '../../MeetingPanel/Question';
 import { ParticipantRoles } from '../../../../../enums/ParticipantRoles';
 
-configure({ adapter: new Adapter() });
+configure({ adapter: new enzymeAdapterReact16() });
 
-describe('AskAwayTabRemove Component', () => {
+describe('Question Component', () => {
     const question = {
         id: '',
         sessionId: '',
@@ -29,7 +29,11 @@ describe('AskAwayTabRemove Component', () => {
     const questionTab = '';
     const userId = '';
     const userRole = ParticipantRoles.Presenter;
-    const onClickAction = jest.fn();
+    let onClickAction;
+
+    beforeAll(() => {
+        onClickAction = jest.fn();
+    });
 
     it('should match the snapshot', () => {
         const wrapper = shallow(
@@ -42,6 +46,7 @@ describe('AskAwayTabRemove Component', () => {
                 userId={userId}
                 userRole={userRole}
                 onClickAction={onClickAction}
+                isSessionActive={true}
             />
         );
         expect(enzymeToJson(wrapper)).toMatchSnapshot();
@@ -58,10 +63,10 @@ describe('AskAwayTabRemove Component', () => {
                 userId={userId}
                 userRole={userRole}
                 onClickAction={onClickAction}
+                isSessionActive={true}
             />
         );
 
-        expect(component.find(Card)).toHaveLength(1);
         expect(component.find(Text)).toHaveLength(3);
         expect(component.find(Flex)).toHaveLength(3);
         expect(component.find(Avatar)).toHaveLength(1);

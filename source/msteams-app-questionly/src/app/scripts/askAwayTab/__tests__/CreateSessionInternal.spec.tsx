@@ -2,14 +2,14 @@
  * @jest-environment jsdom
  */
 
-import * as React from 'react';
-import { shallow, configure } from 'enzyme';
+import { Button, Flex, Form, Input, Text, TextArea } from '@fluentui/react-northstar';
+import { configure, shallow } from 'enzyme';
+import enzymeAdapterReact16 from 'enzyme-adapter-react-16';
 import enzymeToJson from 'enzyme-to-json';
-import { Flex, Text, Button, Form, Input, TextArea } from '@fluentui/react-northstar';
-import Adapter from 'enzyme-adapter-react-16';
+import * as React from 'react';
 import CreateSessionInternal from '../popups/CreateSessionInternal';
 
-configure({ adapter: new Adapter() });
+configure({ adapter: new enzymeAdapterReact16() });
 jest.mock('react-i18next', () => ({
     useTranslation: () => {
         return {
@@ -19,10 +19,11 @@ jest.mock('react-i18next', () => ({
 }));
 
 describe('CreateSessionInternal Component', () => {
-    const onSubmitCreateSession = jest.fn();
+    let onSubmitCreateSession;
 
     afterAll(() => {
         jest.resetAllMocks();
+        onSubmitCreateSession = jest.fn();
     });
 
     it('should match the snapshot', () => {

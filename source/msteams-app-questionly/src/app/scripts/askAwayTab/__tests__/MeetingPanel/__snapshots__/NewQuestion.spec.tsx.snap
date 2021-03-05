@@ -1,12 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`AskAwayTabRemove Component should match the snapshot 1`] = `
-<div
+exports[`NewQuestion Component should match the snapshot 1`] = `
+<Flex
   className="input-text-field"
+  gap="gap.small"
+  hAlign="center"
+  vAlign="end"
 >
-  <Flex
-    gap="gap.small"
-  >
+  <FlexItem>
     <TextArea
       accessibility={[Function]}
       as="textarea"
@@ -17,24 +18,23 @@ exports[`AskAwayTabRemove Component should match the snapshot 1`] = `
       onChange={[Function]}
       value=""
     />
-    <FlexItem
-      push={true}
-    >
-      <Button
-        accessibility={[Function]}
-        as="button"
-        className="send-button"
-        icon={
-          <SendIcon
-            onClick={[Function]}
-            size="large"
-          />
-        }
-        iconOnly={true}
-        size="medium"
-        text={true}
-      />
-    </FlexItem>
-  </Flex>
-</div>
+  </FlexItem>
+  <FlexItem
+    push={true}
+  >
+    <Button
+      accessibility={[Function]}
+      as="button"
+      icon={
+        <SendIcon
+          onClick={[Function]}
+          size="large"
+        />
+      }
+      iconOnly={true}
+      size="medium"
+      text={true}
+    />
+  </FlexItem>
+</Flex>
 `;

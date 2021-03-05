@@ -6,7 +6,6 @@ exports[`Create session should match the snapshot 1`] = `
 >
   <CreateSessionInternal
     onSubmitCreateSession={[Function]}
-    t={[MockFunction]}
   />
 </Provider>
 `;

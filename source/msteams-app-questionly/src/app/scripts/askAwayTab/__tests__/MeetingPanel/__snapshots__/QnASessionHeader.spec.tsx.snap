@@ -1,62 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`AskAwayTabRemove Component should match the snapshot 1`] = `
-<Flex
-  gap="gap.large"
-  vAlign="center"
->
-  <Text
-    as="span"
-    className="session-title"
-    content="some-title"
-    size="medium"
-  />
-  <FlexItem
-    push={true}
-  >
-    <div
-      className="menuHeader"
-    >
-      <Menu
-        accessibility={[Function]}
-        aria-label="Compose Editor"
-        as="ul"
-        defaultActiveIndex={0}
-        iconOnly={true}
-        items={
-          Array [
-            Object {
-              "aria-label": "More options",
-              "icon": <MoreIcon
-                outline={false}
-              />,
-              "indicator": false,
-              "key": "moreOptions",
-              "menu": Object {
-                "items": Array [
-                  Object {
-                    "content": undefined,
-                    "icon": <RetryIcon
-                      outline={true}
-                    />,
-                    "key": "Refresh session",
-                    "onClick": [Function],
-                  },
-                  Object {
-                    "content": undefined,
-                    "icon": <LeaveIcon
-                      outline={true}
-                    />,
-                    "key": "End session",
-                    "onClick": [Function],
-                  },
-                ],
-              },
-            },
-          ]
-        }
-      />
-    </div>
-  </FlexItem>
-</Flex>
+<ProviderConsumer
+  render={[Function]}
+/>
+`;
+
+exports[`QnASessionHeader Component should match the snapshot 1`] = `
+<ProviderConsumer
+  render={[Function]}
+/>
 `;

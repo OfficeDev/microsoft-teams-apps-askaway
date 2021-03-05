@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { shallow, configure } from 'enzyme';
 import enzymeToJson from 'enzyme-to-json';
-import Adapter from 'enzyme-adapter-react-16';
+import enzymeAdapterReact16 from 'enzyme-adapter-react-16';
 import { QnaSessionCreatedNotification } from '../popups/QnaSessionCreatedNotification';
 import QnaSessionNotificationInternal from '../popups/QnaSessionNotificationInternal';
 
-configure({ adapter: new Adapter() });
+configure({ adapter: new enzymeAdapterReact16() });
 
 describe('QnaSessionCreatedNotification', () => {
     it('should match the snapshot', () => {

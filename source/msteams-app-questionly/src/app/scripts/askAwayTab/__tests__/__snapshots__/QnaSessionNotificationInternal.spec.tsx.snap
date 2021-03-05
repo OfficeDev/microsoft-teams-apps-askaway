@@ -3,42 +3,35 @@
 exports[`QnaSessionNotificationInternal Component should match the snapshot 1`] = `
 <Flex
   column={true}
+  gap="gap.medium"
+  padding="padding.medium"
 >
   <Text
     as="span"
     content="popups.notificationTitle"
   />
-  <div
-    className="notification-title"
+  <Text
+    as="span"
+    content="some-value"
+    size="medium"
+    weight="bold"
+  />
+  <Text
+    as="span"
+    content="popups.notificationMessage"
+  />
+  <FlexItem
+    align="end"
   >
-    <Text
-      as="span"
-      content="some-value"
-      weight="bold"
-    />
-  </div>
-  <Flex
-    gap="gap.large"
-    vAlign="center"
-  >
-    <Text
-      as="span"
-      content="popups.notificationMessage"
-    />
     <Button
       accessibility={[Function]}
       as="button"
+      content="popups.notificationButton"
       onClick={[Function]}
       primary={true}
       size="small"
       type="submit"
-    >
-      <ButtonContent
-        as="span"
-      >
-        popups.notificationButton
-      </ButtonContent>
-    </Button>
-  </Flex>
+    />
+  </FlexItem>
 </Flex>
 `;

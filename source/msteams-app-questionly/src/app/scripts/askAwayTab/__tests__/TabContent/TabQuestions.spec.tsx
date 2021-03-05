@@ -2,21 +2,28 @@
  * @jest-environment jsdom
  */
 
-import * as React from 'react';
-import { shallow, configure } from 'enzyme';
-import enzymeToJson from 'enzyme-to-json';
 import { ThemePrepared } from '@fluentui/react-northstar';
-import Adapter from 'enzyme-adapter-react-16';
-import { TabQuestions } from '../../TabContent/TabQuestions';
+import { configure, shallow } from 'enzyme';
+import enzymeAdapterReact16 from 'enzyme-adapter-react-16';
+import enzymeToJson from 'enzyme-to-json';
+import * as React from 'react';
 import { Helper } from '../../shared/Helper';
+import { TabQuestions } from '../../TabContent/TabQuestions';
 
-configure({ adapter: new Adapter() });
+configure({ adapter: new enzymeAdapterReact16() });
 
 describe('TabQuestions Component', () => {
-    const onClickAction = jest.fn();
-    const activeSessionData = new Helper().createEmptyActiveSessionData();
-    const theme = {} as ThemePrepared;
-    const t = jest.fn();
+    let onClickAction;
+    let activeSessionData;
+    let theme;
+    let t;
+
+    beforeAll(() => {
+        t = jest.fn();
+        activeSessionData = new Helper().createEmptyActiveSessionData();
+        onClickAction = jest.fn();
+        theme = {} as ThemePrepared;
+    });
 
     it('should match the snapshot', () => {
         const wrapper = shallow(<TabQuestions t={t} theme={theme} activeSessionData={activeSessionData} onClickAction={onClickAction} teamsTabContext={{ entityId: '', locale: '' }} />);

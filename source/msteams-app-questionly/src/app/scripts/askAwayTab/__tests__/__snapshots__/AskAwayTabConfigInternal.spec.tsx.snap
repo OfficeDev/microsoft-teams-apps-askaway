@@ -2,7 +2,9 @@
 
 exports[`AskAwayTabConfigInternal Component should match the snapshot 1`] = `
 <Flex
-  className="screen"
+  className="tab-config-container"
+  column={true}
+  gap="gap.large"
   hAlign="center"
   vAlign="center"
 >
@@ -10,7 +12,6 @@ exports[`AskAwayTabConfigInternal Component should match the snapshot 1`] = `
     accessibility={[Function]}
     alt="image"
     as="img"
-    className="askaway-tab-added"
     src="askaway_tab_added.png"
   />
   <FlexItem
@@ -18,8 +19,9 @@ exports[`AskAwayTabConfigInternal Component should match the snapshot 1`] = `
   >
     <Text
       as="span"
-      className="text-configtab-caption"
       content="tab.configTabText"
+      size="large"
+      weight="bold"
     />
   </FlexItem>
 </Flex>

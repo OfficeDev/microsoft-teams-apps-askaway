@@ -2,14 +2,14 @@
  * @jest-environment jsdom
  */
 
-import * as React from 'react';
-import { shallow, configure } from 'enzyme';
+import { Flex, Image, Text } from '@fluentui/react-northstar';
+import { configure, shallow } from 'enzyme';
+import enzymeAdapterReact16 from 'enzyme-adapter-react-16';
 import enzymeToJson from 'enzyme-to-json';
-import { Flex, Text, Image } from '@fluentui/react-northstar';
-import Adapter from 'enzyme-adapter-react-16';
+import * as React from 'react';
 import AskAwayTabConfigInternal from '../AskAwayTabConfigInternal';
 
-configure({ adapter: new Adapter() });
+configure({ adapter: new enzymeAdapterReact16() });
 jest.mock('react-i18next', () => ({
     useTranslation: () => {
         return {

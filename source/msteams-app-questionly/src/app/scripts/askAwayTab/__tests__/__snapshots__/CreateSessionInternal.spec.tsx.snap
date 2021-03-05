@@ -79,7 +79,7 @@ exports[`CreateSessionInternal Component should match the snapshot 1`] = `
               as="button"
               className="btn-create-session"
               primary={true}
-              size="small"
+              size="medium"
               type="submit"
             >
               <ButtonContent

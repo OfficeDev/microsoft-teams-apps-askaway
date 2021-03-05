@@ -1,25 +1,53 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`AskAwayTabRemove Component should match the snapshot 1`] = `
-<div
-  className="no-question-layout"
->
-  <Flex
-    column={true}
+<div>
+  <div
+    className="no-question-layout"
   >
-    <Image
-      accessibility={[Function]}
-      as="img"
-      src="no-question.png"
-    />
-    <div
-      className="sub-text"
+    <Flex
+      column={true}
     >
-      <Text
-        as="span"
-        weight="bold"
+      <Image
+        accessibility={[Function]}
+        as="img"
+        src="no-question.png"
       />
-    </div>
-  </Flex>
+    </Flex>
+  </div>
+  <div
+    className="text-center"
+  >
+    <Text
+      as="span"
+      weight="bold"
+    />
+  </div>
+</div>
+`;
+
+exports[`NoQuestionDesign Component should match the snapshot 1`] = `
+<div>
+  <div
+    className="no-question-layout"
+  >
+    <Flex
+      column={true}
+    >
+      <Image
+        accessibility={[Function]}
+        as="img"
+        src="no-question.png"
+      />
+    </Flex>
+  </div>
+  <div
+    className="text-center"
+  >
+    <Text
+      as="span"
+      weight="bold"
+    />
+  </div>
 </div>
 `;

@@ -9,6 +9,7 @@ exports[`TabHeader Component should match the snapshot 1`] = `
     <Button
       accessibility={[Function]}
       as="button"
+      disabled={true}
       onClick={[Function]}
       size="medium"
       text={true}
@@ -23,7 +24,7 @@ exports[`TabHeader Component should match the snapshot 1`] = `
     <Button
       accessibility={[Function]}
       as="button"
-      disabled={false}
+      disabled={true}
       onClick={[Function]}
       size="medium"
       text={true}
@@ -39,6 +40,8 @@ exports[`TabHeader Component should match the snapshot 1`] = `
     <Button
       accessibility={[Function]}
       as="button"
+      disabled={true}
+      onClick={[Function]}
       size="medium"
       text={true}
     >

@@ -3,6 +3,8 @@
 exports[`TabCreateSession Component should match the snapshot 1`] = `
 <Flex
   className="screen"
+  column={true}
+  gap="gap.medium"
   hAlign="center"
   vAlign="center"
 >
@@ -10,40 +12,25 @@ exports[`TabCreateSession Component should match the snapshot 1`] = `
     accessibility={[Function]}
     alt="image"
     as="img"
-    className="create-session"
     src="collaboration.png"
   />
-  <FlexItem
-    align="center"
-  >
-    <Text
-      as="span"
-      className="text-caption"
-    />
-  </FlexItem>
-  <FlexItem
-    align="center"
-  >
-    <Text
-      as="span"
-      className="text-subcaption"
-    />
-  </FlexItem>
-  <FlexItem
-    align="center"
-  >
-    <Button
-      accessibility={[Function]}
-      as="button"
-      className="button"
-      onClick={[Function]}
-      primary={true}
-      size="medium"
-    >
-      <ButtonContent
-        as="span"
-      />
-    </Button>
-  </FlexItem>
+  <Text
+    as="span"
+    className="text-caption"
+    size="large"
+    weight="bold"
+  />
+  <Text
+    as="span"
+    size="medium"
+  />
+  <Button
+    accessibility={[Function]}
+    as="button"
+    className="button"
+    onClick={[Function]}
+    primary={true}
+    size="medium"
+  />
 </Flex>
 `;
