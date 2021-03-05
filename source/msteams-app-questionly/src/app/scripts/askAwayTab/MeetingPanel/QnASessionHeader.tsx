@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { LeaveIcon, MoreIcon, RetryIcon } from '@fluentui/react-icons-northstar';
 import { Flex, FlexItem, Menu, menuAsToolbarBehavior, MenuItemProps, ShorthandCollection, Text } from '@fluentui/react-northstar';
 import * as React from 'react';

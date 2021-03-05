@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { createSvgIcon } from '@fluentui/react-icons-northstar/dist/dts/src/utils/createSvgIcon';
 import { iconClassNames } from '@fluentui/react-icons-northstar/dist/dts/src/utils/iconClassNames';
 import classnames from 'classnames';

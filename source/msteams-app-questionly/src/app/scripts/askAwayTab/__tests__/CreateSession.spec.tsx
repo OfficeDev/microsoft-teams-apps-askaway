@@ -1,7 +1,10 @@
-import * as React from 'react';
-import { shallow, configure } from 'enzyme';
-import enzymeToJson from 'enzyme-to-json';
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+import { configure, shallow } from 'enzyme';
 import enzymeAdapterReact16 from 'enzyme-adapter-react-16';
+import enzymeToJson from 'enzyme-to-json';
+import * as React from 'react';
 import { CreateSession } from '../popups/CreateSession';
 import CreateSessionInternal from '../popups/CreateSessionInternal';
 

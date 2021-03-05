@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 // [Constant Values]
 export const CONST = Object.freeze({
     TAB_QUESTIONS: {

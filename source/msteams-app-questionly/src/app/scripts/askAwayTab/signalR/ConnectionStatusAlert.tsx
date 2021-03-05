@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { Button, CloseIcon, Flex, FlexItem, Text } from '@fluentui/react-northstar';
 import { TFunction } from 'i18next';
 import * as React from 'react';
