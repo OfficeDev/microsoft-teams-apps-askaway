@@ -10,6 +10,7 @@ import {
   getUpdatedMainCard,
 } from "msteams-app-questionly.common";
 import { AdaptiveCard } from "adaptivecards";
+import { clearMemoryCache } from "../../utils/keyvaultUtility";
 
 const sampleServiceUrl = "sampleServiceUrl";
 const sampleConversationId = "sampleConversationId";
@@ -52,6 +53,10 @@ beforeEach(() => {
     },
     headers: null,
   };
+});
+
+afterAll(() => {
+  clearMemoryCache();
 });
 
 test("update adaptive card - post card for qnaSession started event", async () => {

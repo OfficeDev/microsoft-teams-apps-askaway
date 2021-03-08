@@ -1,12 +1,16 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { Flex } from '@fluentui/react-northstar';
+/**
+ * @jest-environment jsdom
+ */
+
 import { configure, shallow } from 'enzyme';
 import enzymeAdapterReact16 from 'enzyme-adapter-react-16';
 import enzymeToJson from 'enzyme-to-json';
 import * as React from 'react';
 import { CreateSession } from '../popups/CreateSession';
+import CreateSessionInternal from '../popups/CreateSessionInternal';
 
 configure({ adapter: new enzymeAdapterReact16() });
 
@@ -16,9 +20,8 @@ describe('Create session', () => {
         expect(enzymeToJson(wrapper)).toMatchSnapshot();
     });
 
-    it.skip('should render TabContent', () => {
+    it('should render TabContent', () => {
         const component = shallow(<CreateSession />);
-
-        expect(component.find(Flex)).toHaveLength(2);
+        expect(component.find(CreateSessionInternal)).toHaveLength(1);
     });
 });

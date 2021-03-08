@@ -48,7 +48,7 @@ describe('Meeting Panel Component', () => {
         );
         const stateVal = { showLoader: false, activeSessionData: true };
         component.setState(stateVal);
-        const divEle = component.find('div.meeting-panel');
+        const divEle = component.find('Flex.meeting-panel');
 
         expect(divEle).toHaveLength(1);
     });
@@ -59,9 +59,7 @@ describe('Meeting Panel Component', () => {
         );
         const stateVal = { showLoader: false, userRole: ParticipantRoles.Presenter };
         component.setState(stateVal);
-        const buttonEle = component.containsMatchingElement(<Button.Content>Start a Q&A session</Button.Content>);
-
-        expect(buttonEle).toBeTruthy();
+        expect(component.find('Button#createSession')).toHaveLength(1);
     });
 
     it('should render attendee createSessionLayout view when activeSessionData is not present', () => {

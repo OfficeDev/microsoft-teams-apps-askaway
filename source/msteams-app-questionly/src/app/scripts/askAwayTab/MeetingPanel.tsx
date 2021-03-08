@@ -286,7 +286,7 @@ export class MeetingPanel extends React.Component<MeetingPanelProps, MeetingPane
                     <EmptyTile image={image} line1={text1} line2={text2} />
                     {isUserPresenterOrOrganizer && (
                         <Flex.Item align="center">
-                            <Button onClick={this.onShowTaskModule}>
+                            <Button id="createSession" onClick={this.onShowTaskModule}>
                                 <Button.Content>{this.localize('meetingPanel.createQnaSessionButton')}</Button.Content>
                             </Button>
                         </Flex.Item>

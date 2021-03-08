@@ -230,7 +230,11 @@ const SignalRLifecycle: React.FunctionComponent<SignalRLifecycleProps> = (props)
                 throw new Error('Error while calling /config API. Could not get SignalRFunctionBaseUrl');
             }
 
-            if (!connection) {
+            if (props.connection) {
+                // This is true only for UTs.
+                connection = props.connection;
+                registerCallbacksOnConnection();
+            } else if (!connection) {
                 connection =
                     props.connection ??
                     new signalR.HubConnectionBuilder()

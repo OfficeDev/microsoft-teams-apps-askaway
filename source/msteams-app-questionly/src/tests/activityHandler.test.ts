@@ -19,6 +19,10 @@ let mockUserDataService: IUserDataService;
 let mockQuestionDataService: IQuestionDataService;
 let mockQnASessionDataService: IQnASessionDataService;
 
+beforeEach(async () => {
+    await new Promise((resolve) => setImmediate(resolve));
+});
+
 beforeAll(async () => {
     await initLocalization();
     mockUserDataService = new UserDataService();

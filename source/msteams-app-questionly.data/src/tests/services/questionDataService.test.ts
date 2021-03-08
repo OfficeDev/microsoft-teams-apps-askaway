@@ -578,12 +578,8 @@ test("retrieve most recent/top questions with three questions", async () => {
     },
   ];
 
-  const _sleep = (ms) =>
-    new Promise<void>((resolve) => setTimeout(() => resolve(), ms));
   questions[1] = await new Question(questions[1]).save();
-  await _sleep(50);
   questions[0] = await new Question(questions[0]).save();
-  await _sleep(1000);
   questions[2] = await new Question(questions[2]).save();
 
   const results = await questionDataService.getQuestionsCountWithRecentAndTopNQuestions(
@@ -635,12 +631,8 @@ test("retrieve most top questions with no votes should be most recent questions"
     },
   ];
 
-  const _sleep = (ms) =>
-    new Promise<void>((resolve) => setTimeout(() => resolve(), ms));
   questions[1] = await new Question(questions[1]).save();
-  await _sleep(50);
   questions[0] = await new Question(questions[0]).save();
-  await _sleep(1000);
   questions[2] = await new Question(questions[2]).save();
 
   const results = await questionDataService.getQuestionsCountWithRecentAndTopNQuestions(
@@ -691,12 +683,8 @@ test("retrieve most top questions with some votes should be most recent question
     },
   ];
 
-  const _sleep = (ms) =>
-    new Promise<void>((resolve) => setTimeout(() => resolve(), ms));
   questions[1] = await new Question(questions[1]).save();
-  await _sleep(50);
   questions[0] = await new Question(questions[0]).save();
-  await _sleep(1000);
   questions[2] = await new Question(questions[2]).save();
 
   const results = await questionDataService.getQuestionsCountWithRecentAndTopNQuestions(

@@ -4,12 +4,12 @@
 /**
  * @jest-environment jsdom
  */
-import { Text } from '@fluentui/react-northstar';
 import { configure, shallow } from 'enzyme';
 import enzymeAdapterReact16 from 'enzyme-adapter-react-16';
 import enzymeToJson from 'enzyme-to-json';
 import * as React from 'react';
 import { AskAwayTabConfig } from '../AskAwayTabConfig';
+import AskAwayTabConfigInternal from '../AskAwayTabConfigInternal';
 
 configure({ adapter: new enzymeAdapterReact16() });
 
@@ -19,9 +19,8 @@ describe('AskAwayTabConfig Component', () => {
         expect(enzymeToJson(wrapper)).toMatchSnapshot();
     });
 
-    it.skip('should render the tab', () => {
+    it('should render the tab', () => {
         const component = shallow(<AskAwayTabConfig />);
-        const divResult = component.containsMatchingElement(<Text content="Select save to finish adding Ask Away to the meeting" />);
-        expect(divResult).toBeTruthy();
+        expect(component.find(AskAwayTabConfigInternal)).toHaveLength(1);
     });
 });
