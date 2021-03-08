@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+/**
+ * @jest-environment jsdom
+ */
+
 import { StatusCodes } from 'http-status-codes';
 import { UnauthorizedAccessErrorCode } from '../../../../../errors/unauthorizedAccessError';
 import {
@@ -37,15 +41,6 @@ describe('test handleTaskModuleErrorForCreateQnASessionFlow', () => {
         testHandler = () => {
             return;
         };
-    });
-
-    beforeAll(() => {
-        Object.defineProperty(window, 'location', {
-            value: {
-                host: `${process.env.HostName}`,
-            },
-            writable: true,
-        });
     });
 
     beforeEach(() => {

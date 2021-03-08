@@ -69,3 +69,6 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 # Azure Functions artifacts
 bin
 obj
+
+# junit results
+junit.xml

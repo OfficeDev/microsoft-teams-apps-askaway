@@ -30,3 +30,10 @@ export const getFromMemoryCache = (key: string): string | null => {
 export const putIntoMemoryCache = (key: string, value: string, retryAfterMs: number) => {
     memCache.put(key, value, retryAfterMs);
 };
+
+/**
+ * Clears memory cache.
+ */
+export const clearMemoryCache = async () => {
+    memCache.clear();
+};

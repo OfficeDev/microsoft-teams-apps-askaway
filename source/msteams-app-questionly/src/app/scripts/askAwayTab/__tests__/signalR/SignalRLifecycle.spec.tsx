@@ -57,6 +57,9 @@ describe('SignalRLifecycle Component', () => {
             start: jest.fn(() => {
                 return Promise.resolve();
             }),
+            stop: jest.fn(() => {
+                return Promise.resolve();
+            }),
             connectionId: 'random',
             on: jest.fn(),
             onclose: jest.fn(),
@@ -345,12 +348,12 @@ describe('SignalRLifecycle Component', () => {
             wrapper.update();
         });
 
-        expect(wrapper.containsMatchingElement(<div id="alertHolder" />)).toBeTruthy();
+        expect(wrapper.find('div#alertHolder')).toHaveLength(1);
 
         // No alert should be shown.
         expect(wrapper.find(ConnectionStatusAlert)).toHaveLength(0);
 
-        expect(hubConnection.onclose).toBeCalledTimes(1);
+        expect(hubConnection.onreconnecting).toBeCalledTimes(1);
 
         await act(async () => {
             // Trigger onreconnecting callback.

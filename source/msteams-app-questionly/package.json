@@ -10,7 +10,8 @@
         "coverage": "jest --coverage",
         "lint": "eslint . --ext .ts",
         "lint-and-fix": "eslint . --ext .ts --fix",
-        "pretty": "pretty-quick --staged"
+        "pretty": "pretty-quick --staged",
+        "ci-test": "jest --ci --reporters=jest-junit --coverage --coverageReporters=cobertura"
     },
     "dependencies": {
         "@azure/identity": "^1.2.3",
@@ -104,6 +105,7 @@
         "identity-obj-proxy": "^3.0.0",
         "jest": "^26.0.1",
         "jest-environment-jsdom": "^26.5.2",
+        "jest-junit": "^12.0.0",
         "ngrok": "^3.1.1",
         "node-sass": "^4.14.1",
         "nodemon": "1.19.0",
