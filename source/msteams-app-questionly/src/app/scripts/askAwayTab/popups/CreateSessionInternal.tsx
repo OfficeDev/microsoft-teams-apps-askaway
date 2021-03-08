@@ -72,7 +72,7 @@ const CreateSessionInternal: React.FunctionComponent<CreateSessionInternalProps>
     const showCreateSessionForm = () => {
         return (
             <Flex column>
-                <Form onSubmit={(e) => submitCreateSession(e)} className="sidepanel-form" styles={{ display: 'flex', flexDirection: 'column' }}>
+                <Form onSubmit={(e) => submitCreateSession(e)}>
                     <div className="form-grid">
                         <Text content={t('popups.sessionTitle')} size="small" />
                         <Input
@@ -99,12 +99,10 @@ const CreateSessionInternal: React.FunctionComponent<CreateSessionInternalProps>
                         {error.isDescription && <Text styles={{ display: 'inline-flex' }} error content={t('popups.fieldRequiredMessageDescription')} size="small" />}
                     </div>
                     <div className="form-grid">
-                        <Flex>
-                            <FlexItem push>
-                                <Button primary type="submit" className="btn-create-session" size="medium">
-                                    <Button.Content>{t('popups.createQnaSessionButton')}</Button.Content>
-                                </Button>
-                            </FlexItem>
+                        <Flex hAlign="end" vAlign="end">
+                            <Button primary type="submit" className="btn-create-session" size="medium">
+                                <Button.Content>{t('popups.createQnaSessionButton')}</Button.Content>
+                            </Button>
                         </Flex>
                     </div>
                 </Form>

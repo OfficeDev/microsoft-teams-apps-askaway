@@ -1,18 +1,15 @@
-.sidepanel-form {
-    display: flex;
-    flex-direction: column;
-    .form-grid {
-        margin-top: 0.5rem;
-        .btn-create-session {
-            height: 2rem;
-            position: absolute;
-            right: 2rem;
-            bottom: 2rem;
-            width: 6rem;
-            border-radius: 0.125rem;
-        }
+.form-grid {
+    margin-top: 0.5rem;
+    .btn-create-session {
+        height: 2rem;
+        position: absolute;
+        right: 2rem;
+        bottom: 2rem;
+        width: 6rem;
+        border-radius: 0.125rem;
     }
 }
+
 .meeting-panel {
     height: 100vh;
     .margin-top-bottom {
@@ -344,5 +341,14 @@
         .screen {
             left: 42%;
         }
+    }
+    .form-grid {
+        .btn-create-session {
+            right: auto;
+        }
+    }
+    .switchButton {
+        left: 2rem;
+        right: auto;
     }
 }
