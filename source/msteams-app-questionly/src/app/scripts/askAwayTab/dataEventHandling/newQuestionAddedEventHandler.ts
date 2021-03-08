@@ -22,8 +22,7 @@ export class NewQuestionAddedEventHandler implements IDataEventHandler {
         activeSessionData: ClientDataContract.QnaSession | null,
         updateQnASessionContent: () => void,
         showNewUpdatesButton: () => void,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        updateActiveSessionData: (sessionData: ClientDataContract.QnaSession | null) => void
+        _updateActiveSessionData: (sessionData: ClientDataContract.QnaSession | null) => void
     ) => {
         if (dataEvent.qnaSessionId !== activeSessionData?.sessionId) {
             // If the event is not for the current state qna session, that means there is a possibility of

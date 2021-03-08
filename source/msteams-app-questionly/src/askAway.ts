@@ -384,8 +384,7 @@ export class AskAway extends TeamsActivityHandler {
     // -------------------------------------------------------------------------- //
     //          ANCHOR Bot Framework messaging extension method overrides         //
     // -------------------------------------------------------------------------- //
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async handleTeamsMessagingExtensionFetchTask(context: TurnContext, action: MessagingExtensionAction): Promise<MessagingExtensionActionResponse> {
+    async handleTeamsMessagingExtensionFetchTask(context: TurnContext, _action: MessagingExtensionAction): Promise<MessagingExtensionActionResponse> {
         // commandId: 'startQnA'
         const meetingId = getMeetingIdFromContext(context);
         // Only presenters and organizers can start a Q&A session in meeting chat.

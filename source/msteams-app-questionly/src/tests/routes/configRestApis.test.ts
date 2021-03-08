@@ -9,8 +9,6 @@ import { configRouter } from 'src/routes/configRestApis';
 import { StatusCodes } from 'http-status-codes';
 
 let app: ExpressType;
-const sampleUserId = 'sampleUserId';
-const sampleUserName = 'sampleUserName';
 
 describe('test get /config api', () => {
     beforeAll(async () => {
