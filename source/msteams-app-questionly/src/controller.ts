@@ -36,7 +36,7 @@ export interface IController {
         hostUserId: string;
         isChannel: boolean;
         serviceUrl: string;
-        initiator: EventInitiator;
+        caller: EventInitiator;
         meetingId?: string;
     }) => Promise<IQnASession_populated>;
     generateLeaderboard: (qnaSessionId: string, aadObjectId: string, theme: string) => Promise<AdaptiveCard>;
@@ -48,7 +48,7 @@ export interface IController {
         questionContent: string,
         conversationId: string,
         serviceUrl: string,
-        initiator: EventInitiator,
+        caller: EventInitiator,
         meetingId?: string
     ) => Promise<IQuestion>;
     markQuestionAsAnswered: (
@@ -58,7 +58,7 @@ export interface IController {
         questionId: string,
         aadObjectId: string,
         serviceUrl: string,
-        initiator: EventInitiator
+        caller: EventInitiator
     ) => Promise<IQuestionPopulatedUser>;
     upvoteQuestion: (
         conversationId: string,
@@ -67,7 +67,7 @@ export interface IController {
         aadObjectId: string,
         userName: string,
         serviceUrl: string,
-        initiator: EventInitiator,
+        caller: EventInitiator,
         meetingId?: string
     ) => Promise<IQuestionPopulatedUser>;
     downvoteQuestion: (
@@ -77,7 +77,7 @@ export interface IController {
         aadObjectId: string,
         userName: string,
         serviceUrl: string,
-        initiator: EventInitiator,
+        caller: EventInitiator,
         meetingId?: string
     ) => Promise<IQuestionPopulatedUser>;
     updateUpvote: (
@@ -88,7 +88,7 @@ export interface IController {
         conversationId: string,
         theme: string,
         serviceUrl: string,
-        initiator: EventInitiator,
+        caller: EventInitiator,
         meetingId?: string
     ) => Promise<AdaptiveCard>;
     getEndQnAConfirmationCard: (qnaSessionId: string) => AdaptiveCard;
@@ -100,7 +100,7 @@ export interface IController {
         serviceURL: string;
         userName: string;
         endedByUserId: string;
-        initiator: EventInitiator;
+        caller: EventInitiator;
         meetingId?: string;
     }) => Promise<void>;
     getResubmitQuestionCard: (qnaSessionId: string, questionContent: string) => AdaptiveCard;
@@ -135,7 +135,7 @@ export class Controller implements IController {
      * hostUserId - MS Teams Id of user who created the QnA (used for at-mentions)
      * isChannel - whether the QnA session was started in a channel or group chat
      * serviceUrl - bot service url.
-     * initiator - event initiator (card/ Rest API)
+     * caller - event initiator (card/ Rest API)
      * meetingId - meeting id.
      * @returns qna session document.
      */
@@ -151,7 +151,7 @@ export class Controller implements IController {
         hostUserId: string;
         isChannel: boolean;
         serviceUrl: string;
-        initiator: EventInitiator;
+        caller: EventInitiator;
         meetingId?: string;
     }): Promise<IQnASession_populated> => {
         const isMeetingGroupChat = isValidStringParameter(sessionParameters.meetingId);
@@ -186,7 +186,7 @@ export class Controller implements IController {
             isMeetingGroupChat: isMeetingGroupChat,
         });
 
-        if (await triggerBackgroundJobForQnaSessionCreatedEvent(response, sessionParameters.serviceUrl, sessionParameters.initiator, sessionParameters.meetingId)) {
+        if (await triggerBackgroundJobForQnaSessionCreatedEvent(response, sessionParameters.serviceUrl, sessionParameters.caller, sessionParameters.meetingId)) {
             trackCreateQnASessionEvent({
                 qnaSessionId: response?._id,
                 tenantId: sessionParameters.tenantId,
@@ -249,13 +249,13 @@ export class Controller implements IController {
      * @param sessionId - session id.
      * @param serviceUrl - service url.
      * @param meetingId - meeting id.
-     * @param initiator - event initiator (main card/ rest api)
+     * @param caller - event initiator (main card/ rest api)
      * @throws - this method should not throw any errors or exception as it is called from the error flows.
      */
-    private handleOperationFailureForEndedSession = (error: any, conversationId: string, sessionId: string, serviceUrl: string, initiator: EventInitiator, meetingId?: string) => {
+    private handleOperationFailureForEndedSession = (error: any, conversationId: string, sessionId: string, serviceUrl: string, caller: EventInitiator, meetingId?: string) => {
         try {
             if (error instanceof SessionIsNoLongerActiveError) {
-                triggerBackgroundJobForQnaSessionEndedEvent(conversationId, sessionId, serviceUrl, initiator, meetingId);
+                triggerBackgroundJobForQnaSessionEndedEvent(conversationId, sessionId, serviceUrl, caller, meetingId);
             }
         } catch (error) {
             exceptionLogger(error, {
@@ -276,7 +276,7 @@ export class Controller implements IController {
      * @param questionContent - question content asked by the user
      * @param conversationId - conversation id.
      * @param serviceUrl - bot service url.
-     * @param initiator - event initiator (main card/ rest api)
+     * @param caller - event initiator (main card/ rest api)
      * @param meetingId - meeting id.
      * @returns Returns ok object if successful, otherwise returns error
      */
@@ -287,13 +287,13 @@ export class Controller implements IController {
         questionContent: string,
         conversationId: string,
         serviceUrl: string,
-        initiator: EventInitiator,
+        caller: EventInitiator,
         meetingId?: string
     ): Promise<IQuestion> => {
         try {
             const question = await this.questionDataService.createQuestion(qnaSessionId, userAadObjId, userName, questionContent, conversationId);
 
-            if (await triggerBackgroundJobForQuestionPostedEvent(conversationId, question, qnaSessionId, userAadObjId, serviceUrl, initiator, meetingId)) {
+            if (await triggerBackgroundJobForQuestionPostedEvent(conversationId, question, qnaSessionId, userAadObjId, serviceUrl, caller, meetingId)) {
                 trackCreateQuestionEvent({ questionId: question?._id, qnaSessionId: qnaSessionId, conversationId: conversationId, questionContent: questionContent });
                 return question;
             } else {
@@ -312,7 +312,7 @@ export class Controller implements IController {
                 throw new ChangesRevertedDueToBackgroundJobFailureError();
             }
         } catch (error) {
-            this.handleOperationFailureForEndedSession(error, conversationId, qnaSessionId, serviceUrl, initiator, meetingId);
+            this.handleOperationFailureForEndedSession(error, conversationId, qnaSessionId, serviceUrl, caller, meetingId);
             throw error;
         }
     };
@@ -325,7 +325,7 @@ export class Controller implements IController {
      * @param questionId - question id.
      * @param aadObjectId - aad object id of user who marked question as answered.
      * @param serviceUrl - bot service url.
-     * @param initiator - event initiator (main card/ rest api)
+     * @param caller - event initiator (main card/ rest api)
      * @returns - question document.
      */
     public markQuestionAsAnswered = async (
@@ -335,13 +335,13 @@ export class Controller implements IController {
         questionId: string,
         aadObjectId: string,
         serviceUrl: string,
-        initiator: EventInitiator
+        caller: EventInitiator
     ): Promise<IQuestionPopulatedUser> => {
         try {
             if (await isPresenterOrOrganizer(meetingId, aadObjectId, conversationData.tenantId, conversationData.serviceUrl)) {
                 const questionData = await this.questionDataService.markQuestionAsAnswered(conversationData._id, qnaSessionId, questionId);
 
-                if (await triggerBackgroundJobForQuestionMarkedAsAnsweredEvent(conversationData._id, questionId, qnaSessionId, aadObjectId, serviceUrl, initiator, meetingId)) {
+                if (await triggerBackgroundJobForQuestionMarkedAsAnsweredEvent(conversationData._id, questionId, qnaSessionId, aadObjectId, serviceUrl, caller, meetingId)) {
                     return questionData;
                 } else {
                     try {
@@ -361,7 +361,7 @@ export class Controller implements IController {
                 throw new UnauthorizedAccessError(UnauthorizedAccessErrorCode.InsufficientPermissionsToMarkQuestionAsAnswered);
             }
         } catch (error) {
-            this.handleOperationFailureForEndedSession(error, conversationData._id, qnaSessionId, serviceUrl, initiator, meetingId);
+            this.handleOperationFailureForEndedSession(error, conversationData._id, qnaSessionId, serviceUrl, caller, meetingId);
             throw error;
         }
     };
@@ -374,7 +374,7 @@ export class Controller implements IController {
      * @param aadObjectId - aad object id of user who upvoted question.
      * @param userName - name of user who upvoted the question.
      * @param serviceUrl - bot service url.
-     * @param initiator - event initiator (main card/ rest api)
+     * @param caller - event initiator (main card/ rest api)
      * @param meetingId - meeting id.
      * @returns - question document.
      */
@@ -385,13 +385,13 @@ export class Controller implements IController {
         aadObjectId: string,
         userName: string,
         serviceUrl: string,
-        initiator: EventInitiator,
+        caller: EventInitiator,
         meetingId?: string
     ): Promise<IQuestionPopulatedUser> => {
         try {
             const questionData = await this.questionDataService.upVoteQuestion(conversationId, qnaSessionId, questionId, aadObjectId, userName);
 
-            if (await triggerBackgroundJobForQuestionUpvotedEvent(conversationId, questionId, qnaSessionId, aadObjectId, serviceUrl, initiator, meetingId)) {
+            if (await triggerBackgroundJobForQuestionUpvotedEvent(conversationId, questionId, qnaSessionId, aadObjectId, serviceUrl, caller, meetingId)) {
                 return questionData;
             } else {
                 try {
@@ -410,7 +410,7 @@ export class Controller implements IController {
                 throw new ChangesRevertedDueToBackgroundJobFailureError();
             }
         } catch (error) {
-            this.handleOperationFailureForEndedSession(error, conversationId, qnaSessionId, serviceUrl, initiator, meetingId);
+            this.handleOperationFailureForEndedSession(error, conversationId, qnaSessionId, serviceUrl, caller, meetingId);
             throw error;
         }
     };
@@ -423,7 +423,7 @@ export class Controller implements IController {
      * @param aadObjectId - aad object id of user who downvoted question.
      * @param serviceUrl - bot service url.
      * @param userName - name of user who upvoted the question.
-     * @param initiator - event initiator (main card/ rest api)
+     * @param caller - event initiator (main card/ rest api)
      * @param meetingId - meeting id.
      * @returns - question document.
      */
@@ -434,13 +434,13 @@ export class Controller implements IController {
         aadObjectId: string,
         userName: string,
         serviceUrl: string,
-        initiator: EventInitiator,
+        caller: EventInitiator,
         meetingId?: string
     ): Promise<IQuestionPopulatedUser> => {
         try {
             const questionData = await this.questionDataService.downVoteQuestion(conversationId, qnaSessionId, questionId, aadObjectId);
 
-            if (await triggerBackgroundJobForQuestionDownvotedEvent(conversationId, questionId, qnaSessionId, aadObjectId, serviceUrl, initiator, meetingId)) {
+            if (await triggerBackgroundJobForQuestionDownvotedEvent(conversationId, questionId, qnaSessionId, aadObjectId, serviceUrl, caller, meetingId)) {
                 return questionData;
             } else {
                 try {
@@ -459,7 +459,7 @@ export class Controller implements IController {
                 throw new ChangesRevertedDueToBackgroundJobFailureError();
             }
         } catch (error) {
-            this.handleOperationFailureForEndedSession(error, conversationId, qnaSessionId, serviceUrl, initiator, meetingId);
+            this.handleOperationFailureForEndedSession(error, conversationId, qnaSessionId, serviceUrl, caller, meetingId);
             throw error;
         }
     };
@@ -471,7 +471,7 @@ export class Controller implements IController {
      * @param name - Name of the user upvoting the question
      * @param theme - Teams theme of the user upvoting. Options are 'default', 'dark', or 'high-contrast'
      * @param serviceUrl - bot service url.
-     * @param initiator - event initiator (main card/ rest api)
+     * @param caller - event initiator (main card/ rest api)
      * @param meetingId - meeting id.
      */
     public updateUpvote = async (
@@ -482,7 +482,7 @@ export class Controller implements IController {
         conversationId: string,
         theme: string,
         serviceUrl: string,
-        initiator: EventInitiator,
+        caller: EventInitiator,
         meetingId?: string
     ): Promise<AdaptiveCard> => {
         try {
@@ -490,9 +490,9 @@ export class Controller implements IController {
             let backgroundJobStatus: boolean;
 
             if (response.upvoted) {
-                backgroundJobStatus = await triggerBackgroundJobForQuestionUpvotedEvent(conversationId, response.question._id, qnaSessionId, aadObjectId, serviceUrl, initiator, meetingId);
+                backgroundJobStatus = await triggerBackgroundJobForQuestionUpvotedEvent(conversationId, response.question._id, qnaSessionId, aadObjectId, serviceUrl, caller, meetingId);
             } else {
-                backgroundJobStatus = await triggerBackgroundJobForQuestionDownvotedEvent(conversationId, response.question._id, qnaSessionId, aadObjectId, serviceUrl, initiator, meetingId);
+                backgroundJobStatus = await triggerBackgroundJobForQuestionDownvotedEvent(conversationId, response.question._id, qnaSessionId, aadObjectId, serviceUrl, caller, meetingId);
             }
 
             if (!backgroundJobStatus) {
@@ -515,7 +515,7 @@ export class Controller implements IController {
 
             return this.generateLeaderboard(response.question.qnaSessionId, aadObjectId, theme);
         } catch (error) {
-            this.handleOperationFailureForEndedSession(error, conversationId, qnaSessionId, serviceUrl, initiator, meetingId);
+            this.handleOperationFailureForEndedSession(error, conversationId, qnaSessionId, serviceUrl, caller, meetingId);
             throw error;
         }
     };
@@ -538,7 +538,7 @@ export class Controller implements IController {
      * tenantId - tenant id
      * serviceURL - bot service url
      * endedByUserId - aad object id of user who is ending the session
-     * initiator - event initiator (main card/ rest api)
+     * caller - event initiator (main card/ rest api)
      * meetingId - meeting id
      */
     public endQnASession = async (sessionParameters: {
@@ -549,7 +549,7 @@ export class Controller implements IController {
         serviceURL: string;
         userName: string;
         endedByUserId: string;
-        initiator: EventInitiator;
+        caller: EventInitiator;
         meetingId?: string;
     }): Promise<void> => {
         try {
@@ -581,7 +581,7 @@ export class Controller implements IController {
                     sessionParameters.conversationId,
                     sessionParameters.qnaSessionId,
                     sessionParameters.serviceURL,
-                    sessionParameters.initiator,
+                    sessionParameters.caller,
                     sessionParameters.meetingId
                 ))
             ) {
@@ -605,7 +605,7 @@ export class Controller implements IController {
                 sessionParameters.conversationId,
                 sessionParameters.qnaSessionId,
                 sessionParameters.serviceURL,
-                sessionParameters.initiator,
+                sessionParameters.caller,
                 sessionParameters.meetingId
             );
             throw error;

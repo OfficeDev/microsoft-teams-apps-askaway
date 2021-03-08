@@ -341,7 +341,7 @@ export class AskAway extends TeamsActivityHandler {
                     userName: context.activity.from.name,
                     endedByUserId: context.activity.from.id,
                     meetingId: meetingId,
-                    initiator: EventInitiator.MainCard,
+                    caller: EventInitiator.MainCard,
                 });
             } catch (error) {
                 exceptionLogger(error, {
@@ -464,7 +464,7 @@ export class AskAway extends TeamsActivityHandler {
                 isChannel: isChannel,
                 serviceUrl: serviceURL,
                 meetingId: meetingId,
-                initiator: EventInitiator.MainCard,
+                caller: EventInitiator.MainCard,
             });
         } catch (error) {
             exceptionLogger(error, {
