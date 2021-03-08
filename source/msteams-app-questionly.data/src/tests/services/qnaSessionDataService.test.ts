@@ -419,7 +419,7 @@ describe("tests ama session apis", () => {
     };
 
     expect(doc.isActive).toBe(true);
-    expect(doc.ttl).toBe(-1);
+    expect(doc.ttl).toBe(null);
     expect(doc.dataEventVersion).toBe(0);
     expect(expectedData).toEqual(data);
 
@@ -439,7 +439,7 @@ describe("tests ama session apis", () => {
     expect(doc).not.toBeNull();
     expect(doc._id).toEqual(testSession._id);
     expect(doc.toObject().activityId).toEqual(activityId);
-    expect(doc.toObject().ttl).toEqual(-1);
+    expect(doc.toObject().ttl).toEqual(null);
   });
 
   it("get QnA session data", async () => {

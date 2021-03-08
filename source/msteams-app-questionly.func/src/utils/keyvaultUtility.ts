@@ -21,6 +21,13 @@ export const getMemCacheInstance = () => {
 };
 
 /**
+ * Clears memory cache.
+ */
+export const clearMemoryCache = async () => {
+  memCache?.clear();
+};
+
+/**
  * If the secret is present in cache, read from cache, else read from app settings and put it in cache.
  * @param secretName - Secret to be read.
  * @returns - Value of secret.
