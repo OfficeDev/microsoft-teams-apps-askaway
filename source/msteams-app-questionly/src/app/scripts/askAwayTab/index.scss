@@ -39,11 +39,21 @@
         padding-inline-end: 1rem;
         height: 1.85rem;
     }
+    .title-truncate {
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 3;
+        overflow: hidden;
+    }
     .menuHeader {
+        position: relative;
+        bottom: 0.2rem;
         .ui-menu__item__submenu {
             border: none;
         }
     }
+
     .question-card {
         overflow-y: scroll;
         flex: 1;
@@ -89,6 +99,14 @@
             height: 2.2rem;
         }
     }
+}
+
+.notification-bubble {
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
 }
 
 .badge {

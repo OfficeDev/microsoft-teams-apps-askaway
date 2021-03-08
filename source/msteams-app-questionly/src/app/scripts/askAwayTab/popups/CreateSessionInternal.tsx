@@ -78,6 +78,7 @@ const CreateSessionInternal: React.FunctionComponent<CreateSessionInternalProps>
                         <Input
                             label=""
                             as="div"
+                            maxLength={250}
                             fluid
                             placeholder={t('popups.sessionTitlePlaceholder')}
                             onKeyUp={(e) => validateCreateSessionField(input.title, 'isTitle')}
@@ -90,6 +91,7 @@ const CreateSessionInternal: React.FunctionComponent<CreateSessionInternalProps>
                         <TextArea
                             fluid
                             styles={{ marginTop: '0.25rem' }}
+                            maxLength={250}
                             placeholder={t('popups.sessionDescriptionPlaceholder')}
                             onKeyUp={(e) => validateCreateSessionField(input.description, 'isDescription')}
                             onChange={(e) => appendInput(e, 'description')}
