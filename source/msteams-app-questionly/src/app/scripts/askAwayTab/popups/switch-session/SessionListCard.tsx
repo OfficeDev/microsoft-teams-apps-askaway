@@ -29,8 +29,8 @@ const SessionListCard: React.FunctionComponent<SessionListCardProps & ThemeProps
     const colorScheme = props.theme.siteVariables.colorScheme;
     return (
         <div key={qnaSession.sessionId} id="switchSessionListCard" style={{ borderColor: colorScheme.default.border }} className="switchSessionListCard">
-            <Flex gap="gap.small">
-                <Text size="medium"> {qnaSession.title} </Text>
+            <Flex vAlign="center" gap="gap.small">
+                <Text size="medium" content={qnaSession.title} />
                 {qnaSession.isActive && <Badge className="liveTag" styles={{ backgroundColor: colorScheme.green.background, color: colorScheme.green.foreground1 }} text={props.t('popups.live')} />}
             </Flex>
             <Text styles={{ color: colorScheme.default.foreground1 }} size="small" className="sessionMetadata">
