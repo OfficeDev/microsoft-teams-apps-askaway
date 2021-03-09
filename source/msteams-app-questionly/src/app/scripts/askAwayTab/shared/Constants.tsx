@@ -15,4 +15,9 @@ export const CONST = Object.freeze({
         APP_INSIGHTS_INSTRUMENTATION_KEY: 'ApplicationInsightsInstrumentationKey',
         SIGNALR_FUNCTION_BASEURL: 'SignalRFunctionBaseUrl',
     },
+
+    CREATE_SESSION: {
+        TITLE_MAX_LENGTH: 250,
+        DESC_MAX_LENGTH: 250,
+    },
 });
