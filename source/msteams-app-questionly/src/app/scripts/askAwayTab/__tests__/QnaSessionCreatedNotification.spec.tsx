@@ -11,7 +11,7 @@ describe('QnaSessionCreatedNotification', () => {
     let url = '';
     beforeAll(() => {
         global.window = Object.create(window);
-        url = 'http://dummy.com';
+        url = 'https://dummy.com';
         Object.defineProperty(window, 'location', {
             value: {
                 href: url,

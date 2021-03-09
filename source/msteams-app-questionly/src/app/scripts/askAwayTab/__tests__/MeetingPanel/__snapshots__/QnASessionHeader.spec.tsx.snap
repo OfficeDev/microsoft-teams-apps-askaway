@@ -30,7 +30,7 @@ exports[`QnASessionHeader Component should match the snapshot 1`] = `
                 outline={false}
                 styles={
                   Object {
-                    "color": undefined,
+                    "color": "#fff",
                   }
                 }
               />,

@@ -10,6 +10,7 @@ import enzymeAdapterReact16 from 'enzyme-adapter-react-16';
 import { PostNewQuestions } from '../../TabContent/PostNewQuestions';
 import { Helper } from '../../shared/Helper';
 import Badge from '../../shared/Badge';
+import { themeMock } from '../mocks/themes';
 
 configure({ adapter: new enzymeAdapterReact16() });
 
@@ -24,7 +25,7 @@ describe('PostNewQuestions Component', () => {
         t = jest.fn();
         activeSessionData = new Helper().createEmptyActiveSessionData();
         onPostNewQuestion = jest.fn();
-        theme = {} as ThemePrepared;
+        theme = themeMock;
         testUserName = '1234';
     });
 

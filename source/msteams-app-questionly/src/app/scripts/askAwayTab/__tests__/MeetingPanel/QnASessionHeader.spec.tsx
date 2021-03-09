@@ -9,6 +9,7 @@ import { Flex, Text, FlexItem, Menu, ThemePrepared } from '@fluentui/react-north
 import enzymeAdapterReact16 from 'enzyme-adapter-react-16';
 import { QnASessionHeader } from '../../MeetingPanel/QnASessionHeader';
 import { ParticipantRoles } from '../../../../../enums/ParticipantRoles';
+import { themeMock } from '../mocks/themes';
 
 configure({ adapter: new enzymeAdapterReact16() });
 
@@ -23,7 +24,7 @@ describe('QnASessionHeader Component', () => {
         t = jest.fn();
         onClickRefreshSession = jest.fn();
         onClickEndSession = jest.fn();
-        theme = {} as ThemePrepared;
+        theme = themeMock;
     });
 
     it('should match the snapshot', () => {

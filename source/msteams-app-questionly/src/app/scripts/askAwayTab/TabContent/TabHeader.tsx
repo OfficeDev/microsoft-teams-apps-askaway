@@ -4,6 +4,7 @@
 import { AddIcon, RetryIcon } from '@fluentui/react-icons-northstar';
 import { Button, Divider, Flex, FlexItem } from '@fluentui/react-northstar';
 import * as React from 'react';
+import { TFunction } from 'i18next';
 import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
 import { ParticipantRoles } from '../../../../enums/ParticipantRoles';
 import { isPresenterOrOrganizer } from '.././shared/meetingUtility';
@@ -16,7 +17,7 @@ import './../index.scss';
 export interface TabHeaderProps {
     refreshSession: Function;
     endSession: Function;
-    t: Function;
+    t: TFunction;
     activeSessionData: ClientDataContract.QnaSession;
     showTaskModule: Function;
     /**

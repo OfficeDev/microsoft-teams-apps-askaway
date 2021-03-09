@@ -9,6 +9,7 @@ import { Flex, Button, Text, Avatar, ThemePrepared } from '@fluentui/react-north
 import enzymeAdapterReact16 from 'enzyme-adapter-react-16';
 import { Question } from '../../MeetingPanel/Question';
 import { ParticipantRoles } from '../../../../../enums/ParticipantRoles';
+import { themeMock } from '../mocks/themes';
 
 configure({ adapter: new enzymeAdapterReact16() });
 
@@ -34,7 +35,7 @@ describe('Question Component', () => {
 
     beforeAll(() => {
         onClickAction = jest.fn();
-        theme = {} as ThemePrepared;
+        theme = themeMock;
     });
 
     it('should match the snapshot', () => {

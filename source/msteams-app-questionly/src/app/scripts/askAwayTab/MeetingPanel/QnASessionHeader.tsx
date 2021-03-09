@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 import { LeaveIcon, MoreIcon, RetryIcon } from '@fluentui/react-icons-northstar';
+import { TFunction } from 'i18next';
 import { Flex, FlexItem, Menu, menuAsToolbarBehavior, MenuItemProps, ShorthandCollection, Text } from '@fluentui/react-northstar';
 import * as React from 'react';
 import { ParticipantRoles } from '../../../../enums/ParticipantRoles';
@@ -17,12 +18,12 @@ export interface QnASessionHeaderProps {
     onClickRefreshSession: Function;
     onClickEndSession: Function;
     showToolBar: boolean;
-    t: Function;
+    t: TFunction;
     userRole: ParticipantRoles;
 }
 
 export const QnASessionHeader: React.FunctionComponent<QnASessionHeaderProps & ThemeProps> = (props) => {
-    const colorScheme = props.theme?.siteVariables?.colorScheme;
+    const colorScheme = props.theme.siteVariables.colorScheme;
 
     const items = [
         {
@@ -51,7 +52,7 @@ export const QnASessionHeader: React.FunctionComponent<QnASessionHeaderProps & T
         {
             icon: (
                 <MoreIcon
-                    styles={{ color: colorScheme?.default?.foregroundHover }}
+                    styles={{ color: colorScheme.default.foregroundHover }}
                     {...{
                         outline: false,
                     }}

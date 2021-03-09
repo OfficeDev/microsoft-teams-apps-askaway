@@ -5,6 +5,7 @@ import { ChevronDownMediumIcon, ChevronEndMediumIcon, LikeIcon } from '@fluentui
 import { Avatar, Button, Flex, Text } from '@fluentui/react-northstar';
 import * as React from 'react';
 import { useState } from 'react';
+import { TFunction } from 'i18next';
 import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
 import Badge from '../shared/Badge';
 import { CONST } from '../shared/Constants';
@@ -12,14 +13,20 @@ import { LikeIconFilled } from '../shared/Icons/LikeIconFilled';
 import { ThemeProps, withTheme } from '../shared/WithTheme';
 import './../index.scss';
 
+interface IQuestionEventData {
+    question: ClientDataContract.Question;
+    key: string;
+    actionValue: string;
+}
+
 /**
  * Properties for the TabQuestions React component
  */
 export interface TabQuestionsProps {
     activeSessionData: ClientDataContract.QnaSession;
     teamsTabContext: microsoftTeams.Context;
-    onClickAction: Function;
-    t: Function;
+    onClickAction: (event: IQuestionEventData) => Promise<void>;
+    t: TFunction;
 }
 export const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (props) => {
     const [isPendingTabOpen, setPendingTabOpen] = useState(true);
@@ -32,7 +39,7 @@ export const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProp
         }
     };
 
-    const colorScheme = props.theme?.siteVariables?.colorScheme;
+    const colorScheme = props.theme.siteVariables.colorScheme;
 
     /**
      * Identifies user own questions
@@ -56,7 +63,7 @@ export const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProp
                     {((questionType === CONST.TAB_QUESTIONS.UNANSWERED_Q && isQuestionsTabExpanded) || (questionType === CONST.TAB_QUESTIONS.ANSWERED_Q && isQuestionsTabExpanded)) &&
                         questions.map((question) => {
                             return (
-                                <div key={question.id} style={{ backgroundColor: colorScheme?.default?.background, border: `1px solid ${colorScheme?.onyx?.border1}` }} className="question-layout">
+                                <div key={question.id} style={{ backgroundColor: colorScheme.default.background, border: `1px solid ${colorScheme.onyx.border1}` }} className="question-layout">
                                     <Flex gap="gap.small">
                                         <Flex vAlign="center" gap="gap.small" padding="padding.medium">
                                             <Avatar size="small" name={question.author.name} />
@@ -64,8 +71,8 @@ export const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProp
                                             <Badge
                                                 styles={
                                                     CONST.TAB_QUESTIONS.UNANSWERED_Q === questionType
-                                                        ? { backgroundColor: colorScheme?.brand?.background, color: colorScheme?.brand?.foreground4, paddingBottom: '0.3rem' }
-                                                        : { backgroundColor: colorScheme?.green?.background, color: colorScheme?.green?.foreground1, paddingBottom: '0.3rem' }
+                                                        ? { backgroundColor: colorScheme.brand.background, color: colorScheme.brand.foreground4, paddingBottom: '0.3rem' }
+                                                        : { backgroundColor: colorScheme.green.background, color: colorScheme.green.foreground1, paddingBottom: '0.3rem' }
                                                 }
                                                 text={CONST.TAB_QUESTIONS.UNANSWERED_Q === questionType ? props.t('tab.pendingStatus') : props.t('tab.answeredStatus')}
                                             />
@@ -81,7 +88,7 @@ export const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProp
                                                             actionValue: isUserLikedQuestion(question.voterAadObjectIds) ? CONST.TAB_QUESTIONS.DOWN_VOTE : CONST.TAB_QUESTIONS.UP_VOTE,
                                                         })
                                                     }
-                                                    icon={isUserLikedQuestion(question.voterAadObjectIds) ? <LikeIconFilled style={{ fill: colorScheme?.brand?.background }} /> : <LikeIcon outline />}
+                                                    icon={isUserLikedQuestion(question.voterAadObjectIds) ? <LikeIconFilled style={{ fill: colorScheme.brand.background }} /> : <LikeIcon outline />}
                                                     styles={{ marginRight: '0 !important' }}
                                                     iconOnly
                                                     text
@@ -107,7 +114,7 @@ export const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProp
      */
     const setIcons = (questionType) => {
         const downMediumIcon = <ChevronDownMediumIcon size="small" className="svg-position" outline />;
-        let response = <ChevronEndMediumIcon styles={{ stroke: colorScheme?.default?.foreground1 }} size="small" className="svg-position" />;
+        let response = <ChevronEndMediumIcon styles={{ stroke: colorScheme.default.foreground1 }} size="small" className="svg-position" />;
         if ((questionType === CONST.TAB_QUESTIONS.UNANSWERED_Q && isPendingTabOpen) || (questionType === CONST.TAB_QUESTIONS.ANSWERED_Q && isAnsweredTabOpen)) {
             response = downMediumIcon;
         }

@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 import { Flex, Image, Text } from '@fluentui/react-northstar';
+import { TFunction } from 'i18next';
 import * as React from 'react';
 import './../index.scss';
 
@@ -10,7 +11,7 @@ const NoQuestionImage = require('./../../../web/assets/no-question.png');
  * Properties for the NoQuestionDesign React component
  */
 export interface NoQuestionDesignProps {
-    t: Function;
+    t: TFunction;
     isSessionActive: boolean;
 }
 const NoQuestionDesign: React.FunctionComponent<NoQuestionDesignProps> = (props) => {

@@ -3,6 +3,7 @@
 
 import { Button, Flex, Image, Text } from '@fluentui/react-northstar';
 import * as React from 'react';
+import { TFunction } from 'i18next';
 import { ParticipantRoles } from '../../../../enums/ParticipantRoles';
 import { isPresenterOrOrganizer } from '.././shared/meetingUtility';
 import './../index.scss';
@@ -15,7 +16,7 @@ const noSessionImageForAttendees = require('./../../../web/assets/relax_and_wait
  */
 export interface TabCreateSessionProps {
     showTaskModule: Function;
-    t: Function;
+    t: TFunction;
     /**
      * current user's role in meeting.
      */

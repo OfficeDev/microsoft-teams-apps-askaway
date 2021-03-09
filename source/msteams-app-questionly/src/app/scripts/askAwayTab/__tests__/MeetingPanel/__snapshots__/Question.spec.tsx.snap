@@ -8,8 +8,8 @@ exports[`Question Component should match the snapshot 1`] = `
   onMouseLeave={[Function]}
   style={
     Object {
-      "backgroundColor": undefined,
-      "color": undefined,
+      "backgroundColor": "#2D2C2C",
+      "color": "#fff",
     }
   }
 >
@@ -57,7 +57,7 @@ exports[`Question Component should match the snapshot 1`] = `
               outline={true}
               styles={
                 Object {
-                  "color": undefined,
+                  "color": "#000",
                 }
               }
             />

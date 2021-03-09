@@ -54,6 +54,13 @@ export class AskAwayTab extends msteamsReactBaseComponent<IAskAwayTabProps, IAsk
     constructor(props) {
         super(props);
         microsoftTeams.initialize();
+        this.state = {
+            dataEvent: {},
+            theme: {},
+            teamContext: {} as microsoftTeams.Context,
+            envConfig: { key: '' },
+            direction: 'ltr',
+        };
     }
 
     public async componentWillMount() {
