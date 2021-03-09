@@ -22,7 +22,7 @@ export class QuestionDownvotedEventHandler implements IDataEventHandler {
         activeSessionData: ClientDataContract.QnaSession | null,
         updateQnASessionContent: () => void,
         showNewUpdatesButton: () => void,
-        updateActiveSessionData: (sessionData: ClientDataContract.QnaSession | null) => void
+        _updateActiveSessionData: (sessionData: ClientDataContract.QnaSession | null) => void
     ) => {
         const downvotedByUserAadObjectId: string = dataEvent.data.downvotedByUserAadObjectId;
 

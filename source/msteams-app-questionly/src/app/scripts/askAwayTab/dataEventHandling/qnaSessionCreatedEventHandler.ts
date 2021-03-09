@@ -21,8 +21,8 @@ export class QnaSessionCreatedEventHandler implements IDataEventHandler {
         dataEvent: IDataEvent,
         activeSessionData: ClientDataContract.QnaSession | null,
         updateQnASessionContent: () => void,
-        showNewUpdatesButton: () => void,
-        updateActiveSessionData: (sessionData: ClientDataContract.QnaSession | null) => void
+        _showNewUpdatesButton: () => void,
+        _updateActiveSessionData: (sessionData: ClientDataContract.QnaSession | null) => void
     ) => {
         // No need to update screen if event corresponds to current state `activeSessionData`.
         // Otherwise update screen with latest qna session data.
