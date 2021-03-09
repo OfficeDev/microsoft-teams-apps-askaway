@@ -2,6 +2,7 @@
 
 exports[`QnaSessionNotificationInternal Component should match the snapshot 1`] = `
 <Flex
+  className="qna-session-notify"
   column={true}
   gap="gap.medium"
   padding="padding.medium"
@@ -12,6 +13,7 @@ exports[`QnaSessionNotificationInternal Component should match the snapshot 1`] 
   />
   <Text
     as="span"
+    className="truncated-title"
     content="some-value"
     size="medium"
     weight="bold"

@@ -2,13 +2,15 @@
 
 exports[`QnASessionHeader Component should match the snapshot 1`] = `
 <Flex
+  className="qna-header"
   gap="gap.large"
-  vAlign="center"
 >
   <Text
     as="span"
+    className="truncated-title"
     content="some-title"
     size="large"
+    title="some-title"
   />
   <FlexItem
     push={true}
