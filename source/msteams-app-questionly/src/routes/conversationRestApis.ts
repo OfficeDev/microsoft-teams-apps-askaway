@@ -188,7 +188,7 @@ conversationRouter.patch('/:conversationId/sessions/:sessionId', async (req: Exp
                 meetingId: <string>conversationData.meetingId,
                 userName: user.userName,
                 endedByUserId: endedByUserId,
-                caller: EventInitiator.RestApi,
+                initiator: EventInitiator.RestApi,
             });
         }
 
@@ -231,7 +231,7 @@ conversationRouter.post('/:conversationId/sessions', async (req: Express.Request
             hostUserId: hostUserId,
             isChannel: isChannel,
             serviceUrl: serviceUrl,
-            caller: EventInitiator.RestApi,
+            initiator: EventInitiator.RestApi,
             // `ensureConversationBelongsToMeetingChat` makes sure meeting id is available
             meetingId: <string>meetingId,
         });
