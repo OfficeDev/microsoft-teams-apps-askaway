@@ -341,7 +341,7 @@ export class AskAway extends TeamsActivityHandler {
                     userName: context.activity.from.name,
                     endedByUserId: context.activity.from.id,
                     meetingId: meetingId,
-                    caller: EventInitiator.MainCard,
+                    initiator: EventInitiator.MainCard,
                 });
             } catch (error) {
                 exceptionLogger(error, {
@@ -451,6 +451,10 @@ export class AskAway extends TeamsActivityHandler {
             meetingId = getMeetingIdFromContext(context);
 
         try {
+            if (!scopeId) {
+                throw new Error('channel id is not present in activity.');
+            }
+
             await this.controller.startQnASession({
                 title: title,
                 description: description,
@@ -459,12 +463,12 @@ export class AskAway extends TeamsActivityHandler {
                 activityId: activityId,
                 conversationId: context.activity.conversation.id,
                 tenantId: tenantId,
-                scopeId: scopeId!,
+                scopeId: scopeId,
                 hostUserId: hostUserId,
                 isChannel: isChannel,
                 serviceUrl: serviceURL,
                 meetingId: meetingId,
-                caller: EventInitiator.MainCard,
+                initiator: EventInitiator.MainCard,
             });
         } catch (error) {
             exceptionLogger(error, {

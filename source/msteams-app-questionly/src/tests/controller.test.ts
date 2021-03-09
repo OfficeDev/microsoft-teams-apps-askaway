@@ -97,7 +97,7 @@ test('start qna session in channel', async () => {
         hostUserId: sampleHostUserId,
         isChannel: true,
         serviceUrl: sampleServiceUrl,
-        caller: EventInitiator.MainCard,
+        initiator: EventInitiator.MainCard,
     });
     expect(qnaSessionDataService.createQnASession).toBeCalledTimes(1);
     expect(qnaSessionDataService.createQnASession).toBeCalledWith({
@@ -144,7 +144,7 @@ test('start qna session in group chat', async () => {
         isChannel: false,
         serviceUrl: sampleServiceUrl,
         meetingId: sampleMeetingId,
-        caller: EventInitiator.MainCard,
+        initiator: EventInitiator.MainCard,
     });
     expect(qnaSessionDataService.createQnASession).toBeCalledTimes(1);
     expect(qnaSessionDataService.createQnASession).toBeCalledWith({
@@ -193,7 +193,7 @@ test('create qna session - revert changes if background function is not triggere
             isChannel: false,
             serviceUrl: sampleServiceUrl,
             meetingId: sampleMeetingId,
-            caller: EventInitiator.MainCard,
+            initiator: EventInitiator.MainCard,
         })
     ).rejects.toThrow();
     expect(qnaSessionDataService.createQnASession).toBeCalledTimes(1);
@@ -231,7 +231,7 @@ test('start qna session in meeting for attendee', async () => {
             isChannel: false,
             serviceUrl: sampleServiceUrl,
             meetingId: sampleMeetingId,
-            caller: EventInitiator.MainCard,
+            initiator: EventInitiator.MainCard,
         })
     ).rejects.toThrow();
     expect(qnaSessionDataService.createQnASession).toBeCalledTimes(0);
@@ -422,7 +422,7 @@ test('end ama session', async () => {
             serviceURL: sampleServiceUrl,
             userName: sampleUserName,
             endedByUserId: sampleHostUserId,
-            caller: EventInitiator.MainCard,
+            initiator: EventInitiator.MainCard,
         })
     ).rejects.toThrow();
 
@@ -450,7 +450,7 @@ test('end ama session - meeting', async () => {
         meetingId: sampleMeetingId,
         userName: sampleUserName,
         endedByUserId: sampleHostUserId,
-        caller: EventInitiator.MainCard,
+        initiator: EventInitiator.MainCard,
     });
     expect(isPresenterOrOrganizer).toBeCalledTimes(1);
     expect(isPresenterOrOrganizer).toBeCalledWith(sampleMeetingId, sampleUserAADObjId1, sampleTenantId, sampleServiceUrl);
@@ -483,7 +483,7 @@ test('end ama session - revert changes if background function is not triggered.'
             meetingId: sampleMeetingId,
             userName: sampleUserName,
             endedByUserId: sampleHostUserId,
-            caller: EventInitiator.MainCard,
+            initiator: EventInitiator.MainCard,
         })
     ).rejects.toThrow();
 
@@ -514,7 +514,7 @@ test('end ama session - meeting for attendee', async () => {
             meetingId: sampleMeetingId,
             userName: sampleUserName,
             endedByUserId: sampleHostUserId,
-            caller: EventInitiator.MainCard,
+            initiator: EventInitiator.MainCard,
         })
     ).rejects.toThrow();
 
