@@ -6,6 +6,7 @@ import * as React from 'react';
 import { useState } from 'react';
 import { Flex, Text, Button, Form, Input, TextArea, FlexItem } from '@fluentui/react-northstar';
 import { useTranslation } from 'react-i18next';
+import { CONST } from '../shared/Constants';
 /**
  * Properties for the CreateSessionInternal React component
  */
@@ -78,7 +79,7 @@ const CreateSessionInternal: React.FunctionComponent<CreateSessionInternalProps>
                         <Input
                             label=""
                             as="div"
-                            maxLength={250}
+                            maxLength={CONST.CREATE_SESSION.TITLE_MAX_LENGTH}
                             fluid
                             placeholder={t('popups.sessionTitlePlaceholder')}
                             onKeyUp={(e) => validateCreateSessionField(input.title, 'isTitle')}
@@ -91,7 +92,7 @@ const CreateSessionInternal: React.FunctionComponent<CreateSessionInternalProps>
                         <TextArea
                             fluid
                             styles={{ marginTop: '0.25rem' }}
-                            maxLength={250}
+                            maxLength={CONST.CREATE_SESSION.DESC_MAX_LENGTH}
                             placeholder={t('popups.sessionDescriptionPlaceholder')}
                             onKeyUp={(e) => validateCreateSessionField(input.description, 'isDescription')}
                             onChange={(e) => appendInput(e, 'description')}

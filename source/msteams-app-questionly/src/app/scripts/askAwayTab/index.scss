@@ -36,12 +36,14 @@
         padding-inline-end: 1rem;
         height: 1.85rem;
     }
-    .title-truncate {
-        text-overflow: ellipsis;
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
-        -webkit-line-clamp: 3;
-        overflow: hidden;
+    .qna-header {
+        .truncated-title {
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 3;
+            overflow: hidden;
+        }
     }
     .menuHeader {
         position: relative;
@@ -98,12 +100,14 @@
     }
 }
 
-.notification-bubble {
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    overflow: hidden;
+.qna-session-notify {
+    .truncated-title {
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
+    }
 }
 
 .badge {

@@ -65,8 +65,8 @@ const QnASessionHeader: React.FunctionComponent<QnASessionHeaderProps & ThemePro
     ];
 
     return (
-        <Flex gap="gap.large">
-            <Text title={props.title} className="title-truncate" content={props.title} size="large" />
+        <Flex className="qna-header" gap="gap.large">
+            <Text title={props.title} className="truncated-title" content={props.title} size="large" />
             {props.showToolBar && (
                 <FlexItem push>
                     <div className="menuHeader">

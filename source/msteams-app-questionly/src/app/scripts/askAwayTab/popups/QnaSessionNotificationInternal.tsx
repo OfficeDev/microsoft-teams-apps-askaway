@@ -21,9 +21,9 @@ const QnaSessionNotificationInternal: React.FunctionComponent<QnaSessionNotifica
     const userName = props.searchParams.get('username');
 
     return (
-        <Flex gap="gap.medium" padding="padding.medium" column>
+        <Flex className="qna-session-notify" gap="gap.medium" padding="padding.medium" column>
             <Text content={t('popups.notificationTitle', { userName: userName })} />
-            <Text className="notification-bubble" size="medium" content={sessionTitle} weight="bold" />
+            <Text className="truncated-title" size="medium" content={sessionTitle} weight="bold" />
             <Text content={t('popups.notificationMessage')} />
             <FlexItem align="end">
                 <Button
