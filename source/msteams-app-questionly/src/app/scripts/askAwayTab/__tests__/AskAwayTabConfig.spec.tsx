@@ -4,7 +4,6 @@
 /**
  * @jest-environment jsdom
  */
-import { Text } from '@fluentui/react-northstar';
 import { configure, shallow } from 'enzyme';
 import enzymeAdapterReact16 from 'enzyme-adapter-react-16';
 import enzymeToJson from 'enzyme-to-json';
@@ -20,9 +19,8 @@ describe('AskAwayTabConfig Component', () => {
         expect(enzymeToJson(wrapper)).toMatchSnapshot();
     });
 
-    it.skip('should render the tab', () => {
+    it('should render the tab', () => {
         const component = shallow(<AskAwayTabConfig />);
-
         expect(component.find(AskAwayTabConfigInternal)).toHaveLength(1);
     });
 });

@@ -32,6 +32,7 @@ export const getOperationIdForCurrentRequest = () => {
  * @param traceData - custom properties logged for this exception.
  */
 export const exceptionLogger = (error: Error | string, traceData?: TraceData) => {
+    if (jest) return;
     if (process.env.debugMode === 'true') {
         // eslint-disable-next-line no-console
         console.error(error);

@@ -28,6 +28,10 @@ describe("tests UserDataService", () => {
     await User.deleteOne({ _id: sampleUserAADObjId1 });
   });
 
+  afterAll(async () => {
+    await mongoose.connection.close();
+  });
+
   it("create new user", async () => {
     const data = await userDataService.getUserOrCreate(
       sampleUserAADObjId1,

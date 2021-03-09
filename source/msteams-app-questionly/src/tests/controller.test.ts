@@ -51,7 +51,8 @@ beforeAll(() => {
     controller = new Controller(questionDataService, qnaSessionDataService);
 });
 
-beforeEach(() => {
+beforeEach(async () => {
+    await new Promise((resolve) => setImmediate(resolve));
     process.env.debugMode = 'true';
     jest.clearAllMocks();
 });

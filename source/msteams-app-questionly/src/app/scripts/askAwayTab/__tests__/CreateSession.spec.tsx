@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+/**
+ * @jest-environment jsdom
+ */
+
 import { configure, shallow } from 'enzyme';
 import enzymeAdapterReact16 from 'enzyme-adapter-react-16';
 import enzymeToJson from 'enzyme-to-json';
@@ -16,9 +20,8 @@ describe('Create session', () => {
         expect(enzymeToJson(wrapper)).toMatchSnapshot();
     });
 
-    it.skip('should render TabContent', () => {
+    it('should render TabContent', () => {
         const component = shallow(<CreateSession />);
-
         expect(component.find(CreateSessionInternal)).toHaveLength(1);
     });
 });

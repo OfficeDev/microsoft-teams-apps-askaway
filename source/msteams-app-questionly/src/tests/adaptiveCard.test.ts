@@ -21,7 +21,7 @@ import crypto from 'crypto';
 import { initKeyVault } from 'src/util/keyvault';
 import { IQuestionPopulatedUser } from 'msteams-app-questionly.data';
 import { CardConstants } from 'src/adaptive-cards/constants/cardConstants';
-import { initializeCacheInstance } from 'src/util/memoryCache';
+import { initializeCacheInstance, clearMemoryCache } from 'src/util/memoryCache';
 
 const sampleUserAADObjId1 = 'be36140g-9729-3024-8yg1-147bbi67g2c9';
 const sampleQnASessionID = '5f160b862655575054393a0e';
@@ -29,8 +29,14 @@ const sampleTitle = 'Weekly QnA Test';
 const sampleDescription = 'Weekly QnA Test description';
 const sampleErrorMessage = 'Sample error message';
 
+jest.mock('msteams-app-questionly.data');
+
 beforeAll(async () => {
     await initLocalization();
+});
+
+afterAll(() => {
+    clearMemoryCache();
 });
 
 describe('get start qna card', () => {

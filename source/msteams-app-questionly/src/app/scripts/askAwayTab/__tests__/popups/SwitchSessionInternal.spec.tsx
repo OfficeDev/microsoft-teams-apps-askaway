@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+/**
+ * @jest-environment jsdom
+ */
+
 import { Loader } from '@fluentui/react-northstar';
 import { configure, shallow } from 'enzyme';
 import enzymeAdapterReact16 from 'enzyme-adapter-react-16';
@@ -11,6 +15,9 @@ import { SwitchSessionInternal } from '../../popups/switch-session/SwitchSession
 
 jest.mock('../../../telemetryService');
 jest.mock('history');
+jest.mock('react-i18next', () => ({
+    useTranslation: () => ({ t: (key) => key }),
+}));
 
 configure({ adapter: new enzymeAdapterReact16() });
 
