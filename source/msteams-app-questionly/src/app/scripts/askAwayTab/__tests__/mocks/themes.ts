@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { ThemePrepared } from '@fluentui/react-northstar';
 
 export const themeMock: ThemePrepared = {

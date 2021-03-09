@@ -2,6 +2,9 @@
  * @jest-environment jsdom
  */
 
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { Button, Flex, Text } from '@fluentui/react-northstar';
 import { configure, shallow } from 'enzyme';
 import enzymeAdapterReact16 from 'enzyme-adapter-react-16';

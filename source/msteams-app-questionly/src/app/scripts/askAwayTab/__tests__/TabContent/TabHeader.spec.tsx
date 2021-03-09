@@ -2,6 +2,9 @@
  * @jest-environment jsdom
  */
 
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { AddIcon, RetryIcon } from '@fluentui/react-icons-northstar';
 import { Button, Divider, Flex } from '@fluentui/react-northstar';
 import { configure, shallow } from 'enzyme';

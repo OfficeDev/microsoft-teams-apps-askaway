@@ -2,6 +2,9 @@
  * @jest-environment jsdom
  */
 
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import * as React from 'react';
 import { shallow, configure } from 'enzyme';
 import enzymeToJson from 'enzyme-to-json';
