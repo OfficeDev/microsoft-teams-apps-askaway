@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { Flex, Text, FlexItem } from '@fluentui/react-northstar';
+import { Flex, Text } from '@fluentui/react-northstar';
 import { TFunction } from 'i18next';
 import * as React from 'react';
 import { ClientDataContract } from '../../../../../contracts/clientDataContract';
