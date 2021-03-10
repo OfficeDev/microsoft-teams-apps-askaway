@@ -1,9 +1,10 @@
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT License.
-
 /**
  * @jest-environment jsdom
  */
+
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { configure, shallow } from 'enzyme';
 import enzymeAdapterReact16 from 'enzyme-adapter-react-16';
 import * as React from 'react';

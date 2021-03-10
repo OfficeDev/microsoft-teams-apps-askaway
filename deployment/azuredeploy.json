@@ -378,6 +378,10 @@
             {
               "name": "OrphanedAmaSessionExpiryInSeconds",
               "value": "86400"
+            },
+            {
+              "name": "EnableCustomerContentInTelemetry",
+              "value": "false"
             }
           ],
           "cors": {

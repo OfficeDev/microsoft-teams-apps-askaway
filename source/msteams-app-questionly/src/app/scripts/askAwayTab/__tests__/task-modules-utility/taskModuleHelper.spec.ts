@@ -1,9 +1,9 @@
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT License.
-
 /**
  * @jest-environment jsdom
  */
+
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
 import { StatusCodes } from 'http-status-codes';
 import { UnauthorizedAccessErrorCode } from '../../../../../errors/unauthorizedAccessError';

@@ -68,14 +68,16 @@ export const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProp
                                         <Flex vAlign="center" gap="gap.small" padding="padding.medium">
                                             <Avatar size="small" name={question.author.name} />
                                             <Text size="small" content={question.author.name} />
-                                            <Badge
-                                                styles={
-                                                    CONST.TAB_QUESTIONS.UNANSWERED_Q === questionType
-                                                        ? { backgroundColor: colorScheme.brand.background, color: colorScheme.brand.foreground4, paddingBottom: '0.3rem' }
-                                                        : { backgroundColor: colorScheme.green.background, color: colorScheme.green.foreground1, paddingBottom: '0.3rem' }
-                                                }
-                                                text={CONST.TAB_QUESTIONS.UNANSWERED_Q === questionType ? props.t('tab.pendingStatus') : props.t('tab.answeredStatus')}
-                                            />
+                                            <Flex vAlign="start" hAlign="start">
+                                                <Badge
+                                                    styles={
+                                                        CONST.TAB_QUESTIONS.UNANSWERED_Q === questionType
+                                                            ? { backgroundColor: colorScheme.brand.background, color: colorScheme.brand.foreground4, paddingBottom: '0.3rem' }
+                                                            : { backgroundColor: colorScheme.green.background, color: colorScheme.green.foreground1, paddingBottom: '0.3rem' }
+                                                    }
+                                                    text={CONST.TAB_QUESTIONS.UNANSWERED_Q === questionType ? props.t('tab.pendingStatus') : props.t('tab.answeredStatus')}
+                                                />
+                                            </Flex>
                                         </Flex>
                                         <Flex.Item push>
                                             <Flex gap="gap.small" vAlign="center" styles={{ position: 'relative', right: '1.5rem' }}>

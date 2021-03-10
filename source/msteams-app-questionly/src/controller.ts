@@ -194,7 +194,10 @@ export class Controller implements IController {
                 isChannel: sessionParameters.isChannel,
                 meetingId: sessionParameters.meetingId,
                 conversationId: sessionParameters.conversationId,
-                sessionTitle: sessionParameters.title,
+                sessionTitle:
+                    process.env.EnableCustomerContentInTelemetry?.toString() === 'true'
+                        ? sessionParameters.title
+                        : "Data not logged, please set EnableCustomerContentInTelemetry setting to 'true' to log session title.",
             });
 
             return response;
@@ -294,7 +297,15 @@ export class Controller implements IController {
             const question = await this.questionDataService.createQuestion(qnaSessionId, userAadObjId, userName, questionContent, conversationId);
 
             if (await triggerBackgroundJobForQuestionPostedEvent(conversationId, question, qnaSessionId, userAadObjId, serviceUrl, initiator, meetingId)) {
-                trackCreateQuestionEvent({ questionId: question?._id, qnaSessionId: qnaSessionId, conversationId: conversationId, questionContent: questionContent });
+                trackCreateQuestionEvent({
+                    questionId: question?._id,
+                    qnaSessionId: qnaSessionId,
+                    conversationId: conversationId,
+                    questionContent:
+                        process.env.EnableCustomerContentInTelemetry?.toString() === 'true'
+                            ? questionContent
+                            : "Data not logged, please set EnableCustomerContentInTelemetry setting to 'true' to log question content.",
+                });
                 return question;
             } else {
                 try {
