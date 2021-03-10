@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { Flex, Text } from '@fluentui/react-northstar';
+import { Flex, Text, FlexItem } from '@fluentui/react-northstar';
 import { TFunction } from 'i18next';
 import * as React from 'react';
 import { ClientDataContract } from '../../../../../contracts/clientDataContract';
@@ -29,7 +29,7 @@ const SessionListCard: React.FunctionComponent<SessionListCardProps & ThemeProps
     const colorScheme = props.theme.siteVariables.colorScheme;
     return (
         <div key={qnaSession.sessionId} id="switchSessionListCard" style={{ borderColor: colorScheme.default.border }} className="switchSessionListCard">
-            <Flex vAlign="center" gap="gap.small">
+            <Flex vAlign="start" hAlign="start" gap="gap.small">
                 <Text size="medium" content={qnaSession.title} />
                 {qnaSession.isActive && <Badge className="liveTag" styles={{ backgroundColor: colorScheme.green.background, color: colorScheme.green.foreground1 }} text={props.t('popups.live')} />}
             </Flex>
