@@ -453,7 +453,7 @@ test('bot message preview send', async () => {
         isChannel: false,
         serviceUrl: context.activity.serviceUrl,
         meetingId: sampleMeetingId,
-        caller: EventInitiator.MainCard,
+        initiator: EventInitiator.MainCard,
     });
 });
 

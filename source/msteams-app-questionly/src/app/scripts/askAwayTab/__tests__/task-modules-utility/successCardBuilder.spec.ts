@@ -1,9 +1,9 @@
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT License.
-
 /**
  * @jest-environment jsdom
  */
+
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
 import { Container, Image, TextBlock } from 'adaptivecards';
 import { successCardBuilder } from '../../task-modules-utility/successCardBuilder';

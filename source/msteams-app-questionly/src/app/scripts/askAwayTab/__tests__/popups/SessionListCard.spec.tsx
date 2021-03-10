@@ -1,9 +1,9 @@
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT License.
-
 /**
  * @jest-environment jsdom
  */
+
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
 import { Text } from '@fluentui/react-northstar';
 import { configure, shallow } from 'enzyme';

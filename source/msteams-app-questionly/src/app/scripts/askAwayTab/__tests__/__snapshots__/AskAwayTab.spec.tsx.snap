@@ -2,6 +2,7 @@
 
 exports[`AskAwayTab Component should match the snapshot 1`] = `
 <Provider
+  rtl={false}
   style={
     Object {
       "background": "unset",

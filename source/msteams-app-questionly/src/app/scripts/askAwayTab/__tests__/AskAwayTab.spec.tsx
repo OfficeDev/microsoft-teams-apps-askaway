@@ -1,9 +1,10 @@
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT License.
-
 /**
  * @jest-environment jsdom
  */
+
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 // tslint:disable:no-relative-imports
 import * as React from 'react';
 import { shallow, configure } from 'enzyme';

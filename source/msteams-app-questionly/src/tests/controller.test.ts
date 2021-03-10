@@ -52,7 +52,7 @@ beforeAll(() => {
 });
 
 beforeEach(async () => {
-    await new Promise((resolve) => setImmediate(resolve));
+    await new Promise((cb: (value: any) => void) => setImmediate(cb));
     process.env.debugMode = 'true';
     jest.clearAllMocks();
 });

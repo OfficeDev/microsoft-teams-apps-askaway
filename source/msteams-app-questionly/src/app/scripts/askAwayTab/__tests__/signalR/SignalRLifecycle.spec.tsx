@@ -1,9 +1,10 @@
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT License.
-
 /**
  * @jest-environment jsdom
  */
+
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { HubConnection } from '@microsoft/signalr';
 import axios from 'axios';
 import { configure, mount } from 'enzyme';
