@@ -1,3 +1,7 @@
+/**
+ * @jest-environment jsdom
+ */
+
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
@@ -27,7 +31,7 @@ describe('QnaSessionCreatedNotification', () => {
         expect(enzymeToJson(wrapper)).toMatchSnapshot();
     });
 
-    it('should render TabContent', () => {
+    it('should render QnaSessionCreatedNotification', () => {
         const component = shallow(<QnaSessionCreatedNotification />);
         component.setState({ theme: {} });
         expect(component.find(QnaSessionNotificationInternal)).toHaveLength(1);

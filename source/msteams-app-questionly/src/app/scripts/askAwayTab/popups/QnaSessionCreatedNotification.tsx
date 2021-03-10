@@ -25,6 +25,10 @@ export interface QnaSessionCreatedNotificationState extends ITeamsBaseComponentS
 export class QnaSessionCreatedNotification extends msteamsReactBaseComponent<QnaSessionCreatedNotificationProps, QnaSessionCreatedNotificationState> {
     constructor(props) {
         super(props);
+        this.state = {
+            direction: '',
+            theme: {},
+        };
         microsoftTeams.initialize();
     }
 
