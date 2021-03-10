@@ -12,7 +12,6 @@ import { Flex, Text, FlexItem, Menu, ThemePrepared } from '@fluentui/react-north
 import enzymeAdapterReact16 from 'enzyme-adapter-react-16';
 import { QnASessionHeader } from '../../MeetingPanel/QnASessionHeader';
 import { ParticipantRoles } from '../../../../../enums/ParticipantRoles';
-import { themeMock } from '../mocks/themes';
 
 configure({ adapter: new enzymeAdapterReact16() });
 
@@ -23,11 +22,24 @@ describe('QnASessionHeader Component', () => {
     let onClickEndSession;
     let theme;
 
+    // Creates dummy color schemes for unit tests
+    const createThemeForUTs = (): ThemePrepared => {
+        return ({
+            siteVariables: {
+                colorScheme: {
+                    default: {
+                        foregroundHover: '',
+                    },
+                },
+            },
+        } as unknown) as ThemePrepared;
+    };
+
     beforeAll(() => {
         t = jest.fn();
         onClickRefreshSession = jest.fn();
         onClickEndSession = jest.fn();
-        theme = themeMock;
+        theme = createThemeForUTs();
     });
 
     it('should match the snapshot', () => {

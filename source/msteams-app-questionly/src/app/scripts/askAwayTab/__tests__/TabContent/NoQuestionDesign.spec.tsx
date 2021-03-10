@@ -25,7 +25,7 @@ describe('NoQuestionDesign Component', () => {
         expect(enzymeToJson(wrapper)).toMatchSnapshot();
     });
 
-    it('should render the tab', () => {
+    it('should render the NoQuestionDesign', () => {
         const component = shallow(<NoQuestionDesign t={t} isSessionActive={true} />);
 
         expect(component.find(Flex)).toHaveLength(1);

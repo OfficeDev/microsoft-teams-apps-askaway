@@ -13,7 +13,6 @@ import enzymeAdapterReact16 from 'enzyme-adapter-react-16';
 import { PostNewQuestions } from '../../TabContent/PostNewQuestions';
 import { Helper } from '../../shared/Helper';
 import Badge from '../../shared/Badge';
-import { themeMock } from '../mocks/themes';
 
 configure({ adapter: new enzymeAdapterReact16() });
 
@@ -24,11 +23,32 @@ describe('PostNewQuestions Component', () => {
     let theme;
     let testUserName;
 
+    // Creates dummy color schemes for unit tests
+    const createThemeForUTs = (): ThemePrepared => {
+        return ({
+            siteVariables: {
+                colorScheme: {
+                    default: {
+                        foregroundDisabled1: '',
+                        border: '',
+                    },
+                    green: {
+                        background: '',
+                        foreground1: '',
+                    },
+                    onyx: {
+                        border1: '',
+                    },
+                },
+            },
+        } as unknown) as ThemePrepared;
+    };
+
     beforeAll(() => {
         t = jest.fn();
         activeSessionData = new Helper().createEmptyActiveSessionData();
         onPostNewQuestion = jest.fn();
-        theme = themeMock;
+        theme = createThemeForUTs();
         testUserName = '1234';
     });
 
@@ -37,7 +57,7 @@ describe('PostNewQuestions Component', () => {
         expect(enzymeToJson(wrapper)).toMatchSnapshot();
     });
 
-    it('should render the tab', () => {
+    it('should render the PostNewQuestions', () => {
         const component = shallow(<PostNewQuestions t={t} theme={theme} activeSessionData={activeSessionData} onPostNewQuestion={onPostNewQuestion} userName={testUserName} />);
 
         expect(component.find(Flex)).toHaveLength(3);

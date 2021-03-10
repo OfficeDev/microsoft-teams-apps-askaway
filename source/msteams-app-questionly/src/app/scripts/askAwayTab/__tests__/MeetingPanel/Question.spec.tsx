@@ -12,7 +12,6 @@ import { Flex, Button, Text, Avatar, ThemePrepared } from '@fluentui/react-north
 import enzymeAdapterReact16 from 'enzyme-adapter-react-16';
 import { Question } from '../../MeetingPanel/Question';
 import { ParticipantRoles } from '../../../../../enums/ParticipantRoles';
-import { themeMock } from '../mocks/themes';
 
 configure({ adapter: new enzymeAdapterReact16() });
 
@@ -36,9 +35,27 @@ describe('Question Component', () => {
     let theme;
     let onClickAction;
 
+    // Creates dummy color schemes for unit tests
+    const createThemeForUTs = (): ThemePrepared => {
+        return ({
+            siteVariables: {
+                colorScheme: {
+                    default: {
+                        foreground3: '',
+                        background: '',
+                        foregroundDisabled1: '',
+                        foreground4: '',
+                        backgroundHover: '',
+                        foregroundDisabled: '',
+                    },
+                },
+            },
+        } as unknown) as ThemePrepared;
+    };
+
     beforeAll(() => {
         onClickAction = jest.fn();
-        theme = themeMock;
+        theme = createThemeForUTs();
     });
 
     it('should match the snapshot', () => {
@@ -59,7 +76,7 @@ describe('Question Component', () => {
         expect(enzymeToJson(wrapper)).toMatchSnapshot();
     });
 
-    it('should render the tab', () => {
+    it('should render the Question', () => {
         const component = shallow(
             <Question
                 question={question}

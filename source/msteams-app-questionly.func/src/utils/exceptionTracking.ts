@@ -14,7 +14,6 @@ export const exceptionLogger = (
   operationId?: string,
   traceData?: TraceData
 ) => {
-  if (jest) return;
   if (process.env.debugMode === "true") {
     // eslint-disable-next-line no-console
     console.error(error);

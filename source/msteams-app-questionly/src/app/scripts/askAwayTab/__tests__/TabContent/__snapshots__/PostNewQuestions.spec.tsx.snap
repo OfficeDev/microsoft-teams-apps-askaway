@@ -11,8 +11,8 @@ exports[`PostNewQuestions Component should match the snapshot 1`] = `
     size="medium"
     style={
       Object {
-        "backgroundColor": "#2D2C2C",
-        "borderColor": "#fff",
+        "backgroundColor": undefined,
+        "borderColor": "",
       }
     }
   >
@@ -29,8 +29,8 @@ exports[`PostNewQuestions Component should match the snapshot 1`] = `
             className="badge"
             styles={
               Object {
-                "backgroundColor": "#979593",
-                "color": "#fff",
+                "backgroundColor": undefined,
+                "color": undefined,
               }
             }
           />
