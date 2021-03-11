@@ -33,7 +33,7 @@ describe('QnaSessionCreatedNotification', () => {
 
     it('should render QnaSessionCreatedNotification', () => {
         const component = shallow(<QnaSessionCreatedNotification />);
-        component.setState({ theme: {} });
+        component.setState({ theme: {}, direction: 'ltr' });
         expect(component.find(QnaSessionNotificationInternal)).toHaveLength(1);
     });
 });
