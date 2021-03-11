@@ -5,6 +5,7 @@ import { ChevronDownMediumIcon, ChevronEndMediumIcon, LikeIcon } from '@fluentui
 import { Avatar, Button, Flex, Text } from '@fluentui/react-northstar';
 import * as React from 'react';
 import { useState } from 'react';
+import { TFunction } from 'i18next';
 import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
 import Badge from '../shared/Badge';
 import { CONST } from '../shared/Constants';
@@ -12,17 +13,22 @@ import { LikeIconFilled } from '../shared/Icons/LikeIconFilled';
 import { ThemeProps, withTheme } from '../shared/WithTheme';
 import './../index.scss';
 
+interface IQuestionEventData {
+    question: ClientDataContract.Question;
+    key: string;
+    actionValue: string;
+}
+
 /**
  * Properties for the TabQuestions React component
  */
 export interface TabQuestionsProps {
     activeSessionData: ClientDataContract.QnaSession;
     teamsTabContext: microsoftTeams.Context;
-    onClickAction: Function;
-    t: Function;
+    onClickAction: (event: IQuestionEventData) => Promise<void>;
+    t: TFunction;
 }
-
-const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (props) => {
+export const TabQuestions: React.FunctionComponent<TabQuestionsProps & ThemeProps> = (props) => {
     const [isPendingTabOpen, setPendingTabOpen] = useState(true);
 
     const [isAnsweredTabOpen, setAnsweredTabOpen] = useState(true);

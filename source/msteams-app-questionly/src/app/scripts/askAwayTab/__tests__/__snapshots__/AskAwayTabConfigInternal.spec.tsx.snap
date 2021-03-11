@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AskAwayTabConfigInternal Component should match the snapshot 1`] = `
+<Flex
+  className="tab-config-container"
+  column={true}
+  gap="gap.large"
+  hAlign="center"
+  vAlign="center"
+>
+  <Image
+    accessibility={[Function]}
+    alt="image"
+    as="img"
+    src="askaway_tab_added.png"
+  />
+  <FlexItem
+    align="center"
+  >
+    <Text
+      as="span"
+      content="tab.configTabText"
+      size="large"
+      weight="bold"
+    />
+  </FlexItem>
+</Flex>
+`;

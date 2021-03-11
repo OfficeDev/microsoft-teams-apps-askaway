@@ -4,6 +4,7 @@
 import { Avatar, Button, Card, Divider, Flex, FlexItem, Text, TextArea } from '@fluentui/react-northstar';
 import * as React from 'react';
 import { useState } from 'react';
+import { TFunction } from 'i18next';
 import { ClientDataContract } from '../../../../../src/contracts/clientDataContract';
 import Badge from '../shared/Badge';
 import Helper from '../shared/Helper';
@@ -16,11 +17,11 @@ import './../index.scss';
 export interface PostNewQuestionsProps {
     activeSessionData: ClientDataContract.QnaSession;
     userName: string;
-    t: Function;
+    t: TFunction;
     onPostNewQuestion: Function;
 }
 
-const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps & ThemeProps> = (props) => {
+export const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps & ThemeProps> = (props) => {
     const colorScheme = props.theme.siteVariables.colorScheme;
 
     const [question, setQuestion] = useState('');
@@ -43,7 +44,7 @@ const PostNewQuestions: React.FunctionComponent<PostNewQuestionsProps & ThemePro
                                 styles={
                                     props.activeSessionData.isActive
                                         ? { backgroundColor: colorScheme.green.background, color: colorScheme.green.foreground1 }
-                                        : { backgroundColor: colorScheme.default.background5, color: colorScheme.default.foregroundFocus1 }
+                                        : { backgroundColor: colorScheme.default.background5, color: colorScheme.default.foreground4 }
                                 }
                                 text={props.activeSessionData.isActive ? props.t('tab.liveStatus') : props.t('tab.closedStatus')}
                             />

@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AskAwayTabRemove Component should match the snapshot 1`] = `
+<Fragment>
+  <Menu
+    accessibility={[Function]}
+    aria-label="Today's events"
+    as="ul"
+    className="menu-bar"
+    defaultActiveIndex={1}
+    items={
+      Array [
+        Object {
+          "content": undefined,
+          "key": "unansweredQuestions",
+          "onClick": [Function],
+        },
+        Object {
+          "content": undefined,
+          "key": "answeredQuestions",
+          "onClick": [Function],
+        },
+      ]
+    }
+    primary={true}
+    underlined={true}
+  />
+</Fragment>
+`;

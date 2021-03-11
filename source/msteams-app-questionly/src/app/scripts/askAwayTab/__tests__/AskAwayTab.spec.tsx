@@ -5,7 +5,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-// tslint:disable:no-relative-imports
 import * as React from 'react';
 import { shallow, configure } from 'enzyme';
 import enzymeToJson from 'enzyme-to-json';

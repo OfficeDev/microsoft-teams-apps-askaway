@@ -13,13 +13,19 @@ import { isPresenterOrOrganizer } from '../shared/meetingUtility';
 import { ThemeProps, withTheme } from '../shared/WithTheme';
 import './../index.scss';
 
+interface IQuestionEventData {
+    question: ClientDataContract.Question;
+    key: string;
+    actionValue: string;
+}
+
 type QuestionCompProps = {
     question: ClientDataContract.Question;
     isUserLikedQuestion: boolean;
     renderHoverElement?: any;
     questionId: string;
     questionTab: string;
-    onClickAction: any;
+    onClickAction: (event: IQuestionEventData) => Promise<void>;
     userId: string;
     userRole: ParticipantRoles;
     isSessionActive: boolean;
@@ -29,7 +35,7 @@ type QuestionCompProps = {
  * Properties for the UnansweredQuestions React component
  */
 
-const Question: React.FunctionComponent<QuestionCompProps & ThemeProps> = (props) => {
+export const Question: React.FunctionComponent<QuestionCompProps & ThemeProps> = (props) => {
     const { question, isUserLikedQuestion, renderHoverElement, questionId, questionTab, onClickAction, userId } = props;
     const colorScheme = props.theme.siteVariables.colorScheme;
     const [isMouseHovered, setMouseHover] = useState(false);
