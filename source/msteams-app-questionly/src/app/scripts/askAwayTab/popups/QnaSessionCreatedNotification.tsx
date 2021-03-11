@@ -26,16 +26,14 @@ export class QnaSessionCreatedNotification extends msteamsReactBaseComponent<Qna
     constructor(props) {
         super(props);
         this.state = {
-            direction: '',
             theme: {},
+            direction: '',
         };
         microsoftTeams.initialize();
     }
 
     public async componentWillMount() {
         microsoftTeams.initialize();
-        const theme = this.getQueryVariable('theme') ? this.getQueryVariable('theme') : 'dark';
-        this.updateTheme(theme);
         microsoftTeams.getContext((context: microsoftTeams.Context) => {
             // Set Language for Localization
             Helper.setI18nextLocale(i18next, context.locale, (err) => {
@@ -47,6 +45,7 @@ export class QnaSessionCreatedNotification extends msteamsReactBaseComponent<Qna
                     });
                 }
             });
+            this.updateTheme(context.theme);
         });
     }
 
@@ -59,11 +58,15 @@ export class QnaSessionCreatedNotification extends msteamsReactBaseComponent<Qna
 
     public render() {
         const searchParams = new URL(decodeURIComponent(window.location.href)).searchParams;
-
+        const { direction, theme } = this.state;
         return (
-            <Provider rtl={this.state.direction == 'rtl'} style={{ background: 'unset' }} theme={this.state.theme}>
-                <QnaSessionNotificationInternal onSubmitSession={this.handleOnSubmit} searchParams={searchParams} />
-            </Provider>
+            <div>
+                {direction && (
+                    <Provider rtl={direction === 'rtl'} style={{ background: 'unset' }} theme={theme}>
+                        <QnaSessionNotificationInternal onSubmitSession={this.handleOnSubmit} searchParams={searchParams} />
+                    </Provider>
+                )}
+            </div>
         );
     }
 }
