@@ -1,6 +1,6 @@
 {
-  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.6/MicrosoftTeams.schema.json",
-  "manifestVersion": "1.6",
+  "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.8/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.8",
   "id": "{{MicrosoftAppId}}",
   "version": "{{Version}}",
   "packageName": "{{BotDisplayName}}",
@@ -27,7 +27,8 @@
     {
       "configurationUrl": "https://{{HostName}}/askAwayTab/config.html",
       "canUpdateConfiguration": true,
-      "scopes": ["groupchat"]
+      "scopes": ["groupchat"],
+      "context": ["meetingChatTab", "meetingDetailsTab", "meetingSidePanel"]
     }
   ],
   "staticTabs": [],
