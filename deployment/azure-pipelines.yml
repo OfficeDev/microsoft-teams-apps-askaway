@@ -22,14 +22,16 @@ stages:
           - task: CredScan@2
             inputs:
               toolMajorVersion: "V2"
-          - task: BatchScript@1
-            inputs:
-              filename: "init.bat"
-            displayName: Build Dependencies
-          - script: cd source\msteams-app-questionly.func && npm run build
-            displayName: Build function project
+          - script: npm install -g npm@7.6.0
+            displayName: Install required npm version
+          - script: cd source\msteams-app-questionly && npm install
+            displayName: Install dependencies for main project
           - script: cd source\msteams-app-questionly && npm run build
             displayName: Build main project
+          - script: cd source\msteams-app-questionly.func && npm install
+            displayName: Install dependencies for function project
+          - script: cd source\msteams-app-questionly.func && npm run build
+            displayName: Build function project
           - task: BatchScript@1
             inputs:
               filename: "runtests.bat"
@@ -67,24 +69,28 @@ stages:
               RemoveSourceFolder: false
           - task: DeleteFiles@1
             inputs:
-              SourceFolder: "**/coverage"
-              Contents: "*"
-              RemoveSourceFolder: true
+              SourceFolder: "./"
+              Contents: "**/coverage*"
+              RemoveSourceFolder: false
           - task: DeleteFiles@1
             inputs:
-              SourceFolder: "**/node_modules"
-              Contents: "*"
-              RemoveSourceFolder: true
-          - task: CopyFiles@2
+              SourceFolder: "./"
+              Contents: "**/src*"
+              RemoveSourceFolder: false
+          - task: ArchiveFiles@2
             inputs:
-              SourceFolder: "./source/msteams-app-questionly/dist"
-              Contents: "**"
-              TargetFolder: "$(Build.ArtifactStagingDirectory)/source/msteams-app-questionly/dist"
-          - task: CopyFiles@2
+              archiveType: zip
+              rootFolderOrFile: "./source/msteams-app-questionly"
+              includeRootFolder: false
+              archiveFile: "$(Build.ArtifactStagingDirectory)/msteams-app-questionly.zip"
+              replaceExistingArchive: true
+          - task: ArchiveFiles@2
             inputs:
-              SourceFolder: "./source/msteams-app-questionly.func/dist"
-              Contents: "**"
-              TargetFolder: "$(Build.ArtifactStagingDirectory)/source/msteams-app-questionly.func/dist"
+              archiveType: zip
+              rootFolderOrFile: "./source/msteams-app-questionly.func"
+              includeRootFolder: false
+              archiveFile: "$(Build.ArtifactStagingDirectory)/msteams-app-questionly.func.zip"
+              replaceExistingArchive: true
           - task: PublishBuildArtifacts@1
             displayName: "Upload Artifact"
             inputs:
