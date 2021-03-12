@@ -834,8 +834,8 @@ test("upvote question that has not been upvoted yet with existing user", async (
 
   expect(response.question.voters).toContain(testUserUpvoting._id);
 
-  await Question.deleteOne(response.question);
-  await User.deleteOne(testUserUpvoting);
+  await Question.deleteOne({ _id: response.question._id });
+  await User.deleteOne({ _id: testUserUpvoting._id });
 });
 
 test("upvote question that has already been upvoted with existing user", async () => {
@@ -876,8 +876,8 @@ test("upvote question that has already been upvoted with existing user", async (
       .length
   ).toEqual(0);
 
-  await Question.deleteOne(response.question);
-  await User.deleteOne(testUserUpvoting);
+  await Question.deleteOne({ _id: response.question._id });
+  await User.deleteOne({ _id: testUserUpvoting._id });
 });
 
 test("upvote question with new user not in database", async () => {
@@ -903,6 +903,6 @@ test("upvote question with new user not in database", async () => {
 
   expect(response.question.voters).toContain("134679");
 
-  await Question.deleteOne(response.question);
-  await User.deleteOne(testUserUpvoting);
+  await Question.deleteOne({ _id: response.question._id });
+  await User.deleteOne({ _id: testUserUpvoting._id });
 });

@@ -13,7 +13,9 @@
         "resolveJsonModule": true,
         "baseUrl": ".",
         "paths": {
-            "src/*": ["src/*"]
+            "src/*": ["src/*"],
+            "applicationinsights": ["node_modules/applicationinsights"],
+            "msteams-app-questionly.data": ["node_modules/msteams-app-questionly.data"]
         }
     },
     "exclude": ["node_modules"]

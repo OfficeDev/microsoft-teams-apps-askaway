@@ -171,18 +171,17 @@ export class QuestionDataService implements IQuestionDataService {
 
     // most recent question comes first at index 0
     const recentSorted = questionData
-      .map((value) => value.toObject())
+      .map((value) => value)
       .sort(
-        (a: any, b: any) =>
-          new Date(b.dateTimeCreated).getTime() -
-          new Date(a.dateTimeCreated).getTime()
+        (a: IQuestionPopulatedUser, b: IQuestionPopulatedUser) =>
+          b.dateTimeCreated.getTime() - a.dateTimeCreated.getTime()
       );
 
     if (topN)
       // descending order, so [0, 1, 2] => [2, 1, 0]
       voteSorted = questionData
-        .map((value) => value.toObject())
-        .sort((a: any, b: any) => {
+        .map((value) => value)
+        .sort((a: IQuestionPopulatedUser, b: IQuestionPopulatedUser) => {
           // sort by votes first then most recent
           const diff = b.voters.length - a.voters.length;
           if (diff !== 0) return diff;

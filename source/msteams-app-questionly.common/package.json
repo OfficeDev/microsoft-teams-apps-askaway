@@ -6,14 +6,16 @@
     "build": "webpack",
     "test": "jest",
     "coverage": "jest --coverage",
+    "preinstall": "cd ../msteams-app-questionly.data && npm install && npm run build && cd ../msteams-app-questionly.common",
     "ci-test": "jest --ci --reporters=jest-junit --coverage --coverageReporters=cobertura"
   },
   "dependencies": {
     "adaptivecards": "^2.5.0",
     "adaptivecards-templating": "^1.0.0-rc.0",
-    "applicationinsights": "^1.8.8",
+    "applicationinsights": "^1.8.10",
     "botbuilder": "^4.11.1",
     "i18next": "^19.8.4",
+    "msteams-app-questionly.data": "file:../msteams-app-questionly.data",
     "random": "^2.2.0",
     "seedrandom": "^3.0.5"
   },

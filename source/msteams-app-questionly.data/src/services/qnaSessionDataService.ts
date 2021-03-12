@@ -203,7 +203,7 @@ export class QnASessionDataService implements IQnASessionDataService {
   public async getQnASessionData(
     qnaSessionId: string
   ): Promise<IQnASession_populated> {
-    const qnaSessionData = await retryWrapper(() =>
+    const qnaSessionData = await retryWrapper<IQnASession_populated>(() =>
       QnASession.findById(qnaSessionId)
         .populate({
           path: "hostId",
@@ -218,15 +218,11 @@ export class QnASessionDataService implements IQnASessionDataService {
 
     if (!qnaSessionData) throw new Error("QnA Session not found");
 
-    const _qnaSessionData: IQnASession_populated = (<IQnASession>(
-      qnaSessionData
-    )).toObject();
-
     // activity id must be set before this function gets called
     // if (!_qnaSessionData.activityId)
     //     throw new Error('QnA Session `activityId` not found');
 
-    return _qnaSessionData;
+    return qnaSessionData;
   }
 
   /**

@@ -56,6 +56,10 @@ export class AskAway extends TeamsActivityHandler {
             }
 
             try {
+                if (!activity.conversation.tenantId) {
+                    throw new Error(`tenant id is not present for activity id ${activity.id}`);
+                }
+
                 for (const member of membersAdded) {
                     if (member.id === context.activity.recipient.id) {
                         await conversationDataService.createConversationData(activity.conversation.id, activity.serviceUrl, activity.conversation.tenantId, activity.channelData?.meeting?.id);
@@ -331,6 +335,10 @@ export class AskAway extends TeamsActivityHandler {
 
         if (taskModuleRequest.data.id == 'submitEndQnA') {
             try {
+                if (!conversation.tenantId) {
+                    throw new Error(`tenant id is not present for activity id ${context.activity.id}`);
+                }
+
                 await this.controller.endQnASession({
                     qnaSessionId: qnaSessionId,
                     aadObjectId: <string>context.activity.from.aadObjectId,
@@ -387,6 +395,16 @@ export class AskAway extends TeamsActivityHandler {
     async handleTeamsMessagingExtensionFetchTask(context: TurnContext, _action: MessagingExtensionAction): Promise<MessagingExtensionActionResponse> {
         // commandId: 'startQnA'
         const meetingId = getMeetingIdFromContext(context);
+        if (!context.activity.conversation.tenantId) {
+            exceptionLogger(`tenant id is not present for activity id ${context.activity.id}`, {
+                conversationId: context.activity.conversation.id,
+                userAadObjectId: context.activity.from.aadObjectId,
+                isChannel: isConverationTypeChannel(context),
+                meetingId: getMeetingIdFromContext(context),
+                filename: module.id,
+            });
+            return this._buildTaskModuleContinueResponse(getErrorCard(errorStrings('taskFetch')));
+        }
         // Only presenters and organizers can start a Q&A session in meeting chat.
         if (meetingId && !(await isPresenterOrOrganizer(meetingId, <string>context.activity.from.aadObjectId, context.activity.conversation.tenantId, context.activity.serviceUrl))) {
             return this._buildTaskModuleContinueResponse(getErrorCard(errorStrings('insufficientPermissionsToCreateOrEndQnASessionError')));
@@ -450,7 +468,10 @@ export class AskAway extends TeamsActivityHandler {
 
         try {
             if (!scopeId) {
-                throw new Error('channel id is not present in activity.');
+                throw new Error(`channel id is not present for activity id ${context.activity.id}`);
+            }
+            if (!tenantId) {
+                throw new Error(`tenant id is not present for activity id ${context.activity.id}`);
             }
 
             await this.controller.startQnASession({
