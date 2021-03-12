@@ -9,7 +9,7 @@
     "start": "func start",
     "test": "jest",
     "coverage": "jest --coverage",
-    "preinstall": "cd ../msteams-app-questionly.common && npm install && npm run build && cd ../msteams-app-questionly",
+    "preinstall": "cd ../msteams-app-questionly.common && npm install && npm run build",
     "ci-test": "jest --ci --reporters=jest-junit --coverage --coverageReporters=cobertura"
   },
   "dependencies": {

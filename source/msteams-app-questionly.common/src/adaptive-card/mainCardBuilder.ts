@@ -64,7 +64,7 @@ export const getMainCard = async (
   const _processQuestions = async (questions: IQuestionPopulatedUser[]) =>
     await Promise.all(
       questions.map(async (question: IQuestionPopulatedUser) => {
-        const questionObject = <any>question.toObject();
+        const questionObject = JSON.parse(JSON.stringify(question));
         questionObject.userId.picture = await getPersonImage(
           questionObject.userId.userName,
           question.userId._id,

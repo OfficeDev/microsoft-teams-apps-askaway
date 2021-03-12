@@ -15,17 +15,6 @@ import QnaSessionNotificationInternal from '../popups/QnaSessionNotificationInte
 configure({ adapter: new enzymeAdapterReact16() });
 
 describe('QnaSessionCreatedNotification', () => {
-    let url = '';
-    beforeAll(() => {
-        global.window = Object.create(window);
-        url = 'https://dummy.com';
-        Object.defineProperty(window, 'location', {
-            value: {
-                href: url,
-            },
-        });
-    });
-
     it('should match the snapshot', () => {
         const wrapper = shallow(<QnaSessionCreatedNotification />);
         expect(enzymeToJson(wrapper)).toMatchSnapshot();

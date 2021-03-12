@@ -14,12 +14,7 @@ const sampleAppId = "random";
 const sampleAppPassword = "random";
 
 beforeAll(() => {
-  (<any>BotFrameworkAdapter) = jest.fn();
-  testAdapter.continueConversation = jest.fn();
-  (<any>BotFrameworkAdapter).mockImplementation(() => {
-    return testAdapter;
-  });
-
+  (<any>testAdapter.continueConversation) = jest.fn();
   const testConversation: ConversationAccount = {
     id: sampleConversationId,
     name: "",
@@ -48,15 +43,11 @@ test("test verify user from conversation id", async () => {
     sampleConversationId,
     sampleServiceUrl,
     sampleTenantId,
-    sampleuserId
+    sampleuserId,
+    testAdapter
   );
 
   expect(res).toBeTruthy();
-  expect(BotFrameworkAdapter).toBeCalledTimes(1);
-  expect(BotFrameworkAdapter).toBeCalledWith({
-    appId: sampleAppId,
-    appPassword: sampleAppPassword,
-  });
   expect(testAdapter.continueConversation).toBeCalledTimes(1);
   expect(testAdapter.continueConversation).toBeCalledWith(
     testConversationReference,
@@ -77,15 +68,11 @@ test("test verify user from conversation id when user is not part of the convers
     sampleConversationId,
     sampleServiceUrl,
     sampleTenantId,
-    sampleuserId
+    sampleuserId,
+    testAdapter
   );
 
   expect(res).not.toBeTruthy();
-  expect(BotFrameworkAdapter).toBeCalledTimes(1);
-  expect(BotFrameworkAdapter).toBeCalledWith({
-    appId: sampleAppId,
-    appPassword: sampleAppPassword,
-  });
   expect(testAdapter.continueConversation).toBeCalledTimes(1);
   expect(testAdapter.continueConversation).toBeCalledWith(
     testConversationReference,
@@ -106,15 +93,11 @@ test("test verify user from conversation id - continueConversation throws error 
       sampleConversationId,
       sampleServiceUrl,
       sampleTenantId,
-      sampleuserId
+      sampleuserId,
+      testAdapter
     )
   ).rejects.toThrow(testError);
 
-  expect(BotFrameworkAdapter).toBeCalledTimes(1);
-  expect(BotFrameworkAdapter).toBeCalledWith({
-    appId: sampleAppId,
-    appPassword: sampleAppPassword,
-  });
   expect(testAdapter.continueConversation).toBeCalledTimes(1);
   expect(testAdapter.continueConversation).toBeCalledWith(
     testConversationReference,

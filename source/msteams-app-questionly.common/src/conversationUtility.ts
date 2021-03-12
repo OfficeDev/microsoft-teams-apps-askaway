@@ -18,6 +18,7 @@ const memberNotFoundInConversationError = "MemberNotFoundInConversation";
  * @param serviceUrl: service url.
  * @param tenantId: tenat id.
  * @param userId: user id.
+ * @param adapter: bot framework adapter (only required for UTs).
  * @returns - boolean value, true if user is a member of conversation.
  * @throws - Throws any excpetion occured during function flow.
  */
@@ -27,7 +28,8 @@ export const verifyUserFromConversationId = async (
   conversationId: string,
   serviceUrl: string,
   tenantId: string,
-  userId: string
+  userId: string,
+  adapter?: BotFrameworkAdapter
 ): Promise<boolean> => {
   try {
     const conversation: ConversationAccount = {
@@ -44,12 +46,14 @@ export const verifyUserFromConversationId = async (
       conversation: conversation,
     };
 
-    const adapter: BotFrameworkAdapter = new BotFrameworkAdapter({
-      appId: botAppId,
-      appPassword: botPassword,
-    });
+    const botAdapter =
+      adapter ??
+      new BotFrameworkAdapter({
+        appId: botAppId,
+        appPassword: botPassword,
+      });
 
-    await adapter.continueConversation(
+    await botAdapter.continueConversation(
       conversationReference,
       async (turnContext: TurnContext) => {
         const teamMember = await TeamsInfo.getMember(turnContext, userId);

@@ -61,7 +61,6 @@ describe('TabQuestions Component', () => {
 
     it('should render the TabQuestions', () => {
         const component = shallow(<TabQuestions t={t} theme={theme} activeSessionData={activeSessionData} onClickAction={onClickAction} teamsTabContext={{ entityId: '', locale: '' }} />);
-        console.log(component.debug());
 
         expect(component.find('div.question-container')).toBeTruthy();
     });

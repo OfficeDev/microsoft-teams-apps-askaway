@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 import { generateUniqueId } from 'adaptivecards';
-import { BotFrameworkAdapter } from 'botbuilder';
 import { IQuestionDataService, QuestionDataService, UserDataService, IUserDataService, IConversation, IQnASessionDataService } from 'msteams-app-questionly.data';
 import { getTeamsUserId, getMemberInfo, getAndEnsureRequestBodyContainsParameter, ensureUserIsPartOfMeetingConversation } from 'src/routes/restUtils';
 import { getMicrosoftAppPassword } from 'src/util/keyvault';
@@ -167,7 +166,6 @@ describe('test process QnA sesssions for meeting tab', () => {
 describe('test getHostUserId', () => {
     beforeAll(() => {
         process.env.MicrosoftAppId = 'random';
-        (<any>BotFrameworkAdapter) = jest.fn();
         (<any>getMemberInfo) = jest.fn();
         (<any>getMicrosoftAppPassword) = jest.fn();
     });

@@ -55,12 +55,16 @@ test("schedule adaptive card - schedule now", async () => {
     return {
       dateTimeCardLastUpdated: new Date(
         new Date().setMilliseconds(
-          new Date().getMilliseconds() - maxWaitTimeForAdaptiveCardRefreshInMs
+          new Date().getMilliseconds() -
+            maxWaitTimeForAdaptiveCardRefreshInMs -
+            5000
         )
       ),
       dateTimeNextCardUpdateScheduled: new Date(
         new Date().setMilliseconds(
-          new Date().getMilliseconds() - maxWaitTimeForAdaptiveCardRefreshInMs
+          new Date().getMilliseconds() -
+            maxWaitTimeForAdaptiveCardRefreshInMs -
+            5000
         )
       ),
     };

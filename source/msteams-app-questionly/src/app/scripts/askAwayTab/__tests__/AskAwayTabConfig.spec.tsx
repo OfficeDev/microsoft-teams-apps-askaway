@@ -15,7 +15,7 @@ import AskAwayTabConfigInternal from '../AskAwayTabConfigInternal';
 configure({ adapter: new enzymeAdapterReact16() });
 
 describe('AskAwayTabConfig Component', () => {
-    it('should match the snapshot', () => {
+    it.skip('should match the snapshot', () => {
         const wrapper = shallow(<AskAwayTabConfig />);
         expect(enzymeToJson(wrapper)).toMatchSnapshot();
     });
