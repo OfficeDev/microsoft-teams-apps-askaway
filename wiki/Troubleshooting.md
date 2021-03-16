@@ -51,5 +51,11 @@ Certain issues can arise that are common to many of the app templates. Please ch
     
     * Please run `npm install -g npm@7.6.0`. 
 
+5. **Mongo server version issue**
+    
+    ```Updating ServerVersion is not allowed. Error occured while deploying Azure resources```
+
+    We have updated our database Cosmos DB's API for MongoDB from server version 3.2 to 3.6. So if you are using older database resource please upgrade it to 3.6. See [here](https://devblogs.microsoft.com/cosmosdb/upgrade-your-server-version-from-3-2-to-3-6-for-azure-cosmos-db-api-for-mongodb/).
+
 **Didn't find your problem here?**
 Please, report the issue [here](https://github.com/OfficeDev/microsoft-teams-apps-askaway/issues)
