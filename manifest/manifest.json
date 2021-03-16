@@ -6,9 +6,9 @@
   "packageName": "{{BotDisplayName}}",
   "developer": {
     "name": "{{Company}}",
-    "websiteUrl": "https://{{HostName}}",
-    "privacyUrl": "https://{{HostName}}/privacy.html",
-    "termsOfUseUrl": "https://{{HostName}}/tou.html"
+    "websiteUrl": "{{WebsiteUrl}}",
+    "privacyUrl": "{{PrivacyUrl}}",
+    "termsOfUseUrl": "{{TermsOfUseUrl}}"
   },
   "name": {
     "short": "Ask Away",

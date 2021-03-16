@@ -8,12 +8,6 @@
     "strict": false,
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "baseUrl": ".",
-    "paths": {
-      "applicationinsights": ["node_modules/applicationinsights"],
-      "msteams-app-questionly.data": [
-        "node_modules/msteams-app-questionly.data"
-      ]
-    }
+    "skipLibCheck": true
   }
 }
