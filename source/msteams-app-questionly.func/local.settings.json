@@ -1,0 +1,36 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "debugMode": true,
+    "WEBSITE_NODE_DEFAULT_VERSION": "~12",
+    "AzureWebJobsStorage": "{{AzureWebJobsStorage}}",
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "APPINSIGHTS_INSTRUMENTATIONKEY": "{{APPINSIGHTS_INSTRUMENTATIONKEY}}",
+    "AzureAd_ClientId": "{{AzureAd_ClientId}}",
+    "AzureAd_ApplicationIdUri": "{{AzureAd_ApplicationIdUri}}",
+    "AzureAd_ValidIssuers": "https://login.microsoftonline.com/TENANT_ID/v2.0,https://sts.windows.net/TENANT_ID/",
+    "TenantId": "{{TenantId}}",
+    "AzureSignalRConnectionString": "{{AzureSignalRConnectionString}}",
+    "MicrosoftAppId": "{{MicrosoftAppId}}",
+    "MicrosoftAppPassword": "{{MicrosoftAppPassword}}",
+    "MongoDbUri": "{{MongoDbUri}}",
+    "AppId": "{{ManifestAppId}}",
+    "NotificationBubblePageUrl": "{{NotificationBubblePageUrl}}",
+    "NotificationBubbleActivityRetryInterval": 2000,
+    "NotificationBubbleActivityRetryAttemptCount": 1,
+    "BroadcastActivityRetryInterval": 1000,
+    "BroadcastActivityRetryAttemptCount": 2,
+    "MaxWaitTimeForAdaptiveCardRefreshInMs": 5000,
+    "AvatarKey": "{{AvatarKey}}",
+    "HostName": "{{HostName}}",
+    "ExpireInMemorySecretsAfterMs": "{{ExpireInMemorySecretsAfterMs}}",
+    "MarkQuestionAsAnsweredOperationLockValidityInMS": 5000,
+    "EndSessionOperationLockValidityInMS": 5000,
+    "IdentityObjectId_AppService": "{{IdentityObjectId_AppService}}"
+  },
+  "Host": {
+    "LocalHttpPort": 7071,
+    "CORS": "http://localhost:3007,https://{{ngrokhost}}.ngrok.io",
+    "CORSCredentials": true
+  }
+}

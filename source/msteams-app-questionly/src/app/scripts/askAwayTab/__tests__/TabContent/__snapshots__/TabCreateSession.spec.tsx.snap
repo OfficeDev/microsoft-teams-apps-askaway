@@ -1,0 +1,36 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TabCreateSession Component should match the snapshot 1`] = `
+<Flex
+  className="screen"
+  column={true}
+  gap="gap.medium"
+  hAlign="center"
+  vAlign="center"
+>
+  <Image
+    accessibility={[Function]}
+    alt="image"
+    as="img"
+    src="collaboration.png"
+  />
+  <Text
+    as="span"
+    className="text-caption"
+    size="large"
+    weight="bold"
+  />
+  <Text
+    as="span"
+    size="medium"
+  />
+  <Button
+    accessibility={[Function]}
+    as="button"
+    className="button"
+    onClick={[Function]}
+    primary={true}
+    size="medium"
+  />
+</Flex>
+`;

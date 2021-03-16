@@ -1,83 +1,135 @@
----
-page_type: sample
-languages:
-- typescript
-products:
-- office-teams
-description: "Ask Away helps you easily gather questions for a Q & A event from within a Teams channel or chat."
-urlFragment: "microsoft-teams-app-askaway"
----
+# askAway - Microsoft Teams App
 
-# Ask Away - Teams App Template
-| [Documentation](https://github.com/OfficeDev/microsoft-teams-apps-askaway/wiki/Home) | [Deployment guide](https://github.com/OfficeDev/microsoft-teams-apps-askaway/wiki/Deployment-Guide) | [Architecture](https://github.com/OfficeDev/microsoft-teams-apps-askaway/wiki/Solution-Overview) |
-| ---- | ---- | ---- |
+Generate a Microsoft Teams application.
 
-As organizations rely more on Teams to collaborate and do work, there is a need to connect organization leaders and SMEs (Subject Matter Experts) with their team members to share organizational updates and knowledge. With the onset of COVID-19, even more teams are conducting Q&A (Question and Answer) sessions remotely using Teams. Orchestrating one of these sessions directly in a Teams channel or chat is messy because hosts do not have a way to track questions and attendees do not have a way to upvote questions. Making it easier to conduct one of these sessions will add value to Teams and make it easier for users to collaborate and share knowledge.
+TODO: Add your documentation here
 
-The Ask Away app helps Q & A hosts easily gather questions for a Q & A event from within a Teams channel or chat. Team members can submit questions and upvote others shared by colleagues, resulting in a list of top-of-mind questions to give to the Q & A host. Because the bot runs in Teams, organizations can use it to conduct real-time sessions.
+## Getting started with Microsoft Teams Apps development
 
-**Key features:**
+Head on over to [Microsoft Teams official documentation](https://developer.microsoft.com/en-us/microsoft-teams) to learn how to build Microsoft Teams Tabs or the [Microsoft Teams Yeoman generator Wiki](https://github.com/PnP/generator-teams/wiki) for details on how this solution is set up.
 
-With the Ask Away app in Microsoft Teams, attendees can:
-* Submit questions.
-* Upvote questions shared by colleagues.
-* View a summary of top questions and general session updates on the main card.
-* View all questions and associated upvote counts, with personally asked and top questions organized in the leaderboard.
+## Project setup
 
-Hosts can use the Ask Away app to:
-* Start, manage, and end Q & A events.
-* View a summary of top questions and general session updates on the main card.
-* View all questions and associated upvote counts, with personally asked and top questions organized in the leaderboard
+All required source code are located in the `./src` folder - split into two parts
 
-Here is an example screenshot of the main card:
-![Ask Away main card](https://github.com/OfficeDev/microsoft-teams-apps-askaway/wiki/images/ui_screenshot1.png)
+- `app` for the application
+- `manifest` for the Microsoft Teams app manifest
 
-Screenshot of the leaderboard pop up box to vote on questions:
-![Ask Away upvote dialog box](https://github.com/OfficeDev/microsoft-teams-apps-askaway/wiki/images/ui_screenshot2.png)
+For further details se the [Yo Teams wiki for the project structure](https://github.com/PnP/generator-teams/wiki/Project-Structure)
 
-The app workflow is described below:
-1. The host initiates a new Q & A event in a Teams channel or chat along with a live Teams call.
-1. Attendees in the channel or chat submit questions during the duration of the event.
-1. Everyone can view the leaderboard which organizes all the questions asked along with associated upvote counts.
-1. Hosts will answer the questions submitted throughout the event through the Teams call.
-1. Everyone can upvote questions in the leaderboard.
-1. Everyone can view the top questions and general session updates on the main card.
-1. Hosts will end the Q & A session once the event is complete.
+## Secret management for local setup
 
-## Legal notice
+For develoment ease, local deployment can be configured to read secrets from .env instead of key vault.
 
-This app template is provided under the [MIT License](https://github.com/OfficeDev/microsoft-teams-apps-eprescription/blob/master/LICENSE) terms.  In addition to these terms, by using this app template you agree to the following:
+Add following entries in .env file
 
-- You, not Microsoft, will license the use of your app to users or organizations.
+```
+MongoDbUri="{{MongoDB connection string}}"
+ApplicationInsightsInstrumentationKey="{{Application Insights Instrumentation Key}}"
+MicrosoftAppPassword="{{Bot client secret}}"
+AvatarKey="{{Avatar key}}"
+debugMode="true"
+HostName="{{Host name}}"
+MicrosoftAppId="{{ Bot client id}}"
+AzureAd_ApplicationIdUri=api://{{HostName}}/{{MicrosoftAppId}}
+```
 
-- You understand this app template is not intended to substitute your own regulatory due diligence or make you or your app compliant with applicable regulations including but not limited to privacy, healthcare, employment, and financial regulations.
+## Building the app
 
-- You are responsible for complying with all applicable privacy and security regulations including those related to use, collection and handling of any personal data by your app.  This includes complying with all internal privacy and security policies of your organization if your app is developed to be sideloaded internally within your organization.
+The application is built using the `build` Gulp task.
 
-- Where applicable, you may be responsible for data related incidents or data subject requests for data collected through your app.
+```bash
+npm i -g gulp gulp-cli
+gulp build
+```
 
--	Any trademarks or registered trademarks of Microsoft in the United States and/or other countries and logos included in this repository are the property of Microsoft, and the license for this project does not grant you rights to use any Microsoft names, logos or trademarks outside of this repository.  Microsoft’s general trademark guidelines can be found [here](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general.aspx).
+## Building the manifest
 
--	Use of this template does not guarantee acceptance of your app to the Teams app store.  To make this app available in the Teams app store, you will have to comply with the [submission and validation process](https://docs.microsoft.com/en-us/microsoftteams/platform/concepts/deploy-and-publish/appsource/publish), and all associated requirements such as including your own privacy statement and terms of use for your app.
+To create the Microsoft Teams Apps manifest, run the `manifest` Gulp task. This will generate and validate the package and finally create the package (a zip file) in the `package` folder. The manifest will be validated against the schema and dynamically populated with values from the `.env` file.
 
-## Getting started
+```bash
+gulp manifest
+```
 
-Begin with the [Solution overview](https://github.com/OfficeDev/microsoft-teams-apps-askaway/wiki/Solution-overview) to read about what the app does and how it works.
+## Configuration
 
-When you're ready to try out Ask Away, or to use it in your own organization, follow the steps in the [Deployment guide](https://github.com/OfficeDev/microsoft-teams-apps-askaway/wiki/Deployment-guide).
+Configuration is stored in the `.env` file.
 
-## Contributing
+## Debug and test locally
 
-### This project was possible with the contributions of Microsoft Interns Lily Du, Shayan Khalili Moghaddam and Kavin Singh. Thank you to them and their mentors who helped convert a side project to a full Teams app template!
+To debug and test the solution locally you use the `serve` Gulp task. This will first build the app and then start a local web server on port 3007, where you can test your Tabs, Bots or other extensions. Also this command will rebuild the App if you change any file in the `/src` directory.
 
-This project welcomes contributions and suggestions.  Most contributions require you to agree to a
-Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
-the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
+```bash
+gulp serve
+```
 
-When you submit a pull request, a CLA bot will automatically determine whether you need to provide
-a CLA and decorate the PR appropriately (e.g., status check, comment). Simply follow the instructions
-provided by the bot. You will only need to do this once across all repos using our CLA.
+To debug the code you can append the argument `debug` to the `serve` command as follows. This allows you to step through your code using your preferred code editor.
 
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
-For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
-contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+```bash
+gulp serve --debug
+```
+
+To step through code in Visual Studio Code you need to add the following snippet in the `./.vscode/launch.json` file. Once done, you can easily attach to the node process after running the `gulp server --debug` command.
+
+```json
+{
+    "type": "node",
+    "request": "attach",
+    "name": "Attach",
+    "port": 5858,
+    "sourceMaps": true,
+    "outFiles": [
+        "${workspaceRoot}/dist/**/*.js"
+    ],
+    "remoteRoot": "${workspaceRoot}/src/"
+},
+```
+
+### Using ngrok for local development and hosting
+
+In order to make development locally a great experience it is recommended to use [ngrok](https://ngrok.io), which allows you to publish the localhost on a public DNS, so that you can consume the bot and the other resources in Microsoft Teams.
+
+To use ngrok, it is recommended to use the `gulp ngrok-serve` command, which will read your ngrok settings from the `.env` file and automatically create a correct manifest file and finally start a local development server using the ngrok settings.
+
+### Additional build options
+
+You can use the following flags for the `serve`, `ngrok-serve` and build commands:
+
+- `--no-linting` - skips the linting of Typescript during build to improve build times
+- `--debug` - builds in debug mode
+
+## Deploying to Azure using Git
+
+If you want to deploy to Azure using Git follow these steps.
+
+This will automatically deploy your files to Azure, download the npm pacakges, build the solution and start the web server using Express.
+
+1. Log into [the Azure Portal](https://portal.azure.com)
+2. Create a new _Resource Group_ or use an existing one
+3. Create a new _Web App_ with Windows App Service Plan and give it the name of your tab, the same you used when asked for URL in the Yeoman generator. In your case https://askAway.azurewebsites.net.
+4. Add the following keys in the _Configuration_ -> _Application Settings_; Name = `WEBSITE_NODE_DEFAULT_VERSION`, Value = `8.10.0` and Name = `SCM_COMMAND_IDLE_TIMEOUT`, Value = `1800`. Click Save.
+5. Go to _Deployment Center_
+6. Choose _Local Git_ as source and _App Service build service_ as the Build Provider
+7. Click on _Deployment Credentials_ and store the App Credentials securely
+8. In your tab folder initialize a Git repository using `git init`
+9. Build the solution using `gulp build` to make sure you don't have any errors
+10. Commit all your files using `git add -A && git commit -m "Initial commit"`
+11. Run the following command to set up the remote repository: `git remote add azure https://<username>@askAway.scm.azurewebsites.net:443/askAway.git`. You need to replace <username> with the username of the App Credentials you retrieved in _Deployment Credentials_. You can also copy the URL from _Options_ in the Azure Web App.
+12. To push your code use to Azure use the following command: `git push azure master`, you will be asked for your credentials the first time, insert the Password for the App Credential. Note that you should update the Azure Web Site application setting before pushing the code as the settings are needed when building the application.
+13. Wait until the deployment is completed and navigate to https://askAway.azurewebsites.net/privacy.html to test that the web application is running
+14. Done
+15. Repeat step 11 for every commit you do and want to deploy
+
+> NOTE: The `.env` file is excluded from source control and will not be pushed to the web site so you need to ensure that all the settings present in the `.env` file are added as application settings to your Azure Web site (except the `PORT` variable which is used for local debugging).
+
+## Logging
+
+To enable logging for the solution you need to add `msteams` to the `DEBUG` environment variable. See the [debug package](https://www.npmjs.com/package/debug) for more information. By default this setting is turned on in the `.env` file.
+
+Example for Windows command line:
+
+```bash
+SET DEBUG=msteams
+```
+
+If you are using Microsoft Azure to host your Microsoft Teams app, then you can add `DEBUG` as an Application Setting with the value of `msteams`.

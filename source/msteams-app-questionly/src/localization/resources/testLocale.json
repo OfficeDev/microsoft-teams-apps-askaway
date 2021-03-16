@@ -1,0 +1,49 @@
+{
+    "leaderboard": {
+        "taskModuleTitle": "taskModuleTitle",
+        "yourQuestions": "yourQuestions",
+        "allQuestions": "allQuestions",
+        "noQuestions": "noQuestions",
+        "refresh": "refresh"
+    },
+    "startQnA": {
+        "titleFieldLabel": "titleFieldLabel",
+        "titleFieldExample": "titleFieldExample",
+        "descriptionFieldLabel": "descriptionFieldLabel",
+        "descriptionFieldExample": "descriptionFieldExample",
+        "taskModuleTitle": "taskModuleTitle",
+        "taskModuleTitleEdit": "taskModuleTitleEdit"
+    },
+    "endQnA": {
+        "taskModuleTitle": "taskModuleTitle",
+        "prompt": "prompt"
+    },
+    "askQuestion": {
+        "textFieldExample": "textFieldExample",
+        "taskModuleTitle": "taskModuleTitle",
+        "resubmitTaskModuleTitle": "resubmitTaskModuleTitle",
+        "textFieldLabel": "testFieldLabel"
+    },
+    "errors": {
+        "upvoting": "upvoting",
+        "submittingQuestions": "submittingQuestions",
+        "submittingEmptyQuestion": "submittingEmptyQuestion",
+        "missingFields": "missingFields",
+        "taskFetch": "taskFetch",
+        "taskSubmit": "taskSubmit",
+        "leaderboard": "leaderboard",
+        "conversationInvalid": "conversationInvalid",
+        "qnasessionlimitexhaustedError": "qnasessionlimitexhaustedError",
+        "qnasessionCreationError": "qnasessionCreationError",
+        "insufficientPermissionsToCreateOrEndQnASessionError": "insufficientPermissionsToCreateOrEndQnASessionError",
+        "unableToPostCardForSessionStartedEvent": "unableToPostCardForSessionStartedEvent",
+        "unableToPerformActivityOnEndedSession": "unableToPerformActivityOnEndedSession"
+    },
+    "generic": {
+        "submit": "submit",
+        "preview": "preview",
+        "cancel": "cancel",
+        "endSession": "endSession",
+        "noQuestions": "noQuestions"
+    }
+}

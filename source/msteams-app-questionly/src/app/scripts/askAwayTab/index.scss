@@ -1,0 +1,358 @@
+.form-grid {
+    margin-top: 0.5rem;
+    .btn-create-session {
+        height: 2rem;
+        position: absolute;
+        right: 2rem;
+        bottom: 2rem;
+        width: 6rem;
+        border-radius: 0.125rem;
+    }
+}
+
+.meeting-panel {
+    height: 100vh;
+    .margin-top-bottom {
+        margin-top: auto;
+        margin-bottom: auto !important;
+        .text-caption-panel {
+            display: contents;
+        }
+    }
+    .welcome-text {
+        margin-top: auto;
+        margin-bottom: auto;
+    }
+    .new-update-btn-wrapper {
+        position: relative;
+        width: 0;
+        height: 0;
+        margin: 0 auto;
+        left: 1.4rem;
+    }
+    .new-updates-button {
+        top: -1.4rem;
+        padding-inline-start: 1rem;
+        padding-inline-end: 1rem;
+        height: 1.85rem;
+    }
+    .qna-header {
+        .truncated-title {
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 3;
+            overflow: hidden;
+        }
+    }
+    .menuHeader {
+        position: relative;
+        bottom: 0.2rem;
+        .ui-menu__item__submenu {
+            border: none;
+        }
+    }
+
+    .question-card {
+        overflow-y: scroll;
+        flex: 1;
+        .card-divider {
+            border-bottom: 1px solid #3b3a39;
+            min-height: 4.5rem;
+            border-top-left-radius: 0.2rem;
+            border-top-right-radius: 0.2rem;
+            .card-layout {
+                width: 100%;
+                padding: 0.625rem 0.875rem 0 0.875rem;
+                .action-buttons {
+                    button {
+                        margin-inline-end: -0.3rem;
+                    }
+                }
+            }
+            .question-padding {
+                padding-top: 0.2rem;
+                padding-inline-end: 1rem;
+                .card-body-question {
+                    padding-inline-start: 0.4rem;
+                    overflow: auto;
+                    white-space: pre-line;
+                }
+            }
+        }
+    }
+    .menu-bar {
+        padding-top: 0.2rem;
+        padding-bottom: 0.7rem;
+        border-bottom: none;
+        a {
+            border-bottom-width: medium;
+        }
+        span {
+            padding-bottom: 0.7rem;
+        }
+    }
+    .input-text-field {
+        margin-bottom: 0.625rem;
+        .text-question {
+            height: 2.2rem;
+        }
+    }
+}
+
+.qna-session-notify {
+    .truncated-title {
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
+    }
+}
+
+.badge {
+    width: 3.75rem;
+    font-family: Segoe UI;
+    font-weight: 600;
+    font-size: 0.625rem;
+    padding: 0.25rem 0.2rem;
+    line-height: 0.75rem;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.75rem;
+    text-align: center;
+}
+
+.tab-config-container {
+    margin-top: 6rem;
+}
+
+.tab-content {
+    position: absolute;
+    height: 100%;
+    overflow-x: hidden;
+    width: 100%;
+    .screen {
+        left: 50%;
+        margin-top: -10.5rem;
+        margin-inline-start: -9.25rem;
+        position: absolute;
+        top: 50%;
+        height: 21rem;
+    }
+    .tab-nav-header {
+        padding: 0.625rem 0.875rem 0 1rem;
+        .btn-end-session {
+            height: auto;
+            margin-inline-end: 1rem;
+        }
+
+        span {
+            font-weight: 500;
+        }
+    }
+    .tab-container {
+        margin: 0 auto;
+        width: 54.2%;
+        .new-update-btn-wrapper {
+            position: relative;
+            width: 0;
+            height: 0;
+            margin: 0 auto;
+            left: -4rem;
+        }
+        .new-updates-button {
+            top: 1.2rem;
+            padding-inline-start: 1rem;
+            padding-inline-end: 1rem;
+        }
+        .post-new-question {
+            margin-top: 2rem;
+            padding: 0.1rem;
+            .question-input-flex {
+                padding-top: 0.3rem;
+                margin-bottom: -1rem;
+            }
+            .question-input {
+                padding-bottom: 0rem;
+                height: 2.3rem;
+            }
+            .card-layout {
+                width: 100%;
+                box-shadow: 0px 0.15px 0.45px rgba(0, 0, 0, 0.11), 0px 0.8px 1.8px rgba(0, 0, 0, 0.13);
+                border-radius: 0.25rem;
+                .badge {
+                    font-size: 0.75rem;
+                    font-weight: bold;
+                }
+                .ui-card__body {
+                    margin-bottom: 0.3rem;
+                }
+                .date-content-format {
+                    padding-top: 0.25rem;
+                }
+                .session-title {
+                    padding-top: 0.3rem;
+                }
+            }
+        }
+        .question-container {
+            .svg-position {
+                position: relative;
+                top: 0.125rem;
+                left: -0.3rem;
+            }
+            .question-layout {
+                box-shadow: 0px 0.15px 0.45px rgba(0, 0, 0, 0.11), 0px 0.8px 1.8px rgba(0, 0, 0, 0.13);
+                border-radius: 0.25rem;
+                margin-top: 0.5rem;
+                margin-bottom: 0.5rem;
+                padding-inline-start: 0.4rem;
+                padding-inline-end: 0.2rem;
+                .ui-reaction {
+                    position: relative;
+                    right: 1rem;
+                }
+                .text-format {
+                    padding-top: 0;
+                    padding-inline-end: 1rem;
+                    overflow: auto;
+                    white-space: pre-wrap;
+                }
+            }
+            .padding-none {
+                padding: 0;
+                span {
+                    font-size: 0.75rem;
+                    line-height: 1rem;
+                }
+            }
+            .btn-text-font-bold {
+                span {
+                    font-weight: 700;
+                }
+            }
+        }
+    }
+}
+
+.no-question-layout {
+    margin: 0 auto;
+    width: 100%;
+    text-align: center;
+    img {
+        margin-inline-start: auto;
+        margin-inline-end: auto;
+    }
+    .sub-text {
+        width: 62%;
+        margin: 0 auto;
+    }
+}
+.text-center {
+    text-align: center;
+}
+.centerContent {
+    top: 50%;
+    left: 50%;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    font-family: Segoe UI;
+}
+.switchSessionListHolder {
+    padding-inline-start: 1.875rem;
+    padding-inline-end: 1.875rem;
+    margin-bottom: 0.75rem;
+    overflow: scroll;
+    max-height: 28.125rem;
+    padding-top: 0.625rem;
+    font-family: Segoe UI;
+
+    .title {
+        margin-bottom: 0.75rem;
+    }
+
+    .switchSessionList {
+        li {
+            margin-bottom: 0.75rem;
+            padding-inline-start: 0;
+            padding-inline-end: 0;
+        }
+
+        .fn {
+            margin-inline-end: 0;
+        }
+    }
+}
+.switchButton {
+    position: absolute;
+    right: 1.875rem;
+    bottom: 1.5rem;
+
+    button {
+        font-family: Segoe UI;
+    }
+}
+.switchSessionListCard {
+    padding-inline-end: 0.75rem;
+    padding-inline-start: 0.75rem;
+    padding-top: 0.68rem;
+    padding-bottom: 0.68rem;
+    border: solid;
+    border-radius: 0.2rem;
+    font-family: Segoe UI;
+
+    .sessionMetadata {
+        line-height: 1.25rem;
+    }
+    .liveTag {
+        font-weight: bold;
+        padding-inline-start: 1rem;
+        border-radius: 0.75rem;
+        padding-inline-end: 1rem;
+        padding-bottom: 0.2rem;
+        padding-top: 0.2rem;
+    }
+}
+
+.connectionStatusAlert {
+    border: solid;
+    margin-bottom: 0.25rem;
+
+    .alertContent {
+        margin-inline-start: 0.5rem;
+        margin-bottom: 0.25rem;
+        margin-top: 0.25rem;
+    }
+
+    .refreshNowLink {
+        color: inherit;
+    }
+}
+
+.ui-provider[dir='rtl'] {
+    .meeting-panel {
+        .new-update-btn-wrapper {
+            left: -1.4rem;
+        }
+    }
+    .tab-container {
+        .new-update-btn-wrapper {
+            right: -4rem;
+        }
+    }
+    .tab-content {
+        .screen {
+            left: 38%;
+        }
+    }
+    .form-grid {
+        .btn-create-session {
+            right: auto;
+        }
+    }
+    .switchButton {
+        left: 2rem;
+        right: auto;
+    }
+}

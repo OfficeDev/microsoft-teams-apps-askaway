@@ -1,0 +1,68 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`QnASessionHeader Component should match the snapshot 1`] = `
+<Flex
+  className="qna-header"
+  gap="gap.large"
+>
+  <Text
+    as="span"
+    className="truncated-title"
+    content="some-title"
+    size="large"
+    title="some-title"
+  />
+  <FlexItem
+    push={true}
+  >
+    <div
+      className="menuHeader"
+    >
+      <Menu
+        accessibility={[Function]}
+        aria-label="Compose Editor"
+        as="ul"
+        defaultActiveIndex={0}
+        iconOnly={true}
+        items={
+          Array [
+            Object {
+              "aria-label": "More options",
+              "icon": <MoreIcon
+                outline={false}
+                styles={
+                  Object {
+                    "color": "",
+                  }
+                }
+              />,
+              "indicator": false,
+              "key": "moreOptions",
+              "menu": Object {
+                "items": Array [
+                  Object {
+                    "content": undefined,
+                    "icon": <RetryIcon
+                      outline={true}
+                    />,
+                    "key": "Refresh session",
+                    "onClick": [Function],
+                  },
+                  Object {
+                    "content": undefined,
+                    "icon": <LeaveIcon
+                      outline={true}
+                    />,
+                    "key": "End session",
+                    "onClick": [Function],
+                  },
+                ],
+              },
+            },
+          ]
+        }
+      />
+    </div>
+  </FlexItem>
+</Flex>
+`;

@@ -1,0 +1,40 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NewQuestion Component should match the snapshot 1`] = `
+<Flex
+  className="input-text-field"
+  gap="gap.small"
+  hAlign="center"
+  vAlign="end"
+>
+  <FlexItem>
+    <TextArea
+      accessibility={[Function]}
+      as="textarea"
+      className="text-question"
+      fluid={true}
+      inverted={true}
+      maxLength={250}
+      onChange={[Function]}
+      value=""
+    />
+  </FlexItem>
+  <FlexItem
+    push={true}
+  >
+    <Button
+      accessibility={[Function]}
+      as="button"
+      icon={
+        <SendIcon
+          onClick={[Function]}
+          size="large"
+        />
+      }
+      iconOnly={true}
+      size="medium"
+      text={true}
+    />
+  </FlexItem>
+</Flex>
+`;
