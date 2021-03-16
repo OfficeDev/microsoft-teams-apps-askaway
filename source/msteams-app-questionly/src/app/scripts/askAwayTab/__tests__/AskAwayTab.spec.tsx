@@ -16,7 +16,7 @@ import MeetingPanel from '../MeetingPanel';
 configure({ adapter: new enzymeAdapterReact16() });
 
 describe('AskAwayTab Component', () => {
-    it.skip('should match the snapshot', () => {
+    it('should match the snapshot', () => {
         const wrapper = shallow(<AskAwayTab />);
         expect(enzymeToJson(wrapper)).toMatchSnapshot();
     });

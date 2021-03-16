@@ -999,11 +999,26 @@ exports[`Create session should match the snapshot 1`] = `
           "root": [Function],
           "toggle": [Function],
         },
-        "Datepicker": Object {},
+        "Datepicker": Object {
+          "root": [Function],
+        },
         "DatepickerCalendar": Object {
           "root": [Function],
         },
+        "DatepickerCalendarCell": Object {
+          "root": [Function],
+        },
+        "DatepickerCalendarCellButton": Object {
+          "root": [Function],
+        },
+        "DatepickerCalendarGrid": Object {
+          "root": [Function],
+        },
+        "DatepickerCalendarGridRow": Object {
+          "root": [Function],
+        },
         "DatepickerCalendarHeader": Object {
+          "label": [Function],
           "root": [Function],
         },
         "DatepickerCalendarHeaderCell": Object {
@@ -1348,6 +1363,10 @@ exports[`Create session should match the snapshot 1`] = `
         "Checkbox": [Function],
         "Datepicker": [Function],
         "DatepickerCalendar": [Function],
+        "DatepickerCalendarCell": [Function],
+        "DatepickerCalendarCellButton": [Function],
+        "DatepickerCalendarGrid": [Function],
+        "DatepickerCalendarGridRow": [Function],
         "DatepickerCalendarHeader": [Function],
         "DatepickerCalendarHeaderCell": [Function],
         "Dialog": [Function],
@@ -1459,16 +1478,19 @@ exports[`Create session should match the snapshot 1`] = `
         "categoryColorScheme": Object {
           "blue": Object {
             "background": "#CDDAEA",
+            "borderActive": "#164279",
             "foreground": "#0F3057",
             "foreground1": "#376BAB",
           },
           "blueDark": Object {
             "background": "#C7D4E8",
+            "borderActive": "#002E72",
             "foreground": "#002152",
             "foreground1": "#1E53A3",
           },
           "brown": Object {
             "background": "#E9DDD8",
+            "borderActive": "#764E3B",
             "foreground": "#56392B",
             "foreground1": "#A87A63",
           },
@@ -1492,116 +1514,139 @@ exports[`Create session should match the snapshot 1`] = `
           },
           "green": Object {
             "background": "#D1ECDF",
+            "borderActive": "#248353",
             "foreground": "#1A5E3C",
             "foreground1": "#48B67F",
           },
           "greenDark": Object {
             "background": "#CFE1D7",
+            "borderActive": "#1D5C39",
             "foreground": "#154229",
             "foreground1": "#408861",
           },
           "maroon": Object {
             "background": "#EBD3E1",
+            "borderActive": "#7D2B5C",
             "foreground": "#5A1F42",
             "foreground1": "#AF5089",
           },
           "neon": Object {
             "background": "#E9F1AC",
+            "borderActive": "#899338",
             "foreground": "#656C2B",
             "foreground1": "#BDCB4C",
           },
           "olive": Object {
             "background": "#E6EDDC",
+            "borderActive": "#56742F",
             "foreground": "#4E6136",
             "foreground1": "#9BBA75",
           },
           "oliveDark": Object {
             "background": "#DBE1D5",
+            "borderActive": "#475A31",
             "foreground": "#334123",
             "foreground1": "#708757",
           },
           "orange": Object {
             "background": "#FBDED7",
+            "borderActive": "#B24932",
             "foreground": "#823929",
             "foreground1": "#F07A60",
           },
           "orangeDark": Object {
             "background": "#F2D5CD",
+            "borderActive": "#973216",
             "foreground": "#6D240F",
             "foreground1": "#CD5937",
           },
           "orangeLight": Object {
             "background": "#FDEAD4",
+            "borderActive": "#A45D11",
             "foreground": "#895722",
             "foreground1": "#FAAB54",
           },
           "pink": Object {
             "background": "#F5D3DF",
+            "borderActive": "#A22954",
             "foreground": "#751E3C",
             "foreground1": "#DA4E7F",
           },
           "purple": Object {
             "background": "#E2DEED",
+            "borderActive": "#5D5286",
             "foreground": "#443B61",
             "foreground1": "#8B7DBA",
           },
           "purpleDark": Object {
             "background": "#D6D4E8",
+            "borderActive": "#362E75",
             "foreground": "#272154",
             "foreground1": "#5D53A5",
           },
           "red": Object {
             "background": "#F3D7D9",
+            "borderActive": "#993840",
             "foreground": "#6E282E",
             "foreground1": "#D06069",
           },
           "redDark": Object {
             "background": "#E7CED1",
+            "borderActive": "#721A23",
             "foreground": "#521319",
             "foreground1": "#A23D48",
           },
           "smokeDark": Object {
             "background": "#D5D5D5",
+            "borderActive": "#333333",
             "foreground": "#252525",
             "foreground1": "#5A5A5A",
           },
           "smokeLight": Object {
             "background": "#DFDFDF",
+            "borderActive": "#555555",
             "foreground": "#3D3D3D",
             "foreground1": "#818181",
           },
           "steelDark": Object {
             "background": "#DDE1E2",
+            "borderActive": "#4F5B5F",
             "foreground": "#394245",
             "foreground1": "#7B898D",
           },
           "steelLight": Object {
             "background": "#EAEDEE",
+            "borderActive": "#637074",
             "foreground": "#585761",
             "foreground1": "#ACABBB",
           },
           "teal": Object {
             "background": "#D6E3E7",
+            "borderActive": "#34626F",
             "foreground": "#254650",
             "foreground1": "#5A8F9F",
           },
           "tealDark": Object {
             "background": "#CEDADD",
+            "borderActive": "#1A444E",
             "foreground": "#133138",
             "foreground1": "#3D6E79",
           },
           "tealLight": Object {
             "background": "#DBF1F1",
+            "borderActive": "#37797B",
             "foreground": "#33696B",
             "foreground1": "#70C8CA",
           },
           "yellow": Object {
             "background": "#FEEFCB",
+            "borderActive": "#8F680D",
             "foreground": "#805E0B",
             "foreground1": "#FDC030",
           },
           "yellowDark": Object {
             "background": "#F8EACD",
+            "borderActive": "#92660D",
             "foreground": "#7C5811",
             "foreground1": "#E5AC39",
           },

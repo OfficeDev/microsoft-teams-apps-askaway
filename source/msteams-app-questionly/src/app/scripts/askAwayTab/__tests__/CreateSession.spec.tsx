@@ -15,7 +15,7 @@ import CreateSessionInternal from '../popups/CreateSessionInternal';
 configure({ adapter: new enzymeAdapterReact16() });
 
 describe('Create session', () => {
-    it.skip('should match the snapshot', () => {
+    it('should match the snapshot', () => {
         const wrapper = shallow(<CreateSession />);
         expect(enzymeToJson(wrapper)).toMatchSnapshot();
     });

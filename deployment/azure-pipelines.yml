@@ -24,12 +24,12 @@ stages:
               toolMajorVersion: "V2"
           - script: npm install -g npm@7.6.0
             displayName: Install required npm version
-          - script: cd source\msteams-app-questionly && npm install
-            displayName: Install dependencies for main project
+          - task: BatchScript@1
+            inputs:
+              filename: "init.bat"
+            displayName: Build Dependencies
           - script: cd source\msteams-app-questionly && npm run build
             displayName: Build main project
-          - script: cd source\msteams-app-questionly.func && npm install
-            displayName: Install dependencies for function project
           - script: cd source\msteams-app-questionly.func && npm run build
             displayName: Build function project
           - task: BatchScript@1
