@@ -142,12 +142,13 @@ const SignalRLifecycle: React.FunctionComponent<SignalRLifecycleProps> = (props)
      * When signalR connection can not be established by the client,
      * this handler updates state accordingly.
      * @param error - error that occured while establishing connection. signalR client passes error to `onclose` callback.
+     * @param force - flag to forcefully show error banner. This would be required by the flows where failures occur after connection is established (eg: add to group).
      */
-    const handleConnectionError = (error?: Error) => {
+    const handleConnectionError = (error?: Error, force?: boolean) => {
         // Putting this check to handle delayed callback, eg the active connection was stopped and then re-started.
         // `onclose` callback in only called when stop is called on active connection,
         // so we might not run into delayed callback as we restart the connection only if it is not active.
-        if (connection?.state !== signalR.HubConnectionState.Connected) {
+        if (force === true || connection?.state !== signalR.HubConnectionState.Connected) {
             setConnectionStatus(ConnectionStatus.NotConnected);
 
             if (error) {
@@ -199,17 +200,14 @@ const SignalRLifecycle: React.FunctionComponent<SignalRLifecycleProps> = (props)
         };
 
         if (!props.envConfig.SignalRFunctionBaseUrl) {
-            trackException(new Error('Error while calling /config API. Could not get SignalRFunctionBaseUrl'), SeverityLevel.Error);
-            handleConnectionError();
+            handleConnectionError(new Error('Error while calling /config API. Could not get SignalRFunctionBaseUrl'), true);
             return;
         }
 
         const response = await props.httpService.post(`${props.envConfig.SignalRFunctionBaseUrl}/api/add-to-group`, addToGroupInputDate, false, undefined, false);
 
         if (response.status !== StatusCodes.OK) {
-            trackException(new Error(`Error in adding connection to the group, conversationId: ${props.conversationId}, reason: ${response.statusText}`), SeverityLevel.Error);
-
-            handleConnectionError();
+            handleConnectionError(new Error(`Error in adding connection to the group, conversationId: ${props.conversationId}, reason: ${response.statusText}`), true);
             return;
         }
 
@@ -270,11 +268,10 @@ const SignalRLifecycle: React.FunctionComponent<SignalRLifecycleProps> = (props)
 
                 // Too many connection can be logged as warning than error.
                 trackException(error, SeverityLevel.Warning);
+                handleConnectionError(undefined, true);
             } else {
-                trackException(error, SeverityLevel.Error);
+                handleConnectionError(error, true);
             }
-
-            handleConnectionError();
         }
     };
 

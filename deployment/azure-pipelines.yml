@@ -69,14 +69,28 @@ stages:
               RemoveSourceFolder: false
           - task: DeleteFiles@1
             inputs:
-              SourceFolder: "./"
-              Contents: "**/coverage*"
-              RemoveSourceFolder: false
+              SourceFolder: "./source/msteams-app-questionly.func/coverage"
+              Contents: "*"
+              RemoveSourceFolder: true
           - task: DeleteFiles@1
             inputs:
-              SourceFolder: "./"
-              Contents: "**/src*"
-              RemoveSourceFolder: false
+              SourceFolder: "./source/msteams-app-questionly/coverage"
+              Contents: "*"
+              RemoveSourceFolder: true
+          - task: DeleteFiles@1
+            inputs:
+              SourceFolder: "./source/msteams-app-questionly.func/src"
+              Contents: "*"
+              RemoveSourceFolder: true
+          - task: DeleteFiles@1
+            inputs:
+              SourceFolder: "./source/msteams-app-questionly/src"
+              Contents: "*"
+              RemoveSourceFolder: true
+          - script: cd source\msteams-app-questionly && npm install --production
+            displayName: Install production dependencies for main project
+          - script: cd source\msteams-app-questionly.func && npm install --production
+            displayName: Install production dependencies for function project
           - task: ArchiveFiles@2
             inputs:
               archiveType: zip
