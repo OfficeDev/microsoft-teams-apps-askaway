@@ -41,7 +41,7 @@ test("tests authenticateRequest", async () => {
     return decoded;
   });
 
-  var result = await authenticateRequest(triggerMockContext, mockRequest);
+  var result = await authenticateRequest(triggerMockContext, mockRequest, true);
   expect(result).toBe(true);
   expect(mockRequest[userIdParameterConstant]).toBe(testUserId);
 });
@@ -52,7 +52,7 @@ test("tests authenticateRequest to throw error/ invalid token", async () => {
     throw testError;
   });
 
-  var result = await authenticateRequest(triggerMockContext, mockRequest);
+  var result = await authenticateRequest(triggerMockContext, mockRequest, true);
   expect(result).toBe(false);
   expect(triggerMockContext.log.error).toBeCalledTimes(1);
   expect(triggerMockContext.log.error).toBeCalledWith(testError);
@@ -60,27 +60,27 @@ test("tests authenticateRequest to throw error/ invalid token", async () => {
 
 test("tests authenticateRequest for missing bearer token", async () => {
   mockRequest.headers = {};
-  var result = await authenticateRequest(triggerMockContext, mockRequest);
+  var result = await authenticateRequest(triggerMockContext, mockRequest, true);
   expect(result).toBe(false);
 });
 
 test("tests authenticateRequest for missing tenant id", async () => {
   delete process.env.TenantId;
   await expect(
-    authenticateRequest(triggerMockContext, mockRequest)
+    authenticateRequest(triggerMockContext, mockRequest, true)
   ).rejects.toThrow(errorStrings.TenantIdMissingError);
 });
 
 test("tests authenticateRequest for missing AzureAd valid issuers", async () => {
   delete process.env.AzureAd_ValidIssuers;
   await expect(
-    authenticateRequest(triggerMockContext, mockRequest)
+    authenticateRequest(triggerMockContext, mockRequest, true)
   ).rejects.toThrow(errorStrings.AzureAdValidIssuersMissingError);
 });
 
 test("tests authenticateRequest for missing AzureAd applicationIdUri", async () => {
   delete process.env.AzureAd_ApplicationIdUri;
   await expect(
-    authenticateRequest(triggerMockContext, mockRequest)
+    authenticateRequest(triggerMockContext, mockRequest, true)
   ).rejects.toThrow(errorStrings.AzureAdApplicationIdUriMissingError);
 });

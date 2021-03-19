@@ -384,6 +384,36 @@ function DeployARMTemplate {
     }
 }
 
+# Grant Admin consent
+function GrantAdminConsent {
+    Param(
+        [Parameter(Mandatory = $true)] $appId
+        )
+
+    $confirmationTitle = "Admin consent permissions is required for app registration using CLI"
+    $confirmationQuestion = "Do you want to proceed?"
+    $confirmationChoices = "&Yes", "&No" # 0 = Yes, 1 = No
+    $consentErrorMessage = "Current user does not have the privilege to consent the below permissions on this app.
+    * openid(Delegated)
+    Please ask the tenant's global administrator to consent."
+
+    $updateDecision = $Host.UI.PromptForChoice($confirmationTitle, $confirmationQuestion, $confirmationChoices, 1)
+    if ($updateDecision -eq 0) {
+        # Grant admin consent for app registration required permissions using CLI
+        WriteInformation -message "Waiting for admin consent to finish..."
+        az ad app permission admin-consent --id $appId
+        
+        if ($LASTEXITCODE -ne 0) {
+            WriteError -message $consentErrorMessage
+            WriteWarning -message "`nPlease inform the global admin to consent the app permissions from this link`nhttps://login.microsoftonline.com/$($parameters.tenantId.Value)/adminconsent?client_id=$appId"
+        } else {
+            WriteS -message "Admin consent has been granted."
+        }
+    } else {
+        WriteWarning -message "`nPlease inform the global admin to consent the app permissions from this link`nhttps://login.microsoftonline.com/$($parameters.tenantId.Value)/adminconsent?client_id=$appId"
+    }
+}
+
 # Azure AD app update. Assigning Admin-consent,RedirectUris,IdentifierUris,Optionalclaim etc. 
 function ADAppUpdate {
     Param(
@@ -394,6 +424,7 @@ function ADAppUpdate {
     $configAppId = $appId
     $IdentifierUris = "api://$appdomainName"
     $appName = $parameters.baseResourceName.Value
+    $RedirectUris = ("https://$appdomainName/askAwayTab/signInSimpleEnd.html")
 
     function CreatePreAuthorizedApplication(
         [string] $applicationIdToPreAuthorize,
@@ -421,6 +452,14 @@ function ADAppUpdate {
         $scope.Type = "User"
         return $scope
     }
+
+    # Grant Admin consent if the subscriptionTenantId and tenantId are same.
+    if ($parameters.tenantId.value -eq $parameters.subscriptionTenantId.value) {
+        GrantAdminConsent $configAppId
+    }
+    
+    # Assigning graph permissions  
+    az ad app update --id $configAppId --required-resource-accesses './AadAppManifest.json'
 
     Import-Module AzureAD
 
@@ -469,6 +508,9 @@ function ADAppUpdate {
 
     az ad app update --id $configAppId --identifier-uris $appIDUri
     WriteInformation -message "App URI set"
+
+    $configApp = az ad app update --id $configAppId --reply-urls $RedirectUris
+    WriteInformation -message "App reply-urls set"
                     
     # Create access_as_user scope
     # Add all existing scopes first
@@ -528,8 +570,6 @@ function GenerateAppManifestPackage {
         '{{WebsiteUrl}}'    = $parameters.websiteUrl.Value
         '{{PrivacyUrl}}'    = $parameters.privacyUrl.Value
         '{{TermsOfUseUrl}}' = $parameters.termsOfUseUrl.Value
-        '{{Version}}'       = "2.0.0"
-        '{{BotDisplayName}}'= "com.microsoft.teams.askaway"
     }
     $appManifestContent = Get-Content $manifestFilePath
     foreach ($mergeField in $mergeFields.GetEnumerator()) {
@@ -718,7 +758,7 @@ if ($null -eq $appCred) {
 # Function call to Deploy ARM Template
 $deploymentOutput = DeployARMTemplate $appCred.appId $appCred.password
 if ($null -eq $deploymentOutput) {
-    WriteE -message "Encountered an error during ARM template deployment. Exiting..."
+    WriteError -message "Encountered an error during ARM template deployment. Exiting..."
     logout
     Exit
 }

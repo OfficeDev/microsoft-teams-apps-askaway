@@ -54,7 +54,11 @@ const httpTrigger: AzureFunction = async function (
     }
 
     // Authenticate the request.
-    const isAuthenticRequest = await authenticateRequest(context, req);
+    const isAuthenticRequest = await authenticateRequest(
+      context,
+      req,
+      /* forUserTenant */ true
+    );
 
     if (!isAuthenticRequest) {
       createUnauthorizedErrorResponse(context);

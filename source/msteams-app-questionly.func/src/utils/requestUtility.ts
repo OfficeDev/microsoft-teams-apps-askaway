@@ -57,7 +57,11 @@ export const validateTokenFromAppService = async (
   if (process.env.debugMode) {
     return true;
   }
-  const isAuthenticRequest = await authenticateRequest(context, req);
+  const isAuthenticRequest = await authenticateRequest(
+    context,
+    req,
+    /* forUserTenant */ false
+  );
   return (
     isAuthenticRequest &&
     req[userIdParameterConstant] === process.env.IdentityObjectId_AppService
