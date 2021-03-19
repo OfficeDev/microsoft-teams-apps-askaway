@@ -12,10 +12,10 @@ import {
 } from "../constants/requestConstants";
 
 /**
- * Fetches tenant id from app settings.
- * @returns - AzureAd tenant id.
+ * Fetches tenant id of user tenant from app settings.
+ * @returns - AzureAd user tenant id.
  */
-const getTenantId = (): string => {
+const getUserTenantId = (): string => {
   if (process.env.TenantId === undefined) {
     throw new Error(errorStrings.TenantIdMissingError);
   }
@@ -24,10 +24,23 @@ const getTenantId = (): string => {
 };
 
 /**
+ * Fetches tenant id of subscription tenant from app settings.
+ * @returns - AzureAd subscription tenant id.
+ */
+const getSubscriptionTenantId = (): string => {
+  if (process.env.SubscriptionTenantId === undefined) {
+    throw new Error(errorStrings.TenantIdMissingError);
+  }
+
+  return process.env.SubscriptionTenantId.toString().trim();
+};
+
+/**
  * Fetches Azure AD valid issuers from app settings.
+ * @param forUserTenant - boolean stating if valid issuer is for user tenant. False meaning issuers for subscription tenant.
  * @returns - Azure AD valid issuers list.
  */
-export const getValidIssuers = (): string[] => {
+export const getValidIssuers = (forUserTenant: boolean): string[] => {
   if (process.env.AzureAd_ValidIssuers === undefined) {
     throw new Error(errorStrings.AzureAdValidIssuersMissingError);
   }
@@ -38,7 +51,9 @@ export const getValidIssuers = (): string[] => {
     ","
   );
 
-  const tenantId = getTenantId();
+  const tenantId = forUserTenant
+    ? getUserTenantId()
+    : getSubscriptionTenantId();
 
   validIssuers = validIssuerFromSettings.map((issuer) => {
     return issuer.replace("TENANT_ID", tenantId).trim();
@@ -49,8 +64,9 @@ export const getValidIssuers = (): string[] => {
 
 /**
  * Constructs verify options for Azure ad token.
+ * @param forUserTenant - boolean stating if verify options are for user tenant. False meaning options for subscription tenant.
  */
-const getVerifyOptions = (): VerifyOptions => {
+const getVerifyOptions = (forUserTenant: boolean): VerifyOptions => {
   if (process.env.AzureAd_ApplicationIdUri === undefined) {
     throw new Error(errorStrings.AzureAdApplicationIdUriMissingError);
   }
@@ -60,7 +76,7 @@ const getVerifyOptions = (): VerifyOptions => {
   }
 
   const options: VerifyOptions = {
-    issuer: getValidIssuers(),
+    issuer: getValidIssuers(forUserTenant),
     audience: [
       process.env.AzureAd_ApplicationIdUri.toString().trim(),
       process.env.AzureAd_ClientId.toString().trim(),
@@ -72,14 +88,16 @@ const getVerifyOptions = (): VerifyOptions => {
 
 /**
  * Verifies azure ad token from http request and append userId to the request.
- * @param context: azure function context.
- * @param req: http request.
+ * @param context - azure function context.
+ * @param req - http request.
+ * @param forUserTenant - boolean stating if request should be authenticated for user tenant. False meaning authentication for subscription tenant..
  * @returns - boolean value, true if token is valid.
  * @throws - error while forming verify options.
  */
 export const authenticateRequest = async (
   context: Context,
-  req: HttpRequest
+  req: HttpRequest,
+  forUserTenant: boolean
 ): Promise<Boolean> => {
   let token = req.headers[authorizationHeaderConstant];
 
@@ -88,7 +106,7 @@ export const authenticateRequest = async (
   }
 
   token = token.replace("Bearer", "").trim();
-  const options = getVerifyOptions();
+  const options = getVerifyOptions(forUserTenant);
 
   try {
     const decoded = await verifyAzureToken(token, options);

@@ -107,7 +107,7 @@
     "signalRName": "[toLower(concat('signalr-', uniqueString(resourceGroup().id)))]",
     "keyvaultName": "[concat('keyvault-', uniqueString(resourceGroup().id))]",
     "functionAppName": "[concat(parameters('baseResourceName'), '-function')]",
-    "AzureAd_ValidIssuers": "[concat('https://login.microsoftonline.com/', parameters('tenantId'), '/v2.0,https://sts.windows.net/', parameters('tenantId'), '/')]",
+    "AzureAd_ValidIssuers": "https://login.microsoftonline.com/TENANT_ID/v2.0,https://sts.windows.net/TENANT_ID/",
     "AzureAd_Metadata_Endpoint": "[concat('https://login.microsoftonline.com/', parameters('tenantId'), '/v2.0/.well-known/openid-configuration')]",
     "NotificationBubblePageUrl": "[concat('https://', variables('botAppDomain'), '/askAwayTab/qnasessioncreatednotification.html')]",
     "BackgroundJobUri": "[concat('https://', variables('functionAppName'), '.azurewebsites.net/api/background-Job')]",
@@ -742,6 +742,10 @@
             {
               "name": "TenantId",
               "value": "[parameters('tenantId')]"
+            },
+            {
+              "name": "SubscriptionTenantId",
+              "value": "[subscription().tenantId]"
             },
             {
               "name": "MongoDbUri",

@@ -30,32 +30,38 @@ Certain issues can arise that are common to many of the app templates. Please ch
 
 2. **Error creating database account**
 
-    ```The subscription is exceeding the maximum number of allowed DatabaseAccounts. The current DatabaseAccount count is {count} and maximum allowed DatabaseAccounts are {count}```
-    
-    * In this case, you can [raise a request](https://docs.microsoft.com/en-us/azure/cosmos-db/concepts-limits#control-plane-operations) to increare maximum database accounts per subscription.
-    * You can delete any older instance of database account in the same subscription, which is currently not in use.
-    * You can also choose to switch to different subscription for which this limit is not reached.
+   `The subscription is exceeding the maximum number of allowed DatabaseAccounts. The current DatabaseAccount count is {count} and maximum allowed DatabaseAccounts are {count}`
+
+   - In this case, you can [raise a request](https://docs.microsoft.com/en-us/azure/cosmos-db/concepts-limits#control-plane-operations) to increare maximum database accounts per subscription.
+   - You can delete any older instance of database account in the same subscription, which is currently not in use.
+   - You can also choose to switch to different subscription for which this limit is not reached.
 
 3. **Error while creating a zip**
 
-    ``` Cannot find path '..\temp_msteams-app-questionly.zip' because it does not exist.```
+   ` Cannot find path '..\temp_msteams-app-questionly.zip' because it does not exist.`
 
-    ``` Cannot find path '..\temp_msteams-app-questionly.func.zip' because it does not exist.```
+   ` Cannot find path '..\temp_msteams-app-questionly.func.zip' because it does not exist.`
 
-    This means there is an error while creating zip files. Locate `temp_msteams-app-questionly`/ `temp_msteams-app-questionly.func` in source folder. Manually zip content inside these folders and create required zip files and place them in source folder.
-    Run `zipDeploy.ps1` script.
+   This means there is an error while creating zip files. Please follow any of the option below to resolve this error.
+
+   - Make sure repo path in machine should not be too deep. Powershell script fails to create zip for paths that are too long. Clone/ move repo to folder which is not too deep nested, and rerun the `deploy.ps1` script.
+
+   - Run `build.ps1` script, this will create `temp_msteams-app-questionly` and `temp_msteams-app-questionly.func` folders in deployment folder. Manually zip content inside these folders and create required zip files and place them in deployment folder.
+     Run `zipDeploy.ps1` script.
+
+   `.\zipDeploy.ps1 <base_resource_name> <resource_group_name> <subdcription_id>`
 
 4. **NPM version issue**
-    
-    ```This version of npm is compatible with lockfileVersion@1, but package-lock.json was generated for lockfileVersion@2```
-    
-    * Please run `npm install -g npm@7.6.0`. 
+
+   `This version of npm is compatible with lockfileVersion@1, but package-lock.json was generated for lockfileVersion@2`
+
+   - Please run `npm install -g npm@7.6.0`.
 
 5. **Mongo server version issue**
-    
-    ```Updating ServerVersion is not allowed. Error occured while deploying Azure resources```
 
-    We have updated our database Cosmos DB's API for MongoDB from server version 3.2 to 3.6. So if you are using older database resource please upgrade it to 3.6. See [here](https://devblogs.microsoft.com/cosmosdb/upgrade-your-server-version-from-3-2-to-3-6-for-azure-cosmos-db-api-for-mongodb/).
+   `Updating ServerVersion is not allowed. Error occured while deploying Azure resources`
+
+   We have updated our database Cosmos DB's API for MongoDB from server version 3.2 to 3.6. So if you are using older database resource please upgrade it to 3.6. See [here](https://devblogs.microsoft.com/cosmosdb/upgrade-your-server-version-from-3-2-to-3-6-for-azure-cosmos-db-api-for-mongodb/).
 
 **Didn't find your problem here?**
 Please, report the issue [here](https://github.com/OfficeDev/microsoft-teams-apps-askaway/issues)

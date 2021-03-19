@@ -43,45 +43,45 @@ Both the methods are explained in detail below.
 2. Open a PowerShell window in administrator mode and navigate to the deloyment folder.<br/>
    `cd .\microsoft-teams-apps-askaway\deployment\`
 3. You will find a paramters.json file under Deployment folder. Please fill in all the `<<value>>` in `paramters.json` appropriately. Make sure you review the default values for optional fields.
-![parameters](images/param_file.png)
+   ![parameters](images/param_file.png)
 4. You may refer to the following:
-   * `subscriptionId` - Azure subscription to deploy the solution to (MUST be associated with the Azure AD of the Office 365 tenant that you wish to deploy this solution to.) e.g. 22f602c4-1b8f-46df-8b73-45d7bdfbf58e.
-   * `subscriptionTenantId` - Id of the tenant to deploy to (If you are not sure how to get Tenant ID, please check Azure Active Directory in Azure Portal. Under Manage, click Properties. The tenant ID is shown in the Directory ID box). e.g 98f3ece2-3a5a-428b-aa4f-4c41b3f6eef0. Tenant ID is also available in the Overview section".
-   * `resourceGroupName` - Name for a new resource group to deploy the solution to - the script will create this resource group. e.g. AskAwayRG.
-   * `region` - Azure region in which to create the resources. The internal name should be used e.g. eastus. Run the following command in Powershell to list internal names.
-      ```
-      az account list-locations -o table
-      ```
-   * `baseResourceName` - which the template uses to generate names for the other resources.
-      * The [Base Resource Name] must be available. For example, if you select contosoAskAway as the base name, the name contosoAskAway must be available (not taken); otherwise, it will prompt you to confirmation dialog to update the existing resources.
-      * [Base Resource Name] -function etc.
-   * `tenantId` - Tenant Id where the teams application will be installed. If the Azure subscription is in the same tenant, copy `subscriptionTenantId` parameter value.
-      > **Note**: If your Azure subscription is in a different tenant than the tenant where you want to install the Teams App, please update the Tenant Id field with the tenant where you want to install the Teams App.
-   * `customDomainOption` - How the app will be hosted on a domain that is not \*.azurewebsites.net. Azure Front Door is an easy option that the template can set up automatically, but it comes with ongoing monthly costs.
-      > **NOTE**:  If you plan to use a custom domain name instead of relying on Azure Front Door, read the instructions [here](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Custom-domain-option) first.
-   * `hostingPlanSku`: The pricing tier for the hosting plan. Defaul value: Standard. You may choose between Basic, Standard and Premium.
-   * `hostingPlanSize`: The size of the hosting plan (small - 1, medium - 2, or large - 3). Default value: 1
-   * `appDisplayName` - The app (and bot) display name. Default value: AskAway.
-   * `appDescription` - The app (and bot) description. Default value: "Ask Away helps QnA hosts and attendees manage and interact with ​QnA sessions.".
-   * `appIconUrl` - The link to the icon for the app. It must resolve to a PNG file. Default value [https://raw.githubusercontent.com/OfficeDev/microsoft-teams-apps-askaway/master/Manifest/color.png](https://raw.githubusercontent.com/OfficeDev/microsoft-teams-apps-askaway/master/Manifest/color.png).
-   * `companyName` - The display name for the company.
-   * `websiteUrl` - The https:// URL to you company's website. This link should take users to your company or product-specific landing page.
-   * `privacyUrl` - The https:// URL to the company's privacy policy.
-   * `termsOfUseUrl` - The https:// URL to the company's terms of use.
-    
+   - `subscriptionId` - Azure subscription to deploy the solution to (MUST be associated with the Azure AD of the Office 365 tenant that you wish to deploy this solution to.) e.g. 22f602c4-1b8f-46df-8b73-45d7bdfbf58e.
+   - `subscriptionTenantId` - Id of the tenant to deploy to (If you are not sure how to get Tenant ID, please check Azure Active Directory in Azure Portal. Under Manage, click Properties. The tenant ID is shown in the Directory ID box). e.g 98f3ece2-3a5a-428b-aa4f-4c41b3f6eef0. Tenant ID is also available in the Overview section".
+   - `resourceGroupName` - Name for a new resource group to deploy the solution to - the script will create this resource group. e.g. AskAwayRG.
+   - `region` - Azure region in which to create the resources. The internal name should be used e.g. eastus. Run the following command in Powershell to list internal names.
+     ```
+     az account list-locations -o table
+     ```
+   - `baseResourceName` - which the template uses to generate names for the other resources.
+     - The [Base Resource Name] must be available. For example, if you select contosoAskAway as the base name, the name contosoAskAway must be available (not taken); otherwise, it will prompt you to confirmation dialog to update the existing resources.
+     - [Base Resource Name] -function etc.
+   - `tenantId` - Tenant Id where the teams application will be installed. If the Azure subscription is in the same tenant, copy `subscriptionTenantId` parameter value.
+     > **Note**: If your Azure subscription is in a different tenant than the tenant where you want to install the Teams App, please update the Tenant Id field with the tenant where you want to install the Teams App.
+   - `customDomainOption` - How the app will be hosted on a domain that is not \*.azurewebsites.net. Azure Front Door is an easy option that the template can set up automatically, but it comes with ongoing monthly costs.
+     > **NOTE**: If you plan to use a custom domain name instead of relying on Azure Front Door, read the instructions [here](https://github.com/OfficeDev/microsoft-teams-company-communicator-app/wiki/Custom-domain-option) first.
+   - `hostingPlanSku`: The pricing tier for the hosting plan. Defaul value: Standard. You may choose between Basic, Standard and Premium.
+   - `hostingPlanSize`: The size of the hosting plan (small - 1, medium - 2, or large - 3). Default value: 1
+   - `appDisplayName` - The app (and bot) display name. Default value: AskAway.
+   - `appDescription` - The app (and bot) description. Default value: "Ask Away helps QnA hosts and attendees manage and interact with ​QnA sessions.".
+   - `appIconUrl` - The link to the icon for the app. It must resolve to a PNG file. Default value [https://raw.githubusercontent.com/OfficeDev/microsoft-teams-apps-askaway/master/Manifest/color.png](https://raw.githubusercontent.com/OfficeDev/microsoft-teams-apps-askaway/master/Manifest/color.png).
+   - `companyName` - The display name for the company.
+   - `websiteUrl` - The https:// URL to you company's website. This link should take users to your company or product-specific landing page.
+   - `privacyUrl` - The https:// URL to the company's privacy policy.
+   - `termsOfUseUrl` - The https:// URL to the company's terms of use.
 5. Execute the `deploy.ps1` script in the Powershell window: <br/>
    `.\deploy.ps1`
 
 6. If the Azure CLI is not installed, it will prompt you to confirmation dialog to install azure CLI. Enter `Y` to proceed.
    ![Powershell deployment guide](images/azure_cli.png)
-   >**Note** : Restart the Powershell after Azure CLI is installed. The script will automatically **exit** just after CLI application installation. It will ask you to open a new session and re-run the script.
+
+   > **Note** : Restart the Powershell after Azure CLI is installed. The script will automatically **exit** just after CLI application installation. It will ask you to open a new session and re-run the script.
 
 7. If the azure CLI application is already installed, the script will check if the following modules are installed.
    ![Powershell deployment guide](images/check_modules.png)
 
    > Note: The script requires Azure CLI `v.2.2` or later. The script will install Azure CLI if its not already installed. If it is already installed, make sure its `v2.2` or later.
 
-8. The script will prompt *twice* for authentication during execution, once to get access to the Azure subscription, and the other to get access to Azure Active Directory. Please login using an account that has **contributor** role or higher.
+8. The script will prompt _twice_ for authentication during execution, once to get access to the Azure subscription, and the other to get access to Azure Active Directory. Please login using an account that has **contributor** role or higher.
    ![Powershell deployment guide](images/login_screen_first.png)
    ![Powershell deployment guide](images/login_screen_second.png)
 
@@ -91,7 +91,7 @@ Both the methods are explained in detail below.
 10. When the script is completed a DEPLOYMENT SUCCEEDED message will be displayed and the script will open the folder that contains the app packages (zip files).
 
 11. The script will finally generate zip file for the application.
-   ![Powershell deployment guide](images/manifest_folder.png)
+    ![Powershell deployment guide](images/manifest_folder.png)
 
 ## Manual Deployment Guide
 
@@ -172,13 +172,18 @@ Build the AskAway application locally using the build script.
    `git clone https://github.com/OfficeDev/microsoft-teams-apps-askaway.git`
 2. Navigate to the deloyment folder.<br/>
    `cd .\microsoft-teams-apps-askaway\deployment\`
-3. Run the build script. This operation may take a while to complete.<br/>
+3. Run following command.
+   `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`
+4. Run the build script. This operation may take a while to complete.<br/>
    `.\build.ps1`
 
 ### Step 4: Zip Deployment
 
-1. Note the _Base Resource Name_, _Resource Group Name_, and _Subscription Id_ from Step 2.
-1. Run the zip deployment script. This operation may take a while to commplete. <br/>
+1. Note the _Base Resource Name_ and _Resource Group Name_ from Step 2.
+2. Please find subscription Id corresponding to your azure subscription.
+3. Run the following command and login using account which has access to Azure subscription. <br/>
+   `az login`
+4. Run the zip deployment script. This operation may take a while to commplete. <br/>
    `.\zipDeploy.ps1 <base_resource_name> <resource_group_name> <subdcription_id>`
 
 ### Step 5: Setup Authentication
@@ -187,7 +192,7 @@ Build the AskAway application locally using the build script.
 2. Go to App Registartion panel and open the app that you created in Step 1.
 3. Under **Manage**, click on **Expose an API**.
 
-   1. Click on the **Set** link next to **Application ID URI**, and change the value to api://<app_domain>/<application_id>
+   1. Click on the **Set** link next to **Application ID URI**, and change the value to `api://<app_domain>/<application_id>` eg: `api://appName.azurefd.net/934d17fb-600d-4a90-8340-40599fb5ddce`
    2. Click **Save** to commit your changes.
    3. Click on **Add a scope**, under **Scopes** defined by this API. In the flyout that appears, enter the following values:
       - **Scope name**: access_as_user
@@ -203,6 +208,28 @@ Build the AskAway application locally using the build script.
 
    ![Deployment screenshot 3](images/deployment_screenshot3.png)
 
+4. Under **Manage**, click on **API permissions** blade from the left hand side.
+
+   1. Click on **Add a permission** button to add permission to your app.
+   2. In Microsoft APIs under Select an API label, select the particular service and give the following permissions,
+      - Under Commonly used Microsoft APIs,
+      - Select **Microsoft Graph**, then select Delegated permissions and check the following permissions,
+        - openid
+      - Click on Add Permissions to commit your changes.
+   3. If you are logged in as the Global Administrator, click on the “Grant admin consent for %tenant-name%” button to grant admin consent, else inform your Admin to do the same through the portal. Alternatively you may follow the steps below:
+      - Prepare link - https://login.microsoftonline.com/common/adminconsent?client_id=%appId%. Replace the %appId% with _Appplication Id_ (step 1).
+      - Global Administrator can grant consent using the link above.
+
+   ![Deployment screenshot 4](images/multitenant_app_permissions_1.png)
+   ![Deployment screenshot 5](images/multitenant_app_permissions_2.png)
+
+5. Under **Manage**, click on **Authentication** to bring up authentication settings.
+   1. Add a new entry to Redirect URIs:
+      - Type: Web
+      - Redirect URI: Enter `https://%appDomain%/askAwayTab/signInSimpleEnd.html` for the URL e.g. `https://appName.azurefd.net/askAwayTab/signInSimpleEnd.html`
+   2. Under Implicit grant, check **ID tokens**.
+   3. Click **Save** to commit your changes.
+
 ### Step 6: Create the Teams app packages
 
 Create Teams app package:
@@ -213,11 +240,8 @@ Create Teams app package:
    - developer.websiteUrl
    - developer.privacyUrl
    - developer.termsOfUseUrl
-1. Manifest Id which is placed just above 'Version' needs to be same as one used while deployment.
 1. Replace {{MicrosoftAppId}} placeholder to your Azure Active Directory application's ID from above. This is the same GUID that you entered in the template under "Bot Client ID".
-1. Replace all placeholders to AzureFD URL created during deployment. (e.g. https://askaway.azurefd.net)
-1. Replace with application Id URL created in expose an API page in step 1.
-1. In the "validDomains" section, replace with your Bot App Service's domain. This will be [BaseResourceName].azurefd.net. For example if you chose "askaway" as the base name, change the placeholder to askaway.azurefd.net.
+1. Replace {{HostName}} placeholder to `[BaseResourceName].azurefd.net`. (e.g. https://askaway.azurefd.net)
 1. Create a ZIP package with the manifest.json,color.png, and outline.png. The two image files are the icons for your app in Teams.
    - Name this package askaway.zip.
    - Make sure that the 3 files are the top level of the ZIP package, with no nested folders.
