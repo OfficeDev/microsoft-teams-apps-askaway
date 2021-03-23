@@ -14,7 +14,7 @@ stages:
 jobs:
   include:
     - stage: WikiUpdate
-      if: (branch = master or branch = v-abtan/Wiki_AutoUpdate) AND (type = push)
+      if: (branch = master OR branch = v-abtan/Wiki_AutoUpdate) AND (type = push)
       script:
         - rm -rf ${REPO_SOURCE}
         - rm -rf ${REPO_DEST}
