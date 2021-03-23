@@ -1,4 +1,4 @@
-language: csharp
+language: node_js
 dist: bionic
 sudo: false
 env:
@@ -14,7 +14,7 @@ stages:
 jobs:
   include:
     - stage: WikiUpdate
-      if: (branch = master OR branch = main) AND (type = push)
+      if: (branch = master OR branch = main OR branch = v-abtan/Wiki_AutoUpdate) AND (type = push)
       script:
         - rm -rf ${REPO_SOURCE}
         - rm -rf ${REPO_DEST}
