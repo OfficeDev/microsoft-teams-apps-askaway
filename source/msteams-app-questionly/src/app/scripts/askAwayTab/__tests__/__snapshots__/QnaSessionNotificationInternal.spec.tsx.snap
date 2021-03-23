@@ -1,0 +1,39 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`QnaSessionNotificationInternal Component should match the snapshot 1`] = `
+<Flex
+  className="qna-session-notify"
+  column={true}
+  gap="gap.medium"
+  padding="padding.medium"
+>
+  <Text
+    as="span"
+    content="popups.notificationTitle"
+  />
+  <Text
+    as="span"
+    className="truncated-title"
+    content="some-value"
+    size="medium"
+    weight="bold"
+  />
+  <Text
+    as="span"
+    content="popups.notificationMessage"
+  />
+  <FlexItem
+    align="end"
+  >
+    <Button
+      accessibility={[Function]}
+      as="button"
+      content="popups.notificationButton"
+      onClick={[Function]}
+      primary={true}
+      size="small"
+      type="submit"
+    />
+  </FlexItem>
+</Flex>
+`;

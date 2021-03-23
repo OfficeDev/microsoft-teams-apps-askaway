@@ -1,0 +1,49 @@
+{
+    "leaderboard": {
+        "taskModuleTitle": "View questions and upvote",
+        "yourQuestions": "Your questions",
+        "allQuestions": "All questions",
+        "noQuestions": "There are no questions to show.",
+        "refresh": "Refresh"
+    },
+    "startQnA": {
+        "titleFieldLabel": "Title of Q & A*",
+        "titleFieldExample": "Ex. Weekly Product QnA",
+        "descriptionFieldLabel": "Message* ({{maxCharCount}} characters max)",
+        "descriptionFieldExample": "Ex. Please submit and upvote questions for the CEO!",
+        "taskModuleTitle": "Start session to gather questions",
+        "taskModuleTitleEdit": "Edit Details"
+    },
+    "endQnA": {
+        "taskModuleTitle": "End session",
+        "prompt": "Are you sure you want to stop gathering questions?"
+    },
+    "askQuestion": {
+        "textFieldExample": "Type a question",
+        "taskModuleTitle": "Ask a question",
+        "resubmitTaskModuleTitle": "Resubmit a question",
+        "textFieldLabel": "Question* ({{maxCharCount}} characters max)"
+    },
+    "errors": {
+        "upvoting": "Upvoting failed. Please try again.",
+        "submittingQuestions": "There was an error submitting your question. Please try again.",
+        "submittingEmptyQuestion": "Please enter a question.",
+        "missingFields": "Fields cannot be empty",
+        "taskFetch": "Something went wrong. Please try opening again.",
+        "taskSubmit": "Your submission encountered an error. Please try submitting again!",
+        "leaderboard": "Could not retrieve leaderboard. Please try again",
+        "conversationInvalid": "Requests pertaining to a Q & A must be made in the same conversation the QnA is in.",
+        "qnasessionlimitexhaustedError": "Could not create a new Q & A session. Number of active sessions cannot exceed 1. Please end existing session(s) and try again.",
+        "qnasessionCreationError": "Could not create a new QnA session. Please try again later.",
+        "insufficientPermissionsToCreateOrEndQnASessionError": "Only a Presenter or an Organizer can create/end a Q & A Session.",
+        "unableToPostCardForSessionStartedEvent": "Something went wrong, we were not able to successfully create a new Ask Away session. Please try again later.",
+        "unableToPerformActivityOnEndedSession": "Sorry, we cannot perform the action because the session has ended."
+    },
+    "generic": {
+        "submit": "Submit",
+        "preview": "Preview",
+        "cancel": "Cancel",
+        "endSession": "End session",
+        "noQuestions": "No questions yet. Be the first one to ask."
+    }
+}

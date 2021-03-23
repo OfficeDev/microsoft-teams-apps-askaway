@@ -1,0 +1,8 @@
+{
+  "extends": "tslint-microsoft-contrib/recommended",
+  "defaultSeverity": "warning",
+  "rules": {
+    "no-backbone-get-set-outside-model": false,
+    "no-inferrable-types": true
+  }
+}

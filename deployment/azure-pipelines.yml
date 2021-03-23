@@ -1,0 +1,112 @@
+name: $(Date:yyyMMdd)$(Rev:.r)
+trigger:
+  batch: true
+  branches:
+    include:
+      - users/nebhagat/pipeline
+pool:
+  vmImage: "windows-latest"
+stages:
+  - stage: Build
+    jobs:
+      - job: Build
+        workspace:
+          clean: all
+        steps:
+          - task: ComponentGovernanceComponentDetection@0
+            inputs:
+              scanType: "Register"
+              verbosity: "Verbose"
+              alertWarningLevel: "High"
+              failOnAlert: true
+          - task: CredScan@2
+            inputs:
+              toolMajorVersion: "V2"
+          - script: npm install -g npm@7.6.0
+            displayName: Install required npm version
+          - task: BatchScript@1
+            inputs:
+              filename: "init.bat"
+            displayName: Build Dependencies
+          - script: cd source\msteams-app-questionly && npm run build
+            displayName: Build main project
+          - script: cd source\msteams-app-questionly.func && npm run build
+            displayName: Build function project
+          - task: BatchScript@1
+            inputs:
+              filename: "runtests.bat"
+            timeoutInMinutes: 10
+            displayName: Run Tests and Coverage
+          - script: npm i -g cobertura-merge
+            displayName: Install tool to merge code coverage reports
+          - script: cobertura-merge -o cobertura-coverage.xml main=source\msteams-app-questionly\coverage\cobertura-coverage.xml func=source\msteams-app-questionly.func\coverage\cobertura-coverage.xml data=source\msteams-app-questionly.data\coverage\cobertura-coverage.xml common=source\msteams-app-questionly.common\coverage\cobertura-coverage.xml
+            displayName: Merge code coverage reports
+          - script: npm i -g junit-report-merger
+            displayName: Install tool to merge unit tests reports
+          - script: jrm "junit.xml" "source/msteams-app-questionly/junit.xml" "source/msteams-app-questionly.func/junit.xml" "source/msteams-app-questionly.data/junit.xml" "source/msteams-app-questionly.common/junit.xml"
+            displayName: Merge unit tests reports
+          - task: PublishCodeCoverageResults@1
+            inputs:
+              codeCoverageTool: "Cobertura"
+              summaryFileLocation: "cobertura-coverage.xml"
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: "JUnit"
+              testResultsFiles: "junit.xml"
+              mergeTestResults: true
+              failTaskOnFailedTests: true
+              testRunTitle: "Unit Tests"
+          - task: PublishBuildArtifacts@1
+            displayName: "Upload NPM cache logs"
+            inputs:
+              pathtoPublish: 'C:\npm\cache\_logs'
+              artifactName: "npm-logs"
+            condition: failed()
+          - task: DeleteFiles@1
+            inputs:
+              SourceFolder: "./"
+              Contents: "**/junit.xml"
+              RemoveSourceFolder: false
+          - task: DeleteFiles@1
+            inputs:
+              SourceFolder: "./source/msteams-app-questionly.func/coverage"
+              Contents: "*"
+              RemoveSourceFolder: true
+          - task: DeleteFiles@1
+            inputs:
+              SourceFolder: "./source/msteams-app-questionly/coverage"
+              Contents: "*"
+              RemoveSourceFolder: true
+          - task: DeleteFiles@1
+            inputs:
+              SourceFolder: "./source/msteams-app-questionly.func/src"
+              Contents: "*"
+              RemoveSourceFolder: true
+          - task: DeleteFiles@1
+            inputs:
+              SourceFolder: "./source/msteams-app-questionly/src"
+              Contents: "*"
+              RemoveSourceFolder: true
+          - script: cd source\msteams-app-questionly && npm install --production
+            displayName: Install production dependencies for main project
+          - script: cd source\msteams-app-questionly.func && npm install --production
+            displayName: Install production dependencies for function project
+          - task: ArchiveFiles@2
+            inputs:
+              archiveType: zip
+              rootFolderOrFile: "./source/msteams-app-questionly"
+              includeRootFolder: false
+              archiveFile: "$(Build.ArtifactStagingDirectory)/msteams-app-questionly.zip"
+              replaceExistingArchive: true
+          - task: ArchiveFiles@2
+            inputs:
+              archiveType: zip
+              rootFolderOrFile: "./source/msteams-app-questionly.func"
+              includeRootFolder: false
+              archiveFile: "$(Build.ArtifactStagingDirectory)/msteams-app-questionly.func.zip"
+              replaceExistingArchive: true
+          - task: PublishBuildArtifacts@1
+            displayName: "Upload Artifact"
+            inputs:
+              pathtoPublish: "$(Build.ArtifactStagingDirectory)"
+              artifactName: "msteams-app-questionly"

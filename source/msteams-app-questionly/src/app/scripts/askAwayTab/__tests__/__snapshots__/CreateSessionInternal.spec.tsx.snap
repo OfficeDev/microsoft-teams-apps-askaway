@@ -1,0 +1,91 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CreateSessionInternal Component should match the snapshot 1`] = `
+<div
+  style={
+    Object {
+      "padding": "1rem 2rem",
+    }
+  }
+>
+  <Flex
+    column={true}
+  >
+    <Form
+      as="form"
+      onSubmit={[Function]}
+    >
+      <div
+        className="form-grid"
+      >
+        <Text
+          as="span"
+          content="popups.sessionTitle"
+          size="small"
+        />
+        <Input
+          accessibility={[Function]}
+          as="div"
+          errorIndicator={<ExclamationCircleIcon />}
+          fluid={true}
+          iconPosition="end"
+          label=""
+          maxLength={250}
+          onChange={[Function]}
+          onKeyUp={[Function]}
+          placeholder="popups.sessionTitlePlaceholder"
+          successIndicator={<PresenceAvailableIcon />}
+          type="text"
+          wrapper={Object {}}
+        />
+      </div>
+      <div
+        className="form-grid"
+      >
+        <Text
+          as="span"
+          content="popups.sessionDescription"
+          size="small"
+        />
+        <TextArea
+          accessibility={[Function]}
+          as="textarea"
+          fluid={true}
+          maxLength={250}
+          onChange={[Function]}
+          onKeyUp={[Function]}
+          placeholder="popups.sessionDescriptionPlaceholder"
+          styles={
+            Object {
+              "marginTop": "0.25rem",
+            }
+          }
+        />
+      </div>
+      <div
+        className="form-grid"
+      >
+        <Flex
+          hAlign="end"
+          vAlign="end"
+        >
+          <Button
+            accessibility={[Function]}
+            as="button"
+            className="btn-create-session"
+            primary={true}
+            size="medium"
+            type="submit"
+          >
+            <ButtonContent
+              as="span"
+            >
+              popups.createQnaSessionButton
+            </ButtonContent>
+          </Button>
+        </Flex>
+      </div>
+    </Form>
+  </Flex>
+</div>
+`;

@@ -1,0 +1,90 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Question Component should match the snapshot 1`] = `
+<div
+  className="card-divider"
+  key=""
+  onMouseEnter={[Function]}
+  onMouseLeave={[Function]}
+  style={
+    Object {
+      "backgroundColor": "",
+      "color": "",
+    }
+  }
+>
+  <Flex
+    className="card-layout"
+    gap="gap.small"
+    vAlign="center"
+  >
+    <Avatar
+      getInitials={[Function]}
+      name=""
+      size="smaller"
+    />
+    <Text
+      as="span"
+      content=""
+      size="small"
+      title=""
+      truncated={true}
+      weight="regular"
+    />
+    <FlexItem
+      push={true}
+    >
+      <Flex
+        className="action-buttons"
+        gap="gap.smaller"
+        vAlign="center"
+      >
+        <Button
+          accessibility={[Function]}
+          as="button"
+          icon={false}
+          iconOnly={true}
+          onClick={[Function]}
+          size="medium"
+          text={true}
+        />
+        <Button
+          accessibility={[Function]}
+          as="button"
+          disabled={true}
+          icon={
+            <LikeIcon
+              outline={true}
+              styles={
+                Object {
+                  "color": "",
+                }
+              }
+            />
+          }
+          iconOnly={true}
+          onClick={[Function]}
+          size="medium"
+          text={true}
+        />
+        <Text
+          as="span"
+          content={0}
+        />
+      </Flex>
+    </FlexItem>
+  </Flex>
+  <Flex
+    className="question-padding"
+    gap="gap.small"
+    padding="padding.medium"
+  >
+    <Text
+      as="span"
+      className="card-body-question"
+      content=""
+      size="medium"
+    />
+  </Flex>
+</div>
+`;
