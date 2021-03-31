@@ -95,6 +95,9 @@
     "botAppName": "[parameters('baseResourceName')]",
     "botAppDomain": "[concat(variables('botAppName'), '.azurewebsites.net')]",
     "botAppUrl": "[concat('https://', variables('botAppDomain'))]",
+    "useFrontDoor": "[equals(parameters('customDomainOption'), 'Azure Front Door')]",
+    "frontDoorName": "[parameters('baseResourceName')]",
+    "frontDoorDomain": "[toLower(concat(variables('frontDoorName'), '.azurefd.net'))]",
     "hostingPlanName": "[parameters('baseResourceName')]",
     "cosmosDbName": "[toLower(concat('mongodb-', uniqueString(resourceGroup().id)))]",
     "botAppInsightsName": "[parameters('baseResourceName')]",
@@ -109,12 +112,9 @@
     "functionAppName": "[concat(parameters('baseResourceName'), '-function')]",
     "AzureAd_ValidIssuers": "https://login.microsoftonline.com/TENANT_ID/v2.0,https://sts.windows.net/TENANT_ID/",
     "AzureAd_Metadata_Endpoint": "[concat('https://login.microsoftonline.com/', parameters('tenantId'), '/v2.0/.well-known/openid-configuration')]",
-    "NotificationBubblePageUrl": "[concat('https://', variables('botAppDomain'), '/askAwayTab/qnasessioncreatednotification.html')]",
+    "NotificationBubblePageUrl": "[concat('https://', variables('frontDoorDomain'), '/askAwayTab/qnasessioncreatednotification.html')]",
     "BackgroundJobUri": "[concat('https://', variables('functionAppName'), '.azurewebsites.net/api/background-Job')]",
     "SignalRFunctionBaseUrl": "[concat('https://', variables('functionAppName'), '.azurewebsites.net')]",
-    "useFrontDoor": "[equals(parameters('customDomainOption'), 'Azure Front Door')]",
-    "frontDoorName": "[parameters('baseResourceName')]",
-    "frontDoorDomain": "[toLower(concat(variables('frontDoorName'), '.azurefd.net'))]",
     "AzureAd_ApplicationIdUri": "[if(variables('useFrontDoor'), concat('api://', variables('frontDoorDomain'),  '/', parameters('botClientId')), '')]"
   },
   "outputs": {
