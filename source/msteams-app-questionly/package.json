@@ -39,7 +39,7 @@
         "jimp": "^0.14.0",
         "jsonwebtoken": "^8.5.1",
         "memory-cache": "^0.2.0",
-        "moment": "^2.27.0",
+        "moment": "^2.29.2",
         "mongoose": "^5.10.11",
         "morgan": "1.9.1",
         "msteams-react-base-component": "^2.1.0",
