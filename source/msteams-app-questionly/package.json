@@ -73,7 +73,7 @@
         "@typescript-eslint/eslint-plugin-tslint": "^3.7.0",
         "@typescript-eslint/parser": "^3.2.0",
         "autoprefixer": "^9.5.1",
-        "browser-sync": "^2.26.14",
+        "browser-sync": "^2.27.10",
         "copy-webpack-plugin": "^6.0.3",
         "css-loader": "^5.0.0",
         "del": "^5.1.0",
