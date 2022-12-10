@@ -31,7 +31,7 @@
         "compression": "1.7.4",
         "debug": "4.1.1",
         "dotenv": "8.2.0",
-        "express": "4.16.4",
+        "express": "4.17.3",
         "express-msteams-host": "^1.6.2",
         "http-status-codes": "^2.1.4",
         "i18next": "19.6.0",
