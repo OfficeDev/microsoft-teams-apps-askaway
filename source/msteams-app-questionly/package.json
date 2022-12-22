@@ -37,7 +37,7 @@
         "i18next": "19.6.0",
         "i18next-http-backend": "^1.0.21",
         "jimp": "^0.14.0",
-        "jsonwebtoken": "^8.5.1",
+        "jsonwebtoken": "^9.0.0",
         "memory-cache": "^0.2.0",
         "moment": "^2.27.0",
         "mongoose": "^5.10.11",
