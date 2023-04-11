@@ -17,7 +17,7 @@
     "applicationinsights": "^1.8.10",
     "axios": "^0.21.1",
     "azure-ad-jwt-lite": "^1.1.0",
-    "botbuilder": "^4.11.1",
+    "botbuilder": "^4.19.3",
     "durable-functions": "^1.4.6",
     "http-status-codes": "^2.1.4",
     "i18next": "^19.6.0",
