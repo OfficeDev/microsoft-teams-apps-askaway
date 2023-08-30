@@ -9,7 +9,7 @@
     "ci-test": "jest --ci --reporters=jest-junit --coverage --coverageReporters=cobertura"
   },
   "dependencies": {
-    "mongodb": "^3.6.4",
+    "mongodb": "^3.6.10",
     "mongoose": "^5.10.11"
   },
   "devDependencies": {
